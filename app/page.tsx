@@ -334,9 +334,9 @@ function MobileBassFretboard({
   fretRange: FretRange;
   onPlayNote: (note: FretNote) => void;
 }) {
-  const mobileLeft = 56;
+  const mobileLeft = 46;
   const mobileTop = 86;
-  const mobileWidth = 286;
+  const mobileWidth = 340;
   const mobileHeight = 740;
   const openStringLane = 44;
   const noteRadius = 18;
@@ -404,7 +404,7 @@ function MobileBassFretboard({
             <text
               className="fretNumber mobileFretNumber"
               key={`mobile-fret-label-${fretRange.id}-${fretLabel}`}
-              x={24}
+              x={14}
               y={mobileTop + (fretIndex + 0.5) * mobileFretGap + 5}
             >
               {fretLabel}

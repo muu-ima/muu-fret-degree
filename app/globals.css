@@ -294,9 +294,13 @@ select:focus-visible,
 }
 
 .noteName {
-  fill: #fff8;
+  fill: #fffdf3;
   font-size: 13px;
+  font-weight: 900;
+  paint-order: stroke;
   pointer-events: none;
+  stroke: rgba(32, 33, 36, 0.62);
+  stroke-width: 3px;
 }
 
 .degreeStrip {
