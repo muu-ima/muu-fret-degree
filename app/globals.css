@@ -508,3 +508,22 @@ select:focus-visible,
     font-size: 1.25rem;
   }
 }
+
+.notFoundPage {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.notFoundPage h1,
+.notFoundPage p {
+  margin: 0;
+}
+
+.notFoundPage a {
+  color: var(--focus);
+  font-weight: 800;
+}
