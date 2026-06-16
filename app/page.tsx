@@ -823,7 +823,7 @@ export default function Home() {
       <section className="hero">
         <div>
           <p className="eyebrow">Electric Bass Chord Degrees</p>
-          <h1>ベース指板コード度数ビューア</h1>
+          <h1>Bass Fret Degree</h1>
         </div>
         <div className="chordBadge">
           <strong>{root}</strong>
