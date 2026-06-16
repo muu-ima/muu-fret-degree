@@ -490,7 +490,9 @@ select:focus-visible,
     left: 0;
     z-index: 40;
     display: block;
-    max-height: min(78vh, 560px);
+    max-height: min(86dvh, 620px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 14px;
     border: 1px solid var(--line);
     border-radius: 8px 8px 0 0;
