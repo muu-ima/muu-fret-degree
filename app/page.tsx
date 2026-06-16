@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import theory from "../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./components/BassFretboard";
 import { ControlsPanel } from "./components/ControlsPanel";
-import {
-  playBassNote as playBassAudioNote,
-  playMetronomeClick as playMetronomeAudioClick,
-  playPianoNote as playPianoAudioNote,
-} from "./lib/audio";
+import { useAudioEngine } from "./hooks/useAudioEngine";
 import {
   degreeTone,
   type ChordType,
@@ -23,9 +19,6 @@ import {
 } from "./lib/music";
 
 export default function Home() {
-  const audioContext = useRef<AudioContext | null>(null);
-  const metronomeTimer = useRef<number | null>(null);
-  const metronomeBeat = useRef(0);
   const [root, setRoot] = useState("C");
   const [chordTypeId, setChordTypeId] = useState("m7");
   const [tuningId, setTuningId] = useState("standard");
@@ -34,8 +27,14 @@ export default function Home() {
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [bpm, setBpm] = useState(120);
   const [bpmInput, setBpmInput] = useState("120");
-  const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
-  const [currentBeat, setCurrentBeat] = useState(1);
+  const {
+    currentBeat,
+    isMetronomeRunning,
+    playBassNote,
+    playPianoNote,
+    resumeAudio,
+    toggleMetronome,
+  } = useAudioEngine({ bpm });
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
@@ -59,39 +58,13 @@ export default function Home() {
     [chordType, root],
   );
 
-  function ensureAudioContext() {
-    if (!audioContext.current) {
-      audioContext.current = new AudioContext();
-    }
-    return audioContext.current;
-  }
-
-  function playMetronomeClick(startTime: number, accented: boolean) {
-    playMetronomeAudioClick(ensureAudioContext(), startTime, accented);
-  }
-
-  function stopMetronome() {
-    if (metronomeTimer.current !== null) {
-      window.clearInterval(metronomeTimer.current);
-      metronomeTimer.current = null;
-    }
-  }
-
-  function playBassNote(midi: number, startOffset = 0, duration = 0.85) {
-    playBassAudioNote(ensureAudioContext(), midi, startOffset, duration);
-  }
-
-  function playPianoNote(midi: number, startOffset = 0, duration = 1.8) {
-    playPianoAudioNote(ensureAudioContext(), midi, startOffset, duration);
-  }
-
   function playNote(note: FretNote) {
-    void ensureAudioContext().resume();
+    resumeAudio();
     playBassNote(note.midi);
   }
 
   function playArpeggio() {
-    void ensureAudioContext().resume();
+    resumeAudio();
     const playable = chordNotes.map((chordNote) => {
       const candidates = notes.filter((note) => note.degree === chordNote.degree && note.fret <= 7);
       return candidates.sort((a, b) => a.midi - b.midi)[0];
@@ -105,40 +78,10 @@ export default function Home() {
   }
 
   function playStack() {
-    void ensureAudioContext().resume();
+    resumeAudio();
     chordType.intervals.forEach((interval, index) => {
       playPianoNote(trebleChordMidi(root, interval), index * 0.012, 1.9);
     });
-  }
-
-
-  useEffect(() => {
-    stopMetronome();
-
-    if (!isMetronomeRunning) {
-      return;
-    }
-
-    const beatMs = (60 / bpm) * 1000;
-    metronomeBeat.current = 0;
-
-    const tick = () => {
-      const context = ensureAudioContext();
-      const beat = metronomeBeat.current % 4;
-      void context.resume();
-      playMetronomeClick(context.currentTime, beat === 0);
-      setCurrentBeat(beat + 1);
-      metronomeBeat.current += 1;
-    };
-
-    tick();
-    metronomeTimer.current = window.setInterval(tick, beatMs);
-
-    return stopMetronome;
-  }, [bpm, isMetronomeRunning]);
-
-  function toggleMetronome() {
-    setIsMetronomeRunning((running) => !running);
   }
 
   function commitBpm(value: string) {
