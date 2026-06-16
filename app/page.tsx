@@ -2,166 +2,36 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import theory from "../data/theory.json";
+import {
+  playBassNote as playBassAudioNote,
+  playMetronomeClick as playMetronomeAudioClick,
+  playPianoNote as playPianoAudioNote,
+} from "./lib/audio";
+import {
+  degreeTone,
+  type BassString,
+  type ChordType,
+  type FretNote,
+  type FretRange,
+  type Interval,
+  type Tuning,
+  fretRanges,
+  makeChordMap,
+  markerFrets,
+  maxFret,
+  noteAt,
+  pitchClassAt,
+  pitchClassOf,
+  sharpPitchClasses,
+  spellIntervalNote,
+} from "./lib/music";
 
-type Interval = {
-  degree: string;
-  semitones: number;
-};
-
-type ChordType = {
-  id: string;
-  name: string;
-  intervals: Interval[];
-};
-
-type BassString = {
-  name: string;
-  note: string;
-  midi: number;
-};
-
-type Tuning = {
-  id: string;
-  name: string;
-  strings: BassString[];
-};
-
-type FretNote = {
-  id: string;
-  stringIndex: number;
-  fret: number;
-  midi: number;
-  pitchClass: string;
-  note: string;
-  degree?: string;
-  inChord: boolean;
-};
-
-const maxFret = 22;
-const fretRanges = [
-  { id: "low", label: "0-12F", start: 0, end: 12 },
-  { id: "high", label: "13-22F", start: 13, end: 22 },
-] as const;
-type FretRange = (typeof fretRanges)[number];
 const nutWidth = 14;
 const leftPad = 74;
 const topPad = 54;
 const boardWidth = 940;
 const boardHeight = 290;
 const stringGap = boardHeight / 3;
-const markerFrets = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
-
-const degreeTone: Record<string, string> = {
-  "1": "#e84d5b",
-  "b3": "#2b7de9",
-  "3": "#2b7de9",
-  "4": "#16a085",
-  "5": "#f2a51a",
-  "b5": "#8f5bd5",
-  "#5": "#8f5bd5",
-  "6": "#0f9d7a",
-  "7": "#b4478f",
-  "b7": "#b4478f",
-  "bb7": "#6e5a46",
-};
-
-const sharpPitchClasses = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const flatPitchClasses = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-const letterOrder = ["C", "D", "E", "F", "G", "A", "B"];
-
-const degreeLetterSteps: Record<string, number> = {
-  "1": 0,
-  "b2": 1,
-  "2": 1,
-  "#2": 1,
-  "bb3": 2,
-  "b3": 2,
-  "3": 2,
-  "4": 3,
-  "#4": 3,
-  "b5": 4,
-  "5": 4,
-  "#5": 4,
-  "b6": 5,
-  "6": 5,
-  "bb7": 6,
-  "b7": 6,
-  "7": 6,
-};
-
-function noteAt(chromatic: string[], midi: number) {
-  return chromatic[((midi % 12) + 12) % 12];
-}
-
-function pitchClassAt(midi: number) {
-  return sharpPitchClasses[((midi % 12) + 12) % 12];
-}
-
-function pitchClassOf(note: string) {
-  const sharpIndex = sharpPitchClasses.indexOf(note);
-  if (sharpIndex >= 0) {
-    return sharpPitchClasses[sharpIndex];
-  }
-
-  const flatIndex = flatPitchClasses.indexOf(note);
-  if (flatIndex >= 0) {
-    return sharpPitchClasses[flatIndex];
-  }
-
-  return note;
-}
-
-function naturalPitchClass(letter: string) {
-  return sharpPitchClasses.indexOf(letter);
-}
-
-function normalizeAccidental(offset: number) {
-  if (offset > 6) {
-    return offset - 12;
-  }
-  if (offset < -6) {
-    return offset + 12;
-  }
-  return offset;
-}
-
-function spellIntervalNote(root: string, interval: Interval) {
-  const rootLetter = root[0];
-  const rootLetterIndex = letterOrder.indexOf(rootLetter);
-  const degreeStep = degreeLetterSteps[interval.degree] ?? 0;
-  const targetLetter = letterOrder[(rootLetterIndex + degreeStep) % letterOrder.length];
-  const rootPitchClass = sharpPitchClasses.indexOf(pitchClassOf(root));
-  const targetPitchClass = (rootPitchClass + interval.semitones) % sharpPitchClasses.length;
-  const accidental = normalizeAccidental(targetPitchClass - naturalPitchClass(targetLetter));
-
-  if (accidental === 0) {
-    return targetLetter;
-  }
-  if (accidental > 0) {
-    return targetLetter + "#".repeat(accidental);
-  }
-  return targetLetter + "b".repeat(Math.abs(accidental));
-}
-
-function frequencyFromMidi(midi: number) {
-  return 440 * 2 ** ((midi - 69) / 12);
-}
-
-function makeChordMap(root: string, chordType: ChordType, chromatic: string[]) {
-  const rootIndex = sharpPitchClasses.indexOf(pitchClassOf(root));
-  return new Map(
-    chordType.intervals.map((interval) => {
-      const pitchClass = sharpPitchClasses[(rootIndex + interval.semitones) % chromatic.length];
-      return [
-        pitchClass,
-        {
-          degree: interval.degree,
-          note: spellIntervalNote(root, interval),
-        },
-      ];
-    }),
-  );
-}
 
 function BassFretboard({
   notes,
@@ -556,21 +426,7 @@ export default function Home() {
   }
 
   function playMetronomeClick(startTime: number, accented: boolean) {
-    const context = ensureAudioContext();
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const end = startTime + 0.055;
-
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(accented ? 1320 : 920, startTime);
-    gain.gain.setValueAtTime(0.0001, startTime);
-    gain.gain.exponentialRampToValueAtTime(accented ? 0.42 : 0.28, startTime + 0.004);
-    gain.gain.exponentialRampToValueAtTime(0.0001, end);
-
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start(startTime);
-    oscillator.stop(end + 0.01);
+    playMetronomeAudioClick(ensureAudioContext(), startTime, accented);
   }
 
   function stopMetronome() {
@@ -581,82 +437,11 @@ export default function Home() {
   }
 
   function playBassNote(midi: number, startOffset = 0, duration = 0.85) {
-    const context = ensureAudioContext();
-    const start = context.currentTime + startOffset;
-    const end = start + duration;
-    const frequency = frequencyFromMidi(midi);
-    const oscillator = context.createOscillator();
-    const subOscillator = context.createOscillator();
-    const gain = context.createGain();
-    const filter = context.createBiquadFilter();
-    const drive = context.createWaveShaper();
-
-    const curve = new Float32Array(256);
-    for (let i = 0; i < curve.length; i += 1) {
-      const x = (i / 128) - 1;
-      curve[i] = Math.tanh(x * 2.4);
-    }
-
-    oscillator.type = "sawtooth";
-    oscillator.frequency.setValueAtTime(frequency, start);
-    subOscillator.type = "sine";
-    subOscillator.frequency.setValueAtTime(frequency / 2, start);
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(880, start);
-    filter.frequency.exponentialRampToValueAtTime(180, end);
-    filter.Q.setValueAtTime(3.5, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.38, start + 0.025);
-    gain.gain.exponentialRampToValueAtTime(0.18, start + 0.18);
-    gain.gain.exponentialRampToValueAtTime(0.0001, end);
-
-    oscillator.connect(drive);
-    subOscillator.connect(drive);
-    drive.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-
-    oscillator.start(start);
-    subOscillator.start(start);
-    oscillator.stop(end + 0.05);
-    subOscillator.stop(end + 0.05);
+    playBassAudioNote(ensureAudioContext(), midi, startOffset, duration);
   }
 
   function playPianoNote(midi: number, startOffset = 0, duration = 1.8) {
-    const context = ensureAudioContext();
-    const start = context.currentTime + startOffset;
-    const end = start + duration;
-    const frequency = frequencyFromMidi(midi);
-    const output = context.createGain();
-    const filter = context.createBiquadFilter();
-    const partials = [
-      { ratio: 1, gain: 0.34, type: "triangle" as OscillatorType },
-      { ratio: 2, gain: 0.12, type: "sine" as OscillatorType },
-      { ratio: 3, gain: 0.045, type: "sine" as OscillatorType },
-    ];
-
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(5200, start);
-    filter.frequency.exponentialRampToValueAtTime(1500, end);
-    output.gain.setValueAtTime(0.0001, start);
-    output.gain.exponentialRampToValueAtTime(0.34, start + 0.012);
-    output.gain.exponentialRampToValueAtTime(0.16, start + 0.12);
-    output.gain.exponentialRampToValueAtTime(0.0001, end);
-
-    partials.forEach((partial) => {
-      const oscillator = context.createOscillator();
-      const partialGain = context.createGain();
-      oscillator.type = partial.type;
-      oscillator.frequency.setValueAtTime(frequency * partial.ratio, start);
-      partialGain.gain.setValueAtTime(partial.gain, start);
-      oscillator.connect(partialGain);
-      partialGain.connect(filter);
-      oscillator.start(start);
-      oscillator.stop(end + 0.05);
-    });
-
-    filter.connect(output);
-    output.connect(context.destination);
+    playPianoAudioNote(ensureAudioContext(), midi, startOffset, duration);
   }
 
   function trebleChordMidi(interval: Interval) {
