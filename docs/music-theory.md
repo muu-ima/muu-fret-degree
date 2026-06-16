@@ -1,25 +1,25 @@
 # Music Theory Notes
 
-This app separates pitch matching from note spelling.
+このアプリでは、音高の一致判定と音名の綴りを分けて扱う。
 
-A fret position has a pitch class, such as `G#` / `Ab`. Those two names can refer to the same sounding pitch, but they are not always the correct spelling in a chord. For example, in `Emaj7`, the third is `G#`, not `Ab`, because scale-degree spelling must preserve the letter name of the degree:
+フレット上の音には、`G#` / `Ab` のように同じ音高を表す複数の名前がある。ただし、コード内で常にどちらを使ってもよいわけではない。たとえば `Emaj7` の3度は `Ab` ではなく `G#` と綴る。度数に対応する音名の文字を保つ必要があるため。
 
 ```txt
 Emaj7 = E G# B D#
         1 3  5 7
 ```
 
-## How The App Handles This
+## アプリでの扱い
 
-1. Convert each fret's MIDI note into an internal sharp pitch class.
-2. Match that pitch class against the selected chord formula.
-3. Spell the displayed note name from the selected root and interval degree.
+1. 各フレットの MIDI ノートを、内部用のシャープ系ピッチクラスへ変換する。
+2. そのピッチクラスを、選択中のコード構成音と照合する。
+3. 表示する音名は、選択中のルート音と度数から綴り直す。
 
-This keeps enharmonic matching simple while still displaying musically correct names.
+これにより、異名同音の判定はシンプルに保ちながら、表示上は音楽的に正しい音名を出せる。
 
-## Chord Formula Shape
+## コード定義の形式
 
-Chord formulas live in `data/theory.json`:
+コード定義は `data/theory.json` に置く。
 
 ```json
 {
@@ -34,12 +34,12 @@ Chord formulas live in `data/theory.json`:
 }
 ```
 
-- `degree` controls the label shown on the fretboard and the target letter used for spelling.
-- `semitones` controls the actual pitch distance from the root.
+- `degree` は指板上に表示する度数ラベルと、音名を綴るときの目標文字を決める。
+- `semitones` はルートからの実際の半音距離を決める。
 
-## Tuning Data Shape
+## チューニング定義の形式
 
-Tunings also live in `data/theory.json`:
+チューニング定義も `data/theory.json` に置く。
 
 ```json
 {
@@ -54,10 +54,90 @@ Tunings also live in `data/theory.json`:
 }
 ```
 
-The display order is high string to low string, matching the SVG layout from top to bottom.
+表示順は高音弦から低音弦で、SVG 上では上から下へ並ぶ。
 
-## Known Limits
+## 今後の音域選択メモ
 
-- The current fretboard covers open strings through the 12th fret.
-- The current spelling helper is designed around common chord tones up to seventh-based structures.
-- More advanced extensions, such as 9ths, 11ths, and 13ths, should extend the degree-to-letter-step table in `app/page.tsx`.
+現在の `Chord` 再生は、選択したルート音とコード構成音をそのまま上方向へ積んで鳴らす。これはコードの構成音確認には便利だが、常に同じ方向へ上がるだけなので、ピアノ上での実用的なボイシングや音域感を選びにくい。
+
+次の改善では、ピアノの中央のドを `C4` として扱い、コード再生の基準音域を選択できるようにする。
+
+```txt
+中央のド = C4 = MIDI 60
+```
+
+想定する仕様:
+
+- `Chord` ボタンはピアノ音色で鳴らす。
+- 基準オクターブを選べる UI を追加する。
+- 初期値は `C4` を含む中央音域にする。
+- ルートが `C` の場合、基本形の `Cmaj7` は `C4 E4 G4 B4` のように鳴る。
+- ルートが `E` の場合、`Emaj7` は `E4 G#4 B4 D#5` のように、構成音の順序を保ちながら必要に応じて次のオクターブへ上げる。
+- 将来的には `Root Position`, `1st Inversion`, `2nd Inversion` などの転回形も選べるようにできる。
+
+実装時は、音名表示用の enharmonic spelling と、再生用の MIDI 番号計算を分けて考える。表示は度数に従って `G#` / `Ab` を正しく綴り、再生は `C4 = 60` を基準に MIDI 番号へ変換する。
+
+## 今後のコード進行再生メモ
+
+将来的には、単一コードだけではなく、16小節または32小節分のコード進行を UI 上で入力し、BPM に合わせて現在の小節・拍を判定しながら指板表示を自動で切り替えられるようにする。
+
+目的は、曲や練習パターンの進行に合わせて、いま鳴っているコードの構成音をリアルタイムに指板へ表示すること。これにより、コードトーン練習、ウォーキングベース練習、アドリブ練習に使える。
+
+想定する処理の流れ:
+
+1. コード進行データを UI で入力する。
+2. BPM と拍子から、1拍・1小節の長さを計算する。
+3. 再生開始時刻からの経過時間を取得する。
+4. 経過時間から現在の小節番号と拍位置を判定する。
+5. 現在の小節に設定されたコードへ、指板表示を切り替える。
+
+基本計算:
+
+```txt
+1拍の秒数 = 60 / BPM
+1小節の秒数 = 1拍の秒数 * 拍子の拍数
+現在の拍 = floor(経過秒数 / 1拍の秒数)
+現在の小節 = floor(現在の拍 / 拍子の拍数)
+小節内の拍 = 現在の拍 % 拍子の拍数
+```
+
+最初は 4/4 拍子固定でよい。あとから 3/4, 6/8 などを追加できるように、拍子はデータとして持てる設計にする。
+
+コード進行データの例:
+
+```json
+{
+  "bpm": 120,
+  "timeSignature": { "beatsPerBar": 4, "beatUnit": 4 },
+  "bars": [
+    { "bar": 1, "root": "C", "chordType": "maj7" },
+    { "bar": 2, "root": "A", "chordType": "m7" },
+    { "bar": 3, "root": "D", "chordType": "m7" },
+    { "bar": 4, "root": "G", "chordType": "7" }
+  ]
+}
+```
+
+UI の案:
+
+- 16小節 / 32小節を切り替えられる。
+- 各小節に Root と Chord を入力できる。
+- BPM を数値入力できる。
+- Play / Stop / Reset を用意する。
+- 現在の小節をハイライトする。
+- 現在の小節のコードを指板表示に反映する。
+- 将来的には各小節に複数コード、例: 2拍ずつ `Dm7 / G7` も入力できるようにする。
+
+実装時の注意:
+
+- 音声再生のタイミングと画面更新のタイミングは分けて考える。
+- 画面更新は `requestAnimationFrame` で現在時刻を監視する。
+- 音を鳴らす場合は Web Audio API の `AudioContext.currentTime` を基準にする。
+- 指板表示は現在の `root` / `chordType` state を、進行再生中だけ現在小節のコードに同期させる。
+- 手動でコードを選んで学習するモードと、進行に沿って自動切り替えするモードを分ける。
+
+## 現在の制限
+
+- 現在の指板表示は 0-12F と 13-22F をタブで切り替える構成。
+- 現在の音名綴りヘルパーは、7th 系までの一般的なコードトーンを中心に設計している。
+- 9th, 11th, 13th などのテンションを扱う場合は、`app/page.tsx` の度数から文字ステップへの対応表を拡張する必要がある。
