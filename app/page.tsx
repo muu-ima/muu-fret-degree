@@ -590,6 +590,48 @@ export default function Home() {
     subOscillator.stop(end + 0.05);
   }
 
+  function playPianoNote(midi: number, startOffset = 0, duration = 1.8) {
+    const context = ensureAudioContext();
+    const start = context.currentTime + startOffset;
+    const end = start + duration;
+    const frequency = frequencyFromMidi(midi);
+    const output = context.createGain();
+    const filter = context.createBiquadFilter();
+    const partials = [
+      { ratio: 1, gain: 0.34, type: "triangle" as OscillatorType },
+      { ratio: 2, gain: 0.12, type: "sine" as OscillatorType },
+      { ratio: 3, gain: 0.045, type: "sine" as OscillatorType },
+    ];
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(5200, start);
+    filter.frequency.exponentialRampToValueAtTime(1500, end);
+    output.gain.setValueAtTime(0.0001, start);
+    output.gain.exponentialRampToValueAtTime(0.34, start + 0.012);
+    output.gain.exponentialRampToValueAtTime(0.16, start + 0.12);
+    output.gain.exponentialRampToValueAtTime(0.0001, end);
+
+    partials.forEach((partial) => {
+      const oscillator = context.createOscillator();
+      const partialGain = context.createGain();
+      oscillator.type = partial.type;
+      oscillator.frequency.setValueAtTime(frequency * partial.ratio, start);
+      partialGain.gain.setValueAtTime(partial.gain, start);
+      oscillator.connect(partialGain);
+      partialGain.connect(filter);
+      oscillator.start(start);
+      oscillator.stop(end + 0.05);
+    });
+
+    filter.connect(output);
+    output.connect(context.destination);
+  }
+
+  function trebleChordMidi(interval: Interval) {
+    const rootPitchClass = sharpPitchClasses.indexOf(pitchClassOf(root));
+    return 60 + rootPitchClass + interval.semitones;
+  }
+
   function playNote(note: FretNote) {
     void ensureAudioContext().resume();
     playBassNote(note.midi);
@@ -611,13 +653,8 @@ export default function Home() {
 
   function playStack() {
     void ensureAudioContext().resume();
-    chordNotes.forEach((chordNote, index) => {
-      const candidate = notes
-        .filter((note) => note.degree === chordNote.degree)
-        .sort((a, b) => Math.abs(a.midi - 40) - Math.abs(b.midi - 40))[0];
-      if (candidate) {
-        playBassNote(candidate.midi + (index > 1 ? 12 : 0), 0, 1.35);
-      }
+    chordType.intervals.forEach((interval, index) => {
+      playPianoNote(trebleChordMidi(interval), index * 0.012, 1.9);
     });
   }
 
