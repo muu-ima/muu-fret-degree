@@ -502,6 +502,7 @@ export default function Home() {
   const [isControlsOpen, setIsControlsOpen] = useState(false);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [bpm, setBpm] = useState(120);
+  const [bpmInput, setBpmInput] = useState("120");
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(1);
 
@@ -719,10 +720,24 @@ export default function Home() {
     setIsMetronomeRunning((running) => !running);
   }
 
-  function updateBpm(value: string) {
+  function commitBpm(value: string) {
     const nextBpm = Number(value);
-    if (Number.isFinite(nextBpm)) {
-      setBpm(Math.min(240, Math.max(40, Math.round(nextBpm))));
+    const normalizedBpm = Number.isFinite(nextBpm)
+      ? Math.min(240, Math.max(40, Math.round(nextBpm)))
+      : bpm;
+    setBpm(normalizedBpm);
+    setBpmInput(String(normalizedBpm));
+  }
+
+  function updateBpm(value: string) {
+    if (!/^\d*$/.test(value)) {
+      return;
+    }
+
+    setBpmInput(value);
+    const nextBpm = Number(value);
+    if (Number.isFinite(nextBpm) && nextBpm >= 40 && nextBpm <= 240) {
+      setBpm(Math.round(nextBpm));
     }
   }
 
@@ -781,8 +796,15 @@ export default function Home() {
               max="240"
               step="1"
               type="number"
-              value={bpm}
+              value={bpmInput}
+              onBlur={(event) => commitBpm(event.target.value)}
               onChange={(event) => updateBpm(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  commitBpm(event.currentTarget.value);
+                  event.currentTarget.blur();
+                }
+              }}
             />
           </label>
           <button
