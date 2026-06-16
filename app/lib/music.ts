@@ -32,6 +32,10 @@ export type FretNote = {
   inChord: boolean;
 };
 
+export type ChordNote = Interval & {
+  note: string;
+};
+
 export const maxFret = 22;
 
 export const fretRanges = [
@@ -153,4 +157,36 @@ export function makeChordMap(root: string, chordType: ChordType, chromatic: stri
       ];
     }),
   );
+}
+
+export function makeFretNotes(tuning: Tuning, chordMap: ReturnType<typeof makeChordMap>, chromatic: string[]) {
+  return tuning.strings.flatMap((string, stringIndex) =>
+    Array.from({ length: maxFret + 1 }, (_, fret) => {
+      const midi = string.midi + fret;
+      const pitchClass = pitchClassAt(midi);
+      const chordTone = chordMap.get(pitchClass);
+      return {
+        id: `${stringIndex}-${fret}`,
+        stringIndex,
+        fret,
+        midi,
+        pitchClass,
+        note: chordTone?.note ?? noteAt(chromatic, midi),
+        degree: chordTone?.degree,
+        inChord: Boolean(chordTone),
+      };
+    }),
+  );
+}
+
+export function makeChordNotes(root: string, chordType: ChordType): ChordNote[] {
+  return chordType.intervals.map((interval) => ({
+    ...interval,
+    note: spellIntervalNote(root, interval),
+  }));
+}
+
+export function trebleChordMidi(root: string, interval: Interval, baseMidi = 60) {
+  const rootPitchClass = sharpPitchClasses.indexOf(pitchClassOf(root));
+  return baseMidi + rootPitchClass + interval.semitones;
 }
