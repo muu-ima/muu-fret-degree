@@ -175,6 +175,13 @@ select:focus-visible,
   height: auto;
 }
 
+.mobileFretboard,
+.mobileActionBar,
+.drawerBackdrop,
+.controlsDrawer {
+  display: none;
+}
+
 .fingerboard {
   fill: var(--wood);
   stroke: var(--wood-dark);
@@ -321,11 +328,183 @@ select:focus-visible,
     padding-top: 18px;
   }
 
-  .controls {
-    grid-template-columns: 1fr;
+  .chordBadge {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  body {
+    background: var(--paper);
+  }
+
+  .app {
+    width: min(100% - 18px, 430px);
+    padding: 16px 0 28px;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .eyebrow {
+    font-size: 0.68rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    line-height: 1.05;
   }
 
   .chordBadge {
+    min-width: 92px;
+    padding: 10px 12px;
+  }
+
+  .chordBadge strong {
+    font-size: 1.45rem;
+  }
+
+  .chordBadge span {
+    font-size: 0.82rem;
+  }
+
+  .desktopControls,
+  .desktopFretboard {
+    display: none;
+  }
+
+  .mobileActionBar {
+    position: sticky;
+    top: 8px;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    pointer-events: none;
+  }
+
+  .menuButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid rgba(32, 33, 36, 0.14);
+    background: rgba(32, 33, 36, 0.94);
+    box-shadow: 0 12px 28px rgba(32, 33, 36, 0.18);
+    pointer-events: auto;
+  }
+
+  .mobileFretboard {
+    display: block;
+    overflow: hidden;
+  }
+
+  .mobileFretboard .fretboard {
     min-width: 0;
+    width: 100%;
+    max-height: calc(100vh - 172px);
+  }
+
+  .verticalFretboard .degreeLabel {
+    font-size: 16px;
+  }
+
+  .verticalFretboard .noteName {
+    font-size: 12px;
+  }
+
+  .mobileFretNumber {
+    font-size: 13px;
+  }
+
+  .mobileStringName {
+    font-size: 16px;
+  }
+
+  .drawerBackdrop.open {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: block;
+    background: rgba(32, 33, 36, 0.32);
+  }
+
+  .controlsDrawer {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: block;
+    max-height: min(78vh, 560px);
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px 8px 0 0;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 -24px 70px rgba(32, 33, 36, 0.22);
+    transform: translateY(110%);
+    transition: transform 180ms ease;
+  }
+
+  .controlsDrawer.open {
+    transform: translateY(0);
+  }
+
+  .drawerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .drawerHeader strong {
+    font-size: 1rem;
+  }
+
+  .closeButton {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background: #f1eee8;
+    color: var(--ink);
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .drawerControls {
+    grid-template-columns: 1fr;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .degreeStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .degreeCard {
+    min-height: 58px;
+    padding: 9px;
+  }
+
+  .degreeCard span {
+    width: 36px;
+    height: 36px;
+  }
+
+  .degreeCard strong {
+    font-size: 1.25rem;
   }
 }

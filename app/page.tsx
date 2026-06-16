@@ -171,7 +171,7 @@ function BassFretboard({
   const width = leftPad + boardWidth + 32;
 
   return (
-    <div className="fretboardShell" aria-label="ベース指板">
+    <div className="fretboardShell desktopFretboard" aria-label="ベース指板">
       <svg
         className="fretboard"
         viewBox={`0 0 ${width} ${height}`}
@@ -291,12 +291,152 @@ function BassFretboard({
   );
 }
 
+function MobileBassFretboard({
+  notes,
+  tuning,
+  onPlayNote,
+}: {
+  notes: FretNote[];
+  tuning: Tuning;
+  onPlayNote: (note: FretNote) => void;
+}) {
+  const mobileLeft = 42;
+  const mobileTop = 70;
+  const mobileWidth = 286;
+  const mobileHeight = 760;
+  const mobileStringGap = mobileWidth / 3;
+  const mobileFretGap = mobileHeight / fretCount;
+  const width = mobileLeft * 2 + mobileWidth;
+  const height = mobileTop + mobileHeight + 58;
+
+  return (
+    <div className="fretboardShell mobileFretboard" aria-label="モバイル用ベース指板">
+      <svg
+        className="fretboard verticalFretboard"
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-labelledby="mobile-fretboard-title mobile-fretboard-desc"
+      >
+        <title id="mobile-fretboard-title">縦向きのコード構成音ベース指板</title>
+        <desc id="mobile-fretboard-desc">
+          スマートフォン向けに、フレットが上から下へ進む縦向き指板でコード構成音を表示します。
+        </desc>
+
+        <rect
+          className="fingerboard"
+          x={mobileLeft - 18}
+          y={mobileTop}
+          width={mobileWidth + 36}
+          height={mobileHeight}
+          rx="6"
+        />
+        <rect
+          className="nut"
+          x={mobileLeft - 20}
+          y={mobileTop - nutWidth}
+          width={mobileWidth + 40}
+          height={nutWidth}
+          rx="3"
+        />
+
+        {Array.from({ length: fretCount + 1 }, (_, fret) => {
+          const y = mobileTop + fret * mobileFretGap;
+          return (
+            <g key={`mobile-fret-${fret}`}>
+              <line
+                className={fret === 0 ? "fret fretZero" : "fret"}
+                x1={mobileLeft - 18}
+                y1={y}
+                x2={mobileLeft + mobileWidth + 18}
+                y2={y}
+              />
+              {fret > 0 ? (
+                <text className="fretNumber mobileFretNumber" x={24} y={y - mobileFretGap / 2 + 5}>
+                  {fret}
+                </text>
+              ) : null}
+            </g>
+          );
+        })}
+
+        {[...markerFrets].map((fret) => (
+          <circle
+            key={`mobile-marker-${fret}`}
+            className="positionMarker"
+            cx={mobileLeft + mobileWidth / 2}
+            cy={mobileTop + (fret - 0.5) * mobileFretGap}
+            r="8"
+          />
+        ))}
+        <g className="doubleMarker">
+          <circle cx={mobileLeft + mobileStringGap} cy={mobileTop + 11.5 * mobileFretGap} r="7" />
+          <circle cx={mobileLeft + mobileStringGap * 2} cy={mobileTop + 11.5 * mobileFretGap} r="7" />
+        </g>
+
+        {tuning.strings.map((string, stringIndex) => {
+          const x = mobileLeft + stringIndex * mobileStringGap;
+          return (
+            <g key={`mobile-${string.name}-${stringIndex}`}>
+              <text className="stringName mobileStringName" x={x} y={36}>
+                {string.name}
+              </text>
+              <line
+                className={`bassString string-${stringIndex}`}
+                x1={x}
+                y1={mobileTop - nutWidth}
+                x2={x}
+                y2={mobileTop + mobileHeight}
+              />
+            </g>
+          );
+        })}
+
+        {notes.map((note) => {
+          if (!note.inChord) {
+            return null;
+          }
+
+          const x = mobileLeft + note.stringIndex * mobileStringGap;
+          const y = note.fret === 0 ? mobileTop - 38 : mobileTop + (note.fret - 0.5) * mobileFretGap;
+          const color = note.degree ? degreeTone[note.degree] ?? "#333" : "#333";
+
+          return (
+            <g
+              className="noteHit"
+              key={`mobile-${note.id}`}
+              tabIndex={0}
+              role="button"
+              aria-label={`${note.note} ${note.degree}度 ${note.fret}フレットを鳴らす`}
+              onClick={() => onPlayNote(note)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onPlayNote(note);
+                }
+              }}
+            >
+              <circle cx={x} cy={y} r="20" fill={color} />
+              <text className="degreeLabel" x={x} y={y + 6}>
+                {note.degree}
+              </text>
+              <text className="noteName" x={x} y={y + 34}>
+                {note.note}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 export default function Home() {
   const audioContext = useRef<AudioContext | null>(null);
   const [root, setRoot] = useState("C");
   const [chordTypeId, setChordTypeId] = useState("m7");
   const [tuningId, setTuningId] = useState("standard");
   const [showGuideTones, setShowGuideTones] = useState(true);
+  const [isControlsOpen, setIsControlsOpen] = useState(false);
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
@@ -418,6 +558,58 @@ export default function Home() {
     });
   }
 
+
+  function renderControls(className: string) {
+    return (
+      <section className={className} aria-label="コードとチューニング">
+          <label>
+            Root
+            <select value={root} onChange={(event) => setRoot(event.target.value)}>
+              {theory.roots.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Chord
+            <select value={chordTypeId} onChange={(event) => setChordTypeId(event.target.value)}>
+              {chordTypes.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Tuning
+            <select value={tuningId} onChange={(event) => setTuningId(event.target.value)}>
+              {tunings.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={showGuideTones}
+              onChange={(event) => setShowGuideTones(event.target.checked)}
+            />
+            3rd / 7th を強調
+          </label>
+          <button type="button" onClick={playArpeggio}>
+            Arpeggio
+          </button>
+          <button type="button" className="secondaryButton" onClick={playStack}>
+            Chord
+          </button>
+        </section>
+    );
+  }
+
   return (
     <main className="app">
       <section className="hero">
@@ -431,54 +623,39 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="controls" aria-label="コードとチューニング">
-        <label>
-          Root
-          <select value={root} onChange={(event) => setRoot(event.target.value)}>
-            {theory.roots.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Chord
-          <select value={chordTypeId} onChange={(event) => setChordTypeId(event.target.value)}>
-            {chordTypes.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Tuning
-          <select value={tuningId} onChange={(event) => setTuningId(event.target.value)}>
-            {tunings.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="toggle">
-          <input
-            type="checkbox"
-            checked={showGuideTones}
-            onChange={(event) => setShowGuideTones(event.target.checked)}
-          />
-          3rd / 7th を強調
-        </label>
-        <button type="button" onClick={playArpeggio}>
-          Arpeggio
+      <div className="mobileActionBar">
+        <button
+          type="button"
+          className="menuButton"
+          onClick={() => setIsControlsOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={isControlsOpen}
+        >
+          <span aria-hidden="true">☰</span>
+          Controls
         </button>
-        <button type="button" className="secondaryButton" onClick={playStack}>
-          Chord
-        </button>
-      </section>
+      </div>
+
+      {renderControls("controls desktopControls")}
+
+      <div className={isControlsOpen ? "drawerBackdrop open" : "drawerBackdrop"} onClick={() => setIsControlsOpen(false)} />
+      <aside
+        className={isControlsOpen ? "controlsDrawer open" : "controlsDrawer"}
+        role="dialog"
+        aria-modal="true"
+        aria-label="コードとチューニング"
+      >
+        <div className="drawerHeader">
+          <strong>{root} {chordType.name}</strong>
+          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
+            ×
+          </button>
+        </div>
+        {renderControls("controls drawerControls")}
+      </aside>
 
       <BassFretboard notes={notes} tuning={tuning} onPlayNote={playNote} />
+      <MobileBassFretboard notes={notes} tuning={tuning} onPlayNote={playNote} />
 
       <section className="degreeStrip" aria-label="コード構成音">
         {chordNotes.map((item) => {
