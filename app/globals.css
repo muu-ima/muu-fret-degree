@@ -1,0 +1,331 @@
+:root {
+  color-scheme: light;
+  --ink: #202124;
+  --muted: #5f6368;
+  --panel: #ffffff;
+  --paper: #f6f3ee;
+  --line: #d8d2c8;
+  --wood: #7a4e32;
+  --wood-dark: #4d3324;
+  --steel: #b8c0c8;
+  --accent: #e84d5b;
+  --focus: #2b7de9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background:
+    linear-gradient(135deg, rgba(43, 125, 233, 0.08), transparent 34%),
+    linear-gradient(315deg, rgba(22, 160, 133, 0.08), transparent 28%),
+    var(--paper);
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+.app {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 44px;
+}
+
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4.2rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.chordBadge {
+  display: grid;
+  gap: 4px;
+  min-width: 166px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 46px rgba(54, 47, 38, 0.1);
+}
+
+.chordBadge strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.chordBadge span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr)) minmax(160px, auto) auto auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+select,
+button {
+  min-height: 42px;
+  border: 1px solid #c9c3b9;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+}
+
+select {
+  padding: 0 34px 0 12px;
+}
+
+button {
+  padding: 0 16px;
+  border-color: transparent;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: #f2a51a;
+  color: #21190a;
+}
+
+button:focus-visible,
+select:focus-visible,
+.noteHit:focus-visible {
+  outline: 3px solid rgba(43, 125, 233, 0.32);
+  outline-offset: 3px;
+}
+
+.toggle {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #c9c3b9;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.fretboardShell {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fffaf2, #efe3d3);
+  box-shadow: 0 24px 80px rgba(61, 48, 35, 0.16);
+}
+
+.fretboard {
+  display: block;
+  min-width: 980px;
+  width: 100%;
+  height: auto;
+}
+
+.fingerboard {
+  fill: var(--wood);
+  stroke: var(--wood-dark);
+  stroke-width: 2;
+}
+
+.nut {
+  fill: #ece8df;
+  stroke: #c7beb0;
+}
+
+.fret {
+  stroke: var(--steel);
+  stroke-width: 4;
+}
+
+.fretZero {
+  stroke-width: 2;
+}
+
+.fretNumber,
+.stringName,
+.noteName {
+  fill: var(--muted);
+  font-size: 16px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.stringName {
+  font-size: 19px;
+}
+
+.bassString {
+  stroke: #d8dde3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.24));
+}
+
+.string-0 {
+  stroke-width: 3;
+}
+
+.string-1 {
+  stroke-width: 4;
+}
+
+.string-2 {
+  stroke-width: 5;
+}
+
+.string-3 {
+  stroke-width: 6;
+}
+
+.positionMarker,
+.doubleMarker circle {
+  fill: rgba(255, 255, 255, 0.22);
+}
+
+.noteHit {
+  cursor: pointer;
+}
+
+.noteHit circle {
+  stroke: rgba(255, 255, 255, 0.76);
+  stroke-width: 3;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.22));
+  transition:
+    r 140ms ease,
+    filter 140ms ease;
+}
+
+.noteHit:hover circle {
+  r: 25px;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.26));
+}
+
+.degreeLabel {
+  fill: #fff;
+  font-size: 17px;
+  font-weight: 900;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.noteName {
+  fill: #fff8;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.degreeStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.degreeCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 70px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.degreeCard span {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 900;
+}
+
+.degreeCard strong {
+  font-size: 1.55rem;
+}
+
+.guideTone {
+  border-color: rgba(43, 125, 233, 0.62);
+  box-shadow: inset 0 0 0 2px rgba(43, 125, 233, 0.16);
+}
+
+@media (max-width: 920px) {
+  .hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .app {
+    width: min(100% - 20px, 1180px);
+    padding-top: 18px;
+  }
+
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .chordBadge {
+    min-width: 0;
+  }
+}
