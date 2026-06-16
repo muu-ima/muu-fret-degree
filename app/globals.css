@@ -160,6 +160,31 @@ select:focus-visible,
   accent-color: var(--accent);
 }
 
+.fretRangeTabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(108px, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.fretRangeTab {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.fretRangeTab.active {
+  background: var(--ink);
+  color: #fff;
+}
+
 .fretboardShell {
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -376,6 +401,15 @@ select:focus-visible,
   .desktopControls,
   .desktopFretboard {
     display: none;
+  }
+
+  .fretRangeTabs {
+    display: grid;
+    margin-bottom: 10px;
+  }
+
+  .fretRangeTab {
+    min-height: 38px;
   }
 
   .mobileActionBar {

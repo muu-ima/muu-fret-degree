@@ -37,15 +37,19 @@ type FretNote = {
   inChord: boolean;
 };
 
-const fretCount = 12;
+const maxFret = 22;
+const fretRanges = [
+  { id: "low", label: "0-12F", start: 0, end: 12 },
+  { id: "high", label: "13-22F", start: 13, end: 22 },
+] as const;
+type FretRange = (typeof fretRanges)[number];
 const nutWidth = 14;
 const leftPad = 74;
 const topPad = 54;
 const boardWidth = 940;
 const boardHeight = 290;
 const stringGap = boardHeight / 3;
-const fretGap = boardWidth / fretCount;
-const markerFrets = new Set([3, 5, 7, 9]);
+const markerFrets = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
 
 const degreeTone: Record<string, string> = {
   "1": "#e84d5b",
@@ -161,26 +165,39 @@ function makeChordMap(root: string, chordType: ChordType, chromatic: string[]) {
 function BassFretboard({
   notes,
   tuning,
+  fretRange,
   onPlayNote,
 }: {
   notes: FretNote[];
   tuning: Tuning;
+  fretRange: FretRange;
   onPlayNote: (note: FretNote) => void;
 }) {
   const height = topPad * 2 + boardHeight;
   const width = leftPad + boardWidth + 32;
+  const visibleFretCount = fretRange.end - fretRange.start + 1;
+  const currentFretGap = boardWidth / visibleFretCount;
+  const isOpenRange = fretRange.start === 0;
+  const rangeNotes = notes.filter((note) =>
+    isOpenRange
+      ? note.fret >= fretRange.start && note.fret <= fretRange.end
+      : note.fret >= fretRange.start && note.fret <= fretRange.end,
+  );
+  const visibleMarkers = [...markerFrets].filter(
+    (fret) => fret >= Math.max(1, fretRange.start) && fret <= fretRange.end,
+  );
 
   return (
-    <div className="fretboardShell desktopFretboard" aria-label="ベース指板">
+    <div className="fretboardShell desktopFretboard" aria-label={`ベース指板 ${fretRange.label}`}>
       <svg
         className="fretboard"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-labelledby="fretboard-title fretboard-desc"
+        aria-labelledby={`fretboard-title-${fretRange.id} fretboard-desc-${fretRange.id}`}
       >
-        <title id="fretboard-title">コード構成音の度数を表示するベース指板</title>
-        <desc id="fretboard-desc">
-          4弦ベースの0フレットから12フレットまでに、選択コードの構成音を度数で表示します。
+        <title id={`fretboard-title-${fretRange.id}`}>コード構成音の度数を表示するベース指板</title>
+        <desc id={`fretboard-desc-${fretRange.id}`}>
+          4弦ベースの{fretRange.label}に、選択コードの構成音を度数で表示します。
         </desc>
 
         <rect
@@ -191,48 +208,60 @@ function BassFretboard({
           height={boardHeight + 36}
           rx="6"
         />
-        <rect
-          className="nut"
-          x={leftPad - nutWidth}
-          y={topPad - 20}
-          width={nutWidth}
-          height={boardHeight + 40}
-          rx="3"
-        />
+        {isOpenRange ? (
+          <rect
+            className="nut"
+            x={leftPad - nutWidth}
+            y={topPad - 20}
+            width={nutWidth}
+            height={boardHeight + 40}
+            rx="3"
+          />
+        ) : null}
 
-        {Array.from({ length: fretCount + 1 }, (_, fret) => {
-          const x = leftPad + fret * fretGap;
+        {Array.from({ length: visibleFretCount + 1 }, (_, fretIndex) => {
+          const x = leftPad + fretIndex * currentFretGap;
           return (
-            <g key={`fret-${fret}`}>
-              <line
-                className={fret === 0 ? "fret fretZero" : "fret"}
-                x1={x}
-                y1={topPad - 18}
-                x2={x}
-                y2={topPad + boardHeight + 18}
-              />
-              {fret > 0 ? (
-                <text className="fretNumber" x={x - fretGap / 2} y={28}>
-                  {fret}
-                </text>
-              ) : null}
-            </g>
+            <line
+              className={isOpenRange && fretIndex === 0 ? "fret fretZero" : "fret"}
+              key={`fret-line-${fretRange.id}-${fretIndex}`}
+              x1={x}
+              y1={topPad - 18}
+              x2={x}
+              y2={topPad + boardHeight + 18}
+            />
           );
         })}
 
-        {[...markerFrets].map((fret) => (
+        {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
+          const fretLabel = isOpenRange ? fretIndex + 1 : fretRange.start + fretIndex;
+          return (
+            <text
+              className="fretNumber"
+              key={`fret-label-${fretRange.id}-${fretLabel}`}
+              x={leftPad + (fretIndex + 0.5) * currentFretGap}
+              y={28}
+            >
+              {fretLabel}
+            </text>
+          );
+        })}
+
+        {visibleMarkers.map((fret) => (
           <circle
-            key={`marker-${fret}`}
+            key={`marker-${fretRange.id}-${fret}`}
             className="positionMarker"
-            cx={leftPad + (fret - 0.5) * fretGap}
+            cx={leftPad + (isOpenRange ? fret - 0.5 : fret - fretRange.start + 0.5) * currentFretGap}
             cy={topPad + boardHeight / 2}
             r="8"
           />
         ))}
-        <g className="doubleMarker">
-          <circle cx={leftPad + 11.5 * fretGap} cy={topPad + stringGap} r="7" />
-          <circle cx={leftPad + 11.5 * fretGap} cy={topPad + stringGap * 2} r="7" />
-        </g>
+        {fretRange.start <= 12 && fretRange.end >= 12 ? (
+          <g className="doubleMarker">
+            <circle cx={leftPad + (isOpenRange ? 11.5 : 12 - fretRange.start + 0.5) * currentFretGap} cy={topPad + stringGap} r="7" />
+            <circle cx={leftPad + (isOpenRange ? 11.5 : 12 - fretRange.start + 0.5) * currentFretGap} cy={topPad + stringGap * 2} r="7" />
+          </g>
+        ) : null}
 
         {tuning.strings.map((string, stringIndex) => {
           const y = topPad + stringIndex * stringGap;
@@ -243,7 +272,7 @@ function BassFretboard({
               </text>
               <line
                 className={`bassString string-${stringIndex}`}
-                x1={leftPad - nutWidth}
+                x1={isOpenRange ? leftPad - nutWidth : leftPad}
                 y1={y}
                 x2={leftPad + boardWidth}
                 y2={y}
@@ -252,19 +281,22 @@ function BassFretboard({
           );
         })}
 
-        {notes.map((note) => {
-          const x = note.fret === 0 ? leftPad - 34 : leftPad + (note.fret - 0.5) * fretGap;
-          const y = topPad + note.stringIndex * stringGap;
-          const color = note.degree ? degreeTone[note.degree] ?? "#333" : "#333";
-
+        {rangeNotes.map((note) => {
           if (!note.inChord) {
             return null;
           }
 
+          const x =
+            isOpenRange && note.fret === 0
+              ? leftPad - 34
+              : leftPad + (isOpenRange ? note.fret - 0.5 : note.fret - fretRange.start + 0.5) * currentFretGap;
+          const y = topPad + note.stringIndex * stringGap;
+          const color = note.degree ? degreeTone[note.degree] ?? "#333" : "#333";
+
           return (
             <g
               className="noteHit"
-              key={note.id}
+              key={`${fretRange.id}-${note.id}`}
               tabIndex={0}
               role="button"
               aria-label={`${note.note} ${note.degree}度 ${note.fret}フレットを鳴らす`}
@@ -294,10 +326,12 @@ function BassFretboard({
 function MobileBassFretboard({
   notes,
   tuning,
+  fretRange,
   onPlayNote,
 }: {
   notes: FretNote[];
   tuning: Tuning;
+  fretRange: FretRange;
   onPlayNote: (note: FretNote) => void;
 }) {
   const mobileLeft = 56;
@@ -307,22 +341,28 @@ function MobileBassFretboard({
   const openStringLane = 44;
   const noteRadius = 18;
   const stringCount = tuning.strings.length;
+  const visibleFretCount = fretRange.end - fretRange.start + 1;
   const mobileStringGap = mobileWidth / Math.max(stringCount - 1, 1);
-  const mobileFretGap = mobileHeight / fretCount;
+  const mobileFretGap = mobileHeight / visibleFretCount;
   const width = mobileLeft * 2 + mobileWidth;
   const height = mobileTop + mobileHeight + 56;
+  const isOpenRange = fretRange.start === 0;
+  const rangeNotes = notes.filter((note) => note.fret >= fretRange.start && note.fret <= fretRange.end);
+  const visibleMarkers = [...markerFrets].filter(
+    (fret) => fret >= Math.max(1, fretRange.start) && fret <= fretRange.end,
+  );
 
   return (
-    <div className="fretboardShell mobileFretboard" aria-label="モバイル用ベース指板">
+    <div className="fretboardShell mobileFretboard" aria-label={`モバイル用ベース指板 ${fretRange.label}`}>
       <svg
         className="fretboard verticalFretboard"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-labelledby="mobile-fretboard-title mobile-fretboard-desc"
+        aria-labelledby={`mobile-fretboard-title-${fretRange.id} mobile-fretboard-desc-${fretRange.id}`}
       >
-        <title id="mobile-fretboard-title">縦向きのコード構成音ベース指板</title>
-        <desc id="mobile-fretboard-desc">
-          スマートフォン向けに、フレットが上から下へ進む縦向き指板でコード構成音を表示します。
+        <title id={`mobile-fretboard-title-${fretRange.id}`}>縦向きのコード構成音ベース指板</title>
+        <desc id={`mobile-fretboard-desc-${fretRange.id}`}>
+          スマートフォン向けに、{fretRange.label}を縦向き指板で表示します。
         </desc>
 
         <rect
@@ -333,48 +373,60 @@ function MobileBassFretboard({
           height={mobileHeight}
           rx="6"
         />
-        <rect
-          className="nut"
-          x={mobileLeft - noteRadius}
-          y={mobileTop - nutWidth}
-          width={mobileWidth + noteRadius * 2}
-          height={nutWidth}
-          rx="3"
-        />
+        {isOpenRange ? (
+          <rect
+            className="nut"
+            x={mobileLeft - noteRadius}
+            y={mobileTop - nutWidth}
+            width={mobileWidth + noteRadius * 2}
+            height={nutWidth}
+            rx="3"
+          />
+        ) : null}
 
-        {Array.from({ length: fretCount + 1 }, (_, fret) => {
-          const y = mobileTop + fret * mobileFretGap;
+        {Array.from({ length: visibleFretCount + 1 }, (_, fretIndex) => {
+          const y = mobileTop + fretIndex * mobileFretGap;
           return (
-            <g key={`mobile-fret-${fret}`}>
-              <line
-                className={fret === 0 ? "fret fretZero" : "fret"}
-                x1={mobileLeft - noteRadius}
-                y1={y}
-                x2={mobileLeft + mobileWidth + noteRadius}
-                y2={y}
-              />
-              {fret > 0 ? (
-                <text className="fretNumber mobileFretNumber" x={24} y={y - mobileFretGap / 2 + 5}>
-                  {fret}
-                </text>
-              ) : null}
-            </g>
+            <line
+              className={isOpenRange && fretIndex === 0 ? "fret fretZero" : "fret"}
+              key={`mobile-fret-line-${fretRange.id}-${fretIndex}`}
+              x1={mobileLeft - noteRadius}
+              y1={y}
+              x2={mobileLeft + mobileWidth + noteRadius}
+              y2={y}
+            />
           );
         })}
 
-        {[...markerFrets].map((fret) => (
+        {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
+          const fretLabel = isOpenRange ? fretIndex + 1 : fretRange.start + fretIndex;
+          return (
+            <text
+              className="fretNumber mobileFretNumber"
+              key={`mobile-fret-label-${fretRange.id}-${fretLabel}`}
+              x={24}
+              y={mobileTop + (fretIndex + 0.5) * mobileFretGap + 5}
+            >
+              {fretLabel}
+            </text>
+          );
+        })}
+
+        {visibleMarkers.map((fret) => (
           <circle
-            key={`mobile-marker-${fret}`}
+            key={`mobile-marker-${fretRange.id}-${fret}`}
             className="positionMarker"
             cx={mobileLeft + mobileWidth / 2}
-            cy={mobileTop + (fret - 0.5) * mobileFretGap}
+            cy={mobileTop + (isOpenRange ? fret - 0.5 : fret - fretRange.start + 0.5) * mobileFretGap}
             r="8"
           />
         ))}
-        <g className="doubleMarker">
-          <circle cx={mobileLeft + mobileStringGap} cy={mobileTop + 11.5 * mobileFretGap} r="7" />
-          <circle cx={mobileLeft + mobileStringGap * 2} cy={mobileTop + 11.5 * mobileFretGap} r="7" />
-        </g>
+        {fretRange.start <= 12 && fretRange.end >= 12 ? (
+          <g className="doubleMarker">
+            <circle cx={mobileLeft + mobileStringGap} cy={mobileTop + (isOpenRange ? 11.5 : 12 - fretRange.start + 0.5) * mobileFretGap} r="7" />
+            <circle cx={mobileLeft + mobileStringGap * 2} cy={mobileTop + (isOpenRange ? 11.5 : 12 - fretRange.start + 0.5) * mobileFretGap} r="7" />
+          </g>
+        ) : null}
 
         {tuning.strings.map((string, stringIndex) => {
           const displayStringIndex = stringCount - 1 - stringIndex;
@@ -387,7 +439,7 @@ function MobileBassFretboard({
               <line
                 className={`bassString string-${stringIndex}`}
                 x1={x}
-                y1={mobileTop - nutWidth}
+                y1={isOpenRange ? mobileTop - nutWidth : mobileTop}
                 x2={x}
                 y2={mobileTop + mobileHeight}
               />
@@ -395,7 +447,7 @@ function MobileBassFretboard({
           );
         })}
 
-        {notes.map((note) => {
+        {rangeNotes.map((note) => {
           if (!note.inChord) {
             return null;
           }
@@ -403,15 +455,15 @@ function MobileBassFretboard({
           const displayStringIndex = stringCount - 1 - note.stringIndex;
           const x = mobileLeft + displayStringIndex * mobileStringGap;
           const y =
-            note.fret === 0
+            isOpenRange && note.fret === 0
               ? mobileTop - openStringLane / 2
-              : mobileTop + (note.fret - 0.5) * mobileFretGap;
+              : mobileTop + (isOpenRange ? note.fret - 0.5 : note.fret - fretRange.start + 0.5) * mobileFretGap;
           const color = note.degree ? degreeTone[note.degree] ?? "#333" : "#333";
 
           return (
             <g
               className="noteHit"
-              key={`mobile-${note.id}`}
+              key={`mobile-${fretRange.id}-${note.id}`}
               tabIndex={0}
               role="button"
               aria-label={`${note.note} ${note.degree}度 ${note.fret}フレットを鳴らす`}
@@ -445,12 +497,15 @@ export default function Home() {
   const [tuningId, setTuningId] = useState("standard");
   const [showGuideTones, setShowGuideTones] = useState(true);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
+  const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
   const tunings = theory.tunings as Tuning[];
   const chordType = chordTypes.find((chord) => chord.id === chordTypeId) ?? chordTypes[0];
   const tuning = tunings.find((item) => item.id === tuningId) ?? tunings[0];
+  const selectedFretRange =
+    fretRanges.find((range) => range.id === selectedFretRangeId) ?? fretRanges[0];
 
   const chordMap = useMemo(
     () => makeChordMap(root, chordType, chromatic),
@@ -459,7 +514,7 @@ export default function Home() {
 
   const notes = useMemo<FretNote[]>(() => {
     return tuning.strings.flatMap((string, stringIndex) =>
-      Array.from({ length: fretCount + 1 }, (_, fret) => {
+      Array.from({ length: maxFret + 1 }, (_, fret) => {
         const midi = string.midi + fret;
         const pitchClass = pitchClassAt(midi);
         const chordTone = chordMap.get(pitchClass);
@@ -662,8 +717,33 @@ export default function Home() {
         {renderControls("controls drawerControls")}
       </aside>
 
-      <BassFretboard notes={notes} tuning={tuning} onPlayNote={playNote} />
-      <MobileBassFretboard notes={notes} tuning={tuning} onPlayNote={playNote} />
+      <div className="fretRangeTabs" role="tablist" aria-label="表示するフレット範囲">
+        {fretRanges.map((range) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={selectedFretRange.id === range.id}
+            className={selectedFretRange.id === range.id ? "fretRangeTab active" : "fretRangeTab"}
+            key={range.id}
+            onClick={() => setSelectedFretRangeId(range.id)}
+          >
+            {range.label}
+          </button>
+        ))}
+      </div>
+
+      <BassFretboard
+        notes={notes}
+        tuning={tuning}
+        fretRange={selectedFretRange}
+        onPlayNote={playNote}
+      />
+      <MobileBassFretboard
+        notes={notes}
+        tuning={tuning}
+        fretRange={selectedFretRange}
+        onPlayNote={playNote}
+      />
 
       <section className="degreeStrip" aria-label="コード構成音">
         {chordNotes.map((item) => {
