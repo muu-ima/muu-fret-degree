@@ -300,14 +300,17 @@ function MobileBassFretboard({
   tuning: Tuning;
   onPlayNote: (note: FretNote) => void;
 }) {
-  const mobileLeft = 42;
-  const mobileTop = 70;
+  const mobileLeft = 56;
+  const mobileTop = 86;
   const mobileWidth = 286;
-  const mobileHeight = 760;
-  const mobileStringGap = mobileWidth / 3;
+  const mobileHeight = 740;
+  const openStringLane = 44;
+  const noteRadius = 18;
+  const stringCount = tuning.strings.length;
+  const mobileStringGap = mobileWidth / Math.max(stringCount - 1, 1);
   const mobileFretGap = mobileHeight / fretCount;
   const width = mobileLeft * 2 + mobileWidth;
-  const height = mobileTop + mobileHeight + 58;
+  const height = mobileTop + mobileHeight + 56;
 
   return (
     <div className="fretboardShell mobileFretboard" aria-label="モバイル用ベース指板">
@@ -324,17 +327,17 @@ function MobileBassFretboard({
 
         <rect
           className="fingerboard"
-          x={mobileLeft - 18}
+          x={mobileLeft - noteRadius}
           y={mobileTop}
-          width={mobileWidth + 36}
+          width={mobileWidth + noteRadius * 2}
           height={mobileHeight}
           rx="6"
         />
         <rect
           className="nut"
-          x={mobileLeft - 20}
+          x={mobileLeft - noteRadius}
           y={mobileTop - nutWidth}
-          width={mobileWidth + 40}
+          width={mobileWidth + noteRadius * 2}
           height={nutWidth}
           rx="3"
         />
@@ -345,9 +348,9 @@ function MobileBassFretboard({
             <g key={`mobile-fret-${fret}`}>
               <line
                 className={fret === 0 ? "fret fretZero" : "fret"}
-                x1={mobileLeft - 18}
+                x1={mobileLeft - noteRadius}
                 y1={y}
-                x2={mobileLeft + mobileWidth + 18}
+                x2={mobileLeft + mobileWidth + noteRadius}
                 y2={y}
               />
               {fret > 0 ? (
@@ -374,7 +377,8 @@ function MobileBassFretboard({
         </g>
 
         {tuning.strings.map((string, stringIndex) => {
-          const x = mobileLeft + stringIndex * mobileStringGap;
+          const displayStringIndex = stringCount - 1 - stringIndex;
+          const x = mobileLeft + displayStringIndex * mobileStringGap;
           return (
             <g key={`mobile-${string.name}-${stringIndex}`}>
               <text className="stringName mobileStringName" x={x} y={36}>
@@ -396,8 +400,12 @@ function MobileBassFretboard({
             return null;
           }
 
-          const x = mobileLeft + note.stringIndex * mobileStringGap;
-          const y = note.fret === 0 ? mobileTop - 38 : mobileTop + (note.fret - 0.5) * mobileFretGap;
+          const displayStringIndex = stringCount - 1 - note.stringIndex;
+          const x = mobileLeft + displayStringIndex * mobileStringGap;
+          const y =
+            note.fret === 0
+              ? mobileTop - openStringLane / 2
+              : mobileTop + (note.fret - 0.5) * mobileFretGap;
           const color = note.degree ? degreeTone[note.degree] ?? "#333" : "#333";
 
           return (
@@ -415,11 +423,11 @@ function MobileBassFretboard({
                 }
               }}
             >
-              <circle cx={x} cy={y} r="20" fill={color} />
+              <circle cx={x} cy={y} r={noteRadius} fill={color} />
               <text className="degreeLabel" x={x} y={y + 6}>
                 {note.degree}
               </text>
-              <text className="noteName" x={x} y={y + 34}>
+              <text className="noteName" x={x} y={y + noteRadius + 12}>
                 {note.note}
               </text>
             </g>
