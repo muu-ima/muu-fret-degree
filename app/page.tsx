@@ -58,6 +58,7 @@ const degreeTone: Record<string, string> = {
   "4": "#16a085",
   "5": "#f2a51a",
   "b5": "#8f5bd5",
+  "#5": "#8f5bd5",
   "6": "#0f9d7a",
   "7": "#b4478f",
   "b7": "#b4478f",

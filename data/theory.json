@@ -3,6 +3,42 @@
   "roots": ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"],
   "chordTypes": [
     {
+      "id": "maj",
+      "name": "Major Triad",
+      "intervals": [
+        { "degree": "1", "semitones": 0 },
+        { "degree": "3", "semitones": 4 },
+        { "degree": "5", "semitones": 7 }
+      ]
+    },
+    {
+      "id": "min",
+      "name": "Minor Triad",
+      "intervals": [
+        { "degree": "1", "semitones": 0 },
+        { "degree": "b3", "semitones": 3 },
+        { "degree": "5", "semitones": 7 }
+      ]
+    },
+    {
+      "id": "dim",
+      "name": "Diminished Triad",
+      "intervals": [
+        { "degree": "1", "semitones": 0 },
+        { "degree": "b3", "semitones": 3 },
+        { "degree": "b5", "semitones": 6 }
+      ]
+    },
+    {
+      "id": "aug",
+      "name": "Augmented Triad",
+      "intervals": [
+        { "degree": "1", "semitones": 0 },
+        { "degree": "3", "semitones": 4 },
+        { "degree": "#5", "semitones": 8 }
+      ]
+    },
+    {
       "id": "maj7",
       "name": "Major 7",
       "intervals": [
