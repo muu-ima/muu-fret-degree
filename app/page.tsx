@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import theory from "../data/theory.json";
 
 type Interval = {
@@ -493,12 +493,17 @@ function MobileBassFretboard({
 
 export default function Home() {
   const audioContext = useRef<AudioContext | null>(null);
+  const metronomeTimer = useRef<number | null>(null);
+  const metronomeBeat = useRef(0);
   const [root, setRoot] = useState("C");
   const [chordTypeId, setChordTypeId] = useState("m7");
   const [tuningId, setTuningId] = useState("standard");
   const [showGuideTones, setShowGuideTones] = useState(true);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
+  const [bpm, setBpm] = useState(120);
+  const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
+  const [currentBeat, setCurrentBeat] = useState(1);
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
@@ -547,6 +552,31 @@ export default function Home() {
       audioContext.current = new AudioContext();
     }
     return audioContext.current;
+  }
+
+  function playMetronomeClick(startTime: number, accented: boolean) {
+    const context = ensureAudioContext();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const end = startTime + 0.055;
+
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(accented ? 1320 : 920, startTime);
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(accented ? 0.42 : 0.28, startTime + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(startTime);
+    oscillator.stop(end + 0.01);
+  }
+
+  function stopMetronome() {
+    if (metronomeTimer.current !== null) {
+      window.clearInterval(metronomeTimer.current);
+      metronomeTimer.current = null;
+    }
   }
 
   function playBassNote(midi: number, startOffset = 0, duration = 0.85) {
@@ -660,6 +690,43 @@ export default function Home() {
   }
 
 
+  useEffect(() => {
+    stopMetronome();
+
+    if (!isMetronomeRunning) {
+      return;
+    }
+
+    const beatMs = (60 / bpm) * 1000;
+    metronomeBeat.current = 0;
+
+    const tick = () => {
+      const context = ensureAudioContext();
+      const beat = metronomeBeat.current % 4;
+      void context.resume();
+      playMetronomeClick(context.currentTime, beat === 0);
+      setCurrentBeat(beat + 1);
+      metronomeBeat.current += 1;
+    };
+
+    tick();
+    metronomeTimer.current = window.setInterval(tick, beatMs);
+
+    return stopMetronome;
+  }, [bpm, isMetronomeRunning]);
+
+  function toggleMetronome() {
+    setIsMetronomeRunning((running) => !running);
+  }
+
+  function updateBpm(value: string) {
+    const nextBpm = Number(value);
+    if (Number.isFinite(nextBpm)) {
+      setBpm(Math.min(240, Math.max(40, Math.round(nextBpm))));
+    }
+  }
+
+
   function renderControls(className: string) {
     return (
       <section className={className} aria-label="コードとチューニング">
@@ -706,6 +773,24 @@ export default function Home() {
           </button>
           <button type="button" className="secondaryButton" onClick={playStack}>
             Chord
+          </button>
+          <label>
+            BPM
+            <input
+              min="40"
+              max="240"
+              step="1"
+              type="number"
+              value={bpm}
+              onChange={(event) => updateBpm(event.target.value)}
+            />
+          </label>
+          <button
+            type="button"
+            className={isMetronomeRunning ? "metronomeButton active" : "metronomeButton"}
+            onClick={toggleMetronome}
+          >
+            {isMetronomeRunning ? "Beat " + currentBeat : "Metronome"}
           </button>
         </section>
     );

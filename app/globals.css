@@ -110,7 +110,8 @@ label {
 }
 
 select,
-button {
+button,
+input[type="number"] {
   min-height: 42px;
   border: 1px solid #c9c3b9;
   border-radius: 7px;
@@ -118,7 +119,8 @@ button {
   color: var(--ink);
 }
 
-select {
+select,
+input[type="number"] {
   padding: 0 34px 0 12px;
 }
 
@@ -134,6 +136,14 @@ button {
 .secondaryButton {
   background: #f2a51a;
   color: #21190a;
+}
+
+.metronomeButton {
+  background: #2b7de9;
+}
+
+.metronomeButton.active {
+  background: #e84d5b;
 }
 
 button:focus-visible,
