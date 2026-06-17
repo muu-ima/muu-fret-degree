@@ -7,6 +7,7 @@ import { ChordDegreeStrip } from "./components/ChordDegreeStrip";
 import { ControlsPanel } from "./components/ControlsPanel";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useBpmControl } from "./hooks/useBpmControl";
+import { useChordPlayback } from "./hooks/useChordPlayback";
 import {
   type ChordType,
   type FretNote,
@@ -16,7 +17,6 @@ import {
   makeChordNotes,
   makeChordMap,
   makeFretNotes,
-  trebleChordMidi,
 } from "./lib/music";
 
 export default function Home() {
@@ -57,32 +57,15 @@ export default function Home() {
     () => makeChordNotes(root, chordType),
     [chordType, root],
   );
-
-  function playNote(note: FretNote) {
-    resumeAudio();
-    playBassNote(note.midi);
-  }
-
-  function playArpeggio() {
-    resumeAudio();
-    const playable = chordNotes.map((chordNote) => {
-      const candidates = notes.filter((note) => note.degree === chordNote.degree && note.fret <= 7);
-      return candidates.sort((a, b) => a.midi - b.midi)[0];
-    });
-
-    playable.forEach((note, index) => {
-      if (note) {
-        playBassNote(note.midi, index * 0.32, 0.7);
-      }
-    });
-  }
-
-  function playStack() {
-    resumeAudio();
-    chordType.intervals.forEach((interval, index) => {
-      playPianoNote(trebleChordMidi(root, interval), index * 0.012, 1.9);
-    });
-  }
+  const { playArpeggio, playNote, playStack } = useChordPlayback({
+    root,
+    chordType,
+    chordNotes,
+    notes,
+    playBassNote,
+    playPianoNote,
+    resumeAudio,
+  });
 
   function renderControls(className: string) {
     return (

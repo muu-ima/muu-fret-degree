@@ -70,6 +70,16 @@ BPM 入力の state と正規化を担当する。
 
 この hook は、メトロノームを鳴らす処理は持たない。メトロノーム側は、正規化済みの `bpm` だけを受け取る。
 
+### `app/hooks/useChordPlayback.ts`
+
+選択中コードをどう鳴らすかを担当する。
+
+- 指板上の単音をベース音で鳴らす。
+- コード構成音を低フレット側からアルペジオ再生する。
+- コード構成音をピアノ風の積み音で再生する。
+
+この hook は、実際の音色合成や `AudioContext` の管理はしない。`useAudioEngine` から受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
+
 ### `app/lib/music.ts`
 
 音楽理論と表示データの計算を担当する。
@@ -109,6 +119,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 音の鳴らし方を変える場合は、まず `app/lib/audio.ts` に置く。
 - Web Audio API と React state をつなぐ処理は、まず `app/hooks` に置く。
 - 入力値の一時 state や正規化ルールは、まず `app/hooks` に置く。
+- ユーザー操作から再生する MIDI 番号を選ぶ処理は、まず `app/hooks` に置く。
 - アプリ全体の状態や、複数コンポーネントをつなぐ処理は `app/page.tsx` に置く。
 - 同じ UI をデスクトップとモバイルで使う場合は、props で受ける stateless component にする。
 
