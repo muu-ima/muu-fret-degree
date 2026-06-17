@@ -4,6 +4,7 @@ import { type ChordOctave, type ChordType, type Tuning } from "../lib/music";
 
 type ControlsPanelProps = {
   className: string;
+  showTempoControls: boolean;
   roots: string[];
   chordTypes: ChordType[];
   tunings: Tuning[];
@@ -33,6 +34,7 @@ type ControlsPanelProps = {
 
 export function ControlsPanel({
   className,
+  showTempoControls,
   roots,
   chordTypes,
   tunings,
@@ -139,32 +141,36 @@ export function ControlsPanel({
         <span aria-hidden="true">▶</span>
         Chord
       </button>
-      <label>
-        BPM
-        <input
-          min="40"
-          max="240"
-          step="1"
-          type="number"
-          value={bpmInput}
-          onBlur={(event) => onBpmCommit(event.target.value)}
-          onChange={(event) => onBpmInputChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              onBpmCommit(event.currentTarget.value);
-              event.currentTarget.blur();
-            }
-          }}
-        />
-      </label>
-      <button
-        type="button"
-        className={isMetronomeRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
-        onClick={onToggleMetronome}
-      >
-        <span aria-hidden="true">♫</span>
-        {isMetronomeRunning ? "Beat " + currentBeat : "Metronome"}
-      </button>
+      {showTempoControls ? (
+        <>
+          <label>
+            BPM
+            <input
+              min="40"
+              max="240"
+              step="1"
+              type="number"
+              value={bpmInput}
+              onBlur={(event) => onBpmCommit(event.target.value)}
+              onChange={(event) => onBpmInputChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  onBpmCommit(event.currentTarget.value);
+                  event.currentTarget.blur();
+                }
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            className={isMetronomeRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
+            onClick={onToggleMetronome}
+          >
+            <span aria-hidden="true">♫</span>
+            {isMetronomeRunning ? "Beat " + currentBeat : "Metronome"}
+          </button>
+        </>
+      ) : null}
     </section>
   );
 }

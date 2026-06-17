@@ -78,6 +78,7 @@
 - ガイドトーン強調の切り替えを表示する。
 - Arpeggio / Chord / Metronome の操作を表示する。
 - BPM 入力を表示する。
+- Practice モードでは tempo 操作もここに置く。Progression モードでは進行再生側へ寄せる。
 
 このコンポーネントは state を持たず、変更は callback で親へ返す。デスクトップ表示とモバイルドロワーの両方で同じ操作 UI を再利用する。
 
@@ -96,6 +97,7 @@
 
 - Play / Stop / Reset を表示する。
 - 現在の小節、2 拍セル、進行中のコードを表示する。
+- Progression モードでは BPM 調整とメトロノームの ON/OFF を表示する。
 - 状態は持たず、`useProgressionPlayback` から受け取った値を表示するだけにする。
 
 ### `app/components/ProgressionEditor.tsx`

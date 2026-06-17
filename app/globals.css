@@ -669,6 +669,22 @@ select:focus-visible,
   min-width: 126px;
 }
 
+.progressionTransport {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+
+.progressionTempo {
+  min-width: 120px;
+}
+
+.progressionTempo input {
+  min-height: 40px;
+}
+
 .progressionEditor {
   display: grid;
   gap: 12px;
@@ -870,6 +886,10 @@ select:focus-visible,
 
   .progressionButtons {
     justify-content: flex-start;
+  }
+
+  .progressionTransport {
+    align-items: stretch;
   }
 
   .progressionEditorRow {

@@ -232,6 +232,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     return (
       <ControlsPanel
         className={className}
+        showTempoControls={pageMode === "practice"}
         roots={theory.roots}
         chordTypes={chordTypes}
         tunings={tunings}
@@ -320,9 +321,16 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         currentProgressionChordTypeName={currentProgressionChordType.name}
         progressionPosition={progressionPlayback.progressionPosition}
         isProgressionRunning={progressionPlayback.isProgressionRunning}
+        showTempoControls={pageMode === "progression"}
+        bpmInput={bpmInput}
+        isMetronomeRunning={isMetronomeRunning}
+        currentBeat={currentBeat}
         onStartProgression={progressionPlayback.startProgression}
         onStopProgression={progressionPlayback.stopProgression}
         onResetProgression={progressionPlayback.resetProgression}
+        onBpmInputChange={updateBpm}
+        onBpmCommit={commitBpm}
+        onToggleMetronome={toggleMetronome}
       />
 
       {showProgressionEditor ? (
