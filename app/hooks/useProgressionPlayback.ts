@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  getCurrentProgressionBar,
-  getCurrentProgressionSelection,
-  getProgressionPosition,
+  getProgressionPlaybackState,
   type ChordProgression,
   type ProgressionBar,
   type ProgressionPosition,
@@ -69,19 +67,13 @@ export function useProgressionPlayback({ progression }: UseProgressionPlaybackOp
     };
   }, [isProgressionRunning]);
 
-  const progressionPosition: ProgressionPosition = useMemo(
-    () => getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature),
+  const progressionState = useMemo(
+    () => getProgressionPlaybackState(progression, elapsedSeconds),
     [elapsedSeconds, progression],
   );
-
-  const currentProgressionBar: ProgressionBar | undefined = useMemo(
-    () => getCurrentProgressionBar(progression, elapsedSeconds),
-    [elapsedSeconds, progression],
-  );
-  const currentProgressionSelection: ProgressionSelection | undefined = useMemo(
-    () => getCurrentProgressionSelection(progression, elapsedSeconds),
-    [elapsedSeconds, progression],
-  );
+  const progressionPosition: ProgressionPosition = progressionState.position;
+  const currentProgressionSelection: ProgressionSelection | undefined = progressionState.selection;
+  const currentProgressionBar: ProgressionBar | undefined = currentProgressionSelection?.bar;
 
   return {
     currentProgressionBar,

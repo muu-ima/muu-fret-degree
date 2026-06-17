@@ -32,6 +32,11 @@ export type ProgressionSelection = {
   cellIndex: number;
 };
 
+export type ProgressionPlaybackState = {
+  position: ProgressionPosition;
+  selection?: ProgressionSelection;
+};
+
 function normalizeNonNegative(value: number) {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
@@ -84,25 +89,36 @@ export function getCurrentProgressionBar(
   progression: ChordProgression,
   elapsedSeconds: number,
 ): ProgressionBar | undefined {
-  return getCurrentProgressionSelection(progression, elapsedSeconds)?.bar;
+  return getProgressionPlaybackState(progression, elapsedSeconds).selection?.bar;
 }
 
 export function getCurrentProgressionSelection(
   progression: ChordProgression,
   elapsedSeconds: number,
 ): ProgressionSelection | undefined {
+  return getProgressionPlaybackState(progression, elapsedSeconds).selection;
+}
+
+export function getProgressionPlaybackState(
+  progression: ChordProgression,
+  elapsedSeconds: number,
+): ProgressionPlaybackState {
+  const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
+
   if (progression.bars.length === 0) {
-    return undefined;
+    return { position };
   }
 
-  const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
   const bar = progression.bars[position.barIndex % progression.bars.length];
   const cellIndex = Math.min(Math.floor(position.beatInBar / 2), bar.cells.length - 1);
 
   return {
-    bar,
-    cell: bar.cells[cellIndex],
-    cellIndex,
+    position,
+    selection: {
+      bar,
+      cell: bar.cells[cellIndex],
+      cellIndex,
+    },
   };
 }
 
