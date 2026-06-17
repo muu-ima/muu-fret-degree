@@ -1015,9 +1015,11 @@ select:focus-visible,
     gap: 8px;
     min-height: 40px;
     padding: 0 14px;
-    border: 1px solid rgba(32, 33, 36, 0.14);
-    background: rgba(32, 33, 36, 0.94);
-    box-shadow: 0 12px 28px rgba(32, 33, 36, 0.18);
+    border: 1px solid #334055;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(122, 167, 255, 0.16), rgba(43, 125, 233, 0.1));
+    color: #eef1f6;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     pointer-events: auto;
   }
 
