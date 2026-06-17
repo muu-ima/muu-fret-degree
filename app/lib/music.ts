@@ -36,7 +36,19 @@ export type ChordNote = Interval & {
   note: string;
 };
 
+export type ChordOctave = {
+  id: string;
+  label: string;
+  midi: number;
+};
+
 export const maxFret = 22;
+
+export const chordOctaves = [
+  { id: "C3", label: "C3", midi: 48 },
+  { id: "C4", label: "C4", midi: 60 },
+  { id: "C5", label: "C5", midi: 72 },
+] as const satisfies readonly ChordOctave[];
 
 export const fretRanges = [
   { id: "low", label: "0-12F", start: 0, end: 12 },
@@ -186,7 +198,29 @@ export function makeChordNotes(root: string, chordType: ChordType): ChordNote[] 
   }));
 }
 
-export function trebleChordMidi(root: string, interval: Interval, baseMidi = 60) {
-  const rootPitchClass = sharpPitchClasses.indexOf(pitchClassOf(root));
-  return baseMidi + rootPitchClass + interval.semitones;
+export function chordInversionLabel(inversion: number) {
+  if (inversion === 0) {
+    return "Root";
+  }
+  if (inversion === 1) {
+    return "1st Inv";
+  }
+  if (inversion === 2) {
+    return "2nd Inv";
+  }
+  if (inversion === 3) {
+    return "3rd Inv";
+  }
+  return `${inversion}th Inv`;
+}
+
+export function makeTrebleChordMidi(root: string, chordType: ChordType, baseMidi = 60, inversion = 0) {
+  const rootMidi = baseMidi + sharpPitchClasses.indexOf(pitchClassOf(root));
+  const chordMidi = chordType.intervals.map((interval) => rootMidi + interval.semitones);
+  const normalizedInversion = Math.min(Math.max(Math.round(inversion), 0), Math.max(chordMidi.length - 1, 0));
+
+  return [
+    ...chordMidi.slice(normalizedInversion),
+    ...chordMidi.slice(0, normalizedInversion).map((midi) => midi + 12),
+  ];
 }

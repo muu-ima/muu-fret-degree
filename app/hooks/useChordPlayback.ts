@@ -5,13 +5,15 @@ import {
   type ChordNote,
   type ChordType,
   type FretNote,
-  trebleChordMidi,
+  makeTrebleChordMidi,
 } from "../lib/music";
 
 type UseChordPlaybackOptions = {
   root: string;
   chordType: ChordType;
   chordNotes: ChordNote[];
+  chordOctaveMidi: number;
+  chordInversion: number;
   notes: FretNote[];
   playBassNote: (midi: number, startOffset?: number, duration?: number) => void;
   playPianoNote: (midi: number, startOffset?: number, duration?: number) => void;
@@ -22,6 +24,8 @@ export function useChordPlayback({
   root,
   chordType,
   chordNotes,
+  chordOctaveMidi,
+  chordInversion,
   notes,
   playBassNote,
   playPianoNote,
@@ -51,10 +55,10 @@ export function useChordPlayback({
 
   const playStack = useCallback(() => {
     resumeAudio();
-    chordType.intervals.forEach((interval, index) => {
-      playPianoNote(trebleChordMidi(root, interval), index * 0.012, 1.9);
+    makeTrebleChordMidi(root, chordType, chordOctaveMidi, chordInversion).forEach((midi, index) => {
+      playPianoNote(midi, index * 0.012, 1.9);
     });
-  }, [chordType, playPianoNote, resumeAudio, root]);
+  }, [chordInversion, chordOctaveMidi, chordType, playPianoNote, resumeAudio, root]);
 
   return {
     playArpeggio,

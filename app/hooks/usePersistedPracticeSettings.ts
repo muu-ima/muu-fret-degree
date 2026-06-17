@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { ChordType, FretRange, Tuning } from "../lib/music";
+import type { ChordOctave, ChordType, FretRange, Tuning } from "../lib/music";
 
 const storageKey = "muu-fret-degree:practice-settings";
 const storageVersion = 1;
@@ -12,6 +12,8 @@ type PersistedPracticeSettings = {
   chordTypeId: string;
   tuningId: string;
   fretRangeId: FretRange["id"];
+  chordOctaveId: string;
+  chordInversion: number;
   showGuideTones: boolean;
   bpm: number;
 };
@@ -22,6 +24,8 @@ type UsePersistedPracticeSettingsOptions = {
     chordTypeId: string;
     tuningId: string;
     fretRangeId: FretRange["id"];
+    chordOctaveId: string;
+    chordInversion: number;
     showGuideTones: boolean;
     bpm: number;
   };
@@ -30,6 +34,8 @@ type UsePersistedPracticeSettingsOptions = {
     setChordTypeId: Dispatch<SetStateAction<string>>;
     setTuningId: Dispatch<SetStateAction<string>>;
     setFretRangeId: Dispatch<SetStateAction<FretRange["id"]>>;
+    setChordOctaveId: Dispatch<SetStateAction<string>>;
+    setChordInversion: Dispatch<SetStateAction<number>>;
     setShowGuideTones: Dispatch<SetStateAction<boolean>>;
     commitBpm: (value: string) => void;
   };
@@ -38,6 +44,7 @@ type UsePersistedPracticeSettingsOptions = {
     chordTypes: ChordType[];
     tunings: Tuning[];
     fretRanges: readonly FretRange[];
+    chordOctaves: readonly ChordOctave[];
   };
 };
 
@@ -46,6 +53,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isFiniteBpm(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
@@ -107,6 +118,17 @@ export function usePersistedPracticeSettings({
       setters.setFretRangeId(storedSettings.fretRangeId);
     }
 
+    if (
+      typeof storedSettings.chordOctaveId === "string" &&
+      options.chordOctaves.some((octave) => octave.id === storedSettings.chordOctaveId)
+    ) {
+      setters.setChordOctaveId(storedSettings.chordOctaveId);
+    }
+
+    if (isFiniteNumber(storedSettings.chordInversion)) {
+      setters.setChordInversion(Math.max(0, Math.round(storedSettings.chordInversion)));
+    }
+
     if (typeof storedSettings.showGuideTones === "boolean") {
       setters.setShowGuideTones(storedSettings.showGuideTones);
     }
@@ -129,6 +151,8 @@ export function usePersistedPracticeSettings({
       chordTypeId: values.chordTypeId,
       tuningId: values.tuningId,
       fretRangeId: values.fretRangeId,
+      chordOctaveId: values.chordOctaveId,
+      chordInversion: values.chordInversion,
       showGuideTones: values.showGuideTones,
       bpm: values.bpm,
     };
@@ -142,6 +166,8 @@ export function usePersistedPracticeSettings({
     hasLoadedStoredSettings,
     values.bpm,
     values.chordTypeId,
+    values.chordInversion,
+    values.chordOctaveId,
     values.fretRangeId,
     values.root,
     values.showGuideTones,

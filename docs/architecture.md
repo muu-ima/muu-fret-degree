@@ -76,7 +76,7 @@ BPM 入力の state と正規化を担当する。
 
 - 指板上の単音をベース音で鳴らす。
 - コード構成音を低フレット側からアルペジオ再生する。
-- コード構成音をピアノ風の積み音で再生する。
+- コード構成音を、基準オクターブと転回形を反映したピアノ風の積み音で再生する。
 
 この hook は、実際の音色合成や `AudioContext` の管理はしない。`useAudioEngine` から受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
 
@@ -85,7 +85,7 @@ BPM 入力の state と正規化を担当する。
 練習設定のブラウザ保存を担当する。
 
 - 起動時に `localStorage` から保存済み設定を読む。
-- Root / Chord / Tuning / fret range / guide tone / BPM を保存する。
+- Root / Chord / Tuning / fret range / chord octave / chord inversion / guide tone / BPM を保存する。
 - 保存値が現在の `theory.json` や `fretRanges` に存在する場合だけ state に反映する。
 - 保存データの `version` が違う場合や JSON が壊れている場合は無視する。
 
@@ -99,7 +99,7 @@ BPM 入力の state と正規化を担当する。
 - ルート音と度数から音名を綴る。
 - コード構成音の map を作る。
 - 指板に表示する `FretNote[]` を作る。
-- コード再生用の MIDI 番号を求める。
+- 音域や転回形を含むコード再生用の MIDI 番号を求める。
 
 DOM、React state、Web Audio API には依存させない。純粋な計算に寄せることで、あとからテストを書きやすくする。
 
@@ -138,6 +138,5 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 ## 今後分離したい候補
 
 - コード進行再生の現在位置計算。
-- 音域や転回形を含むコード MIDI 生成。
 
 これらは機能が大きくなった時点で、`app/lib` の純粋関数、または React hooks として切り出す。

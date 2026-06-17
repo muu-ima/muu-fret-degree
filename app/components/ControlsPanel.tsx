@@ -1,15 +1,19 @@
 "use client";
 
-import type { ChordType, Tuning } from "../lib/music";
+import { chordInversionLabel, type ChordOctave, type ChordType, type Tuning } from "../lib/music";
 
 type ControlsPanelProps = {
   className: string;
   roots: string[];
   chordTypes: ChordType[];
   tunings: Tuning[];
+  chordOctaves: readonly ChordOctave[];
+  chordInversions: number[];
   root: string;
   chordTypeId: string;
   tuningId: string;
+  chordOctaveId: string;
+  chordInversion: number;
   showGuideTones: boolean;
   bpmInput: string;
   isMetronomeRunning: boolean;
@@ -17,6 +21,8 @@ type ControlsPanelProps = {
   onRootChange: (root: string) => void;
   onChordTypeChange: (chordTypeId: string) => void;
   onTuningChange: (tuningId: string) => void;
+  onChordOctaveChange: (chordOctaveId: string) => void;
+  onChordInversionChange: (chordInversion: number) => void;
   onShowGuideTonesChange: (showGuideTones: boolean) => void;
   onPlayArpeggio: () => void;
   onPlayStack: () => void;
@@ -30,9 +36,13 @@ export function ControlsPanel({
   roots,
   chordTypes,
   tunings,
+  chordOctaves,
+  chordInversions,
   root,
   chordTypeId,
   tuningId,
+  chordOctaveId,
+  chordInversion,
   showGuideTones,
   bpmInput,
   isMetronomeRunning,
@@ -40,6 +50,8 @@ export function ControlsPanel({
   onRootChange,
   onChordTypeChange,
   onTuningChange,
+  onChordOctaveChange,
+  onChordInversionChange,
   onShowGuideTonesChange,
   onPlayArpeggio,
   onPlayStack,
@@ -75,6 +87,29 @@ export function ControlsPanel({
           {tunings.map((item) => (
             <option key={item.id} value={item.id}>
               {item.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Octave
+        <select value={chordOctaveId} onChange={(event) => onChordOctaveChange(event.target.value)}>
+          {chordOctaves.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Voicing
+        <select
+          value={chordInversion}
+          onChange={(event) => onChordInversionChange(Number(event.target.value))}
+        >
+          {chordInversions.map((item) => (
+            <option key={item} value={item}>
+              {chordInversionLabel(item)}
             </option>
           ))}
         </select>

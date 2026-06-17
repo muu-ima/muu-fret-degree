@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import theory from "../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./components/BassFretboard";
 import { ChordDegreeStrip } from "./components/ChordDegreeStrip";
@@ -14,6 +14,7 @@ import {
   type FretNote,
   type FretRange,
   type Tuning,
+  chordOctaves,
   fretRanges,
   makeChordNotes,
   makeChordMap,
@@ -27,6 +28,8 @@ export default function Home() {
   const [showGuideTones, setShowGuideTones] = useState(true);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
+  const [chordOctaveId, setChordOctaveId] = useState("C4");
+  const [chordInversion, setChordInversion] = useState(0);
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
   const {
     currentBeat,
@@ -44,6 +47,15 @@ export default function Home() {
   const tuning = tunings.find((item) => item.id === tuningId) ?? tunings[0];
   const selectedFretRange =
     fretRanges.find((range) => range.id === selectedFretRangeId) ?? fretRanges[0];
+  const selectedChordOctave = chordOctaves.find((octave) => octave.id === chordOctaveId) ?? chordOctaves[1];
+  const chordInversions = useMemo(
+    () => Array.from({ length: chordType.intervals.length }, (_, index) => index),
+    [chordType],
+  );
+
+  useEffect(() => {
+    setChordInversion((currentInversion) => Math.min(currentInversion, chordInversions.length - 1));
+  }, [chordInversions]);
 
   usePersistedPracticeSettings({
     values: {
@@ -51,6 +63,8 @@ export default function Home() {
       chordTypeId,
       tuningId,
       fretRangeId: selectedFretRangeId,
+      chordOctaveId,
+      chordInversion,
       showGuideTones,
       bpm,
     },
@@ -59,6 +73,8 @@ export default function Home() {
       setChordTypeId,
       setTuningId,
       setFretRangeId: setSelectedFretRangeId,
+      setChordOctaveId,
+      setChordInversion,
       setShowGuideTones,
       commitBpm,
     },
@@ -67,6 +83,7 @@ export default function Home() {
       chordTypes,
       tunings,
       fretRanges,
+      chordOctaves,
     },
   });
 
@@ -87,6 +104,8 @@ export default function Home() {
     root,
     chordType,
     chordNotes,
+    chordOctaveMidi: selectedChordOctave.midi,
+    chordInversion,
     notes,
     playBassNote,
     playPianoNote,
@@ -100,9 +119,13 @@ export default function Home() {
         roots={theory.roots}
         chordTypes={chordTypes}
         tunings={tunings}
+        chordOctaves={chordOctaves}
+        chordInversions={chordInversions}
         root={root}
         chordTypeId={chordTypeId}
         tuningId={tuningId}
+        chordOctaveId={selectedChordOctave.id}
+        chordInversion={chordInversion}
         showGuideTones={showGuideTones}
         bpmInput={bpmInput}
         isMetronomeRunning={isMetronomeRunning}
@@ -110,6 +133,8 @@ export default function Home() {
         onRootChange={setRoot}
         onChordTypeChange={setChordTypeId}
         onTuningChange={setTuningId}
+        onChordOctaveChange={setChordOctaveId}
+        onChordInversionChange={setChordInversion}
         onShowGuideTonesChange={setShowGuideTones}
         onPlayArpeggio={playArpeggio}
         onPlayStack={playStack}
