@@ -49,6 +49,14 @@
 
 このコンポーネントは、コード構成音の計算はしない。`page.tsx` から渡された `ChordNote[]` を表示する。
 
+### `app/components/ProgressionPanel.tsx`
+
+コード進行再生の操作と現在位置表示を担当する。
+
+- Play / Stop / Reset を表示する。
+- 現在の小節、拍、進行中のコードを表示する。
+- 状態は持たず、`useProgressionPlayback` から受け取った値を表示するだけにする。
+
 ### `app/hooks/useAudioEngine.ts`
 
 音声再生に必要な React state とブラウザ API の接続を担当する。

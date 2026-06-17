@@ -6,6 +6,7 @@ import { BassFretboard, MobileBassFretboard } from "./components/BassFretboard";
 import { ChordDegreeStrip } from "./components/ChordDegreeStrip";
 import { ControlsPanel } from "./components/ControlsPanel";
 import { FretRangeTabs } from "./components/FretRangeTabs";
+import { ProgressionPanel } from "./components/ProgressionPanel";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useBpmControl } from "./hooks/useBpmControl";
 import { useChordPlayback } from "./hooks/useChordPlayback";
@@ -203,10 +204,13 @@ export default function Home() {
         {renderControls("controls drawerControls")}
       </aside>
 
-      <div
-        aria-hidden="true"
-        data-progression-bar={progressionPlayback.currentProgressionBar?.bar ?? 0}
-        data-progression-playing={progressionPlayback.isProgressionRunning ? "true" : "false"}
+      <ProgressionPanel
+        currentProgressionBar={progressionPlayback.currentProgressionBar}
+        progressionPosition={progressionPlayback.progressionPosition}
+        isProgressionRunning={progressionPlayback.isProgressionRunning}
+        onStartProgression={progressionPlayback.startProgression}
+        onStopProgression={progressionPlayback.stopProgression}
+        onResetProgression={progressionPlayback.resetProgression}
       />
 
       <FretRangeTabs
