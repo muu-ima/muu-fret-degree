@@ -33,9 +33,10 @@ import {
 
 type PracticeWorkspaceProps = {
   showProgressionEditor: boolean;
+  pageMode: "practice" | "progression";
 };
 
-export function PracticeWorkspace({ showProgressionEditor }: PracticeWorkspaceProps) {
+export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeWorkspaceProps) {
   const [root, setRoot] = useState("C");
   const [chordTypeId, setChordTypeId] = useState("m7");
   const [tuningId, setTuningId] = useState("standard");
@@ -95,6 +96,18 @@ export function PracticeWorkspace({ showProgressionEditor }: PracticeWorkspacePr
     () => Array.from({ length: displayedChordType.intervals.length }, (_, index) => index),
     [displayedChordType],
   );
+  const pageHeader =
+    pageMode === "practice"
+      ? {
+          eyebrow: "Practice Mode",
+          summary: "指板で音を確認しながら、コード・音域・ガイドトーンを切り替える画面です。",
+          chips: ["Fretboard", "Voicings", "Guide tones"],
+        }
+      : {
+          eyebrow: "Progression Edit",
+          summary: "2拍単位のセルを編集して、4 / 8 / 16 小節のループを組む画面です。",
+          chips: ["2-beat cells", "Loop length", "Local save"],
+        };
 
   useEffect(() => {
     setChordInversion((currentInversion) => Math.min(currentInversion, chordInversions.length - 1));
@@ -250,10 +263,18 @@ export function PracticeWorkspace({ showProgressionEditor }: PracticeWorkspacePr
     <main className="app">
       <section className="hero">
         <div>
-          <p className="eyebrow">Electric Bass Chord Degrees</p>
+          <p className="eyebrow">{pageHeader.eyebrow}</p>
           <h1>Bass Fret Degree</h1>
+          <p className="heroSummary">{pageHeader.summary}</p>
+          <div className="heroChips" aria-label="page highlights">
+            {pageHeader.chips.map((chip) => (
+              <span key={chip} className="heroChip">
+                {chip}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="chordBadge">
+        <div className={pageMode === "progression" ? "chordBadge chordBadgeProgression" : "chordBadge"}>
           <strong>{displayedRoot}</strong>
           <span>{displayedChordType.name}</span>
         </div>

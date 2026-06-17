@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <PracticeWorkspace showProgressionEditor={false} />;
+  return <PracticeWorkspace pageMode="practice" showProgressionEditor={false} />;
 }

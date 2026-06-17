@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function ProgressionPage() {
-  return <PracticeWorkspace showProgressionEditor />;
+  return <PracticeWorkspace pageMode="progression" showProgressionEditor />;
 }
