@@ -54,14 +54,14 @@ export function useChordPlayback({
   }, [chordNotes, notes, playBassNote, resumeAudio]);
 
   const playProgressionBeat = useCallback(
-    (beatInBar: number) => {
+    (beatInCell: number) => {
       resumeAudio();
-      const chordNote = chordNotes[beatInBar % chordNotes.length];
+      const chordNote = chordNotes[beatInCell % chordNotes.length];
       const candidates = notes.filter((note) => note.degree === chordNote.degree && note.fret <= 7);
       const note = candidates.sort((a, b) => a.midi - b.midi)[0];
 
       if (note) {
-        playBassNote(note.midi, 0, beatInBar === 0 ? 0.85 : 0.6);
+        playBassNote(note.midi, 0, beatInCell === 0 ? 0.85 : 0.6);
       }
     },
     [chordNotes, notes, playBassNote, resumeAudio],

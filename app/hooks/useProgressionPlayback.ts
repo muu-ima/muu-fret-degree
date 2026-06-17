@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getCurrentProgressionBar,
+  getCurrentProgressionSelection,
   getProgressionPosition,
   type ChordProgression,
   type ProgressionBar,
   type ProgressionPosition,
+  type ProgressionSelection,
 } from "../lib/progression";
 
 type UseProgressionPlaybackOptions = {
@@ -76,9 +78,14 @@ export function useProgressionPlayback({ progression }: UseProgressionPlaybackOp
     () => getCurrentProgressionBar(progression, elapsedSeconds),
     [elapsedSeconds, progression],
   );
+  const currentProgressionSelection: ProgressionSelection | undefined = useMemo(
+    () => getCurrentProgressionSelection(progression, elapsedSeconds),
+    [elapsedSeconds, progression],
+  );
 
   return {
     currentProgressionBar,
+    currentProgressionSelection,
     elapsedSeconds,
     isProgressionRunning,
     progressionPosition,

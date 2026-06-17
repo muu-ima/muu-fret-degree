@@ -3,10 +3,14 @@ export type TimeSignature = {
   beatUnit: number;
 };
 
-export type ProgressionBar = {
-  bar: number;
+export type ProgressionCell = {
   root: string;
   chordTypeId: string;
+};
+
+export type ProgressionBar = {
+  bar: number;
+  cells: readonly [ProgressionCell, ProgressionCell];
 };
 
 export type ChordProgression = {
@@ -20,6 +24,12 @@ export type ProgressionPosition = {
   beatIndex: number;
   barIndex: number;
   beatInBar: number;
+};
+
+export type ProgressionSelection = {
+  bar: ProgressionBar;
+  cell: ProgressionCell;
+  cellIndex: number;
 };
 
 function normalizeNonNegative(value: number) {
@@ -74,14 +84,26 @@ export function getCurrentProgressionBar(
   progression: ChordProgression,
   elapsedSeconds: number,
 ): ProgressionBar | undefined {
+  return getCurrentProgressionSelection(progression, elapsedSeconds)?.bar;
+}
+
+export function getCurrentProgressionSelection(
+  progression: ChordProgression,
+  elapsedSeconds: number,
+): ProgressionSelection | undefined {
   if (progression.bars.length === 0) {
     return undefined;
   }
 
   const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
-  const barIndex = position.barIndex % progression.bars.length;
+  const bar = progression.bars[position.barIndex % progression.bars.length];
+  const cellIndex = Math.min(Math.floor(position.beatInBar / 2), bar.cells.length - 1);
 
-  return progression.bars[barIndex];
+  return {
+    bar,
+    cell: bar.cells[cellIndex],
+    cellIndex,
+  };
 }
 
 export function resizeProgressionBars(bars: readonly ProgressionBar[], nextLength: number) {
@@ -93,7 +115,21 @@ export function resizeProgressionBars(bars: readonly ProgressionBar[], nextLengt
   }
 
   return Array.from({ length: nextLength }, (_, index) => ({
-    ...bars[index % bars.length],
     bar: index + 1,
+    cells: bars[index % bars.length].cells.map((cell) => ({ ...cell })) as [
+      ProgressionCell,
+      ProgressionCell,
+    ],
   }));
+}
+
+export function makeProgressionBar(
+  bar: number,
+  firstCell: ProgressionCell,
+  secondCell: ProgressionCell = firstCell,
+): ProgressionBar {
+  return {
+    bar,
+    cells: [{ ...firstCell }, { ...secondCell }],
+  };
 }

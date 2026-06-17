@@ -1,9 +1,11 @@
 "use client";
 
-import { type ProgressionBar, type ProgressionPosition } from "../lib/progression";
+import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../lib/progression";
 
 type ProgressionPanelProps = {
   currentProgressionBar?: ProgressionBar;
+  currentProgressionCell?: ProgressionCell;
+  currentProgressionCellIndex?: number;
   currentProgressionChordTypeName?: string;
   progressionPosition: ProgressionPosition;
   isProgressionRunning: boolean;
@@ -14,6 +16,8 @@ type ProgressionPanelProps = {
 
 export function ProgressionPanel({
   currentProgressionBar,
+  currentProgressionCell,
+  currentProgressionCellIndex,
   currentProgressionChordTypeName,
   progressionPosition,
   isProgressionRunning,
@@ -22,17 +26,19 @@ export function ProgressionPanel({
   onResetProgression,
 }: ProgressionPanelProps) {
   const currentBarNumber = currentProgressionBar?.bar ?? progressionPosition.barIndex + 1;
+  const currentCellIndex = currentProgressionCellIndex ?? Math.min(Math.floor(progressionPosition.beatInBar / 2), 1);
+  const currentCellLabel = currentCellIndex === 0 ? "Beats 1-2" : "Beats 3-4";
 
   return (
     <section className="progressionPanel" aria-label="コード進行再生">
       <div className="progressionMeta">
         <p className="progressionLabel">Progression</p>
         <strong>
-          Bar {currentBarNumber}, Beat {progressionPosition.beatInBar + 1}
+          Bar {currentBarNumber}, {currentCellLabel}
         </strong>
         <span>
-          {currentProgressionBar
-            ? `${currentProgressionBar.root} ${currentProgressionChordTypeName ?? currentProgressionBar.chordTypeId}`
+          {currentProgressionBar && currentProgressionCell
+            ? `${currentProgressionCell.root} ${currentProgressionChordTypeName ?? currentProgressionCell.chordTypeId}`
             : "No bars"}
         </span>
       </div>

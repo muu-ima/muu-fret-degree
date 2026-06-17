@@ -25,7 +25,11 @@ import {
   makeChordMap,
   makeFretNotes,
 } from "./lib/music";
-import { resizeProgressionBars, type ChordProgression } from "./lib/progression";
+import {
+  makeProgressionBar,
+  resizeProgressionBars,
+  type ChordProgression,
+} from "./lib/progression";
 
 export default function Home() {
   const [root, setRoot] = useState("C");
@@ -40,10 +44,10 @@ export default function Home() {
     bpm: 120,
     timeSignature: { beatsPerBar: 4, beatUnit: 4 },
     bars: [
-      { bar: 1, root: "C", chordTypeId: "maj7" },
-      { bar: 2, root: "A", chordTypeId: "m7" },
-      { bar: 3, root: "D", chordTypeId: "m7" },
-      { bar: 4, root: "G", chordTypeId: "7" },
+      makeProgressionBar(1, { root: "C", chordTypeId: "maj7" }),
+      makeProgressionBar(2, { root: "A", chordTypeId: "m7" }),
+      makeProgressionBar(3, { root: "D", chordTypeId: "m7" }),
+      makeProgressionBar(4, { root: "G", chordTypeId: "7" }),
     ],
   }));
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
@@ -68,12 +72,14 @@ export default function Home() {
   const tunings = theory.tunings as Tuning[];
   const chordType = chordTypes.find((chord) => chord.id === chordTypeId) ?? chordTypes[0];
   const tuning = tunings.find((item) => item.id === tuningId) ?? tunings[0];
-  const currentProgressionBar = progressionPlayback.currentProgressionBar;
+  const currentProgressionSelection = progressionPlayback.currentProgressionSelection;
+  const currentProgressionBar = currentProgressionSelection?.bar;
+  const currentProgressionCell = currentProgressionSelection?.cell;
   const currentProgressionChordType =
-    chordTypes.find((chord) => chord.id === currentProgressionBar?.chordTypeId) ?? chordType;
+    chordTypes.find((chord) => chord.id === currentProgressionCell?.chordTypeId) ?? chordType;
   const isProgressionSyncActive =
-    progressionPlayback.isProgressionRunning && currentProgressionBar !== undefined;
-  const displayedRoot = isProgressionSyncActive ? currentProgressionBar.root : root;
+    progressionPlayback.isProgressionRunning && currentProgressionBar !== undefined && currentProgressionCell !== undefined;
+  const displayedRoot = isProgressionSyncActive ? currentProgressionCell.root : root;
   const displayedChordType = isProgressionSyncActive ? currentProgressionChordType : chordType;
   const selectedFretRange =
     fretRanges.find((range) => range.id === selectedFretRangeId) ?? fretRanges[0];
@@ -136,12 +142,28 @@ export default function Home() {
     () => makeChordNotes(displayedRoot, displayedChordType),
     [displayedChordType, displayedRoot],
   );
-  const handleProgressionBarChange = (barIndex: number, nextBar: ChordProgression["bars"][number]) => {
+  const handleProgressionBarCellChange = (
+    barIndex: number,
+    cellIndex: number,
+    nextCell: ChordProgression["bars"][number]["cells"][number],
+  ) => {
     setProgression((currentProgression) => ({
       ...currentProgression,
-      bars: currentProgression.bars.map((bar, index) =>
-        index === barIndex ? { ...nextBar, bar: bar.bar } : bar,
-      ),
+      bars: currentProgression.bars.map((bar, index) => {
+        if (index !== barIndex) {
+          return bar;
+        }
+
+        const nextCells = [
+          cellIndex === 0 ? nextCell : bar.cells[0],
+          cellIndex === 1 ? nextCell : bar.cells[1],
+        ] as const;
+
+        return {
+          ...bar,
+          cells: nextCells,
+        };
+      }),
     }));
   };
   const handleProgressionBarCountChange = (nextBarCount: number) => {
@@ -172,7 +194,7 @@ export default function Home() {
     }
 
     lastProgressionBeatRef.current = progressionPlayback.progressionPosition.beatIndex;
-    playProgressionBeat(progressionPlayback.progressionPosition.beatInBar);
+    playProgressionBeat(progressionPlayback.progressionPosition.beatInBar % 2);
   }, [
     isProgressionSyncActive,
     playProgressionBeat,
@@ -259,6 +281,8 @@ export default function Home() {
 
       <ProgressionPanel
         currentProgressionBar={progressionPlayback.currentProgressionBar}
+        currentProgressionCell={currentProgressionSelection?.cell}
+        currentProgressionCellIndex={currentProgressionSelection?.cellIndex}
         currentProgressionChordTypeName={currentProgressionChordType.name}
         progressionPosition={progressionPlayback.progressionPosition}
         isProgressionRunning={progressionPlayback.isProgressionRunning}
@@ -274,7 +298,7 @@ export default function Home() {
         roots={theory.roots}
         chordTypes={chordTypes}
         onBarCountChange={handleProgressionBarCountChange}
-        onBarChange={handleProgressionBarChange}
+        onCellChange={handleProgressionBarCellChange}
       />
 
       <FretRangeTabs

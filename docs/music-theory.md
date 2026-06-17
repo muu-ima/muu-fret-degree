@@ -109,10 +109,20 @@ Emaj7 = E G# B D#
   "bpm": 120,
   "timeSignature": { "beatsPerBar": 4, "beatUnit": 4 },
   "bars": [
-    { "bar": 1, "root": "C", "chordType": "maj7" },
-    { "bar": 2, "root": "A", "chordType": "m7" },
-    { "bar": 3, "root": "D", "chordType": "m7" },
-    { "bar": 4, "root": "G", "chordType": "7" }
+    {
+      "bar": 1,
+      "cells": [
+        { "root": "C", "chordTypeId": "maj7" },
+        { "root": "A", "chordTypeId": "m7" }
+      ]
+    },
+    {
+      "bar": 2,
+      "cells": [
+        { "root": "D", "chordTypeId": "m7" },
+        { "root": "G", "chordTypeId": "7" }
+      ]
+    }
   ]
 }
 ```
@@ -120,10 +130,11 @@ Emaj7 = E G# B D#
 UI の案:
 
 - 4小節 / 8小節 / 16小節を切り替えられる。
-- 各小節に Root と Chord を入力できる。
+- 各小節を 2 拍単位に分けて、前半 / 後半の Root と Chord を入力できる。
 - BPM を数値入力できる。
 - Play / Stop / Reset を用意する。
 - 現在の小節をハイライトする。
+- 現在の 2 拍セルをハイライトする。
 - 現在の小節のコードを指板表示に反映する。
 - 将来的には 32小節や、各小節に複数コード、例: 2拍ずつ `Dm7 / G7` も入力できるようにする。
 
@@ -159,7 +170,7 @@ muu-fret-degree:practice-settings
 - Chord 再生の転回形
 - ガイドトーン強調の ON/OFF
 - BPM
-- コード進行データ、現時点では 4 / 8 / 16 小節ループの Root / Chord
+- コード進行データ、現時点では 4 / 8 / 16 小節ループの 2 拍セル Root / Chord
 - 将来的には 32小節の入力内容
 
 実装:

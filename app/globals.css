@@ -445,7 +445,7 @@ select:focus-visible,
 
 .progressionEditorRow {
   display: grid;
-  grid-template-columns: auto minmax(130px, 1fr) minmax(180px, 1.4fr);
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
   align-items: end;
   padding: 12px;
@@ -456,6 +456,23 @@ select:focus-visible,
 
 .progressionEditorRow strong {
   font-size: 0.92rem;
+}
+
+.progressionCellGroup {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e9e1d5;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.progressionCellTitle {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 @media (max-width: 920px) {
@@ -478,11 +495,15 @@ select:focus-visible,
   }
 
   .progressionEditorRow {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .progressionEditorRow strong {
     grid-column: 1 / -1;
+  }
+
+  .progressionCellGroup {
+    padding: 10px;
   }
 }
 

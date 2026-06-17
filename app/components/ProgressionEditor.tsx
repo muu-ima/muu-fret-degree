@@ -1,7 +1,7 @@
 "use client";
 
 import { type ChordType } from "../lib/music";
-import { type ProgressionBar } from "../lib/progression";
+import { type ProgressionBar, type ProgressionCell } from "../lib/progression";
 
 type ProgressionEditorProps = {
   bars: readonly ProgressionBar[];
@@ -10,7 +10,7 @@ type ProgressionEditorProps = {
   roots: string[];
   chordTypes: ChordType[];
   onBarCountChange: (barCount: number) => void;
-  onBarChange: (barIndex: number, bar: ProgressionBar) => void;
+  onCellChange: (barIndex: number, cellIndex: number, cell: ProgressionCell) => void;
 };
 
 export function ProgressionEditor({
@@ -20,7 +20,7 @@ export function ProgressionEditor({
   roots,
   chordTypes,
   onBarCountChange,
-  onBarChange,
+  onCellChange,
 }: ProgressionEditorProps) {
   return (
     <section className="progressionEditor" aria-label="コード進行編集">
@@ -45,42 +45,49 @@ export function ProgressionEditor({
         {bars.map((bar, barIndex) => (
           <div className="progressionEditorRow" key={bar.bar}>
             <strong>Bar {bar.bar}</strong>
-            <label>
-              Root
-              <select
-                value={bar.root}
-                onChange={(event) =>
-                  onBarChange(barIndex, {
-                    ...bar,
-                    root: event.target.value,
-                  })
-                }
-              >
-                {roots.map((root) => (
-                  <option key={root} value={root}>
-                    {root}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Chord
-              <select
-                value={bar.chordTypeId}
-                onChange={(event) =>
-                  onBarChange(barIndex, {
-                    ...bar,
-                    chordTypeId: event.target.value,
-                  })
-                }
-              >
-                {chordTypes.map((chordType) => (
-                  <option key={chordType.id} value={chordType.id}>
-                    {chordType.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {bar.cells.map((cell, cellIndex) => (
+              <div className="progressionCellGroup" key={`${bar.bar}-${cellIndex}`}>
+                <strong className="progressionCellTitle">
+                  Beats {cellIndex === 0 ? "1-2" : "3-4"}
+                </strong>
+                <label>
+                  Root
+                  <select
+                    value={cell.root}
+                    onChange={(event) =>
+                      onCellChange(barIndex, cellIndex, {
+                        ...cell,
+                        root: event.target.value,
+                      })
+                    }
+                  >
+                    {roots.map((root) => (
+                      <option key={root} value={root}>
+                        {root}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Chord
+                  <select
+                    value={cell.chordTypeId}
+                    onChange={(event) =>
+                      onCellChange(barIndex, cellIndex, {
+                        ...cell,
+                        chordTypeId: event.target.value,
+                      })
+                    }
+                  >
+                    {chordTypes.map((chordType) => (
+                      <option key={chordType.id} value={chordType.id}>
+                        {chordType.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            ))}
           </div>
         ))}
       </div>
