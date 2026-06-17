@@ -689,18 +689,18 @@ select:focus-visible,
 .barCountTabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  min-width: 220px;
+  gap: 4px;
+  min-width: 188px;
 }
 
 .barCountTab {
-  min-height: 40px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 0 10px;
   border: 1px solid #334055;
   border-radius: 999px;
   background: #141922;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
@@ -732,6 +732,10 @@ select:focus-visible,
 .progressionEditorGrid {
   display: grid;
   gap: 10px;
+  max-height: clamp(240px, 48vh, 430px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-color: rgba(122, 167, 255, 0.6) rgba(255, 255, 255, 0.06);
 }
 
 .progressionEditorRow {

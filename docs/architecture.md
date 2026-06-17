@@ -32,6 +32,7 @@
 
 - `PracticeWorkspace` を `showProgressionEditor=true` で表示する。
 - 進行編集を別ルートに分ける。
+- 4 bars を基準に見通しを保ち、8 / 16 bars は編集領域内スクロールで扱う。
 
 ### `app/components/PracticeWorkspace.tsx`
 
