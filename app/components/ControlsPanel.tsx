@@ -59,7 +59,7 @@ export function ControlsPanel({
   onBpmCommit,
   onToggleMetronome,
 }: ControlsPanelProps) {
-  const voicingTabs = ["Root", "1st", "2nd", "3rd"];
+  const inversionTabs = ["Root", "1st Inv.", "2nd Inv.", "3rd Inv."];
 
   return (
     <section className={className} aria-label="コードとチューニング">
@@ -103,11 +103,11 @@ export function ControlsPanel({
           ))}
         </select>
       </label>
-      <div className="voicingTabs" role="group" aria-label="Voicing">
-        <span className="voicingTabsLabel">Voicing</span>
+      <div className="voicingTabs" role="group" aria-label="Inversion">
+        <span className="voicingTabsLabel">転回形 (Inversion)</span>
         <div className="voicingTabsRow">
           {chordInversions.map((item) => {
-            const label = voicingTabs[item] ?? `${item}`;
+            const label = inversionTabs[item] ?? `${item}`;
             const isActive = item === chordInversion;
             return (
               <button
