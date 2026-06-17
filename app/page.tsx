@@ -9,6 +9,7 @@ import { FretRangeTabs } from "./components/FretRangeTabs";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useBpmControl } from "./hooks/useBpmControl";
 import { useChordPlayback } from "./hooks/useChordPlayback";
+import { useProgressionPlayback } from "./hooks/useProgressionPlayback";
 import { usePersistedPracticeSettings } from "./hooks/usePersistedPracticeSettings";
 import {
   type ChordType,
@@ -21,6 +22,7 @@ import {
   makeChordMap,
   makeFretNotes,
 } from "./lib/music";
+import { type ChordProgression } from "./lib/progression";
 
 export default function Home() {
   const [root, setRoot] = useState("C");
@@ -31,6 +33,16 @@ export default function Home() {
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
+  const [progression] = useState<ChordProgression>(() => ({
+    bpm: 120,
+    timeSignature: { beatsPerBar: 4, beatUnit: 4 },
+    bars: [
+      { bar: 1, root: "C", chordTypeId: "maj7" },
+      { bar: 2, root: "A", chordTypeId: "m7" },
+      { bar: 3, root: "D", chordTypeId: "m7" },
+      { bar: 4, root: "G", chordTypeId: "7" },
+    ],
+  }));
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
   const {
     currentBeat,
@@ -40,6 +52,7 @@ export default function Home() {
     resumeAudio,
     toggleMetronome,
   } = useAudioEngine({ bpm });
+  const progressionPlayback = useProgressionPlayback({ progression });
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
@@ -189,6 +202,12 @@ export default function Home() {
         </div>
         {renderControls("controls drawerControls")}
       </aside>
+
+      <div
+        aria-hidden="true"
+        data-progression-bar={progressionPlayback.currentProgressionBar?.bar ?? 0}
+        data-progression-playing={progressionPlayback.isProgressionRunning ? "true" : "false"}
+      />
 
       <FretRangeTabs
         fretRanges={fretRanges}

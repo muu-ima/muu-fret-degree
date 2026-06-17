@@ -80,6 +80,16 @@ BPM 入力の state と正規化を担当する。
 
 この hook は、実際の音色合成や `AudioContext` の管理はしない。`useAudioEngine` から受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
 
+### `app/hooks/useProgressionPlayback.ts`
+
+コード進行再生の状態管理と現在位置の追跡を担当する。
+
+- 再生の開始 / 停止 / リセットを扱う。
+- `requestAnimationFrame` で経過秒数を更新する。
+- `app/lib/progression.ts` の純粋関数を使って、現在の小節と拍位置を求める。
+
+この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
+
 ### `app/hooks/usePersistedPracticeSettings.ts`
 
 練習設定のブラウザ保存を担当する。
@@ -102,6 +112,16 @@ BPM 入力の state と正規化を担当する。
 - 音域や転回形を含むコード再生用の MIDI 番号を求める。
 
 DOM、React state、Web Audio API には依存させない。純粋な計算に寄せることで、あとからテストを書きやすくする。
+
+### `app/lib/progression.ts`
+
+コード進行再生のデータ型と現在位置計算を担当する。
+
+- BPM と拍子から 1 拍・1 小節の長さを求める。
+- 経過秒数から現在の拍位置と小節番号を求める。
+- 進行データから、現在参照すべき小節のコードを選ぶ。
+
+このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
 ### `app/lib/audio.ts`
 
@@ -137,6 +157,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 
 ## 今後分離したい候補
 
-- コード進行再生の現在位置計算。
+- コード進行 UI の入力フォーム。
+- 小節ごとの編集や複数コード入力。
 
 これらは機能が大きくなった時点で、`app/lib` の純粋関数、または React hooks として切り出す。
