@@ -6,11 +6,13 @@ import { BassFretboard, MobileBassFretboard } from "./components/BassFretboard";
 import { ChordDegreeStrip } from "./components/ChordDegreeStrip";
 import { ControlsPanel } from "./components/ControlsPanel";
 import { FretRangeTabs } from "./components/FretRangeTabs";
+import { ProgressionEditor } from "./components/ProgressionEditor";
 import { ProgressionPanel } from "./components/ProgressionPanel";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useBpmControl } from "./hooks/useBpmControl";
 import { useChordPlayback } from "./hooks/useChordPlayback";
 import { useProgressionPlayback } from "./hooks/useProgressionPlayback";
+import { usePersistedProgression } from "./hooks/usePersistedProgression";
 import { usePersistedPracticeSettings } from "./hooks/usePersistedPracticeSettings";
 import {
   type ChordType,
@@ -34,7 +36,7 @@ export default function Home() {
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
-  const [progression] = useState<ChordProgression>(() => ({
+  const [progression, setProgression] = useState<ChordProgression>(() => ({
     bpm: 120,
     timeSignature: { beatsPerBar: 4, beatUnit: 4 },
     bars: [
@@ -54,6 +56,11 @@ export default function Home() {
     toggleMetronome,
   } = useAudioEngine({ bpm });
   const progressionPlayback = useProgressionPlayback({ progression });
+  useEffect(() => {
+    setProgression((currentProgression) =>
+      currentProgression.bpm === bpm ? currentProgression : { ...currentProgression, bpm },
+    );
+  }, [bpm]);
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
@@ -101,6 +108,12 @@ export default function Home() {
       chordOctaves,
     },
   });
+  usePersistedProgression({
+    progression,
+    setProgression,
+    roots: theory.roots,
+    chordTypes,
+  });
 
   const chordMap = useMemo(
     () => makeChordMap(root, chordType, chromatic),
@@ -115,6 +128,14 @@ export default function Home() {
     () => makeChordNotes(root, chordType),
     [chordType, root],
   );
+  const handleProgressionBarChange = (barIndex: number, nextBar: ChordProgression["bars"][number]) => {
+    setProgression((currentProgression) => ({
+      ...currentProgression,
+      bars: currentProgression.bars.map((bar, index) =>
+        index === barIndex ? { ...nextBar, bar: bar.bar } : bar,
+      ),
+    }));
+  };
   const { playArpeggio, playNote, playStack } = useChordPlayback({
     root,
     chordType,
@@ -211,6 +232,13 @@ export default function Home() {
         onStartProgression={progressionPlayback.startProgression}
         onStopProgression={progressionPlayback.stopProgression}
         onResetProgression={progressionPlayback.resetProgression}
+      />
+
+      <ProgressionEditor
+        bars={progression.bars}
+        roots={theory.roots}
+        chordTypes={chordTypes}
+        onBarChange={handleProgressionBarChange}
       />
 
       <FretRangeTabs

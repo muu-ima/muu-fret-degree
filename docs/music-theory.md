@@ -159,7 +159,8 @@ muu-fret-degree:practice-settings
 - Chord 再生の転回形
 - ガイドトーン強調の ON/OFF
 - BPM
-- 将来的にはコード進行データ、16小節 / 32小節の入力内容
+- コード進行データ、現時点では 4 小節ループの Root / Chord
+- 将来的には 16小節 / 32小節の入力内容
 
 実装:
 

@@ -57,6 +57,14 @@
 - 現在の小節、拍、進行中のコードを表示する。
 - 状態は持たず、`useProgressionPlayback` から受け取った値を表示するだけにする。
 
+### `app/components/ProgressionEditor.tsx`
+
+コード進行の小節ごとの Root / Chord を編集する。
+
+- 4 小節の簡易ループを編集する。
+- 各小節の Root と Chord を選択できる。
+- 状態の保存はしない。編集内容は `page.tsx` の state に反映するだけにする。
+
 ### `app/hooks/useAudioEngine.ts`
 
 音声再生に必要な React state とブラウザ API の接続を担当する。
@@ -97,6 +105,14 @@ BPM 入力の state と正規化を担当する。
 - `app/lib/progression.ts` の純粋関数を使って、現在の小節と拍位置を求める。
 
 この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
+
+### `app/hooks/usePersistedProgression.ts`
+
+コード進行の編集内容をブラウザ保存する。
+
+- 進行の拍子と小節データを `localStorage` へ保存する。
+- 保存値が壊れている場合や、Root / Chord が現在の候補にない場合は無視する。
+- 読み込み時は既存 state の BPM を保ったまま、進行データだけ復元する。
 
 ### `app/hooks/usePersistedPracticeSettings.ts`
 
