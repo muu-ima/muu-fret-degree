@@ -6,6 +6,7 @@ import {
   type ChordType,
   type FretNote,
   makeTrebleChordMidi,
+  pickLowestBassNoteForDegree,
 } from "../lib/music";
 
 type UseChordPlaybackOptions = {
@@ -41,10 +42,7 @@ export function useChordPlayback({
 
   const playArpeggio = useCallback(() => {
     resumeAudio();
-    const playable = chordNotes.map((chordNote) => {
-      const candidates = notes.filter((note) => note.degree === chordNote.degree && note.fret <= 7);
-      return candidates.sort((a, b) => a.midi - b.midi)[0];
-    });
+    const playable = chordNotes.map((chordNote) => pickLowestBassNoteForDegree(notes, chordNote.degree));
 
     playable.forEach((note, index) => {
       if (note) {
@@ -57,8 +55,7 @@ export function useChordPlayback({
     (beatInCell: number) => {
       resumeAudio();
       const chordNote = chordNotes[beatInCell % chordNotes.length];
-      const candidates = notes.filter((note) => note.degree === chordNote.degree && note.fret <= 7);
-      const note = candidates.sort((a, b) => a.midi - b.midi)[0];
+      const note = pickLowestBassNoteForDegree(notes, chordNote.degree);
 
       if (note) {
         playBassNote(note.midi, 0, beatInCell === 0 ? 0.85 : 0.6);

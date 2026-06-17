@@ -198,6 +198,12 @@ export function makeChordNotes(root: string, chordType: ChordType): ChordNote[] 
   }));
 }
 
+export function pickLowestBassNoteForDegree(notes: FretNote[], degree: string, maxFret = 7) {
+  return notes
+    .filter((note) => note.degree === degree && note.fret <= maxFret)
+    .sort((a, b) => a.midi - b.midi)[0];
+}
+
 export function chordInversionLabel(inversion: number) {
   if (inversion === 0) {
     return "Root";
