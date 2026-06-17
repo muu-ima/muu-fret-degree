@@ -409,6 +409,16 @@ select:focus-visible,
   gap: 12px;
 }
 
+.progressionBarCount {
+  min-width: 138px;
+  justify-items: stretch;
+}
+
+.progressionBarCount select {
+  min-height: 40px;
+  padding-right: 28px;
+}
+
 .progressionEditorHeader strong {
   display: block;
   margin-top: 2px;
@@ -420,6 +430,12 @@ select:focus-visible,
   font-size: 0.9rem;
   font-weight: 700;
   text-align: right;
+}
+
+.progressionEditorHint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .progressionEditorGrid {
@@ -550,6 +566,10 @@ select:focus-visible,
 
   .progressionEditorHeader span {
     text-align: left;
+  }
+
+  .progressionBarCount {
+    width: 100%;
   }
 
   .progressionEditorRow {

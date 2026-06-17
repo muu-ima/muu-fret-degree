@@ -5,21 +5,42 @@ import { type ProgressionBar } from "../lib/progression";
 
 type ProgressionEditorProps = {
   bars: readonly ProgressionBar[];
+  barCount: number;
+  barCountOptions: number[];
   roots: string[];
   chordTypes: ChordType[];
+  onBarCountChange: (barCount: number) => void;
   onBarChange: (barIndex: number, bar: ProgressionBar) => void;
 };
 
-export function ProgressionEditor({ bars, roots, chordTypes, onBarChange }: ProgressionEditorProps) {
+export function ProgressionEditor({
+  bars,
+  barCount,
+  barCountOptions,
+  roots,
+  chordTypes,
+  onBarCountChange,
+  onBarChange,
+}: ProgressionEditorProps) {
   return (
     <section className="progressionEditor" aria-label="コード進行編集">
       <div className="progressionEditorHeader">
         <div>
           <p className="progressionLabel">Progression Edit</p>
-          <strong>4-bar starter loop</strong>
+          <strong>{barCount}-bar loop</strong>
         </div>
-        <span>Root と Chord をその場で書き換えられます。</span>
+        <label className="progressionBarCount">
+          Bars
+          <select value={barCount} onChange={(event) => onBarCountChange(Number(event.target.value))}>
+            {barCountOptions.map((count) => (
+              <option key={count} value={count}>
+                {count} bars
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
+      <span className="progressionEditorHint">Root と Chord をその場で書き換えられます。</span>
       <div className="progressionEditorGrid">
         {bars.map((bar, barIndex) => (
           <div className="progressionEditorRow" key={bar.bar}>

@@ -79,7 +79,21 @@ export function getCurrentProgressionBar(
   }
 
   const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
-  const barIndex = Math.min(position.barIndex, progression.bars.length - 1);
+  const barIndex = position.barIndex % progression.bars.length;
 
   return progression.bars[barIndex];
+}
+
+export function resizeProgressionBars(bars: readonly ProgressionBar[], nextLength: number) {
+  if (nextLength <= 0) {
+    return [];
+  }
+  if (bars.length === 0) {
+    return [];
+  }
+
+  return Array.from({ length: nextLength }, (_, index) => ({
+    ...bars[index % bars.length],
+    bar: index + 1,
+  }));
 }

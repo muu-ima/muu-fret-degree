@@ -25,7 +25,7 @@ import {
   makeChordMap,
   makeFretNotes,
 } from "./lib/music";
-import { type ChordProgression } from "./lib/progression";
+import { resizeProgressionBars, type ChordProgression } from "./lib/progression";
 
 export default function Home() {
   const [root, setRoot] = useState("C");
@@ -142,6 +142,12 @@ export default function Home() {
       bars: currentProgression.bars.map((bar, index) =>
         index === barIndex ? { ...nextBar, bar: bar.bar } : bar,
       ),
+    }));
+  };
+  const handleProgressionBarCountChange = (nextBarCount: number) => {
+    setProgression((currentProgression) => ({
+      ...currentProgression,
+      bars: resizeProgressionBars(currentProgression.bars, nextBarCount),
     }));
   };
   const { playArpeggio, playNote, playProgressionBeat, playStack } = useChordPlayback({
@@ -263,8 +269,11 @@ export default function Home() {
 
       <ProgressionEditor
         bars={progression.bars}
+        barCount={progression.bars.length}
+        barCountOptions={[4, 8, 16]}
         roots={theory.roots}
         chordTypes={chordTypes}
+        onBarCountChange={handleProgressionBarCountChange}
         onBarChange={handleProgressionBarChange}
       />
 
