@@ -29,16 +29,22 @@ export function ProgressionEditor({
           <p className="progressionLabel">Progression Edit</p>
           <strong>{barCount}-bar loop</strong>
         </div>
-        <label className="progressionBarCount">
-          Bars
-          <select value={barCount} onChange={(event) => onBarCountChange(Number(event.target.value))}>
-            {barCountOptions.map((count) => (
-              <option key={count} value={count}>
+        <div className="barCountTabs" role="tablist" aria-label="Bars">
+          {barCountOptions.map((count) => {
+            const isActive = count === barCount;
+            return (
+              <button
+                key={count}
+                type="button"
+                className={isActive ? "barCountTab active" : "barCountTab"}
+                aria-pressed={isActive}
+                onClick={() => onBarCountChange(count)}
+              >
                 {count} bars
-              </option>
-            ))}
-          </select>
-        </label>
+              </button>
+            );
+          })}
+        </div>
       </div>
       <span className="progressionEditorHint">Root と Chord をその場で書き換えられます。</span>
       <div className="progressionEditorGrid">

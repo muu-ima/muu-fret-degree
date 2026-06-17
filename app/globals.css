@@ -592,7 +592,14 @@ select:focus-visible,
 
 .progressionMeta {
   display: grid;
-  gap: 5px;
+  gap: 6px;
+}
+
+.progressionLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .progressionLabel {
@@ -612,6 +619,40 @@ select:focus-visible,
   color: var(--muted);
   font-size: 0.92rem;
   font-weight: 700;
+}
+
+.progressionStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid rgba(122, 167, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(122, 167, 255, 0.12);
+  color: #cfe0ff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.progressionReadout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.progressionReadout span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid #334055;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .progressionButtons {
@@ -645,14 +686,28 @@ select:focus-visible,
   gap: 12px;
 }
 
-.progressionBarCount {
-  min-width: 138px;
-  justify-items: stretch;
+.barCountTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 220px;
 }
 
-.progressionBarCount select {
+.barCountTab {
   min-height: 40px;
-  padding-right: 28px;
+  padding: 0 12px;
+  border: 1px solid #334055;
+  border-radius: 999px;
+  background: #141922;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.barCountTab.active {
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+  border-color: rgba(122, 167, 255, 0.42);
 }
 
 .progressionEditorHeader strong {
@@ -804,6 +859,11 @@ select:focus-visible,
     align-items: stretch;
   }
 
+  .progressionLabelRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .progressionButtons {
     justify-content: flex-start;
   }
@@ -903,8 +963,9 @@ select:focus-visible,
     text-align: left;
   }
 
-  .progressionBarCount {
+  .barCountTabs {
     width: 100%;
+    min-width: 0;
   }
 
   .progressionEditorRow {
