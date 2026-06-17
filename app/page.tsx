@@ -8,6 +8,7 @@ import { ControlsPanel } from "./components/ControlsPanel";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useBpmControl } from "./hooks/useBpmControl";
 import { useChordPlayback } from "./hooks/useChordPlayback";
+import { usePersistedPracticeSettings } from "./hooks/usePersistedPracticeSettings";
 import {
   type ChordType,
   type FretNote,
@@ -43,6 +44,31 @@ export default function Home() {
   const tuning = tunings.find((item) => item.id === tuningId) ?? tunings[0];
   const selectedFretRange =
     fretRanges.find((range) => range.id === selectedFretRangeId) ?? fretRanges[0];
+
+  usePersistedPracticeSettings({
+    values: {
+      root,
+      chordTypeId,
+      tuningId,
+      fretRangeId: selectedFretRangeId,
+      showGuideTones,
+      bpm,
+    },
+    setters: {
+      setRoot,
+      setChordTypeId,
+      setTuningId,
+      setFretRangeId: setSelectedFretRangeId,
+      setShowGuideTones,
+      commitBpm,
+    },
+    options: {
+      roots: theory.roots,
+      chordTypes,
+      tunings,
+      fretRanges,
+    },
+  });
 
   const chordMap = useMemo(
     () => makeChordMap(root, chordType, chromatic),

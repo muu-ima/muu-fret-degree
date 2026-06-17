@@ -80,6 +80,17 @@ BPM 入力の state と正規化を担当する。
 
 この hook は、実際の音色合成や `AudioContext` の管理はしない。`useAudioEngine` から受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
 
+### `app/hooks/usePersistedPracticeSettings.ts`
+
+練習設定のブラウザ保存を担当する。
+
+- 起動時に `localStorage` から保存済み設定を読む。
+- Root / Chord / Tuning / fret range / guide tone / BPM を保存する。
+- 保存値が現在の `theory.json` や `fretRanges` に存在する場合だけ state に反映する。
+- 保存データの `version` が違う場合や JSON が壊れている場合は無視する。
+
+この hook は、設定 UI の表示や音声再生はしない。`page.tsx` から受け取った現在値と setter を、保存処理へつなぐ。
+
 ### `app/lib/music.ts`
 
 音楽理論と表示データの計算を担当する。
@@ -120,12 +131,12 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - Web Audio API と React state をつなぐ処理は、まず `app/hooks` に置く。
 - 入力値の一時 state や正規化ルールは、まず `app/hooks` に置く。
 - ユーザー操作から再生する MIDI 番号を選ぶ処理は、まず `app/hooks` に置く。
+- ブラウザストレージなど外部状態との同期は、まず `app/hooks` に置く。
 - アプリ全体の状態や、複数コンポーネントをつなぐ処理は `app/page.tsx` に置く。
 - 同じ UI をデスクトップとモバイルで使う場合は、props で受ける stateless component にする。
 
 ## 今後分離したい候補
 
-- ブラウザストレージへの状態保存処理。
 - コード進行再生の現在位置計算。
 - 音域や転回形を含むコード MIDI 生成。
 
