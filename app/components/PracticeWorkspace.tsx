@@ -107,7 +107,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       : {
           eyebrow: "Progression Edit",
           title: "Progression Edit",
-          summary: "2拍単位のセルを編集して、4 / 8 / 16 小節のループを組む画面です。",
+          summary: "2拍単位のセルを編集して、2 / 4 / 8 / 16 小節のループを組む画面です。4 小節を基準に見せます。",
           chips: ["2-beat cells", "Loop length", "Local save"],
         };
 
@@ -329,7 +329,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         <ProgressionEditor
           bars={progression.bars}
           barCount={progression.bars.length}
-          barCountOptions={[4, 8, 16]}
+          barCountOptions={[2, 4, 8, 16]}
           roots={theory.roots}
           chordTypes={chordTypes}
           onBarCountChange={handleProgressionBarCountChange}

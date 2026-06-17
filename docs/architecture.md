@@ -32,7 +32,8 @@
 
 - `PracticeWorkspace` を `showProgressionEditor=true` で表示する。
 - 進行編集を別ルートに分ける。
-- 4 bars を基準に見通しを保ち、8 / 16 bars は編集領域内スクロールで扱う。
+- 2 / 4 / 8 / 16 bars を切り替えられるようにし、4 bars を基準に見通しを保つ。
+- 8 / 16 bars は編集領域内スクロールで扱う。
 
 ### `app/components/PracticeWorkspace.tsx`
 
@@ -101,7 +102,7 @@
 
 コード進行の小節ごとの Root / Chord を編集する。
 
-- 4 / 8 / 16 小節のループを編集する。
+- 2 / 4 / 8 / 16 小節のループを編集する。
 - 小節数の切り替えは、比較しやすいのでタブ型で見せる。
 - 各小節を 2 拍単位で分割し、前半 / 後半の Root と Chord を選択できる。
 - 状態の保存はしない。編集内容は `PracticeWorkspace` の state に反映するだけにする。
