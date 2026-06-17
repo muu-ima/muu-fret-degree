@@ -267,6 +267,41 @@ input {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.voicingTabs {
+  display: grid;
+  gap: 6px;
+}
+
+.voicingTabsLabel {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.voicingTabsRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.voicingTab {
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid #334055;
+  border-radius: 7px;
+  background: #141922;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.voicingTab.active {
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+  border-color: rgba(122, 167, 255, 0.42);
+}
+
 label {
   display: grid;
   gap: 6px;
@@ -725,6 +760,10 @@ select:focus-visible,
   }
 
   .controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .voicingTabsRow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

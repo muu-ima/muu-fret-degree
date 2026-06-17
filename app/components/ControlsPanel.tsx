@@ -1,6 +1,6 @@
 "use client";
 
-import { chordInversionLabel, type ChordOctave, type ChordType, type Tuning } from "../lib/music";
+import { type ChordOctave, type ChordType, type Tuning } from "../lib/music";
 
 type ControlsPanelProps = {
   className: string;
@@ -59,6 +59,8 @@ export function ControlsPanel({
   onBpmCommit,
   onToggleMetronome,
 }: ControlsPanelProps) {
+  const voicingTabs = ["Root", "1st", "2nd", "3rd"];
+
   return (
     <section className={className} aria-label="コードとチューニング">
       <label>
@@ -101,19 +103,26 @@ export function ControlsPanel({
           ))}
         </select>
       </label>
-      <label>
-        Voicing
-        <select
-          value={chordInversion}
-          onChange={(event) => onChordInversionChange(Number(event.target.value))}
-        >
-          {chordInversions.map((item) => (
-            <option key={item} value={item}>
-              {chordInversionLabel(item)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="voicingTabs" role="group" aria-label="Voicing">
+        <span className="voicingTabsLabel">Voicing</span>
+        <div className="voicingTabsRow">
+          {chordInversions.map((item) => {
+            const label = voicingTabs[item] ?? `${item}`;
+            const isActive = item === chordInversion;
+            return (
+              <button
+                key={item}
+                type="button"
+                className={isActive ? "voicingTab active" : "voicingTab"}
+                aria-pressed={isActive}
+                onClick={() => onChordInversionChange(item)}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <label className="toggle">
         <input
           type="checkbox"
