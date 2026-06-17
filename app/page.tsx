@@ -5,6 +5,7 @@ import theory from "../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./components/BassFretboard";
 import { ChordDegreeStrip } from "./components/ChordDegreeStrip";
 import { ControlsPanel } from "./components/ControlsPanel";
+import { FretRangeTabs } from "./components/FretRangeTabs";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useBpmControl } from "./hooks/useBpmControl";
 import { useChordPlayback } from "./hooks/useChordPlayback";
@@ -189,20 +190,11 @@ export default function Home() {
         {renderControls("controls drawerControls")}
       </aside>
 
-      <div className="fretRangeTabs" role="tablist" aria-label="表示するフレット範囲">
-        {fretRanges.map((range) => (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={selectedFretRange.id === range.id}
-            className={selectedFretRange.id === range.id ? "fretRangeTab active" : "fretRangeTab"}
-            key={range.id}
-            onClick={() => setSelectedFretRangeId(range.id)}
-          >
-            {range.label}
-          </button>
-        ))}
-      </div>
+      <FretRangeTabs
+        fretRanges={fretRanges}
+        selectedFretRangeId={selectedFretRange.id}
+        onSelectFretRange={setSelectedFretRangeId}
+      />
 
       <BassFretboard
         notes={notes}
