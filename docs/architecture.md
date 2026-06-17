@@ -8,7 +8,21 @@
 
 ### `app/page.tsx`
 
-アプリ全体の配線を担当する。
+ホームの練習ページを担当する。
+
+- `PracticeWorkspace` を `showProgressionEditor=false` で表示する。
+- Practice モードの入口として、指板と基本操作を見せる。
+
+### `app/progression/page.tsx`
+
+コード進行編集ページを担当する。
+
+- `PracticeWorkspace` を `showProgressionEditor=true` で表示する。
+- 進行編集を別ルートに分ける。
+
+### `app/components/PracticeWorkspace.tsx`
+
+アプリ共通の練習画面を担当する。
 
 - 選択中の Root / Chord / Tuning / BPM などの state を持つ。
 - `theory.json` から現在のコード種別やチューニングを選ぶ。
@@ -16,6 +30,7 @@
 - UI コンポーネントへ props とイベントハンドラを渡す。
 - 音声 hook から受け取った再生関数を呼び出す。
 - 進行再生中は、現在小節の Root / Chord を表示と再生へ反映する。
+- ページ切り替えリンクを表示する。
 
 ここには、大きな SVG 描画、音楽理論の細かい計算、AudioContext のライフサイクル、入力値の正規化ルールを置かない。画面の流れを読むためのファイルとして保つ。
 
@@ -64,7 +79,10 @@
 
 - 4 / 8 / 16 小節のループを編集する。
 - 各小節を 2 拍単位で分割し、前半 / 後半の Root と Chord を選択できる。
-- 状態の保存はしない。編集内容は `page.tsx` の state に反映するだけにする。
+- 状態の保存はしない。編集内容は `PracticeWorkspace` の state に反映するだけにする。
+- `Progression Edit` ページでのみ表示する。
+
+編集内容そのものは `app/components/PracticeWorkspace.tsx` の state に反映する。
 
 ### `app/hooks/useAudioEngine.ts`
 

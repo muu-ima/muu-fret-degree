@@ -88,6 +88,35 @@ h1 {
   font-weight: 700;
 }
 
+.pageTabs {
+  display: inline-flex;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.pageTab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.pageTab.active {
+  background: var(--ink);
+  color: #fff;
+}
+
 .controls {
   display: grid;
   grid-template-columns: repeat(3, minmax(150px, 1fr)) minmax(160px, auto) auto auto;
