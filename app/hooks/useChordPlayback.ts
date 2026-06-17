@@ -53,6 +53,20 @@ export function useChordPlayback({
     });
   }, [chordNotes, notes, playBassNote, resumeAudio]);
 
+  const playProgressionBeat = useCallback(
+    (beatInBar: number) => {
+      resumeAudio();
+      const chordNote = chordNotes[beatInBar % chordNotes.length];
+      const candidates = notes.filter((note) => note.degree === chordNote.degree && note.fret <= 7);
+      const note = candidates.sort((a, b) => a.midi - b.midi)[0];
+
+      if (note) {
+        playBassNote(note.midi, 0, beatInBar === 0 ? 0.85 : 0.6);
+      }
+    },
+    [chordNotes, notes, playBassNote, resumeAudio],
+  );
+
   const playStack = useCallback(() => {
     resumeAudio();
     makeTrebleChordMidi(root, chordType, chordOctaveMidi, chordInversion).forEach((midi, index) => {
@@ -63,6 +77,7 @@ export function useChordPlayback({
   return {
     playArpeggio,
     playNote,
+    playProgressionBeat,
     playStack,
   };
 }

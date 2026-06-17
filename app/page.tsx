@@ -56,7 +56,7 @@ export default function Home() {
     toggleMetronome,
   } = useAudioEngine({ bpm });
   const progressionPlayback = useProgressionPlayback({ progression });
-  const lastProgressionBarRef = useRef<number | null>(null);
+  const lastProgressionBeatRef = useRef<number | null>(null);
   useEffect(() => {
     setProgression((currentProgression) =>
       currentProgression.bpm === bpm ? currentProgression : { ...currentProgression, bpm },
@@ -144,7 +144,7 @@ export default function Home() {
       ),
     }));
   };
-  const { playArpeggio, playNote, playStack } = useChordPlayback({
+  const { playArpeggio, playNote, playProgressionBeat, playStack } = useChordPlayback({
     root: displayedRoot,
     chordType: displayedChordType,
     chordNotes,
@@ -157,17 +157,22 @@ export default function Home() {
   });
   useEffect(() => {
     if (!isProgressionSyncActive) {
-      lastProgressionBarRef.current = null;
+      lastProgressionBeatRef.current = null;
       return;
     }
 
-    if (lastProgressionBarRef.current === currentProgressionBar.bar) {
+    if (lastProgressionBeatRef.current === progressionPlayback.progressionPosition.beatIndex) {
       return;
     }
 
-    lastProgressionBarRef.current = currentProgressionBar.bar;
-    playStack();
-  }, [currentProgressionBar, isProgressionSyncActive, playStack]);
+    lastProgressionBeatRef.current = progressionPlayback.progressionPosition.beatIndex;
+    playProgressionBeat(progressionPlayback.progressionPosition.beatInBar);
+  }, [
+    isProgressionSyncActive,
+    playProgressionBeat,
+    progressionPlayback.progressionPosition.beatInBar,
+    progressionPlayback.progressionPosition.beatIndex,
+  ]);
 
   function renderControls(className: string) {
     return (
