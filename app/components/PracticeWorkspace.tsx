@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import theory from "../../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
@@ -253,17 +252,6 @@ export function PracticeWorkspace({ showProgressionEditor }: PracticeWorkspacePr
         <div>
           <p className="eyebrow">Electric Bass Chord Degrees</p>
           <h1>Bass Fret Degree</h1>
-          <div className="pageTabs">
-            <Link className="pageTab" href="/">
-              Practice
-            </Link>
-            <Link
-              className={showProgressionEditor ? "pageTab active" : "pageTab"}
-              href="/progression"
-            >
-              Progression Edit
-            </Link>
-          </div>
         </div>
         <div className="chordBadge">
           <strong>{displayedRoot}</strong>
