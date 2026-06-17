@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import theory from "../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./components/BassFretboard";
 import { ChordDegreeStrip } from "./components/ChordDegreeStrip";
@@ -56,6 +56,7 @@ export default function Home() {
     toggleMetronome,
   } = useAudioEngine({ bpm });
   const progressionPlayback = useProgressionPlayback({ progression });
+  const lastProgressionBarRef = useRef<number | null>(null);
   useEffect(() => {
     setProgression((currentProgression) =>
       currentProgression.bpm === bpm ? currentProgression : { ...currentProgression, bpm },
@@ -67,12 +68,19 @@ export default function Home() {
   const tunings = theory.tunings as Tuning[];
   const chordType = chordTypes.find((chord) => chord.id === chordTypeId) ?? chordTypes[0];
   const tuning = tunings.find((item) => item.id === tuningId) ?? tunings[0];
+  const currentProgressionBar = progressionPlayback.currentProgressionBar;
+  const currentProgressionChordType =
+    chordTypes.find((chord) => chord.id === currentProgressionBar?.chordTypeId) ?? chordType;
+  const isProgressionSyncActive =
+    progressionPlayback.isProgressionRunning && currentProgressionBar !== undefined;
+  const displayedRoot = isProgressionSyncActive ? currentProgressionBar.root : root;
+  const displayedChordType = isProgressionSyncActive ? currentProgressionChordType : chordType;
   const selectedFretRange =
     fretRanges.find((range) => range.id === selectedFretRangeId) ?? fretRanges[0];
   const selectedChordOctave = chordOctaves.find((octave) => octave.id === chordOctaveId) ?? chordOctaves[1];
   const chordInversions = useMemo(
-    () => Array.from({ length: chordType.intervals.length }, (_, index) => index),
-    [chordType],
+    () => Array.from({ length: displayedChordType.intervals.length }, (_, index) => index),
+    [displayedChordType],
   );
 
   useEffect(() => {
@@ -116,8 +124,8 @@ export default function Home() {
   });
 
   const chordMap = useMemo(
-    () => makeChordMap(root, chordType, chromatic),
-    [root, chordType, chromatic],
+    () => makeChordMap(displayedRoot, displayedChordType, chromatic),
+    [displayedRoot, displayedChordType, chromatic],
   );
 
   const notes = useMemo<FretNote[]>(() => {
@@ -125,8 +133,8 @@ export default function Home() {
   }, [tuning, chromatic, chordMap]);
 
   const chordNotes = useMemo(
-    () => makeChordNotes(root, chordType),
-    [chordType, root],
+    () => makeChordNotes(displayedRoot, displayedChordType),
+    [displayedChordType, displayedRoot],
   );
   const handleProgressionBarChange = (barIndex: number, nextBar: ChordProgression["bars"][number]) => {
     setProgression((currentProgression) => ({
@@ -137,8 +145,8 @@ export default function Home() {
     }));
   };
   const { playArpeggio, playNote, playStack } = useChordPlayback({
-    root,
-    chordType,
+    root: displayedRoot,
+    chordType: displayedChordType,
     chordNotes,
     chordOctaveMidi: selectedChordOctave.midi,
     chordInversion,
@@ -147,6 +155,19 @@ export default function Home() {
     playPianoNote,
     resumeAudio,
   });
+  useEffect(() => {
+    if (!isProgressionSyncActive) {
+      lastProgressionBarRef.current = null;
+      return;
+    }
+
+    if (lastProgressionBarRef.current === currentProgressionBar.bar) {
+      return;
+    }
+
+    lastProgressionBarRef.current = currentProgressionBar.bar;
+    playStack();
+  }, [currentProgressionBar, isProgressionSyncActive, playStack]);
 
   function renderControls(className: string) {
     return (
@@ -189,8 +210,8 @@ export default function Home() {
           <h1>Bass Fret Degree</h1>
         </div>
         <div className="chordBadge">
-          <strong>{root}</strong>
-          <span>{chordType.name}</span>
+          <strong>{displayedRoot}</strong>
+          <span>{displayedChordType.name}</span>
         </div>
       </section>
 
@@ -227,6 +248,7 @@ export default function Home() {
 
       <ProgressionPanel
         currentProgressionBar={progressionPlayback.currentProgressionBar}
+        currentProgressionChordTypeName={currentProgressionChordType.name}
         progressionPosition={progressionPlayback.progressionPosition}
         isProgressionRunning={progressionPlayback.isProgressionRunning}
         onStartProgression={progressionPlayback.startProgression}

@@ -4,6 +4,7 @@ import { type ProgressionBar, type ProgressionPosition } from "../lib/progressio
 
 type ProgressionPanelProps = {
   currentProgressionBar?: ProgressionBar;
+  currentProgressionChordTypeName?: string;
   progressionPosition: ProgressionPosition;
   isProgressionRunning: boolean;
   onStartProgression: () => void;
@@ -13,6 +14,7 @@ type ProgressionPanelProps = {
 
 export function ProgressionPanel({
   currentProgressionBar,
+  currentProgressionChordTypeName,
   progressionPosition,
   isProgressionRunning,
   onStartProgression,
@@ -29,7 +31,9 @@ export function ProgressionPanel({
           Bar {currentBarNumber}, Beat {progressionPosition.beatInBar + 1}
         </strong>
         <span>
-          {currentProgressionBar ? `${currentProgressionBar.root} ${currentProgressionBar.chordTypeId}` : "No bars"}
+          {currentProgressionBar
+            ? `${currentProgressionBar.root} ${currentProgressionChordTypeName ?? currentProgressionBar.chordTypeId}`
+            : "No bars"}
         </span>
       </div>
       <div className="progressionButtons">
