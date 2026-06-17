@@ -335,6 +335,30 @@ button {
   cursor: pointer;
 }
 
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid #334055;
+  border-radius: 999px;
+  background: #151a22;
+  color: var(--ink);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+}
+
+.actionButton span {
+  font-size: 0.92rem;
+}
+
+.actionButtonPrimary {
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.26), rgba(43, 125, 233, 0.18));
+  border-color: rgba(122, 167, 255, 0.4);
+  box-shadow: 0 16px 28px rgba(43, 125, 233, 0.22);
+}
+
 .secondaryButton {
   background: #2a3241;
   color: var(--ink);
@@ -594,6 +618,14 @@ select:focus-visible,
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.progressionButtons .actionButton {
+  min-width: 110px;
+}
+
+.progressionButtons .actionButtonPrimary {
+  min-width: 126px;
 }
 
 .progressionEditor {

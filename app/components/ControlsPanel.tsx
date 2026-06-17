@@ -131,10 +131,12 @@ export function ControlsPanel({
         />
         3rd / 7th を強調
       </label>
-      <button type="button" onClick={onPlayArpeggio}>
+      <button type="button" className="actionButton actionButtonPrimary" onClick={onPlayArpeggio}>
+        <span aria-hidden="true">▶</span>
         Arpeggio
       </button>
-      <button type="button" className="secondaryButton" onClick={onPlayStack}>
+      <button type="button" className="actionButton" onClick={onPlayStack}>
+        <span aria-hidden="true">▶</span>
         Chord
       </button>
       <label>
@@ -157,9 +159,10 @@ export function ControlsPanel({
       </label>
       <button
         type="button"
-        className={isMetronomeRunning ? "metronomeButton active" : "metronomeButton"}
+        className={isMetronomeRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
         onClick={onToggleMetronome}
       >
+        <span aria-hidden="true">♫</span>
         {isMetronomeRunning ? "Beat " + currentBeat : "Metronome"}
       </button>
     </section>

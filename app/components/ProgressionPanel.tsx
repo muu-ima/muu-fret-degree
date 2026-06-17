@@ -43,13 +43,16 @@ export function ProgressionPanel({
         </span>
       </div>
       <div className="progressionButtons">
-        <button type="button" onClick={onStartProgression} disabled={isProgressionRunning}>
+        <button type="button" className="actionButton actionButtonPrimary" onClick={onStartProgression} disabled={isProgressionRunning}>
+          <span aria-hidden="true">▶</span>
           Play
         </button>
-        <button type="button" className="secondaryButton" onClick={onStopProgression} disabled={!isProgressionRunning}>
+        <button type="button" className="actionButton" onClick={onStopProgression} disabled={!isProgressionRunning}>
+          <span aria-hidden="true">■</span>
           Stop
         </button>
-        <button type="button" className="secondaryButton" onClick={onResetProgression}>
+        <button type="button" className="actionButton" onClick={onResetProgression}>
+          <span aria-hidden="true">↺</span>
           Reset
         </button>
       </div>
