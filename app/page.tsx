@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import theory from "../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./components/BassFretboard";
+import { ChordDegreeStrip } from "./components/ChordDegreeStrip";
 import { ControlsPanel } from "./components/ControlsPanel";
 import { useAudioEngine } from "./hooks/useAudioEngine";
+import { useBpmControl } from "./hooks/useBpmControl";
 import {
-  degreeTone,
   type ChordType,
   type FretNote,
   type FretRange,
@@ -25,8 +26,7 @@ export default function Home() {
   const [showGuideTones, setShowGuideTones] = useState(true);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
-  const [bpm, setBpm] = useState(120);
-  const [bpmInput, setBpmInput] = useState("120");
+  const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
   const {
     currentBeat,
     isMetronomeRunning,
@@ -83,28 +83,6 @@ export default function Home() {
       playPianoNote(trebleChordMidi(root, interval), index * 0.012, 1.9);
     });
   }
-
-  function commitBpm(value: string) {
-    const nextBpm = Number(value);
-    const normalizedBpm = Number.isFinite(nextBpm)
-      ? Math.min(240, Math.max(40, Math.round(nextBpm)))
-      : bpm;
-    setBpm(normalizedBpm);
-    setBpmInput(String(normalizedBpm));
-  }
-
-  function updateBpm(value: string) {
-    if (!/^\d*$/.test(value)) {
-      return;
-    }
-
-    setBpmInput(value);
-    const nextBpm = Number(value);
-    if (Number.isFinite(nextBpm) && nextBpm >= 40 && nextBpm <= 240) {
-      setBpm(Math.round(nextBpm));
-    }
-  }
-
 
   function renderControls(className: string) {
     return (
@@ -205,20 +183,7 @@ export default function Home() {
         onPlayNote={playNote}
       />
 
-      <section className="degreeStrip" aria-label="コード構成音">
-        {chordNotes.map((item) => {
-          const isGuideTone = item.degree.includes("3") || item.degree.includes("7");
-          return (
-            <div
-              className={showGuideTones && isGuideTone ? "degreeCard guideTone" : "degreeCard"}
-              key={`${item.note}-${item.degree}`}
-            >
-              <span style={{ background: degreeTone[item.degree] ?? "#333" }}>{item.degree}</span>
-              <strong>{item.note}</strong>
-            </div>
-          );
-        })}
-      </section>
+      <ChordDegreeStrip chordNotes={chordNotes} showGuideTones={showGuideTones} />
     </main>
   );
 }

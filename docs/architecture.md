@@ -16,7 +16,7 @@
 - UI コンポーネントへ props とイベントハンドラを渡す。
 - 音声 hook から受け取った再生関数を呼び出す。
 
-ここには、大きな SVG 描画、音楽理論の細かい計算、AudioContext のライフサイクルを置かない。画面の流れを読むためのファイルとして保つ。
+ここには、大きな SVG 描画、音楽理論の細かい計算、AudioContext のライフサイクル、入力値の正規化ルールを置かない。画面の流れを読むためのファイルとして保つ。
 
 ### `app/components/BassFretboard.tsx`
 
@@ -40,6 +40,15 @@
 
 このコンポーネントは state を持たず、変更は callback で親へ返す。デスクトップ表示とモバイルドロワーの両方で同じ操作 UI を再利用する。
 
+### `app/components/ChordDegreeStrip.tsx`
+
+選択中コードの構成音一覧を担当する。
+
+- 度数ラベルと音名を表示する。
+- ガイドトーン強調の見た目を切り替える。
+
+このコンポーネントは、コード構成音の計算はしない。`page.tsx` から渡された `ChordNote[]` を表示する。
+
 ### `app/hooks/useAudioEngine.ts`
 
 音声再生に必要な React state とブラウザ API の接続を担当する。
@@ -49,6 +58,17 @@
 - メトロノームの開始 / 停止、現在拍、タイマーを管理する。
 
 この hook は、どのコードをどの順番で鳴らすかは決めない。`page.tsx` が選んだ MIDI 番号を、音声再生へつなぐ。
+
+### `app/hooks/useBpmControl.ts`
+
+BPM 入力の state と正規化を担当する。
+
+- 再生に使う数値の BPM を持つ。
+- 入力欄に表示する文字列の BPM を持つ。
+- 数字以外の入力を無視する。
+- 確定時に 40-240 の範囲へ丸める。
+
+この hook は、メトロノームを鳴らす処理は持たない。メトロノーム側は、正規化済みの `bpm` だけを受け取る。
 
 ### `app/lib/music.ts`
 
@@ -88,6 +108,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 音楽理論の計算を足す場合は、まず `app/lib/music.ts` に置く。
 - 音の鳴らし方を変える場合は、まず `app/lib/audio.ts` に置く。
 - Web Audio API と React state をつなぐ処理は、まず `app/hooks` に置く。
+- 入力値の一時 state や正規化ルールは、まず `app/hooks` に置く。
 - アプリ全体の状態や、複数コンポーネントをつなぐ処理は `app/page.tsx` に置く。
 - 同じ UI をデスクトップとモバイルで使う場合は、props で受ける stateless component にする。
 
