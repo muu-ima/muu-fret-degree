@@ -23,6 +23,7 @@ const navItems = [
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const activeItem = navItems.find((item) => item.href === pathname) ?? navItems[0];
 
   return (
     <div className="appShell">
@@ -33,7 +34,7 @@ export function AppShell({ children }: AppShellProps) {
           </span>
           <div>
             <strong>Bass Chord Degree</strong>
-            <span>Practice workspace</span>
+            <span>Mode switcher</span>
           </div>
         </div>
 
@@ -53,6 +54,12 @@ export function AppShell({ children }: AppShellProps) {
             );
           })}
         </nav>
+
+        <div className="sidebarFoot">
+          <span className="sidebarFootLabel">Current mode</span>
+          <strong>{activeItem.label}</strong>
+          <span>{activeItem.description}</span>
+        </div>
       </aside>
 
       <div className="shellContent">

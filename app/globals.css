@@ -136,6 +136,34 @@ input {
   line-height: 1.35;
 }
 
+.sidebarFoot {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 14px 14px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebarFootLabel {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sidebarFoot strong {
+  font-size: 0.98rem;
+}
+
+.sidebarFoot span:last-child {
+  color: var(--muted);
+  font-size: 0.83rem;
+  line-height: 1.35;
+}
+
 .shellContent {
   min-width: 0;
 }
@@ -160,11 +188,12 @@ input {
   text-transform: uppercase;
 }
 
-h1 {
+.heroTitle {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 4.2rem);
-  line-height: 0.98;
+  font-size: clamp(1.8rem, 4vw, 3.1rem);
+  line-height: 1.02;
   letter-spacing: 0;
+  font-weight: 900;
 }
 
 .heroSummary {
@@ -201,7 +230,7 @@ h1 {
   display: grid;
   gap: 4px;
   min-width: 166px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
@@ -209,11 +238,11 @@ h1 {
 }
 
 .chordBadgeProgression {
-  min-width: 192px;
+  min-width: 208px;
 }
 
 .chordBadge strong {
-  font-size: 2rem;
+  font-size: 1.65rem;
   line-height: 1;
 }
 
@@ -642,6 +671,10 @@ select:focus-visible,
     min-height: 72px;
   }
 
+  .sidebarFoot {
+    margin-top: 0;
+  }
+
   .shellContent {
     padding-bottom: 24px;
   }
@@ -681,6 +714,10 @@ select:focus-visible,
 
   .heroSummary {
     max-width: none;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.7rem, 9vw, 2.5rem);
   }
 
   .chordBadgeProgression {

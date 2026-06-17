@@ -100,11 +100,13 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     pageMode === "practice"
       ? {
           eyebrow: "Practice Mode",
+          title: "Practice",
           summary: "指板で音を確認しながら、コード・音域・ガイドトーンを切り替える画面です。",
           chips: ["Fretboard", "Voicings", "Guide tones"],
         }
       : {
           eyebrow: "Progression Edit",
+          title: "Progression Edit",
           summary: "2拍単位のセルを編集して、4 / 8 / 16 小節のループを組む画面です。",
           chips: ["2-beat cells", "Loop length", "Local save"],
         };
@@ -264,7 +266,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       <section className="hero">
         <div>
           <p className="eyebrow">{pageHeader.eyebrow}</p>
-          <h1>Bass Fret Degree</h1>
+          <p className="heroTitle">{pageHeader.title}</p>
           <p className="heroSummary">{pageHeader.summary}</p>
           <div className="heroChips" aria-label="page highlights">
             {pageHeader.chips.map((chip) => (
