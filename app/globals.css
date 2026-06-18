@@ -193,6 +193,12 @@ input {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+.sidebarItemIcon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.4;
+}
+
 .sidebarItemBody {
   display: grid;
   min-width: 0;
@@ -816,7 +822,7 @@ select:focus-visible,
 
 .fretboardCanvasHeader {
   display: flex;
-  align-items: end;
+  align-items: start;
   justify-content: space-between;
   gap: 16px;
 }

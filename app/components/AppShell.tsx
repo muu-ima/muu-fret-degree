@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode } from "react";
+import { LuChartNoAxesColumn, LuMusic4, LuPencil, LuSlidersHorizontal } from "react-icons/lu";
 
 type AppShellProps = {
   children: ReactNode;
@@ -11,14 +12,14 @@ type AppShellProps = {
 const navItems = [
   {
     href: "/",
-    icon: "P",
+    icon: LuMusic4,
     label: "Practice",
     shortLabel: "Practice",
     description: "Fretboard focus",
   },
   {
     href: "/progression",
-    icon: "E",
+    icon: LuPencil,
     label: "Progression Edit",
     shortLabel: "Edit",
     description: "Chord editing",
@@ -28,14 +29,14 @@ const navItems = [
 const panelItems = [
   {
     key: "controls",
-    icon: "C",
+    icon: LuSlidersHorizontal,
     label: "Controls",
     shortLabel: "Controls",
     description: "Harmony & playback",
   },
   {
     key: "progression",
-    icon: "R",
+    icon: LuChartNoAxesColumn,
     label: "Progression",
     shortLabel: "Progression",
     description: "Rhythm & loop",
@@ -84,6 +85,7 @@ export function AppShell({ children }: AppShellProps) {
           <nav className="sidebarNav" aria-label="Main">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
@@ -97,7 +99,7 @@ export function AppShell({ children }: AppShellProps) {
                   }}
                 >
                   <span className="sidebarItemIcon" aria-hidden="true">
-                    {item.icon}
+                    <Icon />
                   </span>
                   <span className="sidebarItemBody">
                     <strong>
@@ -115,25 +117,28 @@ export function AppShell({ children }: AppShellProps) {
         <div className="sidebarSection">
           <p className="sidebarSectionLabel">Panels</p>
           <div className="sidebarTools">
-            {panelItems.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                className="sidebarToolButton"
-                onClick={() => handlePanelOpen(item.key)}
-              >
-                <span className="sidebarItemIcon" aria-hidden="true">
-                  {item.icon}
-                </span>
-                <span className="sidebarItemBody">
-                  <strong>
-                    <span className="sidebarItemLabelFull">{item.label}</span>
-                    <span className="sidebarItemLabelShort">{item.shortLabel}</span>
-                  </strong>
-                  <span>{item.description}</span>
-                </span>
-              </button>
-            ))}
+            {panelItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  className="sidebarToolButton"
+                  onClick={() => handlePanelOpen(item.key)}
+                >
+                  <span className="sidebarItemIcon" aria-hidden="true">
+                    <Icon />
+                  </span>
+                  <span className="sidebarItemBody">
+                    <strong>
+                      <span className="sidebarItemLabelFull">{item.label}</span>
+                      <span className="sidebarItemLabelShort">{item.shortLabel}</span>
+                    </strong>
+                    <span>{item.description}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </aside>
