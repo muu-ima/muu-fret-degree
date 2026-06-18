@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { LuChartNoAxesColumn, LuMusic4, LuPencil, LuSlidersHorizontal } from "react-icons/lu";
 
 type AppShellProps = {
@@ -46,16 +46,35 @@ const panelItems = [
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const [activePanel, setActivePanel] = useState<(typeof panelItems)[number]["key"] | null>(null);
+
+  useEffect(() => {
+    setActivePanel(pathname === "/progression" ? "edit" : null);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handlePanelClose = () => {
+      setActivePanel(null);
+    };
+
+    window.addEventListener("shell:panel-close", handlePanelClose);
+    return () => {
+      window.removeEventListener("shell:panel-close", handlePanelClose);
+    };
+  }, []);
 
   const openEdit = () => {
+    setActivePanel("edit");
     window.dispatchEvent(new CustomEvent("shell:open-edit"));
   };
 
   const openControls = () => {
+    setActivePanel("controls");
     window.dispatchEvent(new CustomEvent("shell:open-controls"));
   };
 
   const openProgression = () => {
+    setActivePanel("progression");
     window.dispatchEvent(new CustomEvent("shell:open-progression"));
   };
 
@@ -116,7 +135,7 @@ export function AppShell({ children }: AppShellProps) {
             {panelItems.map((item) => {
               const Icon = item.icon;
               if (item.key === "edit") {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href && activePanel === "edit";
                 return (
                   <Link
                     key={item.key}
@@ -148,7 +167,8 @@ export function AppShell({ children }: AppShellProps) {
                 <button
                   key={item.key}
                   type="button"
-                  className="sidebarToolButton"
+                  className={activePanel === item.key ? "sidebarToolButton active" : "sidebarToolButton"}
+                  aria-pressed={activePanel === item.key}
                   onClick={() => handlePanelOpen(item.key)}
                 >
                   <span className="sidebarItemIcon" aria-hidden="true">

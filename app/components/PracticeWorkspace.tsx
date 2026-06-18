@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import theory from "../../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
@@ -36,6 +44,12 @@ type PracticeWorkspaceProps = {
   pageMode: "practice" | "progression";
 };
 
+const bottomSheetHeightBounds = {
+  min: 44,
+  default: 78,
+  max: 92,
+};
+
 export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeWorkspaceProps) {
   const [root, setRoot] = useState("C");
   const [chordTypeId, setChordTypeId] = useState("m7");
@@ -47,6 +61,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
+  const [bottomSheetHeight, setBottomSheetHeight] = useState(bottomSheetHeightBounds.default);
   const [progression, setProgression] = useState<ChordProgression>(() => ({
     bpm: 120,
     timeSignature: { beatsPerBar: 4, beatUnit: 4 },
@@ -68,6 +83,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   } = useAudioEngine({ bpm });
   const progressionPlayback = useProgressionPlayback({ progression });
   const lastProgressionBeatRef = useRef<number | null>(null);
+  const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
 
   useEffect(() => {
     setProgression((currentProgression) =>
@@ -107,6 +123,91 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       window.removeEventListener("shell:open-edit", handleOpenEdit);
     };
   }, [showProgressionEditor]);
+
+  const closePanels = () => {
+    setIsControlsOpen(false);
+    setIsProgressionPanelOpen(false);
+    setIsProgressionEditorOpen(false);
+    window.dispatchEvent(new CustomEvent("shell:panel-close"));
+  };
+
+  const clampBottomSheetHeight = (height: number) =>
+    Math.min(bottomSheetHeightBounds.max, Math.max(bottomSheetHeightBounds.min, height));
+
+  const beginBottomSheetResize = (event: PointerEvent<HTMLButtonElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    bottomSheetDragRef.current = {
+      startHeight: bottomSheetHeight,
+      startY: event.clientY,
+    };
+  };
+
+  const resizeBottomSheet = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!bottomSheetDragRef.current) {
+      return;
+    }
+
+    const viewportHeight = window.innerHeight || 1;
+    const dragDistance = bottomSheetDragRef.current.startY - event.clientY;
+    const nextHeight = bottomSheetDragRef.current.startHeight + (dragDistance / viewportHeight) * 100;
+    setBottomSheetHeight(clampBottomSheetHeight(nextHeight));
+  };
+
+  const finishBottomSheetResize = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    bottomSheetDragRef.current = null;
+  };
+
+  const adjustBottomSheetWithKeyboard = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setBottomSheetHeight((height) => clampBottomSheetHeight(height + 5));
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setBottomSheetHeight((height) => clampBottomSheetHeight(height - 5));
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      setBottomSheetHeight(bottomSheetHeightBounds.min);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      setBottomSheetHeight(bottomSheetHeightBounds.max);
+    }
+  };
+
+  const bottomSheetStyle = {
+    "--bottom-sheet-height": `${bottomSheetHeight}dvh`,
+  } as CSSProperties;
+
+  const renderBottomSheetHandle = () => (
+    <button
+      type="button"
+      className="bottomSheetHandle"
+      aria-label="ボトムシートの高さを調整"
+      aria-valuemax={bottomSheetHeightBounds.max}
+      aria-valuemin={bottomSheetHeightBounds.min}
+      aria-valuenow={Math.round(bottomSheetHeight)}
+      onDoubleClick={() => setBottomSheetHeight(bottomSheetHeightBounds.default)}
+      onKeyDown={adjustBottomSheetWithKeyboard}
+      onPointerCancel={finishBottomSheetResize}
+      onPointerDown={beginBottomSheetResize}
+      onPointerMove={resizeBottomSheet}
+      onPointerUp={finishBottomSheetResize}
+    >
+      <span />
+    </button>
+  );
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
@@ -359,21 +460,19 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             ? "drawerBackdrop open"
             : "drawerBackdrop"
         }
-        onClick={() => {
-          setIsControlsOpen(false);
-          setIsProgressionPanelOpen(false);
-          setIsProgressionEditorOpen(false);
-        }}
+        onClick={closePanels}
       />
       <aside
         className={isControlsOpen ? "shellControlsPanel open" : "shellControlsPanel"}
         role="dialog"
         aria-modal="true"
         aria-label="コードとチューニング"
+        style={bottomSheetStyle}
       >
+        {renderBottomSheetHandle()}
         <div className="drawerHeader">
           <strong>{root} {chordType.name}</strong>
-          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
+          <button type="button" className="closeButton" onClick={closePanels}>
             ×
           </button>
         </div>
@@ -384,10 +483,12 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         role="dialog"
         aria-modal="true"
         aria-label="コード進行再生"
+        style={bottomSheetStyle}
       >
+        {renderBottomSheetHandle()}
         <div className="drawerHeader">
           <strong>Progression</strong>
-          <button type="button" className="closeButton" onClick={() => setIsProgressionPanelOpen(false)}>
+          <button type="button" className="closeButton" onClick={closePanels}>
             ×
           </button>
         </div>
@@ -399,10 +500,12 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           role="dialog"
           aria-modal="true"
           aria-label="コード進行編集"
+          style={bottomSheetStyle}
         >
+          {renderBottomSheetHandle()}
           <div className="drawerHeader">
             <strong>Progression Edit</strong>
-            <button type="button" className="closeButton" onClick={() => setIsProgressionEditorOpen(false)}>
+            <button type="button" className="closeButton" onClick={closePanels}>
               ×
             </button>
           </div>
