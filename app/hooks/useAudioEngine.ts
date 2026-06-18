@@ -12,6 +12,7 @@ type UseAudioEngineOptions = {
   bpm: number;
   beatsPerMeasure: number;
   pulsesPerBeat: number;
+  countInMeasures: number;
   metronomeTone: MetronomeTone;
   accentFirstBeat: boolean;
   metronomeVolume: number;
@@ -21,6 +22,7 @@ export function useAudioEngine({
   bpm,
   beatsPerMeasure,
   pulsesPerBeat,
+  countInMeasures,
   metronomeTone,
   accentFirstBeat,
   metronomeVolume,
@@ -31,6 +33,8 @@ export function useAudioEngine({
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(1);
   const [currentPulse, setCurrentPulse] = useState(1);
+  const [isCountingIn, setIsCountingIn] = useState(false);
+  const [countInBeatsRemaining, setCountInBeatsRemaining] = useState(0);
 
   const ensureAudioContext = useCallback(() => {
     if (!audioContext.current) {
@@ -72,15 +76,22 @@ export function useAudioEngine({
     stopMetronome();
 
     if (!isMetronomeRunning) {
+      setIsCountingIn(false);
+      setCountInBeatsRemaining(0);
       return;
     }
 
     const pulseMs = ((60 / bpm) * 1000) / pulsesPerBeat;
+    const countInBeats = countInMeasures * beatsPerMeasure;
+    const countInPulses = countInBeats * pulsesPerBeat;
     metronomePulse.current = 0;
 
     const tick = () => {
       const context = ensureAudioContext();
-      const pulseInMeasure = metronomePulse.current % (beatsPerMeasure * pulsesPerBeat);
+      const absolutePulse = metronomePulse.current;
+      const isCountInPulse = absolutePulse < countInPulses;
+      const playbackPulse = isCountInPulse ? absolutePulse : absolutePulse - countInPulses;
+      const pulseInMeasure = playbackPulse % (beatsPerMeasure * pulsesPerBeat);
       const beat = Math.floor(pulseInMeasure / pulsesPerBeat);
       const pulse = pulseInMeasure % pulsesPerBeat;
       const clickKind =
@@ -93,6 +104,11 @@ export function useAudioEngine({
       playMetronomeAudioClick(context, context.currentTime, clickKind, metronomeTone, metronomeVolume);
       setCurrentBeat(beat + 1);
       setCurrentPulse(pulse + 1);
+      setIsCountingIn(isCountInPulse);
+      if (pulse === 0) {
+        const elapsedCountInBeats = Math.floor(absolutePulse / pulsesPerBeat);
+        setCountInBeatsRemaining(isCountInPulse ? countInBeats - elapsedCountInBeats : 0);
+      }
       metronomePulse.current += 1;
     };
 
@@ -104,6 +120,7 @@ export function useAudioEngine({
     accentFirstBeat,
     beatsPerMeasure,
     bpm,
+    countInMeasures,
     ensureAudioContext,
     isMetronomeRunning,
     metronomeVolume,
@@ -115,6 +132,8 @@ export function useAudioEngine({
   return {
     currentBeat,
     currentPulse,
+    countInBeatsRemaining,
+    isCountingIn,
     isMetronomeRunning,
     playBassNote,
     playPianoNote,

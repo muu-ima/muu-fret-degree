@@ -9,16 +9,20 @@ type MetronomePanelProps = {
   bpmInput: string;
   currentBeat: number;
   currentPulse: number;
+  countInBeatsRemaining: number;
   beatsPerMeasure: number;
   pulsesPerBeat: number;
+  countInMeasures: number;
   tone: MetronomeTone;
   accentFirstBeat: boolean;
   volume: number;
   isRunning: boolean;
+  isCountingIn: boolean;
   onBpmInputChange: (value: string) => void;
   onBpmCommit: (value: string) => void;
   onBeatsPerMeasureChange: (beats: number) => void;
   onPulsesPerBeatChange: (pulses: number) => void;
+  onCountInMeasuresChange: (measures: number) => void;
   onToneChange: (tone: MetronomeTone) => void;
   onAccentFirstBeatChange: (accented: boolean) => void;
   onVolumeChange: (volume: number) => void;
@@ -26,6 +30,11 @@ type MetronomePanelProps = {
 };
 
 const meterOptions = [2, 3, 4, 6];
+const countInOptions = [
+  { value: 0, label: "Off" },
+  { value: 1, label: "1 bar" },
+  { value: 2, label: "2 bars" },
+];
 const pulseOptions = [
   { value: 1, label: "1/4" },
   { value: 2, label: "1/8" },
@@ -43,16 +52,20 @@ export function MetronomePanel({
   bpmInput,
   currentBeat,
   currentPulse,
+  countInBeatsRemaining,
   beatsPerMeasure,
   pulsesPerBeat,
+  countInMeasures,
   tone,
   accentFirstBeat,
   volume,
   isRunning,
+  isCountingIn,
   onBpmInputChange,
   onBpmCommit,
   onBeatsPerMeasureChange,
   onPulsesPerBeatChange,
+  onCountInMeasuresChange,
   onToneChange,
   onAccentFirstBeatChange,
   onVolumeChange,
@@ -151,11 +164,33 @@ export function MetronomePanel({
           onClick={onToggle}
         >
           {isRunning ? <LuSquare aria-hidden="true" /> : <LuPlay aria-hidden="true" />}
-          {isRunning ? `Stop · Beat ${currentBeat}` : "Start"}
+          {isCountingIn
+            ? `Count-in · ${countInBeatsRemaining}`
+            : isRunning
+              ? `Stop · Beat ${currentBeat}`
+              : "Start"}
         </button>
       </div>
 
       <div className="metronomeSettings">
+        <div className="metronomeSettingGroup">
+          <span className="controlLabel">Count-in</span>
+          <div className="countInTabs" role="group" aria-label="カウントイン">
+            {countInOptions.map((option) => (
+              <button
+                type="button"
+                className={option.value === countInMeasures ? "countInTab active" : "countInTab"}
+                aria-pressed={option.value === countInMeasures}
+                disabled={isRunning}
+                key={option.value}
+                onClick={() => onCountInMeasuresChange(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="metronomeSettingGroup">
           <span className="controlLabel">Tone</span>
           <div className="toneTabs" role="group" aria-label="メトロノーム音色">

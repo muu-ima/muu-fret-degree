@@ -66,6 +66,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [chordInversion, setChordInversion] = useState(0);
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
   const [pulsesPerBeat, setPulsesPerBeat] = useState(1);
+  const [countInMeasures, setCountInMeasures] = useState(0);
   const [metronomeTone, setMetronomeTone] = useState<MetronomeTone>("soft");
   const [accentFirstBeat, setAccentFirstBeat] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.7);
@@ -84,6 +85,8 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const {
     currentBeat,
     currentPulse,
+    countInBeatsRemaining,
+    isCountingIn,
     isMetronomeRunning,
     playBassNote,
     playPianoNote,
@@ -93,6 +96,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     bpm,
     beatsPerMeasure,
     pulsesPerBeat,
+    countInMeasures,
     metronomeTone,
     accentFirstBeat,
     metronomeVolume,
@@ -513,16 +517,20 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             bpmInput={bpmInput}
             currentBeat={currentBeat}
             currentPulse={currentPulse}
+            countInBeatsRemaining={countInBeatsRemaining}
             beatsPerMeasure={beatsPerMeasure}
             pulsesPerBeat={pulsesPerBeat}
+            countInMeasures={countInMeasures}
             tone={metronomeTone}
             accentFirstBeat={accentFirstBeat}
             volume={metronomeVolume}
             isRunning={isMetronomeRunning}
+            isCountingIn={isCountingIn}
             onBpmInputChange={updateBpm}
             onBpmCommit={commitBpm}
             onBeatsPerMeasureChange={setBeatsPerMeasure}
             onPulsesPerBeatChange={setPulsesPerBeat}
+            onCountInMeasuresChange={setCountInMeasures}
             onToneChange={setMetronomeTone}
             onAccentFirstBeatChange={setAccentFirstBeat}
             onVolumeChange={setMetronomeVolume}

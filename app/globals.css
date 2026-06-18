@@ -579,9 +579,16 @@ input {
   gap: 6px;
 }
 
+.countInTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
 .meterTab,
 .pulseTab,
-.toneTab {
+.toneTab,
+.countInTab {
   min-height: 40px;
   padding: 0 8px;
   border: 1px solid #334055;
@@ -595,10 +602,16 @@ input {
 
 .meterTab.active,
 .pulseTab.active,
-.toneTab.active {
+.toneTab.active,
+.countInTab.active {
   border-color: rgba(122, 167, 255, 0.42);
   background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
   color: #fff;
+}
+
+.countInTab:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .metronomeVolume {
