@@ -593,6 +593,70 @@ input {
   }
 }
 
+@media (max-width: 1360px) {
+  .appShell {
+    --shell-sidebar-width: clamp(184px, 16vw, 220px);
+  }
+
+  .appSidebar {
+    gap: 12px;
+    padding: 18px 12px;
+  }
+
+  .sidebarBrand {
+    gap: 9px;
+    padding: 9px;
+  }
+
+  .sidebarBrandMark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .sidebarBrand strong {
+    font-size: 0.88rem;
+    line-height: 1.15;
+  }
+
+  .sidebarBrand span,
+  .sidebarNavItem span,
+  .sidebarToolButton span {
+    font-size: 0.76rem;
+  }
+
+  .sidebarNav,
+  .sidebarSection,
+  .sidebarTools {
+    gap: 8px;
+  }
+
+  .sidebarNavItem,
+  .sidebarToolButton {
+    gap: 9px;
+    padding: 11px 10px;
+    border-radius: 14px;
+  }
+
+  .sidebarItemIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+  }
+
+  .sidebarItemIcon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .fretboardCanvas {
+    padding: 12px;
+  }
+
+  .fretboardCanvasStage {
+    padding: 8px;
+  }
+}
+
 @media (max-width: 1180px) {
   .controls {
     gap: 12px;
@@ -934,7 +998,7 @@ select:focus-visible,
 
 .fretboard {
   display: block;
-  min-width: 980px;
+  min-width: min(940px, 100%);
   width: 100%;
   height: auto;
 }
@@ -1391,7 +1455,7 @@ select:focus-visible,
   letter-spacing: 0.045em;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1080px) {
   .appShell {
     grid-template-columns: 1fr;
   }
