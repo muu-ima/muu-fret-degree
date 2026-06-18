@@ -65,84 +65,93 @@ export function ControlsPanel({
 
   return (
     <section className={className} aria-label="コードとチューニング">
-      <label>
-        Root
-        <select value={root} onChange={(event) => onRootChange(event.target.value)}>
-          {roots.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Chord
-        <select value={chordTypeId} onChange={(event) => onChordTypeChange(event.target.value)}>
-          {chordTypes.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Tuning
-        <select value={tuningId} onChange={(event) => onTuningChange(event.target.value)}>
-          {tunings.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Octave
-        <select value={chordOctaveId} onChange={(event) => onChordOctaveChange(event.target.value)}>
-          {chordOctaves.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <div className="voicingTabs" role="group" aria-label="Inversion">
-        <span className="voicingTabsLabel">転回形 (Inversion)</span>
-        <div className="voicingTabsRow">
-          {chordInversions.map((item) => {
-            const label = inversionTabs[item] ?? `${item}`;
-            const isActive = item === chordInversion;
-            return (
-              <button
-                key={item}
-                type="button"
-                className={isActive ? "voicingTab active" : "voicingTab"}
-                aria-pressed={isActive}
-                onClick={() => onChordInversionChange(item)}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="controlsColumn controlsColumnPrimary">
+        <label>
+          Root
+          <select value={root} onChange={(event) => onRootChange(event.target.value)}>
+            {roots.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Chord
+          <select value={chordTypeId} onChange={(event) => onChordTypeChange(event.target.value)}>
+            {chordTypes.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Tuning
+          <select value={tuningId} onChange={(event) => onTuningChange(event.target.value)}>
+            {tunings.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
-      <label className="toggle">
-        <input
-          type="checkbox"
-          checked={showGuideTones}
-          onChange={(event) => onShowGuideTonesChange(event.target.checked)}
-        />
-        3rd / 7th を強調
-      </label>
-      <button type="button" className="actionButton actionButtonPrimary" onClick={onPlayArpeggio}>
-        <span aria-hidden="true">▶</span>
-        Arpeggio
-      </button>
-      <button type="button" className="actionButton" onClick={onPlayStack}>
-        <span aria-hidden="true">▶</span>
-        Chord
-      </button>
+
+      <div className="controlsColumn controlsColumnSecondary">
+        <label>
+          Octave
+          <select value={chordOctaveId} onChange={(event) => onChordOctaveChange(event.target.value)}>
+            {chordOctaves.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="voicingTabs" role="group" aria-label="Inversion">
+          <span className="voicingTabsLabel">転回形 (Inversion)</span>
+          <div className="voicingTabsRow">
+            {chordInversions.map((item) => {
+              const label = inversionTabs[item] ?? `${item}`;
+              const isActive = item === chordInversion;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  className={isActive ? "voicingTab active" : "voicingTab"}
+                  aria-pressed={isActive}
+                  onClick={() => onChordInversionChange(item)}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <label className="toggle">
+          <input
+            type="checkbox"
+            checked={showGuideTones}
+            onChange={(event) => onShowGuideTonesChange(event.target.checked)}
+          />
+          3rd / 7th を強調
+        </label>
+      </div>
+
+      <div className="controlsColumn controlsColumnActions">
+        <button type="button" className="actionButton actionButtonPrimary" onClick={onPlayArpeggio}>
+          <span aria-hidden="true">▶</span>
+          Arpeggio
+        </button>
+        <button type="button" className="actionButton" onClick={onPlayStack}>
+          <span aria-hidden="true">▶</span>
+          Chord
+        </button>
+      </div>
+
       {showTempoControls ? (
-        <>
+        <div className="controlsColumn controlsColumnTempo">
           <label>
             BPM
             <input
@@ -169,7 +178,7 @@ export function ControlsPanel({
             <span aria-hidden="true">♫</span>
             {isMetronomeRunning ? "Beat " + currentBeat : "Metronome"}
           </button>
-        </>
+        </div>
       ) : null}
     </section>
   );

@@ -203,9 +203,9 @@ input {
 
 .controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(150px, 1fr)) minmax(160px, auto) auto auto;
-  gap: 12px;
-  align-items: end;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
   margin-bottom: 18px;
   padding: 14px;
   border: 1px solid var(--line);
@@ -213,14 +213,45 @@ input {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.controlsColumn {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.controlsColumnPrimary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.controlsColumnSecondary {
+  grid-template-columns: minmax(140px, 0.8fr) minmax(0, 1.5fr) minmax(180px, 1fr);
+  align-items: end;
+}
+
+.controlsColumnActions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+}
+
+.controlsColumnTempo {
+  grid-template-columns: minmax(140px, 0.8fr) minmax(180px, 1fr);
+  align-items: end;
+}
+
+.controlsColumnActions .actionButton,
+.controlsColumnActions label,
+.controlsColumnTempo .actionButton,
+.controlsColumnTempo label {
+  width: 100%;
+}
+
 @media (max-width: 1180px) {
   .controls {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    align-items: stretch;
+    gap: 12px;
   }
 
-  .toggle {
-    grid-column: span 2;
+  .controlsColumnSecondary {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -339,6 +370,7 @@ select:focus-visible,
 }
 
 .toggle {
+  display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
@@ -347,6 +379,10 @@ select:focus-visible,
   border: 1px solid #334055;
   border-radius: 7px;
   background: #141922;
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .toggle input {
@@ -660,27 +696,28 @@ select:focus-visible,
 
 .progressionEditorHeader {
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 
 .barCountTabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  min-width: 188px;
+  grid-template-columns: repeat(4, minmax(0, auto));
+  gap: 6px;
+  min-width: 0;
 }
 
 .barCountTab {
   min-height: 36px;
-  padding: 0 10px;
+  padding: 0 12px;
   border: 1px solid #334055;
   border-radius: 999px;
   background: #141922;
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .barCountTab.active {
@@ -691,7 +728,7 @@ select:focus-visible,
 
 .progressionEditorHeader strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 1.02rem;
 }
 
@@ -785,19 +822,19 @@ select:focus-visible,
   .hero {
     align-items: stretch;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
   .heroSummary {
     max-width: none;
-    margin-top: 6px;
-    font-size: 0.88rem;
-    line-height: 1.42;
+    margin-top: 4px;
+    font-size: 0.86rem;
+    line-height: 1.4;
   }
 
   .heroTitle {
-    font-size: clamp(1.55rem, 8vw, 2.2rem);
+    font-size: clamp(1.5rem, 7.8vw, 2.1rem);
   }
 
   .chordBadgeProgression {
@@ -805,10 +842,22 @@ select:focus-visible,
   }
 
   .controls {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 8px;
     margin-bottom: 10px;
     padding: 9px;
+    align-items: stretch;
+  }
+
+  .controlsColumn {
+    gap: 8px;
+  }
+
+  .controlsColumnPrimary,
+  .controlsColumnSecondary,
+  .controlsColumnActions,
+  .controlsColumnTempo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .voicingTabsRow {
@@ -882,8 +931,8 @@ select:focus-visible,
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: end;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 6px;
   }
 
   .eyebrow {
@@ -891,13 +940,18 @@ select:focus-visible,
   }
 
   .heroTitle {
-    font-size: 1.45rem;
-    line-height: 1.04;
+    font-size: 1.38rem;
+    line-height: 1.05;
+  }
+
+  .heroSummary {
+    font-size: 0.82rem;
+    line-height: 1.36;
   }
 
   .chordBadge {
     min-width: 92px;
-    padding: 8px 10px;
+    padding: 7px 9px;
   }
 
   .chordBadge strong {
@@ -925,14 +979,15 @@ select:focus-visible,
 
   .progressionPanel {
     padding: 10px;
+    gap: 10px;
   }
 
   .progressionMeta strong {
-    font-size: 0.98rem;
+    font-size: 0.95rem;
   }
 
   .progressionMeta span {
-    font-size: 0.88rem;
+    font-size: 0.84rem;
   }
 
   .progressionReadout span {
@@ -959,10 +1014,22 @@ select:focus-visible,
   .barCountTabs {
     width: 100%;
     min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .progressionEditorRow {
     grid-template-columns: 1fr;
+  }
+
+  .progressionButtons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .progressionButtons .actionButton,
+  .progressionButtons .actionButtonPrimary {
+    min-width: 0;
+    padding: 0 10px;
   }
 
   .mobileActionBar {
@@ -1079,6 +1146,16 @@ select:focus-visible,
     padding: 0;
     border: 0;
     background: transparent;
+  }
+
+  .drawerControls .controlsColumnActions {
+    grid-template-columns: 1fr;
+  }
+
+  .drawerControls .controlsColumnPrimary,
+  .drawerControls .controlsColumnSecondary,
+  .drawerControls .controlsColumnTempo {
+    grid-template-columns: 1fr;
   }
 
   .degreeStrip {
