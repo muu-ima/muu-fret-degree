@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { LuMinus, LuPlay, LuPlus, LuSquare, LuTimerReset } from "react-icons/lu";
+import { type MetronomeTone } from "../lib/audio";
 
 type MetronomePanelProps = {
   bpm: number;
@@ -10,6 +11,7 @@ type MetronomePanelProps = {
   currentPulse: number;
   beatsPerMeasure: number;
   pulsesPerBeat: number;
+  tone: MetronomeTone;
   accentFirstBeat: boolean;
   volume: number;
   isRunning: boolean;
@@ -17,6 +19,7 @@ type MetronomePanelProps = {
   onBpmCommit: (value: string) => void;
   onBeatsPerMeasureChange: (beats: number) => void;
   onPulsesPerBeatChange: (pulses: number) => void;
+  onToneChange: (tone: MetronomeTone) => void;
   onAccentFirstBeatChange: (accented: boolean) => void;
   onVolumeChange: (volume: number) => void;
   onToggle: () => void;
@@ -29,6 +32,11 @@ const pulseOptions = [
   { value: 3, label: "Triplet" },
   { value: 4, label: "1/16" },
 ];
+const toneOptions: Array<{ value: MetronomeTone; label: string }> = [
+  { value: "soft", label: "Soft" },
+  { value: "wood", label: "Wood" },
+  { value: "classic", label: "Classic" },
+];
 
 export function MetronomePanel({
   bpm,
@@ -37,6 +45,7 @@ export function MetronomePanel({
   currentPulse,
   beatsPerMeasure,
   pulsesPerBeat,
+  tone,
   accentFirstBeat,
   volume,
   isRunning,
@@ -44,6 +53,7 @@ export function MetronomePanel({
   onBpmCommit,
   onBeatsPerMeasureChange,
   onPulsesPerBeatChange,
+  onToneChange,
   onAccentFirstBeatChange,
   onVolumeChange,
   onToggle,
@@ -146,6 +156,23 @@ export function MetronomePanel({
       </div>
 
       <div className="metronomeSettings">
+        <div className="metronomeSettingGroup">
+          <span className="controlLabel">Tone</span>
+          <div className="toneTabs" role="group" aria-label="メトロノーム音色">
+            {toneOptions.map((option) => (
+              <button
+                type="button"
+                className={option.value === tone ? "toneTab active" : "toneTab"}
+                aria-pressed={option.value === tone}
+                key={option.value}
+                onClick={() => onToneChange(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="metronomeSettingGroup">
           <span className="controlLabel">Pulse</span>
           <div className="pulseTabs" role="group" aria-label="パルス">

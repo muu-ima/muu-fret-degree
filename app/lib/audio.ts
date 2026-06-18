@@ -1,21 +1,70 @@
 import { frequencyFromMidi } from "./music";
 
 export type MetronomeClickKind = "accent" | "beat" | "subdivision";
+export type MetronomeTone = "classic" | "soft" | "wood";
+
+const metronomeToneProfiles: Record<
+  MetronomeTone,
+  {
+    oscillator: OscillatorType;
+    beatFrequency: number;
+    subdivisionFrequency: number;
+    beatGain: number;
+    subdivisionGain: number;
+    beatDuration: number;
+    subdivisionDuration: number;
+  }
+> = {
+  classic: {
+    oscillator: "square",
+    beatFrequency: 920,
+    subdivisionFrequency: 680,
+    beatGain: 0.28,
+    subdivisionGain: 0.14,
+    beatDuration: 0.055,
+    subdivisionDuration: 0.035,
+  },
+  soft: {
+    oscillator: "sine",
+    beatFrequency: 740,
+    subdivisionFrequency: 540,
+    beatGain: 0.24,
+    subdivisionGain: 0.1,
+    beatDuration: 0.09,
+    subdivisionDuration: 0.055,
+  },
+  wood: {
+    oscillator: "triangle",
+    beatFrequency: 1120,
+    subdivisionFrequency: 820,
+    beatGain: 0.3,
+    subdivisionGain: 0.12,
+    beatDuration: 0.045,
+    subdivisionDuration: 0.03,
+  },
+};
 
 export function playMetronomeClick(
   context: AudioContext,
   startTime: number,
   kind: MetronomeClickKind,
+  tone: MetronomeTone,
   volume = 1,
 ) {
   const oscillator = context.createOscillator();
   const gain = context.createGain();
+  const profile = metronomeToneProfiles[tone];
   const isSubdivision = kind === "subdivision";
-  const end = startTime + (isSubdivision ? 0.035 : 0.055);
-  const frequency = kind === "accent" ? 1320 : kind === "beat" ? 920 : 680;
-  const baseGain = kind === "accent" ? 0.42 : kind === "beat" ? 0.28 : 0.14;
+  const isAccent = kind === "accent";
+  const end = startTime + (isSubdivision ? profile.subdivisionDuration : profile.beatDuration);
+  const frequency = isSubdivision
+    ? profile.subdivisionFrequency
+    : profile.beatFrequency * (isAccent ? 1.35 : 1);
+  const baseGain = isSubdivision
+    ? profile.subdivisionGain
+    : profile.beatGain * (isAccent ? 1.35 : 1);
 
-  oscillator.type = "square";
+  oscillator.type = profile.oscillator;
   oscillator.frequency.setValueAtTime(frequency, startTime);
   gain.gain.setValueAtTime(0.0001, startTime);
   const peakGain = baseGain * Math.min(1, Math.max(0, volume));

@@ -23,6 +23,7 @@ import { useChordPlayback } from "../hooks/useChordPlayback";
 import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
 import { usePersistedProgression } from "../hooks/usePersistedProgression";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
+import { type MetronomeTone } from "../lib/audio";
 import {
   type ChordType,
   type FretNote,
@@ -65,6 +66,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [chordInversion, setChordInversion] = useState(0);
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
   const [pulsesPerBeat, setPulsesPerBeat] = useState(1);
+  const [metronomeTone, setMetronomeTone] = useState<MetronomeTone>("soft");
   const [accentFirstBeat, setAccentFirstBeat] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.7);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(bottomSheetHeightBounds.default);
@@ -87,7 +89,14 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     playPianoNote,
     resumeAudio,
     toggleMetronome,
-  } = useAudioEngine({ bpm, beatsPerMeasure, pulsesPerBeat, accentFirstBeat, metronomeVolume });
+  } = useAudioEngine({
+    bpm,
+    beatsPerMeasure,
+    pulsesPerBeat,
+    metronomeTone,
+    accentFirstBeat,
+    metronomeVolume,
+  });
   const progressionPlayback = useProgressionPlayback({ progression });
   const lastProgressionBeatRef = useRef<number | null>(null);
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
@@ -506,6 +515,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             currentPulse={currentPulse}
             beatsPerMeasure={beatsPerMeasure}
             pulsesPerBeat={pulsesPerBeat}
+            tone={metronomeTone}
             accentFirstBeat={accentFirstBeat}
             volume={metronomeVolume}
             isRunning={isMetronomeRunning}
@@ -513,6 +523,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             onBpmCommit={commitBpm}
             onBeatsPerMeasureChange={setBeatsPerMeasure}
             onPulsesPerBeatChange={setPulsesPerBeat}
+            onToneChange={setMetronomeTone}
             onAccentFirstBeatChange={setAccentFirstBeat}
             onVolumeChange={setMetronomeVolume}
             onToggle={toggleMetronome}

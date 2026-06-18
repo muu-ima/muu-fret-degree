@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type MetronomeTone,
   playBassNote as playBassAudioNote,
   playMetronomeClick as playMetronomeAudioClick,
   playPianoNote as playPianoAudioNote,
@@ -11,6 +12,7 @@ type UseAudioEngineOptions = {
   bpm: number;
   beatsPerMeasure: number;
   pulsesPerBeat: number;
+  metronomeTone: MetronomeTone;
   accentFirstBeat: boolean;
   metronomeVolume: number;
 };
@@ -19,6 +21,7 @@ export function useAudioEngine({
   bpm,
   beatsPerMeasure,
   pulsesPerBeat,
+  metronomeTone,
   accentFirstBeat,
   metronomeVolume,
 }: UseAudioEngineOptions) {
@@ -87,7 +90,7 @@ export function useAudioEngine({
             : "beat"
           : "subdivision";
       void context.resume();
-      playMetronomeAudioClick(context, context.currentTime, clickKind, metronomeVolume);
+      playMetronomeAudioClick(context, context.currentTime, clickKind, metronomeTone, metronomeVolume);
       setCurrentBeat(beat + 1);
       setCurrentPulse(pulse + 1);
       metronomePulse.current += 1;
@@ -104,6 +107,7 @@ export function useAudioEngine({
     ensureAudioContext,
     isMetronomeRunning,
     metronomeVolume,
+    metronomeTone,
     pulsesPerBeat,
     stopMetronome,
   ]);
