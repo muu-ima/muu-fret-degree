@@ -4,6 +4,7 @@ import { type ChordType } from "../lib/music";
 import { type ProgressionBar, type ProgressionCell } from "../lib/progression";
 
 type ProgressionEditorProps = {
+  className?: string;
   bars: readonly ProgressionBar[];
   barCount: number;
   barCountOptions: number[];
@@ -14,6 +15,7 @@ type ProgressionEditorProps = {
 };
 
 export function ProgressionEditor({
+  className = "progressionEditor",
   bars,
   barCount,
   barCountOptions,
@@ -23,7 +25,7 @@ export function ProgressionEditor({
   onCellChange,
 }: ProgressionEditorProps) {
   return (
-    <section className="progressionEditor" aria-label="コード進行編集">
+    <section className={className} aria-label="コード進行編集">
       <div className="progressionEditorHeader">
         <div>
           <p className="progressionLabel">Progression Edit</p>
