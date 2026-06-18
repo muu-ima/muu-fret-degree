@@ -14,6 +14,7 @@ import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
 import { ControlsPanel } from "./ControlsPanel";
 import { FretRangeTabs } from "./FretRangeTabs";
+import { MetronomePanel } from "./MetronomePanel";
 import { ProgressionEditor } from "./ProgressionEditor";
 import { ProgressionPanel } from "./ProgressionPanel";
 import { useAudioEngine } from "../hooks/useAudioEngine";
@@ -56,11 +57,15 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [tuningId, setTuningId] = useState("standard");
   const [showGuideTones, setShowGuideTones] = useState(true);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
+  const [isMetronomeOpen, setIsMetronomeOpen] = useState(false);
   const [isProgressionPanelOpen, setIsProgressionPanelOpen] = useState(false);
   const [isProgressionEditorOpen, setIsProgressionEditorOpen] = useState(showProgressionEditor);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
+  const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
+  const [accentFirstBeat, setAccentFirstBeat] = useState(true);
+  const [metronomeVolume, setMetronomeVolume] = useState(0.7);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(bottomSheetHeightBounds.default);
   const [progression, setProgression] = useState<ChordProgression>(() => ({
     bpm: 120,
@@ -80,7 +85,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     playPianoNote,
     resumeAudio,
     toggleMetronome,
-  } = useAudioEngine({ bpm });
+  } = useAudioEngine({ bpm, beatsPerMeasure, accentFirstBeat, metronomeVolume });
   const progressionPlayback = useProgressionPlayback({ progression });
   const lastProgressionBeatRef = useRef<number | null>(null);
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
@@ -93,6 +98,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
 
   useEffect(() => {
     const handleOpenControls = () => {
+      setIsMetronomeOpen(false);
       setIsProgressionPanelOpen(false);
       setIsProgressionEditorOpen(false);
       setIsControlsOpen(true);
@@ -100,6 +106,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
 
     const handleOpenProgression = () => {
       setIsControlsOpen(false);
+      setIsMetronomeOpen(false);
       setIsProgressionEditorOpen(false);
       setIsProgressionPanelOpen(true);
     };
@@ -110,15 +117,25 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       }
 
       setIsControlsOpen(false);
+      setIsMetronomeOpen(false);
       setIsProgressionPanelOpen(false);
       setIsProgressionEditorOpen(true);
     };
 
+    const handleOpenMetronome = () => {
+      setIsControlsOpen(false);
+      setIsProgressionPanelOpen(false);
+      setIsProgressionEditorOpen(false);
+      setIsMetronomeOpen(true);
+    };
+
     window.addEventListener("shell:open-controls", handleOpenControls);
+    window.addEventListener("shell:open-metronome", handleOpenMetronome);
     window.addEventListener("shell:open-progression", handleOpenProgression);
     window.addEventListener("shell:open-edit", handleOpenEdit);
     return () => {
       window.removeEventListener("shell:open-controls", handleOpenControls);
+      window.removeEventListener("shell:open-metronome", handleOpenMetronome);
       window.removeEventListener("shell:open-progression", handleOpenProgression);
       window.removeEventListener("shell:open-edit", handleOpenEdit);
     };
@@ -126,6 +143,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
 
   const closePanels = () => {
     setIsControlsOpen(false);
+    setIsMetronomeOpen(false);
     setIsProgressionPanelOpen(false);
     setIsProgressionEditorOpen(false);
     window.dispatchEvent(new CustomEvent("shell:panel-close"));
@@ -366,7 +384,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     return (
       <ControlsPanel
         className={className}
-        showTempoControls={pageMode === "practice"}
         roots={theory.roots}
         chordTypes={chordTypes}
         tunings={tunings}
@@ -378,9 +395,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         chordOctaveId={selectedChordOctave.id}
         chordInversion={chordInversion}
         showGuideTones={showGuideTones}
-        bpmInput={bpmInput}
-        isMetronomeRunning={isMetronomeRunning}
-        currentBeat={currentBeat}
         onRootChange={setRoot}
         onChordTypeChange={setChordTypeId}
         onTuningChange={setTuningId}
@@ -389,9 +403,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         onShowGuideTonesChange={setShowGuideTones}
         onPlayArpeggio={playArpeggio}
         onPlayStack={playStack}
-        onBpmInputChange={updateBpm}
-        onBpmCommit={commitBpm}
-        onToggleMetronome={toggleMetronome}
       />
     );
   }
@@ -405,16 +416,9 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         currentProgressionChordTypeName={currentProgressionChordType.name}
         progressionPosition={progressionPlayback.progressionPosition}
         isProgressionRunning={progressionPlayback.isProgressionRunning}
-        showTempoControls={pageMode === "progression"}
-        bpmInput={bpmInput}
-        isMetronomeRunning={isMetronomeRunning}
-        currentBeat={currentBeat}
         onStartProgression={progressionPlayback.startProgression}
         onStopProgression={progressionPlayback.stopProgression}
         onResetProgression={progressionPlayback.resetProgression}
-        onBpmInputChange={updateBpm}
-        onBpmCommit={commitBpm}
-        onToggleMetronome={toggleMetronome}
       />
     );
   }
@@ -456,7 +460,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
 
       <div
         className={
-          isControlsOpen || isProgressionPanelOpen || isProgressionEditorOpen
+          isControlsOpen || isMetronomeOpen || isProgressionPanelOpen || isProgressionEditorOpen
             ? "drawerBackdrop open"
             : "drawerBackdrop"
         }
@@ -477,6 +481,38 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           </button>
         </div>
         {renderControls("controls shellControls")}
+      </aside>
+      <aside
+        className={isMetronomeOpen ? "shellControlsPanel shellMetronomePanel open" : "shellControlsPanel shellMetronomePanel"}
+        role="dialog"
+        aria-modal="true"
+        aria-label="メトロノーム"
+        style={bottomSheetStyle}
+      >
+        {renderBottomSheetHandle()}
+        <div className="drawerHeader">
+          <strong>Metronome</strong>
+          <button type="button" className="closeButton" onClick={closePanels}>
+            ×
+          </button>
+        </div>
+        <div className="shellMetronome">
+          <MetronomePanel
+            bpm={bpm}
+            bpmInput={bpmInput}
+            currentBeat={currentBeat}
+            beatsPerMeasure={beatsPerMeasure}
+            accentFirstBeat={accentFirstBeat}
+            volume={metronomeVolume}
+            isRunning={isMetronomeRunning}
+            onBpmInputChange={updateBpm}
+            onBpmCommit={commitBpm}
+            onBeatsPerMeasureChange={setBeatsPerMeasure}
+            onAccentFirstBeatChange={setAccentFirstBeat}
+            onVolumeChange={setMetronomeVolume}
+            onToggle={toggleMetronome}
+          />
+        </div>
       </aside>
       <aside
         className={isProgressionPanelOpen ? "shellProgressionPanel open" : "shellProgressionPanel"}

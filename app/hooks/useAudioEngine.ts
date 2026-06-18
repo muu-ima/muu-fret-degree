@@ -9,9 +9,17 @@ import {
 
 type UseAudioEngineOptions = {
   bpm: number;
+  beatsPerMeasure: number;
+  accentFirstBeat: boolean;
+  metronomeVolume: number;
 };
 
-export function useAudioEngine({ bpm }: UseAudioEngineOptions) {
+export function useAudioEngine({
+  bpm,
+  beatsPerMeasure,
+  accentFirstBeat,
+  metronomeVolume,
+}: UseAudioEngineOptions) {
   const audioContext = useRef<AudioContext | null>(null);
   const metronomeTimer = useRef<number | null>(null);
   const metronomeBeat = useRef(0);
@@ -66,9 +74,9 @@ export function useAudioEngine({ bpm }: UseAudioEngineOptions) {
 
     const tick = () => {
       const context = ensureAudioContext();
-      const beat = metronomeBeat.current % 4;
+      const beat = metronomeBeat.current % beatsPerMeasure;
       void context.resume();
-      playMetronomeAudioClick(context, context.currentTime, beat === 0);
+      playMetronomeAudioClick(context, context.currentTime, accentFirstBeat && beat === 0, metronomeVolume);
       setCurrentBeat(beat + 1);
       metronomeBeat.current += 1;
     };
@@ -77,7 +85,15 @@ export function useAudioEngine({ bpm }: UseAudioEngineOptions) {
     metronomeTimer.current = window.setInterval(tick, beatMs);
 
     return stopMetronome;
-  }, [bpm, ensureAudioContext, isMetronomeRunning, stopMetronome]);
+  }, [
+    accentFirstBeat,
+    beatsPerMeasure,
+    bpm,
+    ensureAudioContext,
+    isMetronomeRunning,
+    metronomeVolume,
+    stopMetronome,
+  ]);
 
   return {
     currentBeat,

@@ -1,6 +1,11 @@
 import { frequencyFromMidi } from "./music";
 
-export function playMetronomeClick(context: AudioContext, startTime: number, accented: boolean) {
+export function playMetronomeClick(
+  context: AudioContext,
+  startTime: number,
+  accented: boolean,
+  volume = 1,
+) {
   const oscillator = context.createOscillator();
   const gain = context.createGain();
   const end = startTime + 0.055;
@@ -8,7 +13,8 @@ export function playMetronomeClick(context: AudioContext, startTime: number, acc
   oscillator.type = "square";
   oscillator.frequency.setValueAtTime(accented ? 1320 : 920, startTime);
   gain.gain.setValueAtTime(0.0001, startTime);
-  gain.gain.exponentialRampToValueAtTime(accented ? 0.42 : 0.28, startTime + 0.004);
+  const peakGain = (accented ? 0.42 : 0.28) * Math.min(1, Math.max(0, volume));
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, peakGain), startTime + 0.004);
   gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
   oscillator.connect(gain);

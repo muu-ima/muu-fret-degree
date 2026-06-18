@@ -4,7 +4,6 @@ import { type ChordOctave, type ChordType, type Tuning } from "../lib/music";
 
 type ControlsPanelProps = {
   className: string;
-  showTempoControls: boolean;
   roots: string[];
   chordTypes: ChordType[];
   tunings: Tuning[];
@@ -16,9 +15,6 @@ type ControlsPanelProps = {
   chordOctaveId: string;
   chordInversion: number;
   showGuideTones: boolean;
-  bpmInput: string;
-  isMetronomeRunning: boolean;
-  currentBeat: number;
   onRootChange: (root: string) => void;
   onChordTypeChange: (chordTypeId: string) => void;
   onTuningChange: (tuningId: string) => void;
@@ -27,14 +23,10 @@ type ControlsPanelProps = {
   onShowGuideTonesChange: (showGuideTones: boolean) => void;
   onPlayArpeggio: () => void;
   onPlayStack: () => void;
-  onBpmInputChange: (value: string) => void;
-  onBpmCommit: (value: string) => void;
-  onToggleMetronome: () => void;
 };
 
 export function ControlsPanel({
   className,
-  showTempoControls,
   roots,
   chordTypes,
   tunings,
@@ -46,9 +38,6 @@ export function ControlsPanel({
   chordOctaveId,
   chordInversion,
   showGuideTones,
-  bpmInput,
-  isMetronomeRunning,
-  currentBeat,
   onRootChange,
   onChordTypeChange,
   onTuningChange,
@@ -57,9 +46,6 @@ export function ControlsPanel({
   onShowGuideTonesChange,
   onPlayArpeggio,
   onPlayStack,
-  onBpmInputChange,
-  onBpmCommit,
-  onToggleMetronome,
 }: ControlsPanelProps) {
   const inversionTabs = ["Root", "1st Inv.", "2nd Inv.", "3rd Inv."];
 
@@ -153,9 +139,9 @@ export function ControlsPanel({
         <div className="controlsSectionHeader">
           <div>
             <p className="controlsSectionEyebrow">Playback</p>
-            <strong>再生とテンポ</strong>
+            <strong>コード再生</strong>
           </div>
-          <span>Arpeggio / Chord / BPM / Metronome</span>
+          <span>Arpeggio / Chord</span>
         </div>
         <div className="controlsColumn controlsColumnActions">
           <button type="button" className="actionButton actionButtonPrimary" onClick={onPlayArpeggio}>
@@ -172,36 +158,6 @@ export function ControlsPanel({
           </button>
         </div>
 
-        {showTempoControls ? (
-          <div className="controlsColumn controlsColumnTempo">
-            <label>
-              BPM
-              <input
-                min="40"
-                max="240"
-                step="1"
-                type="number"
-                value={bpmInput}
-                onBlur={(event) => onBpmCommit(event.target.value)}
-                onChange={(event) => onBpmInputChange(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    onBpmCommit(event.currentTarget.value);
-                    event.currentTarget.blur();
-                  }
-                }}
-              />
-            </label>
-            <button
-              type="button"
-              className={isMetronomeRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
-              onClick={onToggleMetronome}
-            >
-              <span aria-hidden="true">♫</span>
-              {isMetronomeRunning ? "Beat " + currentBeat : "Metronome"}
-            </button>
-          </div>
-        ) : null}
       </div>
     </section>
   );

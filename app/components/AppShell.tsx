@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
-import { LuChartNoAxesColumn, LuMusic4, LuPencil, LuSlidersHorizontal } from "react-icons/lu";
+import { LuChartNoAxesColumn, LuMusic4, LuPencil, LuSlidersHorizontal, LuTimer } from "react-icons/lu";
 
 type AppShellProps = {
   children: ReactNode;
@@ -26,6 +26,13 @@ const panelItems = [
     label: "Controls",
     shortLabel: "Controls",
     description: "Harmony & playback",
+  },
+  {
+    key: "metronome",
+    icon: LuTimer,
+    label: "Metronome",
+    shortLabel: "Tempo",
+    description: "Tempo & pulse",
   },
   {
     key: "progression",
@@ -78,9 +85,19 @@ export function AppShell({ children }: AppShellProps) {
     window.dispatchEvent(new CustomEvent("shell:open-progression"));
   };
 
+  const openMetronome = () => {
+    setActivePanel("metronome");
+    window.dispatchEvent(new CustomEvent("shell:open-metronome"));
+  };
+
   const handlePanelOpen = (key: (typeof panelItems)[number]["key"]) => {
     if (key === "controls") {
       openControls();
+      return;
+    }
+
+    if (key === "metronome") {
+      openMetronome();
       return;
     }
 
