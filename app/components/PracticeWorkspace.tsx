@@ -365,20 +365,34 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         onSelectFretRange={setSelectedFretRangeId}
       />
 
-      <BassFretboard
-        notes={notes}
-        tuning={tuning}
-        fretRange={selectedFretRange}
-        onPlayNote={playNote}
-      />
-      <MobileBassFretboard
-        notes={notes}
-        tuning={tuning}
-        fretRange={selectedFretRange}
-        onPlayNote={playNote}
-      />
+      <section className="fretboardCanvas">
+        <div className="fretboardCanvasHeader">
+          <div>
+            <p className="fretboardCanvasEyebrow">Canvas</p>
+            <strong>Bass Fretboard</strong>
+          </div>
+          <span>{selectedFretRange.label}</span>
+        </div>
 
-      <ChordDegreeStrip chordNotes={chordNotes} showGuideTones={showGuideTones} />
+        <div className="fretboardCanvasStage">
+          <BassFretboard
+            notes={notes}
+            tuning={tuning}
+            fretRange={selectedFretRange}
+            onPlayNote={playNote}
+          />
+          <MobileBassFretboard
+            notes={notes}
+            tuning={tuning}
+            fretRange={selectedFretRange}
+            onPlayNote={playNote}
+          />
+        </div>
+
+        <div className="fretboardCanvasFooter">
+          <ChordDegreeStrip chordNotes={chordNotes} showGuideTones={showGuideTones} />
+        </div>
+      </section>
     </main>
   );
 }
