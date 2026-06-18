@@ -81,15 +81,14 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
 
         {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
           const fretLabel = isOpenRange ? fretIndex + 1 : fretRange.start + fretIndex;
+          const x = leftPad + (fretIndex + 0.5) * currentFretGap;
           return (
-            <text
-              className="fretNumber"
-              key={`fret-label-${fretRange.id}-${fretLabel}`}
-              x={leftPad + (fretIndex + 0.5) * currentFretGap}
-              y={28}
-            >
-              {fretLabel}
-            </text>
+            <g className="fretNumberGroup" key={`fret-label-${fretRange.id}-${fretLabel}`}>
+              <rect className="fretNumberBadge" x={x - 17} y={10} width="34" height="24" rx="12" />
+              <text className="fretNumber" x={x} y={27}>
+                {fretLabel}
+              </text>
+            </g>
           );
         })}
 
@@ -244,15 +243,14 @@ export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: Ba
 
         {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
           const fretLabel = isOpenRange ? fretIndex + 1 : fretRange.start + fretIndex;
+          const y = mobileTop + (fretIndex + 0.5) * mobileFretGap;
           return (
-            <text
-              className="fretNumber mobileFretNumber"
-              key={`mobile-fret-label-${fretRange.id}-${fretLabel}`}
-              x={14}
-              y={mobileTop + (fretIndex + 0.5) * mobileFretGap + 5}
-            >
-              {fretLabel}
-            </text>
+            <g className="fretNumberGroup" key={`mobile-fret-label-${fretRange.id}-${fretLabel}`}>
+              <rect className="fretNumberBadge" x={2} y={y - 12} width="28" height="24" rx="12" />
+              <text className="fretNumber mobileFretNumber" x={16} y={y + 5}>
+                {fretLabel}
+              </text>
+            </g>
           );
         })}
 

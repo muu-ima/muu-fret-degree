@@ -349,17 +349,17 @@ input {
   top: 50%;
   right: 0;
   transform: translateY(-50%);
-  min-width: 52px;
-  width: 52px;
-  height: 52px;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 1px solid rgba(154, 171, 196, 0.14);
-  border-radius: 18px;
+  border-radius: 999px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent),
     rgba(226, 233, 245, 0.92);
   color: #18202c;
-  font-size: 1.15rem;
+  font-size: 0.9rem;
   font-weight: 700;
   line-height: 1;
   box-shadow:
@@ -913,7 +913,9 @@ select:focus-visible,
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: linear-gradient(180deg, #1b1510, #0f1218);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(245, 208, 160, 0.1), transparent 28%),
+    linear-gradient(180deg, #1b1510, #0f1218);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
 }
 
@@ -932,9 +934,10 @@ select:focus-visible,
 }
 
 .fingerboard {
-  fill: var(--wood);
-  stroke: var(--wood-dark);
+  fill: #7d5032;
+  stroke: #2f211a;
   stroke-width: 2;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28));
 }
 
 .nut {
@@ -943,8 +946,8 @@ select:focus-visible,
 }
 
 .fret {
-  stroke: var(--steel);
-  stroke-width: 4;
+  stroke: rgba(218, 226, 235, 0.78);
+  stroke-width: 3.4;
 }
 
 .fretZero {
@@ -954,11 +957,23 @@ select:focus-visible,
 .fretNumber,
 .stringName,
 .noteName {
-  fill: #a8b0be;
+  fill: #b9c4d1;
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 16px;
   font-weight: 800;
   text-anchor: middle;
+}
+
+.fretNumberBadge {
+  fill: rgba(8, 11, 17, 0.58);
+  stroke: rgba(184, 199, 218, 0.2);
+  stroke-width: 1;
+}
+
+.fretNumber {
+  fill: #d4dbe6;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .stringName {
@@ -989,7 +1004,9 @@ select:focus-visible,
 
 .positionMarker,
 .doubleMarker circle {
-  fill: rgba(255, 255, 255, 0.22);
+  fill: rgba(218, 226, 235, 0.22);
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
 }
 
 .noteHit {
@@ -1797,11 +1814,11 @@ select:focus-visible,
   .shellControlsPanel .closeButton,
   .shellProgressionPanel .closeButton,
   .shellEditPanel .closeButton {
-    min-width: 42px;
-    width: 42px;
-    height: 42px;
-    border-radius: 16px;
-    font-size: 1.1rem;
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    font-size: 0.9rem;
   }
 
   .shellControls {
