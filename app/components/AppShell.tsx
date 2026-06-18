@@ -11,15 +11,32 @@ type AppShellProps = {
 const navItems = [
   {
     href: "/",
+    icon: "P",
     label: "Practice",
-    description: "指板と基本操作",
+    description: "Fretboard focus",
   },
   {
     href: "/progression",
+    icon: "E",
     label: "Progression Edit",
-    description: "コード進行を編集",
+    description: "Chord editing",
   },
 ];
+
+const panelItems = [
+  {
+    key: "controls",
+    icon: "C",
+    label: "Controls",
+    description: "Harmony & playback",
+  },
+  {
+    key: "progression",
+    icon: "R",
+    label: "Progression",
+    description: "Rhythm & loop",
+  },
+] as const;
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
@@ -30,6 +47,15 @@ export function AppShell({ children }: AppShellProps) {
 
   const openProgression = () => {
     window.dispatchEvent(new CustomEvent("shell:open-progression"));
+  };
+
+  const handlePanelOpen = (key: (typeof panelItems)[number]["key"]) => {
+    if (key === "controls") {
+      openControls();
+      return;
+    }
+
+    openProgression();
   };
 
   return (
@@ -47,35 +73,48 @@ export function AppShell({ children }: AppShellProps) {
 
         <div className="sidebarSection">
           <p className="sidebarSectionLabel">Modes</p>
-        <nav className="sidebarNav" aria-label="Main">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={isActive ? "sidebarNavItem active" : "sidebarNavItem"}
-                aria-current={isActive ? "page" : undefined}
-              >
-                <strong>{item.label}</strong>
-                <span>{item.description}</span>
-              </Link>
-            );
-          })}
-        </nav>
+          <nav className="sidebarNav" aria-label="Main">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={isActive ? "sidebarNavItem active" : "sidebarNavItem"}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  <span className="sidebarItemIcon" aria-hidden="true">
+                    {item.icon}
+                  </span>
+                  <span className="sidebarItemBody">
+                    <strong>{item.label}</strong>
+                    <span>{item.description}</span>
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
         <div className="sidebarSection">
           <p className="sidebarSectionLabel">Panels</p>
           <div className="sidebarTools">
-            <button type="button" className="sidebarToolButton" onClick={openControls}>
-              <strong>Controls</strong>
-              <span>コードと再生の操作を開く</span>
-            </button>
-            <button type="button" className="sidebarToolButton" onClick={openProgression}>
-              <strong>Progression</strong>
-              <span>再生状態とループを開く</span>
-            </button>
+            {panelItems.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                className="sidebarToolButton"
+                onClick={() => handlePanelOpen(item.key)}
+              >
+                <span className="sidebarItemIcon" aria-hidden="true">
+                  {item.icon}
+                </span>
+                <span className="sidebarItemBody">
+                  <strong>{item.label}</strong>
+                  <span>{item.description}</span>
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       </aside>
