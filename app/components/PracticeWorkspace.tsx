@@ -345,10 +345,12 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           <p className="heroTitle">{pageHeader.title}</p>
           <p className="heroSummary">{pageHeader.summary}</p>
         </div>
-        <div className={pageMode === "progression" ? "chordBadge chordBadgeProgression" : "chordBadge"}>
-          <strong>{displayedRoot}</strong>
-          <span>{displayedChordType.name}</span>
-        </div>
+        {pageMode === "practice" ? (
+          <div className="chordBadge">
+            <strong>{displayedRoot}</strong>
+            <span>{displayedChordType.name}</span>
+          </div>
+        ) : null}
       </section>
 
       <div
@@ -411,6 +413,12 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       <section className="fretboardCanvas">
         <div className="fretboardCanvasHeader">
           <div>
+            {pageMode === "progression" ? (
+              <div className="chordBadge chordBadgeProgression fretboardCanvasBadge">
+                <strong>{displayedRoot}</strong>
+                <span>{displayedChordType.name}</span>
+              </div>
+            ) : null}
             <p className="fretboardCanvasEyebrow">Canvas</p>
             <strong>Bass Fretboard</strong>
           </div>
