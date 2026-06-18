@@ -17,13 +17,6 @@ const navItems = [
     shortLabel: "Practice",
     description: "Fretboard focus",
   },
-  {
-    href: "/progression",
-    icon: LuPencil,
-    label: "Progression Edit",
-    shortLabel: "Edit",
-    description: "Chord editing",
-  },
 ];
 
 const panelItems = [
@@ -40,6 +33,14 @@ const panelItems = [
     label: "Progression",
     shortLabel: "Progression",
     description: "Rhythm & loop",
+  },
+  {
+    key: "edit",
+    href: "/progression",
+    icon: LuPencil,
+    label: "Progression Edit",
+    shortLabel: "Edit",
+    description: "Chord editing",
   },
 ] as const;
 
@@ -92,11 +93,6 @@ export function AppShell({ children }: AppShellProps) {
                   href={item.href}
                   className={isActive ? "sidebarNavItem active" : "sidebarNavItem"}
                   aria-current={isActive ? "page" : undefined}
-                  onClick={() => {
-                    if (item.href === "/progression" && isActive) {
-                      openEdit();
-                    }
-                  }}
                 >
                   <span className="sidebarItemIcon" aria-hidden="true">
                     <Icon />
@@ -119,6 +115,35 @@ export function AppShell({ children }: AppShellProps) {
           <div className="sidebarTools">
             {panelItems.map((item) => {
               const Icon = item.icon;
+              if (item.key === "edit") {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className={isActive ? "sidebarToolButton active" : "sidebarToolButton"}
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={(event) => {
+                      if (isActive) {
+                        event.preventDefault();
+                        openEdit();
+                      }
+                    }}
+                  >
+                    <span className="sidebarItemIcon" aria-hidden="true">
+                      <Icon />
+                    </span>
+                    <span className="sidebarItemBody">
+                      <strong>
+                        <span className="sidebarItemLabelFull">{item.label}</span>
+                        <span className="sidebarItemLabelShort">{item.shortLabel}</span>
+                      </strong>
+                      <span>{item.description}</span>
+                    </span>
+                  </Link>
+                );
+              }
+
               return (
                 <button
                   key={item.key}
