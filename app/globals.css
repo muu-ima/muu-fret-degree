@@ -550,6 +550,56 @@ input {
   text-align: center;
 }
 
+.tempoPresetGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.tempoPresetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tempoPreset {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 7px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #141922;
+  color: var(--muted);
+  text-align: left;
+}
+
+.tempoPreset strong {
+  color: var(--ink);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tempoPreset span {
+  overflow: hidden;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tempoPreset.active {
+  border-color: rgba(122, 167, 255, 0.42);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+}
+
+.tempoPreset.active strong,
+.tempoPreset.active span {
+  color: #fff;
+}
+
 .metronomePrimaryActions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

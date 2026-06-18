@@ -54,6 +54,14 @@ const toneOptions: Array<{ value: MetronomeTone; label: string }> = [
   { value: "wood", label: "Wood" },
   { value: "classic", label: "Classic" },
 ];
+const tempoPresets = [
+  { bpm: 60, label: "Largo" },
+  { bpm: 80, label: "Andante" },
+  { bpm: 100, label: "Moderato" },
+  { bpm: 120, label: "Allegro" },
+  { bpm: 140, label: "Vivace" },
+  { bpm: 160, label: "Presto" },
+];
 
 export function MetronomePanel({
   bpm,
@@ -166,6 +174,24 @@ export function MetronomePanel({
         <button type="button" className="tempoStepButton" onClick={() => adjustBpm(1)} aria-label="BPMを1上げる">
           <LuPlus />
         </button>
+      </div>
+
+      <div className="tempoPresetGroup">
+        <span className="controlLabel">Tempo Presets</span>
+        <div className="tempoPresetGrid">
+          {tempoPresets.map((preset) => (
+            <button
+              type="button"
+              className={preset.bpm === bpm ? "tempoPreset active" : "tempoPreset"}
+              aria-pressed={preset.bpm === bpm}
+              key={preset.bpm}
+              onClick={() => onBpmCommit(String(preset.bpm))}
+            >
+              <strong>{preset.bpm}</strong>
+              <span>{preset.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="metronomePrimaryActions">
