@@ -317,22 +317,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         </div>
       </section>
 
-      <div className="mobileActionBar">
-        <button
-          type="button"
-          className="menuButton"
-          onClick={() => {
-            setIsProgressionPanelOpen(false);
-            setIsControlsOpen(true);
-          }}
-          aria-haspopup="dialog"
-          aria-expanded={isControlsOpen}
-        >
-          <span aria-hidden="true">☰</span>
-          Controls
-        </button>
-      </div>
-
       <div
         className={isControlsOpen || isProgressionPanelOpen ? "drawerBackdrop open" : "drawerBackdrop"}
         onClick={() => {
@@ -367,20 +351,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           </button>
         </div>
         <div className="shellProgression">{renderProgressionPanel()}</div>
-      </aside>
-      <aside
-        className={isControlsOpen ? "controlsDrawer open" : "controlsDrawer"}
-        role="dialog"
-        aria-modal="true"
-        aria-label="コードとチューニング"
-      >
-        <div className="drawerHeader">
-          <strong>{root} {chordType.name}</strong>
-          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
-            ×
-          </button>
-        </div>
-        {renderControls("controls drawerControls")}
       </aside>
 
       <section className="fretboardCanvas">
