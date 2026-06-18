@@ -471,7 +471,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       >
         {renderBottomSheetHandle()}
         <div className="drawerHeader">
-          <strong>{root} {chordType.name}</strong>
+          <strong className="chordTitleValue">{root} {chordType.name}</strong>
           <button type="button" className="closeButton" onClick={closePanels}>
             ×
           </button>

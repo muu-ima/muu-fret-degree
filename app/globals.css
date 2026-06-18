@@ -344,6 +344,12 @@ input {
   line-height: 1.15;
 }
 
+.shellControlsPanel .drawerHeader .chordTitleValue {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
 .shellControlsPanel .closeButton,
 .shellProgressionPanel .closeButton,
 .shellEditPanel .closeButton {
@@ -444,13 +450,16 @@ input {
 .chordBadge strong {
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 1.65rem;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 .chordBadge span {
   color: var(--muted);
-  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
 .pageTabs {
@@ -756,8 +765,10 @@ input {
   border-radius: 10px;
   background: #141922;
   color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8rem;
   font-weight: 800;
+  letter-spacing: 0;
 }
 
 .voicingTab.active {
@@ -798,6 +809,9 @@ input[type="number"] {
 
 select,
 input[type="number"] {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
   padding: 0 34px 0 12px;
 }
 
@@ -906,6 +920,10 @@ select:focus-visible,
   border-radius: 6px;
   background: transparent;
   color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
 .fretRangeTab.active {
@@ -1051,6 +1069,7 @@ select:focus-visible,
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 16px;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   text-anchor: middle;
 }
 
@@ -1164,6 +1183,7 @@ select:focus-visible,
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 17px;
   font-weight: 900;
+  font-variant-numeric: tabular-nums;
   text-anchor: middle;
   pointer-events: none;
 }
@@ -1216,7 +1236,9 @@ select:focus-visible,
   place-items: center;
   border-radius: 50%;
   color: #fff;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-weight: 900;
+  font-variant-numeric: tabular-nums;
 }
 
 .degreeCard strong {
@@ -1267,8 +1289,10 @@ select:focus-visible,
 }
 
 .progressionMeta strong {
-  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 1.02rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
   line-height: 1.15;
 }
 
@@ -1308,8 +1332,11 @@ select:focus-visible,
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.75rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
 .progressionButtons {
@@ -1377,8 +1404,11 @@ select:focus-visible,
   border-radius: 10px;
   background: #141922;
   color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
