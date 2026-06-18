@@ -28,6 +28,10 @@ export function AppShell({ children }: AppShellProps) {
     window.dispatchEvent(new CustomEvent("shell:open-controls"));
   };
 
+  const openProgression = () => {
+    window.dispatchEvent(new CustomEvent("shell:open-progression"));
+  };
+
   return (
     <div className="appShell">
       <aside className="appSidebar">
@@ -63,12 +67,16 @@ export function AppShell({ children }: AppShellProps) {
 
         <div className="sidebarSection">
           <p className="sidebarSectionLabel">Panels</p>
-        <div className="sidebarTools">
-          <button type="button" className="sidebarToolButton" onClick={openControls}>
-            <strong>Controls</strong>
-            <span>コードと再生の操作を開く</span>
-          </button>
-        </div>
+          <div className="sidebarTools">
+            <button type="button" className="sidebarToolButton" onClick={openControls}>
+              <strong>Controls</strong>
+              <span>コードと再生の操作を開く</span>
+            </button>
+            <button type="button" className="sidebarToolButton" onClick={openProgression}>
+              <strong>Progression</strong>
+              <span>再生状態とループを開く</span>
+            </button>
+          </div>
         </div>
       </aside>
 

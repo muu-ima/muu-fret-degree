@@ -42,6 +42,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [tuningId, setTuningId] = useState("standard");
   const [showGuideTones, setShowGuideTones] = useState(true);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
+  const [isProgressionPanelOpen, setIsProgressionPanelOpen] = useState(false);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
@@ -75,11 +76,21 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
 
   useEffect(() => {
     const handleOpenControls = () => {
+      setIsProgressionPanelOpen(false);
       setIsControlsOpen(true);
     };
 
+    const handleOpenProgression = () => {
+      setIsControlsOpen(false);
+      setIsProgressionPanelOpen(true);
+    };
+
     window.addEventListener("shell:open-controls", handleOpenControls);
-    return () => window.removeEventListener("shell:open-controls", handleOpenControls);
+    window.addEventListener("shell:open-progression", handleOpenProgression);
+    return () => {
+      window.removeEventListener("shell:open-controls", handleOpenControls);
+      window.removeEventListener("shell:open-progression", handleOpenProgression);
+    };
   }, []);
 
   const chromatic = theory.chromatic;
@@ -269,65 +280,8 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     );
   }
 
-  return (
-    <main className="app">
-      <section className="hero">
-        <div>
-          <p className="eyebrow">{pageHeader.eyebrow}</p>
-          <p className="heroTitle">{pageHeader.title}</p>
-          <p className="heroSummary">{pageHeader.summary}</p>
-        </div>
-        <div className={pageMode === "progression" ? "chordBadge chordBadgeProgression" : "chordBadge"}>
-          <strong>{displayedRoot}</strong>
-          <span>{displayedChordType.name}</span>
-        </div>
-      </section>
-
-      <div className="mobileActionBar">
-        <button
-          type="button"
-          className="menuButton"
-          onClick={() => setIsControlsOpen(true)}
-          aria-haspopup="dialog"
-          aria-expanded={isControlsOpen}
-        >
-          <span aria-hidden="true">☰</span>
-          Controls
-        </button>
-      </div>
-
-      {!isControlsOpen ? renderControls("controls desktopControls") : null}
-
-      <div className={isControlsOpen ? "drawerBackdrop open" : "drawerBackdrop"} onClick={() => setIsControlsOpen(false)} />
-      <aside
-        className={isControlsOpen ? "shellControlsPanel open" : "shellControlsPanel"}
-        role="dialog"
-        aria-modal="true"
-        aria-label="コードとチューニング"
-      >
-        <div className="drawerHeader">
-          <strong>{root} {chordType.name}</strong>
-          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
-            ×
-          </button>
-        </div>
-        {renderControls("controls shellControls")}
-      </aside>
-      <aside
-        className={isControlsOpen ? "controlsDrawer open" : "controlsDrawer"}
-        role="dialog"
-        aria-modal="true"
-        aria-label="コードとチューニング"
-      >
-        <div className="drawerHeader">
-          <strong>{root} {chordType.name}</strong>
-          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
-            ×
-          </button>
-        </div>
-        {renderControls("controls drawerControls")}
-      </aside>
-
+  function renderProgressionPanel() {
+    return (
       <ProgressionPanel
         currentProgressionBar={progressionPlayback.currentProgressionBar}
         currentProgressionCell={currentProgressionSelection?.cell}
@@ -346,24 +300,90 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         onBpmCommit={commitBpm}
         onToggleMetronome={toggleMetronome}
       />
+    );
+  }
 
-      {showProgressionEditor ? (
-        <ProgressionEditor
-          bars={progression.bars}
-          barCount={progression.bars.length}
-          barCountOptions={[2, 4, 8, 16]}
-          roots={theory.roots}
-          chordTypes={chordTypes}
-          onBarCountChange={handleProgressionBarCountChange}
-          onCellChange={handleProgressionBarCellChange}
-        />
-      ) : null}
+  return (
+    <main className="app">
+      <section className="hero">
+        <div>
+          <p className="eyebrow">{pageHeader.eyebrow}</p>
+          <p className="heroTitle">{pageHeader.title}</p>
+          <p className="heroSummary">{pageHeader.summary}</p>
+        </div>
+        <div className={pageMode === "progression" ? "chordBadge chordBadgeProgression" : "chordBadge"}>
+          <strong>{displayedRoot}</strong>
+          <span>{displayedChordType.name}</span>
+        </div>
+      </section>
 
-      <FretRangeTabs
-        fretRanges={fretRanges}
-        selectedFretRangeId={selectedFretRange.id}
-        onSelectFretRange={setSelectedFretRangeId}
+      <div className="mobileActionBar">
+        <button
+          type="button"
+          className="menuButton"
+          onClick={() => {
+            setIsProgressionPanelOpen(false);
+            setIsControlsOpen(true);
+          }}
+          aria-haspopup="dialog"
+          aria-expanded={isControlsOpen}
+        >
+          <span aria-hidden="true">☰</span>
+          Controls
+        </button>
+      </div>
+
+      {!isControlsOpen ? renderControls("controls desktopControls") : null}
+
+      <div
+        className={isControlsOpen || isProgressionPanelOpen ? "drawerBackdrop open" : "drawerBackdrop"}
+        onClick={() => {
+          setIsControlsOpen(false);
+          setIsProgressionPanelOpen(false);
+        }}
       />
+      <aside
+        className={isControlsOpen ? "shellControlsPanel open" : "shellControlsPanel"}
+        role="dialog"
+        aria-modal="true"
+        aria-label="コードとチューニング"
+      >
+        <div className="drawerHeader">
+          <strong>{root} {chordType.name}</strong>
+          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
+            ×
+          </button>
+        </div>
+        {renderControls("controls shellControls")}
+      </aside>
+      <aside
+        className={isProgressionPanelOpen ? "shellProgressionPanel open" : "shellProgressionPanel"}
+        role="dialog"
+        aria-modal="true"
+        aria-label="コード進行再生"
+      >
+        <div className="drawerHeader">
+          <strong>Progression</strong>
+          <button type="button" className="closeButton" onClick={() => setIsProgressionPanelOpen(false)}>
+            ×
+          </button>
+        </div>
+        <div className="shellProgression">{renderProgressionPanel()}</div>
+      </aside>
+      <aside
+        className={isControlsOpen ? "controlsDrawer open" : "controlsDrawer"}
+        role="dialog"
+        aria-modal="true"
+        aria-label="コードとチューニング"
+      >
+        <div className="drawerHeader">
+          <strong>{root} {chordType.name}</strong>
+          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
+            ×
+          </button>
+        </div>
+        {renderControls("controls drawerControls")}
+      </aside>
 
       <section className="fretboardCanvas">
         <div className="fretboardCanvasHeader">
@@ -371,7 +391,14 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             <p className="fretboardCanvasEyebrow">Canvas</p>
             <strong>Bass Fretboard</strong>
           </div>
-          <span>{selectedFretRange.label}</span>
+          <div className="fretboardCanvasControls">
+            <span>{selectedFretRange.label}</span>
+            <FretRangeTabs
+              fretRanges={fretRanges}
+              selectedFretRangeId={selectedFretRange.id}
+              onSelectFretRange={setSelectedFretRangeId}
+            />
+          </div>
         </div>
 
         <div className="fretboardCanvasStage">
@@ -393,6 +420,18 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           <ChordDegreeStrip chordNotes={chordNotes} showGuideTones={showGuideTones} />
         </div>
       </section>
+
+      {showProgressionEditor ? (
+        <ProgressionEditor
+          bars={progression.bars}
+          barCount={progression.bars.length}
+          barCountOptions={[2, 4, 8, 16]}
+          roots={theory.roots}
+          chordTypes={chordTypes}
+          onBarCountChange={handleProgressionBarCountChange}
+          onCellChange={handleProgressionBarCellChange}
+        />
+      ) : null}
     </main>
   );
 }
