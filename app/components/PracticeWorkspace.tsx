@@ -333,8 +333,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         </button>
       </div>
 
-      {!isControlsOpen ? renderControls("controls desktopControls") : null}
-
       <div
         className={isControlsOpen || isProgressionPanelOpen ? "drawerBackdrop open" : "drawerBackdrop"}
         onClick={() => {
