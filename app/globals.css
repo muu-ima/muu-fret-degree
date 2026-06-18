@@ -474,6 +474,27 @@ input {
   transform: scale(1.12);
 }
 
+.pulsePosition {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 5px;
+  min-height: 5px;
+}
+
+.pulsePosition span {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(154, 171, 196, 0.14);
+  transition:
+    background-color 70ms ease,
+    box-shadow 70ms ease;
+}
+
+.pulsePosition span.active {
+  background: #cfe0ff;
+  box-shadow: 0 0 10px rgba(122, 167, 255, 0.36);
+}
+
 .metronomeTempoControls {
   display: grid;
   grid-template-columns: 40px minmax(120px, 1fr) 40px;
@@ -550,13 +571,15 @@ input {
   text-transform: uppercase;
 }
 
-.meterTabs {
+.meterTabs,
+.pulseTabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
 }
 
-.meterTab {
+.meterTab,
+.pulseTab {
   min-height: 40px;
   padding: 0 8px;
   border: 1px solid #334055;
@@ -568,7 +591,8 @@ input {
   font-weight: 800;
 }
 
-.meterTab.active {
+.meterTab.active,
+.pulseTab.active {
   border-color: rgba(122, 167, 255, 0.42);
   background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
   color: #fff;

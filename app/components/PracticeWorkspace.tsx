@@ -64,6 +64,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
+  const [pulsesPerBeat, setPulsesPerBeat] = useState(1);
   const [accentFirstBeat, setAccentFirstBeat] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.7);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(bottomSheetHeightBounds.default);
@@ -80,12 +81,13 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
   const {
     currentBeat,
+    currentPulse,
     isMetronomeRunning,
     playBassNote,
     playPianoNote,
     resumeAudio,
     toggleMetronome,
-  } = useAudioEngine({ bpm, beatsPerMeasure, accentFirstBeat, metronomeVolume });
+  } = useAudioEngine({ bpm, beatsPerMeasure, pulsesPerBeat, accentFirstBeat, metronomeVolume });
   const progressionPlayback = useProgressionPlayback({ progression });
   const lastProgressionBeatRef = useRef<number | null>(null);
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
@@ -501,13 +503,16 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             bpm={bpm}
             bpmInput={bpmInput}
             currentBeat={currentBeat}
+            currentPulse={currentPulse}
             beatsPerMeasure={beatsPerMeasure}
+            pulsesPerBeat={pulsesPerBeat}
             accentFirstBeat={accentFirstBeat}
             volume={metronomeVolume}
             isRunning={isMetronomeRunning}
             onBpmInputChange={updateBpm}
             onBpmCommit={commitBpm}
             onBeatsPerMeasureChange={setBeatsPerMeasure}
+            onPulsesPerBeatChange={setPulsesPerBeat}
             onAccentFirstBeatChange={setAccentFirstBeat}
             onVolumeChange={setMetronomeVolume}
             onToggle={toggleMetronome}

@@ -10,6 +10,7 @@ import {
 type UseAudioEngineOptions = {
   bpm: number;
   beatsPerMeasure: number;
+  pulsesPerBeat: number;
   accentFirstBeat: boolean;
   metronomeVolume: number;
 };
@@ -17,14 +18,16 @@ type UseAudioEngineOptions = {
 export function useAudioEngine({
   bpm,
   beatsPerMeasure,
+  pulsesPerBeat,
   accentFirstBeat,
   metronomeVolume,
 }: UseAudioEngineOptions) {
   const audioContext = useRef<AudioContext | null>(null);
   const metronomeTimer = useRef<number | null>(null);
-  const metronomeBeat = useRef(0);
+  const metronomePulse = useRef(0);
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(1);
+  const [currentPulse, setCurrentPulse] = useState(1);
 
   const ensureAudioContext = useCallback(() => {
     if (!audioContext.current) {
@@ -69,20 +72,29 @@ export function useAudioEngine({
       return;
     }
 
-    const beatMs = (60 / bpm) * 1000;
-    metronomeBeat.current = 0;
+    const pulseMs = ((60 / bpm) * 1000) / pulsesPerBeat;
+    metronomePulse.current = 0;
 
     const tick = () => {
       const context = ensureAudioContext();
-      const beat = metronomeBeat.current % beatsPerMeasure;
+      const pulseInMeasure = metronomePulse.current % (beatsPerMeasure * pulsesPerBeat);
+      const beat = Math.floor(pulseInMeasure / pulsesPerBeat);
+      const pulse = pulseInMeasure % pulsesPerBeat;
+      const clickKind =
+        pulse === 0
+          ? accentFirstBeat && beat === 0
+            ? "accent"
+            : "beat"
+          : "subdivision";
       void context.resume();
-      playMetronomeAudioClick(context, context.currentTime, accentFirstBeat && beat === 0, metronomeVolume);
+      playMetronomeAudioClick(context, context.currentTime, clickKind, metronomeVolume);
       setCurrentBeat(beat + 1);
-      metronomeBeat.current += 1;
+      setCurrentPulse(pulse + 1);
+      metronomePulse.current += 1;
     };
 
     tick();
-    metronomeTimer.current = window.setInterval(tick, beatMs);
+    metronomeTimer.current = window.setInterval(tick, pulseMs);
 
     return stopMetronome;
   }, [
@@ -92,11 +104,13 @@ export function useAudioEngine({
     ensureAudioContext,
     isMetronomeRunning,
     metronomeVolume,
+    pulsesPerBeat,
     stopMetronome,
   ]);
 
   return {
     currentBeat,
+    currentPulse,
     isMetronomeRunning,
     playBassNote,
     playPianoNote,

@@ -7,31 +7,43 @@ type MetronomePanelProps = {
   bpm: number;
   bpmInput: string;
   currentBeat: number;
+  currentPulse: number;
   beatsPerMeasure: number;
+  pulsesPerBeat: number;
   accentFirstBeat: boolean;
   volume: number;
   isRunning: boolean;
   onBpmInputChange: (value: string) => void;
   onBpmCommit: (value: string) => void;
   onBeatsPerMeasureChange: (beats: number) => void;
+  onPulsesPerBeatChange: (pulses: number) => void;
   onAccentFirstBeatChange: (accented: boolean) => void;
   onVolumeChange: (volume: number) => void;
   onToggle: () => void;
 };
 
 const meterOptions = [2, 3, 4, 6];
+const pulseOptions = [
+  { value: 1, label: "1/4" },
+  { value: 2, label: "1/8" },
+  { value: 3, label: "Triplet" },
+  { value: 4, label: "1/16" },
+];
 
 export function MetronomePanel({
   bpm,
   bpmInput,
   currentBeat,
+  currentPulse,
   beatsPerMeasure,
+  pulsesPerBeat,
   accentFirstBeat,
   volume,
   isRunning,
   onBpmInputChange,
   onBpmCommit,
   onBeatsPerMeasureChange,
+  onPulsesPerBeatChange,
   onAccentFirstBeatChange,
   onVolumeChange,
   onToggle,
@@ -84,6 +96,12 @@ export function MetronomePanel({
         </div>
       </div>
 
+      <div className="pulsePosition" aria-label={`拍内パルス ${currentPulse} / ${pulsesPerBeat}`}>
+        {Array.from({ length: pulsesPerBeat }, (_, index) => (
+          <span className={isRunning && index + 1 === currentPulse ? "active" : undefined} key={`pulse-${index + 1}`} />
+        ))}
+      </div>
+
       <div className="metronomeTempoControls">
         <button type="button" className="tempoStepButton" onClick={() => adjustBpm(-1)} aria-label="BPMを1下げる">
           <LuMinus />
@@ -128,6 +146,23 @@ export function MetronomePanel({
       </div>
 
       <div className="metronomeSettings">
+        <div className="metronomeSettingGroup">
+          <span className="controlLabel">Pulse</span>
+          <div className="pulseTabs" role="group" aria-label="パルス">
+            {pulseOptions.map((option) => (
+              <button
+                type="button"
+                className={option.value === pulsesPerBeat ? "pulseTab active" : "pulseTab"}
+                aria-pressed={option.value === pulsesPerBeat}
+                key={option.value}
+                onClick={() => onPulsesPerBeatChange(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="metronomeSettingGroup">
           <span className="controlLabel">Meter</span>
           <div className="meterTabs" role="group" aria-label="拍子">

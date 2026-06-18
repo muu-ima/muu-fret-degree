@@ -1,19 +1,24 @@
 import { frequencyFromMidi } from "./music";
 
+export type MetronomeClickKind = "accent" | "beat" | "subdivision";
+
 export function playMetronomeClick(
   context: AudioContext,
   startTime: number,
-  accented: boolean,
+  kind: MetronomeClickKind,
   volume = 1,
 ) {
   const oscillator = context.createOscillator();
   const gain = context.createGain();
-  const end = startTime + 0.055;
+  const isSubdivision = kind === "subdivision";
+  const end = startTime + (isSubdivision ? 0.035 : 0.055);
+  const frequency = kind === "accent" ? 1320 : kind === "beat" ? 920 : 680;
+  const baseGain = kind === "accent" ? 0.42 : kind === "beat" ? 0.28 : 0.14;
 
   oscillator.type = "square";
-  oscillator.frequency.setValueAtTime(accented ? 1320 : 920, startTime);
+  oscillator.frequency.setValueAtTime(frequency, startTime);
   gain.gain.setValueAtTime(0.0001, startTime);
-  const peakGain = (accented ? 0.42 : 0.28) * Math.min(1, Math.max(0, volume));
+  const peakGain = baseGain * Math.min(1, Math.max(0, volume));
   gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, peakGain), startTime + 0.004);
   gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
