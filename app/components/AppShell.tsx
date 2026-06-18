@@ -152,7 +152,8 @@ export function AppShell({ children }: AppShellProps) {
             {panelItems.map((item) => {
               const Icon = item.icon;
               if (item.key === "edit") {
-                const isActive = pathname === item.href && activePanel === "edit";
+                const isOnEditPage = pathname === item.href;
+                const isActive = isOnEditPage && activePanel === "edit";
                 return (
                   <Link
                     key={item.key}
@@ -160,7 +161,7 @@ export function AppShell({ children }: AppShellProps) {
                     className={isActive ? "sidebarToolButton active" : "sidebarToolButton"}
                     aria-current={isActive ? "page" : undefined}
                     onClick={(event) => {
-                      if (isActive) {
+                      if (isOnEditPage) {
                         event.preventDefault();
                         openEdit();
                       }
