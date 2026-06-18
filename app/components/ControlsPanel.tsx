@@ -120,15 +120,16 @@ export function ControlsPanel({
           <div className="voicingTabs" role="group" aria-label="Inversion">
             <span className="voicingTabsLabel">転回形 (Inversion)</span>
             <div className="voicingTabsRow">
-              {chordInversions.map((item) => {
-                const label = inversionTabs[item] ?? `${item}`;
-                const isActive = item === chordInversion;
+              {inversionTabs.map((label, item) => {
+                const isAvailable = chordInversions.includes(item);
+                const isActive = isAvailable && item === chordInversion;
                 return (
                   <button
                     key={item}
                     type="button"
                     className={isActive ? "voicingTab active" : "voicingTab"}
                     aria-pressed={isActive}
+                    disabled={!isAvailable}
                     onClick={() => onChordInversionChange(item)}
                   >
                     {label}

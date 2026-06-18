@@ -680,6 +680,11 @@ input {
   border-color: rgba(122, 167, 255, 0.42);
 }
 
+.voicingTab:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
 label {
   display: grid;
   gap: 6px;
