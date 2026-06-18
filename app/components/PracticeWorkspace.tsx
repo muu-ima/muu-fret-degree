@@ -43,6 +43,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [showGuideTones, setShowGuideTones] = useState(true);
   const [isControlsOpen, setIsControlsOpen] = useState(false);
   const [isProgressionPanelOpen, setIsProgressionPanelOpen] = useState(false);
+  const [isProgressionEditorOpen, setIsProgressionEditorOpen] = useState(showProgressionEditor);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
@@ -77,21 +78,35 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   useEffect(() => {
     const handleOpenControls = () => {
       setIsProgressionPanelOpen(false);
+      setIsProgressionEditorOpen(false);
       setIsControlsOpen(true);
     };
 
     const handleOpenProgression = () => {
       setIsControlsOpen(false);
+      setIsProgressionEditorOpen(false);
       setIsProgressionPanelOpen(true);
+    };
+
+    const handleOpenEdit = () => {
+      if (!showProgressionEditor) {
+        return;
+      }
+
+      setIsControlsOpen(false);
+      setIsProgressionPanelOpen(false);
+      setIsProgressionEditorOpen(true);
     };
 
     window.addEventListener("shell:open-controls", handleOpenControls);
     window.addEventListener("shell:open-progression", handleOpenProgression);
+    window.addEventListener("shell:open-edit", handleOpenEdit);
     return () => {
       window.removeEventListener("shell:open-controls", handleOpenControls);
       window.removeEventListener("shell:open-progression", handleOpenProgression);
+      window.removeEventListener("shell:open-edit", handleOpenEdit);
     };
-  }, []);
+  }, [showProgressionEditor]);
 
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
@@ -303,6 +318,25 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     );
   }
 
+  function renderProgressionEditor(className?: string) {
+    if (!showProgressionEditor) {
+      return null;
+    }
+
+    return (
+      <ProgressionEditor
+        className={className}
+        bars={progression.bars}
+        barCount={progression.bars.length}
+        barCountOptions={[2, 4, 8, 16]}
+        roots={theory.roots}
+        chordTypes={chordTypes}
+        onBarCountChange={handleProgressionBarCountChange}
+        onCellChange={handleProgressionBarCellChange}
+      />
+    );
+  }
+
   return (
     <main className="app">
       <section className="hero">
@@ -318,10 +352,15 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       </section>
 
       <div
-        className={isControlsOpen || isProgressionPanelOpen ? "drawerBackdrop open" : "drawerBackdrop"}
+        className={
+          isControlsOpen || isProgressionPanelOpen || isProgressionEditorOpen
+            ? "drawerBackdrop open"
+            : "drawerBackdrop"
+        }
         onClick={() => {
           setIsControlsOpen(false);
           setIsProgressionPanelOpen(false);
+          setIsProgressionEditorOpen(false);
         }}
       />
       <aside
@@ -352,6 +391,22 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         </div>
         <div className="shellProgression">{renderProgressionPanel()}</div>
       </aside>
+      {showProgressionEditor ? (
+        <aside
+          className={isProgressionEditorOpen ? "shellEditPanel open" : "shellEditPanel"}
+          role="dialog"
+          aria-modal="true"
+          aria-label="コード進行編集"
+        >
+          <div className="drawerHeader">
+            <strong>Progression Edit</strong>
+            <button type="button" className="closeButton" onClick={() => setIsProgressionEditorOpen(false)}>
+              ×
+            </button>
+          </div>
+          <div className="shellEdit">{renderProgressionEditor("progressionEditor progressionEditorSheet")}</div>
+        </aside>
+      ) : null}
 
       <section className="fretboardCanvas">
         <div className="fretboardCanvasHeader">
@@ -389,17 +444,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         </div>
       </section>
 
-      {showProgressionEditor ? (
-        <ProgressionEditor
-          bars={progression.bars}
-          barCount={progression.bars.length}
-          barCountOptions={[2, 4, 8, 16]}
-          roots={theory.roots}
-          chordTypes={chordTypes}
-          onBarCountChange={handleProgressionBarCountChange}
-          onCellChange={handleProgressionBarCellChange}
-        />
-      ) : null}
+      {renderProgressionEditor("progressionEditor progressionEditorInline")}
     </main>
   );
 }

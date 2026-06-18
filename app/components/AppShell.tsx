@@ -45,6 +45,10 @@ const panelItems = [
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
 
+  const openEdit = () => {
+    window.dispatchEvent(new CustomEvent("shell:open-edit"));
+  };
+
   const openControls = () => {
     window.dispatchEvent(new CustomEvent("shell:open-controls"));
   };
@@ -86,6 +90,11 @@ export function AppShell({ children }: AppShellProps) {
                   href={item.href}
                   className={isActive ? "sidebarNavItem active" : "sidebarNavItem"}
                   aria-current={isActive ? "page" : undefined}
+                  onClick={() => {
+                    if (item.href === "/progression" && isActive) {
+                      openEdit();
+                    }
+                  }}
                 >
                   <span className="sidebarItemIcon" aria-hidden="true">
                     {item.icon}

@@ -256,7 +256,8 @@ input {
 }
 
 .shellControlsPanel,
-.shellProgressionPanel {
+.shellProgressionPanel,
+.shellEditPanel {
   position: fixed;
   top: 64px;
   left: calc(var(--shell-sidebar-width) + ((100vw - var(--shell-sidebar-width)) / 2));
@@ -283,7 +284,8 @@ input {
 }
 
 .shellControls,
-.shellProgression {
+.shellProgression,
+.shellEdit {
   margin-bottom: 0;
   padding: 0;
   border: 0;
@@ -293,7 +295,8 @@ input {
 }
 
 .shellControlsPanel .drawerHeader,
-.shellProgressionPanel .drawerHeader {
+.shellProgressionPanel .drawerHeader,
+.shellEditPanel .drawerHeader {
   position: relative;
   display: flex;
   align-items: center;
@@ -305,12 +308,14 @@ input {
 }
 
 .shellControlsPanel .drawerHeader strong,
-.shellProgressionPanel .drawerHeader strong {
+.shellProgressionPanel .drawerHeader strong,
+.shellEditPanel .drawerHeader strong {
   font-size: 1.05rem;
 }
 
 .shellControlsPanel .closeButton,
-.shellProgressionPanel .closeButton {
+.shellProgressionPanel .closeButton,
+.shellEditPanel .closeButton {
   position: absolute;
   top: 50%;
   right: 0;
@@ -334,7 +339,8 @@ input {
 }
 
 .shellControlsPanel .closeButton:hover,
-.shellProgressionPanel .closeButton:hover {
+.shellProgressionPanel .closeButton:hover,
+.shellEditPanel .closeButton:hover {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent),
     rgba(239, 244, 252, 0.98);
@@ -545,7 +551,8 @@ input {
   }
 
   .shellControlsPanel,
-  .shellProgressionPanel {
+  .shellProgressionPanel,
+  .shellEditPanel {
     top: 72px;
     width: min(680px, calc(100vw - var(--shell-sidebar-width) - 28px));
     max-width: calc(100vw - var(--shell-sidebar-width) - 28px);
@@ -581,7 +588,8 @@ input {
 
 @media (max-width: 1040px) {
   .shellControlsPanel,
-  .shellProgressionPanel {
+  .shellProgressionPanel,
+  .shellEditPanel {
     top: 68px;
     width: min(560px, calc(100vw - var(--shell-sidebar-width) - 28px));
     max-width: calc(100vw - var(--shell-sidebar-width) - 28px);
@@ -590,14 +598,16 @@ input {
   }
 
   .shellControlsPanel .drawerHeader,
-  .shellProgressionPanel .drawerHeader {
+  .shellProgressionPanel .drawerHeader,
+  .shellEditPanel .drawerHeader {
     min-height: 48px;
     margin-bottom: 14px;
     padding-right: 72px;
   }
 
   .shellControlsPanel .closeButton,
-  .shellProgressionPanel .closeButton {
+  .shellProgressionPanel .closeButton,
+  .shellEditPanel .closeButton {
     min-width: 46px;
     width: 46px;
     height: 46px;
@@ -1274,7 +1284,8 @@ select:focus-visible,
   }
 
   .shellControlsPanel,
-  .shellProgressionPanel {
+  .shellProgressionPanel,
+  .shellEditPanel {
     display: none;
   }
 
@@ -1555,6 +1566,10 @@ select:focus-visible,
     border-radius: 16px;
   }
 
+  .progressionEditorInline {
+    display: none;
+  }
+
   .progressionEditorHeader {
     flex-direction: column;
     align-items: start;
@@ -1646,7 +1661,8 @@ select:focus-visible,
   }
 
   .shellControlsPanel,
-  .shellProgressionPanel {
+  .shellProgressionPanel,
+  .shellEditPanel {
     position: fixed;
     right: 0;
     bottom: 0;
@@ -1672,25 +1688,29 @@ select:focus-visible,
   }
 
   .shellControlsPanel.open,
-  .shellProgressionPanel.open {
+  .shellProgressionPanel.open,
+  .shellEditPanel.open {
     transform: translateY(0);
     pointer-events: auto;
   }
 
   .shellControlsPanel .drawerHeader,
-  .shellProgressionPanel .drawerHeader {
+  .shellProgressionPanel .drawerHeader,
+  .shellEditPanel .drawerHeader {
     min-height: 44px;
     margin-bottom: 12px;
     padding-right: 58px;
   }
 
   .shellControlsPanel .drawerHeader strong,
-  .shellProgressionPanel .drawerHeader strong {
+  .shellProgressionPanel .drawerHeader strong,
+  .shellEditPanel .drawerHeader strong {
     font-size: 1rem;
   }
 
   .shellControlsPanel .closeButton,
-  .shellProgressionPanel .closeButton {
+  .shellProgressionPanel .closeButton,
+  .shellEditPanel .closeButton {
     min-width: 44px;
     width: 44px;
     height: 44px;
@@ -1711,6 +1731,23 @@ select:focus-visible,
     padding: 0;
     border: 0;
     background: transparent;
+  }
+
+  .shellEdit {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .progressionEditorSheet {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .shellControls .controlsColumnActions {
