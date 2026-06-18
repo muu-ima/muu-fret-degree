@@ -331,15 +331,17 @@ input {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  min-height: 52px;
-  margin-bottom: 18px;
-  padding-right: 84px;
+  min-height: 44px;
+  margin-bottom: 16px;
+  padding-right: 50px;
 }
 
 .shellControlsPanel .drawerHeader strong,
 .shellProgressionPanel .drawerHeader strong,
 .shellEditPanel .drawerHeader strong {
-  font-size: 1.05rem;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.15;
 }
 
 .shellControlsPanel .closeButton,
@@ -349,30 +351,33 @@ input {
   top: 50%;
   right: 0;
   transform: translateY(-50%);
-  min-width: 32px;
-  width: 32px;
-  height: 32px;
+  display: grid;
+  min-width: 34px;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  place-items: center;
   padding: 0;
-  border: 1px solid rgba(154, 171, 196, 0.14);
+  border: 1px solid rgba(196, 211, 232, 0.22);
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent),
-    rgba(226, 233, 245, 0.92);
-  color: #18202c;
-  font-size: 0.9rem;
-  font-weight: 700;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.15), transparent),
+    rgba(221, 230, 243, 0.96);
+  color: #151d29;
+  font-size: 0.86rem;
+  font-weight: 900;
   line-height: 1;
   box-shadow:
-    0 18px 34px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+    0 14px 26px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
 .shellControlsPanel .closeButton:hover,
 .shellProgressionPanel .closeButton:hover,
 .shellEditPanel .closeButton:hover {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent),
-    rgba(239, 244, 252, 0.98);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent),
+    rgba(244, 248, 255, 1);
 }
 
 .bottomSheetHandle {
@@ -489,22 +494,22 @@ input {
 .controlsSectionEyebrow {
   margin: 0 0 4px;
   color: var(--focus);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.075em;
   text-transform: uppercase;
 }
 
 .controlsSectionHeader strong {
   display: block;
   font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: 1rem;
+  font-size: 1.02rem;
   line-height: 1.15;
 }
 
 .controlsSectionHeader span {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-align: right;
 }
@@ -644,19 +649,20 @@ input {
   .shellControlsPanel .drawerHeader,
   .shellProgressionPanel .drawerHeader,
   .shellEditPanel .drawerHeader {
-    min-height: 48px;
+    min-height: 42px;
     margin-bottom: 14px;
-    padding-right: 72px;
+    padding-right: 48px;
   }
 
   .shellControlsPanel .closeButton,
   .shellProgressionPanel .closeButton,
   .shellEditPanel .closeButton {
-    min-width: 46px;
-    width: 46px;
-    height: 46px;
-    border-radius: 16px;
-    font-size: 1.05rem;
+    min-width: 34px;
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    border-radius: 999px;
+    font-size: 0.9rem;
   }
 }
 
@@ -667,8 +673,9 @@ input {
 
 .voicingTabsLabel {
   color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 
@@ -682,10 +689,10 @@ input {
   min-height: 40px;
   padding: 0 10px;
   border: 1px solid #334055;
-  border-radius: 7px;
+  border-radius: 10px;
   background: #141922;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 800;
 }
 
@@ -705,8 +712,8 @@ label {
   gap: 6px;
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.03em;
+  font-weight: 900;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 
@@ -720,6 +727,8 @@ input[type="number"] {
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent),
     rgba(16, 22, 32, 0.92);
   color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 800;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
@@ -742,7 +751,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 40px;
   padding: 0 16px;
   border: 1px solid #334055;
   border-radius: 999px;
@@ -799,8 +808,8 @@ select:focus-visible,
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent),
     rgba(16, 22, 32, 0.92);
   color: var(--ink);
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 800;
   line-height: 1.25;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
@@ -1186,22 +1195,22 @@ select:focus-visible,
 
 .progressionLabel {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 800;
+  color: var(--focus);
+  font-size: 0.7rem;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.075em;
 }
 
 .progressionMeta strong {
   font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: 1rem;
-  line-height: 1.2;
+  font-size: 1.02rem;
+  line-height: 1.15;
 }
 
 .progressionMeta span {
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
@@ -1298,13 +1307,13 @@ select:focus-visible,
 }
 
 .barCountTab {
-  min-height: 36px;
+  min-height: 40px;
   padding: 0 12px;
   border: 1px solid #334055;
-  border-radius: 999px;
+  border-radius: 10px;
   background: #141922;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -1319,19 +1328,20 @@ select:focus-visible,
   display: block;
   margin-top: 6px;
   font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.98rem;
+  font-size: 1.02rem;
+  line-height: 1.15;
 }
 
 .progressionEditorHeader span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-align: right;
 }
 
 .progressionEditorHint {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
@@ -1358,7 +1368,7 @@ select:focus-visible,
 }
 
 .progressionEditorRow strong {
-  font-size: 0.92rem;
+  font-size: 0.94rem;
 }
 
 .progressionCellGroup {
@@ -1374,10 +1384,11 @@ select:focus-visible,
 
 .progressionCellTitle {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 900;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.045em;
 }
 
 @media (max-width: 920px) {
@@ -1919,7 +1930,7 @@ select:focus-visible,
     flex: 0 0 auto;
     min-height: 34px;
     margin-bottom: 10px;
-    padding-right: 46px;
+    padding-right: 42px;
   }
 
   .shellControlsPanel .drawerHeader strong,
@@ -1934,6 +1945,7 @@ select:focus-visible,
     min-width: 30px;
     width: 30px;
     height: 30px;
+    min-height: 30px;
     border-radius: 999px;
     font-size: 0.86rem;
   }
