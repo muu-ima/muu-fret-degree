@@ -589,6 +589,10 @@ input {
 }
 
 .controlLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 900;
@@ -596,8 +600,16 @@ input {
   text-transform: uppercase;
 }
 
+.controlLabel small {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .meterTabs,
-.pulseTabs {
+.pulseTabs,
+.swingTabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
@@ -617,6 +629,7 @@ input {
 
 .meterTab,
 .pulseTab,
+.swingTab,
 .toneTab,
 .countInTab {
   min-height: 40px;
@@ -632,6 +645,7 @@ input {
 
 .meterTab.active,
 .pulseTab.active,
+.swingTab.active,
 .toneTab.active,
 .countInTab.active {
   border-color: rgba(122, 167, 255, 0.42);
@@ -642,6 +656,11 @@ input {
 .countInTab:disabled {
   cursor: not-allowed;
   opacity: 0.58;
+}
+
+.swingTab:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
 }
 
 .metronomeVolume {

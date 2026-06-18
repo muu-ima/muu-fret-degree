@@ -13,6 +13,7 @@ type MetronomePanelProps = {
   beatsPerMeasure: number;
   pulsesPerBeat: number;
   countInMeasures: number;
+  swingRatio: number;
   tone: MetronomeTone;
   accentFirstBeat: boolean;
   volume: number;
@@ -23,6 +24,7 @@ type MetronomePanelProps = {
   onBeatsPerMeasureChange: (beats: number) => void;
   onPulsesPerBeatChange: (pulses: number) => void;
   onCountInMeasuresChange: (measures: number) => void;
+  onSwingRatioChange: (ratio: number) => void;
   onToneChange: (tone: MetronomeTone) => void;
   onAccentFirstBeatChange: (accented: boolean) => void;
   onVolumeChange: (volume: number) => void;
@@ -34,6 +36,12 @@ const countInOptions = [
   { value: 0, label: "Off" },
   { value: 1, label: "1 bar" },
   { value: 2, label: "2 bars" },
+];
+const swingOptions = [
+  { value: 0, label: "Straight" },
+  { value: 0.56, label: "Light" },
+  { value: 0.62, label: "Medium" },
+  { value: 0.67, label: "Heavy" },
 ];
 const pulseOptions = [
   { value: 1, label: "1/4" },
@@ -56,6 +64,7 @@ export function MetronomePanel({
   beatsPerMeasure,
   pulsesPerBeat,
   countInMeasures,
+  swingRatio,
   tone,
   accentFirstBeat,
   volume,
@@ -66,6 +75,7 @@ export function MetronomePanel({
   onBeatsPerMeasureChange,
   onPulsesPerBeatChange,
   onCountInMeasuresChange,
+  onSwingRatioChange,
   onToneChange,
   onAccentFirstBeatChange,
   onVolumeChange,
@@ -224,6 +234,27 @@ export function MetronomePanel({
                 aria-pressed={option.value === pulsesPerBeat}
                 key={option.value}
                 onClick={() => onPulsesPerBeatChange(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="metronomeSettingGroup">
+          <span className="controlLabel">
+            Swing
+            <small>8th pulse only</small>
+          </span>
+          <div className="swingTabs" role="group" aria-label="スウィング">
+            {swingOptions.map((option) => (
+              <button
+                type="button"
+                className={option.value === swingRatio ? "swingTab active" : "swingTab"}
+                aria-pressed={option.value === swingRatio}
+                disabled={pulsesPerBeat !== 2}
+                key={option.value}
+                onClick={() => onSwingRatioChange(option.value)}
               >
                 {option.label}
               </button>

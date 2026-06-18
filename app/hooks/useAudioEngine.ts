@@ -13,6 +13,7 @@ type UseAudioEngineOptions = {
   beatsPerMeasure: number;
   pulsesPerBeat: number;
   countInMeasures: number;
+  swingRatio: number;
   metronomeTone: MetronomeTone;
   accentFirstBeat: boolean;
   metronomeVolume: number;
@@ -23,6 +24,7 @@ export function useAudioEngine({
   beatsPerMeasure,
   pulsesPerBeat,
   countInMeasures,
+  swingRatio,
   metronomeTone,
   accentFirstBeat,
   metronomeVolume,
@@ -45,7 +47,7 @@ export function useAudioEngine({
 
   const stopMetronome = useCallback(() => {
     if (metronomeTimer.current !== null) {
-      window.clearInterval(metronomeTimer.current);
+      window.clearTimeout(metronomeTimer.current);
       metronomeTimer.current = null;
     }
   }, []);
@@ -81,7 +83,8 @@ export function useAudioEngine({
       return;
     }
 
-    const pulseMs = ((60 / bpm) * 1000) / pulsesPerBeat;
+    const beatMs = (60 / bpm) * 1000;
+    const pulseMs = beatMs / pulsesPerBeat;
     const countInBeats = countInMeasures * beatsPerMeasure;
     const countInPulses = countInBeats * pulsesPerBeat;
     metronomePulse.current = 0;
@@ -110,10 +113,17 @@ export function useAudioEngine({
         setCountInBeatsRemaining(isCountInPulse ? countInBeats - elapsedCountInBeats : 0);
       }
       metronomePulse.current += 1;
+
+      const nextPulseMs =
+        pulsesPerBeat === 2 && swingRatio > 0
+          ? pulse === 0
+            ? beatMs * swingRatio
+            : beatMs * (1 - swingRatio)
+          : pulseMs;
+      metronomeTimer.current = window.setTimeout(tick, nextPulseMs);
     };
 
     tick();
-    metronomeTimer.current = window.setInterval(tick, pulseMs);
 
     return stopMetronome;
   }, [
@@ -127,6 +137,7 @@ export function useAudioEngine({
     metronomeTone,
     pulsesPerBeat,
     stopMetronome,
+    swingRatio,
   ]);
 
   return {

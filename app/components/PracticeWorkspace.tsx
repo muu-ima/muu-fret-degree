@@ -67,6 +67,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
   const [pulsesPerBeat, setPulsesPerBeat] = useState(1);
   const [countInMeasures, setCountInMeasures] = useState(0);
+  const [swingRatio, setSwingRatio] = useState(0);
   const [metronomeTone, setMetronomeTone] = useState<MetronomeTone>("soft");
   const [accentFirstBeat, setAccentFirstBeat] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.7);
@@ -97,6 +98,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     beatsPerMeasure,
     pulsesPerBeat,
     countInMeasures,
+    swingRatio,
     metronomeTone,
     accentFirstBeat,
     metronomeVolume,
@@ -162,6 +164,13 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     setIsProgressionPanelOpen(false);
     setIsProgressionEditorOpen(false);
     window.dispatchEvent(new CustomEvent("shell:panel-close"));
+  };
+
+  const updatePulsesPerBeat = (pulses: number) => {
+    setPulsesPerBeat(pulses);
+    if (pulses !== 2) {
+      setSwingRatio(0);
+    }
   };
 
   const clampBottomSheetHeight = (height: number) =>
@@ -521,6 +530,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             beatsPerMeasure={beatsPerMeasure}
             pulsesPerBeat={pulsesPerBeat}
             countInMeasures={countInMeasures}
+            swingRatio={swingRatio}
             tone={metronomeTone}
             accentFirstBeat={accentFirstBeat}
             volume={metronomeVolume}
@@ -529,8 +539,9 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
             onBpmInputChange={updateBpm}
             onBpmCommit={commitBpm}
             onBeatsPerMeasureChange={setBeatsPerMeasure}
-            onPulsesPerBeatChange={setPulsesPerBeat}
+            onPulsesPerBeatChange={updatePulsesPerBeat}
             onCountInMeasuresChange={setCountInMeasures}
+            onSwingRatioChange={setSwingRatio}
             onToneChange={setMetronomeTone}
             onAccentFirstBeatChange={setAccentFirstBeat}
             onVolumeChange={setMetronomeVolume}
