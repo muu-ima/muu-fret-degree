@@ -145,10 +145,11 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
               : leftPad + (isOpenRange ? note.fret - 0.5 : note.fret - fretRange.start + 0.5) * currentFretGap;
           const y = topPad + note.stringIndex * stringGap;
           const color = note.degree ? degreeTone[note.degree] ?? "#333" : "#333";
+          const isRoot = note.degree === "1";
 
           return (
             <g
-              className="noteHit"
+              className={isRoot ? "noteHit rootNote" : "noteHit"}
               key={`${fretRange.id}-${note.id}`}
               tabIndex={0}
               role="button"
@@ -161,6 +162,7 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
                 }
               }}
             >
+              <circle className="noteHalo" cx={x} cy={y} r="29" fill={color} />
               <circle cx={x} cy={y} r="22" fill={color} />
               <text className="degreeLabel" x={x} y={y + 6}>
                 {note.degree}
@@ -309,10 +311,11 @@ export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: Ba
               ? mobileTop - openStringLane / 2
               : mobileTop + (isOpenRange ? note.fret - 0.5 : note.fret - fretRange.start + 0.5) * mobileFretGap;
           const color = note.degree ? degreeTone[note.degree] ?? "#333" : "#333";
+          const isRoot = note.degree === "1";
 
           return (
             <g
-              className="noteHit"
+              className={isRoot ? "noteHit rootNote" : "noteHit"}
               key={`mobile-${fretRange.id}-${note.id}`}
               tabIndex={0}
               role="button"
@@ -325,6 +328,7 @@ export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: Ba
                 }
               }}
             >
+              <circle className="noteHalo" cx={x} cy={y} r={noteRadius + 6} fill={color} />
               <circle cx={x} cy={y} r={noteRadius} fill={color} />
               <text className="degreeLabel" x={x} y={y + 6}>
                 {note.degree}
