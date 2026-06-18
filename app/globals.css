@@ -140,10 +140,6 @@ input {
   min-width: 0;
 }
 
-.shellMobileNav {
-  display: none;
-}
-
 .hero {
   display: flex;
   align-items: flex-start;
@@ -215,6 +211,17 @@ input {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 1180px) {
+  .controls {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .toggle {
+    grid-column: span 2;
+  }
 }
 
 .voicingTabs {
@@ -536,8 +543,11 @@ select:focus-visible,
   margin-bottom: 12px;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03)),
+    rgba(255, 255, 255, 0.05);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24);
 }
 
 .progressionMeta {
@@ -641,8 +651,11 @@ select:focus-visible,
   margin-bottom: 12px;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03)),
+    rgba(255, 255, 255, 0.05);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.2);
 }
 
 .progressionEditorHeader {
@@ -769,49 +782,22 @@ select:focus-visible,
     padding-bottom: 16px;
   }
 
-  .shellMobileNav {
-    display: flex;
-    gap: 6px;
-    padding: 8px 12px 0;
-  }
-
-  .shellMobileTab {
-    flex: 1;
-    min-height: 38px;
-    display: grid;
-    place-items: center;
-    border: 1px solid #273142;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--muted);
-    font-size: 0.8rem;
-    font-weight: 900;
-    text-decoration: none;
-    text-transform: uppercase;
-  }
-
-  .shellMobileTab.active {
-    color: #fff;
-    background: linear-gradient(135deg, rgba(122, 167, 255, 0.22), rgba(43, 125, 233, 0.14));
-    border-color: rgba(122, 167, 255, 0.34);
-  }
-
   .hero {
     align-items: stretch;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 10px;
   }
 
   .heroSummary {
     max-width: none;
-    margin-top: 8px;
-    font-size: 0.9rem;
-    line-height: 1.45;
+    margin-top: 6px;
+    font-size: 0.88rem;
+    line-height: 1.42;
   }
 
   .heroTitle {
-    font-size: clamp(1.7rem, 9vw, 2.5rem);
+    font-size: clamp(1.55rem, 8vw, 2.2rem);
   }
 
   .chordBadgeProgression {
@@ -821,8 +807,8 @@ select:focus-visible,
   .controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    margin-bottom: 12px;
-    padding: 10px;
+    margin-bottom: 10px;
+    padding: 9px;
   }
 
   .voicingTabsRow {
@@ -835,6 +821,7 @@ select:focus-visible,
     align-items: stretch;
     margin-bottom: 10px;
     padding: 12px;
+    border-radius: 16px;
   }
 
   .progressionLabelRow {
@@ -870,7 +857,7 @@ select:focus-visible,
 @media (max-width: 560px) {
   .app {
     width: min(100% - 20px, 1180px);
-    padding-top: 14px;
+    padding-top: 12px;
   }
 
   .chordBadge {
@@ -888,37 +875,37 @@ select:focus-visible,
 
   .app {
     width: min(100% - 18px, 430px);
-    padding: 12px 0 22px;
+    padding: 10px 0 18px;
   }
 
   .hero {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: end;
-    gap: 12px;
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 8px;
   }
 
   .eyebrow {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
   }
 
-  h1 {
-    font-size: 1.6rem;
-    line-height: 1.05;
+  .heroTitle {
+    font-size: 1.45rem;
+    line-height: 1.04;
   }
 
   .chordBadge {
     min-width: 92px;
-    padding: 9px 11px;
+    padding: 8px 10px;
   }
 
   .chordBadge strong {
-    font-size: 1.45rem;
+    font-size: 1.3rem;
   }
 
   .chordBadge span {
-    font-size: 0.82rem;
+    font-size: 0.76rem;
   }
 
   .desktopControls,
@@ -928,19 +915,35 @@ select:focus-visible,
 
   .fretRangeTabs {
     display: grid;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .fretRangeTab {
-    min-height: 38px;
+    min-height: 36px;
+    font-size: 0.75rem;
   }
 
   .progressionPanel {
     padding: 10px;
   }
 
+  .progressionMeta strong {
+    font-size: 0.98rem;
+  }
+
+  .progressionMeta span {
+    font-size: 0.88rem;
+  }
+
+  .progressionReadout span {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 0.72rem;
+  }
+
   .progressionEditor {
     padding: 10px;
+    border-radius: 16px;
   }
 
   .progressionEditorHeader {
@@ -968,7 +971,7 @@ select:focus-visible,
     z-index: 10;
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     pointer-events: none;
   }
 
@@ -976,8 +979,8 @@ select:focus-visible,
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 38px;
-    padding: 0 12px;
+    min-height: 36px;
+    padding: 0 11px;
     border: 1px solid #334055;
     border-radius: 999px;
     background: linear-gradient(135deg, rgba(122, 167, 255, 0.16), rgba(43, 125, 233, 0.1));
@@ -1080,22 +1083,22 @@ select:focus-visible,
 
   .degreeStrip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-top: 12px;
+    gap: 7px;
+    margin-top: 10px;
   }
 
   .degreeCard {
-    min-height: 58px;
-    padding: 9px;
+    min-height: 54px;
+    padding: 8px;
   }
 
   .degreeCard span {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
   }
 
   .degreeCard strong {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
 }
 

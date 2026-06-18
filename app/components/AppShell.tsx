@@ -55,24 +55,7 @@ export function AppShell({ children }: AppShellProps) {
         </nav>
       </aside>
 
-      <div className="shellContent">
-        <header className="shellMobileNav" aria-label="Main">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={isActive ? "shellMobileTab active" : "shellMobileTab"}
-                aria-current={isActive ? "page" : undefined}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </header>
-        {children}
-      </div>
+      <div className="shellContent">{children}</div>
     </div>
   );
 }
