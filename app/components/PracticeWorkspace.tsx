@@ -451,8 +451,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           <ChordDegreeStrip chordNotes={chordNotes} showGuideTones={showGuideTones} />
         </div>
       </section>
-
-      {renderProgressionEditor("progressionEditor progressionEditorInline")}
     </main>
   );
 }
