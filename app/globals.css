@@ -940,6 +940,17 @@ select:focus-visible,
   filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28));
 }
 
+.fingerboardHighlight {
+  stroke: rgba(255, 236, 210, 0.18);
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.fretLaneShade {
+  fill: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
 .nut {
   fill: #d8d1c5;
   stroke: #b9aea0;
@@ -1007,6 +1018,13 @@ select:focus-visible,
   fill: rgba(218, 226, 235, 0.22);
   stroke: rgba(255, 255, 255, 0.12);
   stroke-width: 1;
+}
+
+.twelfthMarker circle {
+  fill: rgba(122, 167, 255, 0.18);
+  stroke: rgba(207, 224, 255, 0.42);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px rgba(122, 167, 255, 0.18));
 }
 
 .noteHit {

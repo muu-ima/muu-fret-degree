@@ -54,6 +54,29 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
           height={boardHeight + 36}
           rx="6"
         />
+        <line
+          className="fingerboardHighlight"
+          x1={leftPad + 8}
+          y1={topPad - 10}
+          x2={leftPad + boardWidth - 8}
+          y2={topPad - 10}
+        />
+        {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
+          if (fretIndex % 2 !== 1) {
+            return null;
+          }
+
+          return (
+            <rect
+              className="fretLaneShade"
+              key={`fret-shade-${fretRange.id}-${fretIndex}`}
+              x={leftPad + fretIndex * currentFretGap}
+              y={topPad - 18}
+              width={currentFretGap}
+              height={boardHeight + 36}
+            />
+          );
+        })}
         {isOpenRange ? (
           <rect
             className="nut"
@@ -102,7 +125,7 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
           />
         ))}
         {fretRange.start <= 12 && fretRange.end >= 12 ? (
-          <g className="doubleMarker">
+          <g className="doubleMarker twelfthMarker">
             <circle
               cx={leftPad + (isOpenRange ? 11.5 : 12 - fretRange.start + 0.5) * currentFretGap}
               cy={topPad + stringGap}
@@ -218,6 +241,29 @@ export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: Ba
           height={mobileHeight}
           rx="6"
         />
+        <line
+          className="fingerboardHighlight"
+          x1={mobileLeft - noteRadius + 8}
+          y1={mobileTop + 8}
+          x2={mobileLeft + mobileWidth + noteRadius - 8}
+          y2={mobileTop + 8}
+        />
+        {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
+          if (fretIndex % 2 !== 1) {
+            return null;
+          }
+
+          return (
+            <rect
+              className="fretLaneShade"
+              key={`mobile-fret-shade-${fretRange.id}-${fretIndex}`}
+              x={mobileLeft - noteRadius}
+              y={mobileTop + fretIndex * mobileFretGap}
+              width={mobileWidth + noteRadius * 2}
+              height={mobileFretGap}
+            />
+          );
+        })}
         {isOpenRange ? (
           <rect
             className="nut"
@@ -266,7 +312,7 @@ export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: Ba
           />
         ))}
         {fretRange.start <= 12 && fretRange.end >= 12 ? (
-          <g className="doubleMarker">
+          <g className="doubleMarker twelfthMarker">
             <circle
               cx={mobileLeft + mobileStringGap}
               cy={mobileTop + (isOpenRange ? 11.5 : 12 - fretRange.start + 0.5) * mobileFretGap}
