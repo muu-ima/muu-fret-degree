@@ -103,13 +103,16 @@ export function MetronomePanel({
 
   return (
     <section className="metronomePanel" aria-label="メトロノーム設定">
-      <div className="metronomeReadout">
+      <div className={isCountingIn ? "metronomeReadout countingIn" : "metronomeReadout"}>
         <div>
-          <p className="panelEyebrow">Tempo</p>
-          <strong>{bpm}</strong>
-          <span>BPM</span>
+          <p className="panelEyebrow">{isCountingIn ? "Count-in" : "Tempo"}</p>
+          <strong>{isCountingIn ? countInBeatsRemaining : bpm}</strong>
+          <span>{isCountingIn ? "BEATS" : "BPM"}</span>
         </div>
-        <div className="beatIndicator" aria-label={`${currentBeat}拍目 / ${beatsPerMeasure}拍`}>
+        <div
+          className={isCountingIn ? "beatIndicator countingIn" : "beatIndicator"}
+          aria-label={`${currentBeat}拍目 / ${beatsPerMeasure}拍`}
+        >
           {Array.from({ length: beatsPerMeasure }, (_, index) => (
             <span
               className={isRunning && index + 1 === currentBeat ? "active" : undefined}
@@ -119,7 +122,10 @@ export function MetronomePanel({
         </div>
       </div>
 
-      <div className="pulsePosition" aria-label={`拍内パルス ${currentPulse} / ${pulsesPerBeat}`}>
+      <div
+        className={isCountingIn ? "pulsePosition countingIn" : "pulsePosition"}
+        aria-label={`拍内パルス ${currentPulse} / ${pulsesPerBeat}`}
+      >
         {Array.from({ length: pulsesPerBeat }, (_, index) => (
           <span className={isRunning && index + 1 === currentPulse ? "active" : undefined} key={`pulse-${index + 1}`} />
         ))}

@@ -408,6 +408,25 @@ input {
     linear-gradient(180deg, rgba(122, 167, 255, 0.1), transparent),
     rgba(11, 16, 24, 0.72);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.metronomeReadout.countingIn {
+  border-color: rgba(242, 165, 26, 0.42);
+  background:
+    linear-gradient(180deg, rgba(242, 165, 26, 0.12), transparent),
+    rgba(18, 16, 15, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 241, 211, 0.06),
+    0 0 28px rgba(242, 165, 26, 0.08);
+}
+
+.metronomeReadout.countingIn .panelEyebrow,
+.metronomeReadout.countingIn > div:first-child > span {
+  color: #f5bd59;
 }
 
 .metronomeReadout > div:first-child {
@@ -469,6 +488,12 @@ input {
   transform: scale(1.12);
 }
 
+.beatIndicator.countingIn span.active {
+  border-color: rgba(255, 232, 189, 0.9);
+  background: #f2a51a;
+  box-shadow: 0 0 16px rgba(242, 165, 26, 0.42);
+}
+
 .pulsePosition {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -488,6 +513,11 @@ input {
 .pulsePosition span.active {
   background: #cfe0ff;
   box-shadow: 0 0 10px rgba(122, 167, 255, 0.36);
+}
+
+.pulsePosition.countingIn span.active {
+  background: #f5bd59;
+  box-shadow: 0 0 10px rgba(242, 165, 26, 0.34);
 }
 
 .metronomeTempoControls {
