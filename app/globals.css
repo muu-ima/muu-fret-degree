@@ -938,20 +938,22 @@ select:focus-visible,
 }
 
 .fingerboard {
-  fill: #7d5032;
-  stroke: #2f211a;
+  fill: #805232;
+  stroke: #2b1d16;
   stroke-width: 2;
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28));
+  filter:
+    drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28))
+    drop-shadow(0 -1px 0 rgba(255, 237, 212, 0.08));
 }
 
 .fingerboardHighlight {
-  stroke: rgba(255, 236, 210, 0.18);
+  stroke: rgba(255, 238, 214, 0.24);
   stroke-linecap: round;
   stroke-width: 2;
 }
 
 .fretLaneShade {
-  fill: rgba(0, 0, 0, 0.08);
+  fill: rgba(0, 0, 0, 0.105);
   pointer-events: none;
 }
 
@@ -980,15 +982,19 @@ select:focus-visible,
 }
 
 .fretNumberBadge {
-  fill: rgba(8, 11, 17, 0.58);
-  stroke: rgba(184, 199, 218, 0.2);
+  fill: rgba(7, 10, 15, 0.72);
+  stroke: rgba(202, 216, 236, 0.3);
   stroke-width: 1;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.18));
 }
 
 .fretNumber {
-  fill: #d4dbe6;
+  fill: #eef4ff;
   font-size: 13px;
   font-weight: 900;
+  paint-order: stroke;
+  stroke: rgba(7, 10, 15, 0.72);
+  stroke-width: 2px;
 }
 
 .stringName {
@@ -1025,10 +1031,12 @@ select:focus-visible,
 }
 
 .twelfthMarker circle {
-  fill: rgba(122, 167, 255, 0.18);
-  stroke: rgba(207, 224, 255, 0.42);
-  stroke-width: 2;
-  filter: drop-shadow(0 0 8px rgba(122, 167, 255, 0.18));
+  fill: rgba(122, 167, 255, 0.24);
+  stroke: rgba(226, 236, 255, 0.64);
+  stroke-width: 2.2;
+  filter:
+    drop-shadow(0 0 8px rgba(122, 167, 255, 0.2))
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.16));
 }
 
 .noteHit {
@@ -1036,36 +1044,42 @@ select:focus-visible,
 }
 
 .noteHalo {
-  opacity: 0.16;
+  opacity: 0.14;
   pointer-events: none;
-  filter: blur(1px);
+  filter: blur(1.2px);
 }
 
 .noteHit circle:not(.noteHalo) {
-  stroke: rgba(255, 255, 255, 0.76);
-  stroke-width: 3;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 2.6;
   filter:
-    drop-shadow(0 8px 10px rgba(0, 0, 0, 0.24)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
+    drop-shadow(0 8px 10px rgba(0, 0, 0, 0.24))
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.08));
   transition:
     r 140ms ease,
+    stroke-width 140ms ease,
     filter 140ms ease;
 }
 
 .noteHit.rootNote circle:not(.noteHalo) {
-  stroke: rgba(255, 255, 255, 0.92);
-  stroke-width: 3.5;
+  stroke: rgba(255, 247, 230, 0.96);
+  stroke-width: 4;
   filter:
-    drop-shadow(0 10px 12px rgba(0, 0, 0, 0.28)) drop-shadow(0 0 12px rgba(232, 77, 91, 0.26));
+    drop-shadow(0 10px 12px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 0 13px rgba(232, 77, 91, 0.32))
+    drop-shadow(0 0 4px rgba(255, 236, 211, 0.2));
 }
 
 .noteHit.rootNote .noteHalo {
-  opacity: 0.24;
+  opacity: 0.3;
+  filter: blur(1.4px);
 }
 
 .noteHit:hover circle:not(.noteHalo) {
   r: 25px;
   filter:
-    drop-shadow(0 12px 16px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 14px rgba(255, 255, 255, 0.14));
+    drop-shadow(0 12px 16px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 0 14px rgba(255, 255, 255, 0.14));
 }
 
 .noteHit:hover .noteHalo {
@@ -1081,14 +1095,23 @@ select:focus-visible,
   pointer-events: none;
 }
 
+.rootNote .degreeLabel {
+  fill: #fff8e8;
+}
+
 .noteName {
-  fill: #fffdf3;
+  fill: #f8fbff;
   font-size: 13px;
   font-weight: 900;
   paint-order: stroke;
   pointer-events: none;
   stroke: rgba(32, 33, 36, 0.62);
   stroke-width: 3px;
+}
+
+.rootNote .noteName {
+  fill: #fff0d6;
+  stroke: rgba(38, 22, 20, 0.72);
 }
 
 .degreeStrip {
