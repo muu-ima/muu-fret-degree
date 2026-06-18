@@ -73,6 +73,15 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     );
   }, [bpm]);
 
+  useEffect(() => {
+    const handleOpenControls = () => {
+      setIsControlsOpen(true);
+    };
+
+    window.addEventListener("shell:open-controls", handleOpenControls);
+    return () => window.removeEventListener("shell:open-controls", handleOpenControls);
+  }, []);
+
   const chromatic = theory.chromatic;
   const chordTypes = theory.chordTypes as ChordType[];
   const tunings = theory.tunings as Tuning[];
@@ -287,9 +296,23 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         </button>
       </div>
 
-      {renderControls("controls desktopControls")}
+      {!isControlsOpen ? renderControls("controls desktopControls") : null}
 
       <div className={isControlsOpen ? "drawerBackdrop open" : "drawerBackdrop"} onClick={() => setIsControlsOpen(false)} />
+      <aside
+        className={isControlsOpen ? "shellControlsPanel open" : "shellControlsPanel"}
+        role="dialog"
+        aria-modal="true"
+        aria-label="コードとチューニング"
+      >
+        <div className="drawerHeader">
+          <strong>{root} {chordType.name}</strong>
+          <button type="button" className="closeButton" onClick={() => setIsControlsOpen(false)}>
+            ×
+          </button>
+        </div>
+        {renderControls("controls shellControls")}
+      </aside>
       <aside
         className={isControlsOpen ? "controlsDrawer open" : "controlsDrawer"}
         role="dialog"

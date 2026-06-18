@@ -24,6 +24,10 @@ const navItems = [
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
 
+  const openControls = () => {
+    window.dispatchEvent(new CustomEvent("shell:open-controls"));
+  };
+
   return (
     <div className="appShell">
       <aside className="appSidebar">
@@ -37,6 +41,8 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </div>
 
+        <div className="sidebarSection">
+          <p className="sidebarSectionLabel">Modes</p>
         <nav className="sidebarNav" aria-label="Main">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -53,6 +59,17 @@ export function AppShell({ children }: AppShellProps) {
             );
           })}
         </nav>
+        </div>
+
+        <div className="sidebarSection">
+          <p className="sidebarSectionLabel">Panels</p>
+        <div className="sidebarTools">
+          <button type="button" className="sidebarToolButton" onClick={openControls}>
+            <strong>Controls</strong>
+            <span>コードと再生の操作を開く</span>
+          </button>
+        </div>
+        </div>
       </aside>
 
       <div className="shellContent">{children}</div>
