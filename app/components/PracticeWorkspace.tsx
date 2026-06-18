@@ -102,13 +102,11 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           eyebrow: "Practice Mode",
           title: "Practice",
           summary: "指板で音を確認しながら、コード・音域・ガイドトーンを切り替える画面です。",
-          chips: ["Fretboard", "Voicings", "Guide tones"],
         }
       : {
           eyebrow: "Progression Edit",
           title: "Progression Edit",
           summary: "2拍単位のセルを編集して、2 / 4 / 8 / 16 小節のループを組む画面です。4 小節を基準に見せます。",
-          chips: ["2-beat cells", "Loop length", "Local save"],
         };
 
   useEffect(() => {
@@ -269,13 +267,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           <p className="eyebrow">{pageHeader.eyebrow}</p>
           <p className="heroTitle">{pageHeader.title}</p>
           <p className="heroSummary">{pageHeader.summary}</p>
-          <div className="heroChips" aria-label="page highlights">
-            {pageHeader.chips.map((chip) => (
-              <span key={chip} className="heroChip">
-                {chip}
-              </span>
-            ))}
-          </div>
         </div>
         <div className={pageMode === "progression" ? "chordBadge chordBadgeProgression" : "chordBadge"}>
           <strong>{displayedRoot}</strong>
