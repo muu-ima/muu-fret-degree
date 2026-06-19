@@ -159,6 +159,8 @@
 
 コード進行の小節ごとの Root / Chord を編集する。
 
+短期的なUI再構成の方針は [`docs/progression-editor-ui.md`](./progression-editor-ui.md) を参照する。
+
 - 2 / 4 / 8 / 16 小節のループを編集する。
 - 小節数の切り替えは、比較しやすいのでタブ型で見せる。
 - 各小節を 2 拍単位で分割し、前半 / 後半の Root と Chord を選択できる。
@@ -166,6 +168,17 @@
 - `Progression Edit` ページでのみ表示する。
 
 編集内容そのものは `app/components/PracticeWorkspace.tsx` の state に反映する。
+
+### `app/components/ProgressionChordChart.tsx`
+
+コード進行を簡易コード譜として表示する。
+
+- 各小節のコード名と4拍のリズムスラッシュを表示する。
+- 選択中の小節と拍を視覚的に示す。
+- 拍の選択を callback で `ProgressionEditor` へ返す。
+- 将来は休符、タイ、スラー、1拍コード上書きの表示を担当する。
+
+このコンポーネントは編集データを更新せず、譜面表示と選択操作だけを担当する。
 
 ### `app/hooks/useAudioEngine.ts`
 

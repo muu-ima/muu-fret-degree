@@ -1864,6 +1864,148 @@ select:focus-visible,
   font-weight: 700;
 }
 
+.progressionChordChart {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(154, 171, 196, 0.14);
+  border-radius: 16px;
+  background: rgba(7, 10, 15, 0.5);
+}
+
+.progressionChordChartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.progressionChordChartHeader span {
+  color: #86aeef;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.progressionChordChartHeader strong {
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.progressionChordChartGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+  padding-right: 3px;
+  scrollbar-color: rgba(122, 167, 255, 0.52) rgba(255, 255, 255, 0.05);
+}
+
+.progressionChartBar {
+  min-width: 0;
+  padding: 8px 8px 6px;
+  border: 1px solid rgba(154, 171, 196, 0.16);
+  border-radius: 8px;
+  background: rgba(17, 22, 31, 0.78);
+}
+
+.progressionChartBar.selected {
+  border-color: rgba(122, 167, 255, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.1);
+}
+
+.progressionChartBarNumber {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.progressionChartChords {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 24px;
+}
+
+.progressionChartChord {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progressionChartChord.full {
+  grid-column: 1 / -1;
+}
+
+.progressionChartBeats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(205, 214, 228, 0.48);
+  border-right: 1px solid rgba(205, 214, 228, 0.32);
+  border-left: 1px solid rgba(205, 214, 228, 0.32);
+}
+
+.progressionChartBeat {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid rgba(205, 214, 228, 0.12);
+  border-radius: 0;
+  background: transparent;
+  color: #dce5f4;
+}
+
+.progressionChartBeat:last-child {
+  border-right: 0;
+}
+
+.progressionChartBeat.selected {
+  background: rgba(122, 167, 255, 0.14);
+  color: #fff;
+}
+
+.progressionChartBeat:focus-visible {
+  outline: 2px solid #8ab4ff;
+  outline-offset: -2px;
+}
+
+.progressionChartSlash {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.progressionChartBeatNumber {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.52rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
 .progressionEditorGrid {
   display: grid;
   gap: 10px;
@@ -1886,6 +2028,10 @@ select:focus-visible,
     rgba(13, 18, 27, 0.44);
 }
 
+.progressionEditorRow.selected {
+  border-color: rgba(122, 167, 255, 0.3);
+}
+
 .progressionEditorRow strong {
   font-size: 0.94rem;
 }
@@ -1899,6 +2045,13 @@ select:focus-visible,
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
     rgba(13, 18, 27, 0.44);
+}
+
+.progressionCellGroup.selected {
+  border-color: rgba(122, 167, 255, 0.46);
+  background:
+    linear-gradient(180deg, rgba(122, 167, 255, 0.08), transparent),
+    rgba(13, 18, 27, 0.54);
 }
 
 .progressionCellTitle {
@@ -2034,6 +2187,10 @@ select:focus-visible,
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 10px;
+  }
+
+  .progressionChordChartGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .progressionEditorRow strong {
@@ -2282,6 +2439,23 @@ select:focus-visible,
   .progressionEditor {
     padding: 10px;
     border-radius: 16px;
+  }
+
+  .progressionChordChart {
+    padding: 9px;
+  }
+
+  .progressionChordChartGrid {
+    gap: 6px;
+    max-height: 210px;
+  }
+
+  .progressionChartBar {
+    padding: 7px 6px 5px;
+  }
+
+  .progressionChartBeat {
+    min-height: 38px;
   }
 
   .progressionEditorHeader {

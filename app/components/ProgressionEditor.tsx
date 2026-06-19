@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { type ChordType } from "../lib/music";
 import { type ProgressionBar, type ProgressionCell } from "../lib/progression";
+import { ProgressionChordChart } from "./ProgressionChordChart";
 
 type ProgressionEditorProps = {
   className?: string;
@@ -24,6 +26,18 @@ export function ProgressionEditor({
   onBarCountChange,
   onCellChange,
 }: ProgressionEditorProps) {
+  const [selectedBarIndex, setSelectedBarIndex] = useState(0);
+  const [selectedBeatIndex, setSelectedBeatIndex] = useState(0);
+
+  useEffect(() => {
+    setSelectedBarIndex((currentIndex) => Math.min(currentIndex, Math.max(bars.length - 1, 0)));
+  }, [bars.length]);
+
+  const selectBeat = (barIndex: number, beatIndex: number) => {
+    setSelectedBarIndex(barIndex);
+    setSelectedBeatIndex(beatIndex);
+  };
+
   return (
     <section className={className} aria-label="コード進行編集">
       <div className="progressionEditorHeader">
@@ -49,12 +63,30 @@ export function ProgressionEditor({
         </div>
       </div>
       <span className="progressionEditorHint">Root と Chord をその場で書き換えられます。</span>
+      <ProgressionChordChart
+        bars={bars}
+        chordTypes={chordTypes}
+        selectedBarIndex={selectedBarIndex}
+        selectedBeatIndex={selectedBeatIndex}
+        onBeatSelect={selectBeat}
+      />
       <div className="progressionEditorGrid">
         {bars.map((bar, barIndex) => (
-          <div className="progressionEditorRow" key={bar.bar}>
+          <div
+            className={barIndex === selectedBarIndex ? "progressionEditorRow selected" : "progressionEditorRow"}
+            key={bar.bar}
+          >
             <strong>Bar {bar.bar}</strong>
             {bar.cells.map((cell, cellIndex) => (
-              <div className="progressionCellGroup" key={`${bar.bar}-${cellIndex}`}>
+              <div
+                className={
+                  barIndex === selectedBarIndex && cellIndex === Math.floor(selectedBeatIndex / 2)
+                    ? "progressionCellGroup selected"
+                    : "progressionCellGroup"
+                }
+                key={`${bar.bar}-${cellIndex}`}
+                onClick={() => selectBeat(barIndex, cellIndex * 2)}
+              >
                 <strong className="progressionCellTitle">
                   Beats {cellIndex === 0 ? "1-2" : "3-4"}
                 </strong>
