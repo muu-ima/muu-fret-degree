@@ -75,21 +75,21 @@
 
 ホームの練習ページを担当する。
 
-- `PracticeWorkspace` を `showProgressionEditor=false` で表示する。
+- `PracticeWorkspace` を表示する。
 - Practice モードの入口として、指板と基本操作を見せる。
 
 ### `app/progression/page.tsx`
 
 コード進行編集ページを担当する。
 
-- `PracticeWorkspace` を `showProgressionEditor=true` で表示する。
-- 進行編集を別ルートに分ける。
+- `ProgressionEditorWorkspace` を表示する。
+- 指板や再生パネルを置かず、進行編集を別ルートへ分離する。
 - 2 / 4 / 8 / 16 bars を切り替えられるようにし、4 bars を基準に見通しを保つ。
 - 8 / 16 bars は編集領域内スクロールで扱う。
 
 ### `app/components/PracticeWorkspace.tsx`
 
-アプリ共通の練習画面を担当する。
+メインの練習・再生画面を担当する。
 
 - 選択中の Root / Chord / Tuning / BPM などの state を持つ。
 - `theory.json` から現在のコード種別やチューニングを選ぶ。
@@ -97,6 +97,7 @@
 - UI コンポーネントへ props とイベントハンドラを渡す。
 - 音声 hook から受け取った再生関数を呼び出す。
 - 進行再生中は、現在小節の Root / Chord を表示と再生へ反映する。
+- `ProgressionQuickEditor` へ進行データと更新 callback を渡す。
 
 ここには、大きな SVG 描画、音楽理論の細かい計算、AudioContext のライフサイクル、入力値の正規化ルールを置かない。画面の流れを読むためのファイルとして保つ。
 
@@ -108,6 +109,7 @@
 - `Practice` と `Progression Edit` の入口を常設する。
 - サイドバーは `Modes` と `Panels` のように役割ごとに分けられるようにする。
 - `Controls` のような補助パネルの入口をここに置けるようにする。
+- `Progression Edit` は画面モード、`Quick Edit` はメイン画面の補助パネルとして分ける。
 - モバイルではサイドバーを縮めて、ページ切り替えを残す。
 - 転回形 (Inversion) のように比較したい選択肢は、ドロップダウンよりタブ型の方が向く。
 
@@ -152,7 +154,6 @@
 
 - Play / Stop / Reset を表示する。
 - 現在の小節、2 拍セル、進行中のコードを表示する。
-- Progression モードでは BPM 調整とメトロノームの ON/OFF を表示する。
 - 状態は持たず、`useProgressionPlayback` から受け取った値を表示するだけにする。
 
 ### `app/components/ProgressionEditor.tsx`
@@ -164,10 +165,28 @@
 - 2 / 4 / 8 / 16 小節のループを編集する。
 - 小節数の切り替えは、比較しやすいのでタブ型で見せる。
 - 各小節を 2 拍単位で分割し、前半 / 後半の Root と Chord を選択できる。
-- 状態の保存はしない。編集内容は `PracticeWorkspace` の state に反映するだけにする。
+- 状態の保存はしない。編集内容は親ワークスペースの state に反映するだけにする。
 - `Progression Edit` ページでのみ表示する。
 
-編集内容そのものは `app/components/PracticeWorkspace.tsx` の state に反映する。
+編集内容そのものは `ProgressionEditorWorkspace` の state に反映する。
+
+### `app/components/ProgressionEditorWorkspace.tsx`
+
+`/progression` の専用編集画面を担当する。
+
+- 進行データを読み込み、`ProgressionEditor` へ渡す。
+- 2 / 4 / 8 / 16小節の変更とセル編集をstateへ反映する。
+- 指板、メトロノーム、進行再生の操作は持たない。
+- 編集結果を `usePersistedProgression` でメイン画面と共有する。
+
+### `app/components/ProgressionQuickEditor.tsx`
+
+メイン画面で選択中の小節を素早く編集する。
+
+- 前後の小節と2拍セルを切り替える。
+- Root / Chordを即時変更する。
+- `Full Editor` から `/progression` へ移動する。
+- 小節数、拍、タイ、スラーなどの詳細編集は持たない。
 
 ### `app/components/ProgressionChordChart.tsx`
 

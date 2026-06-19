@@ -17,8 +17,8 @@ import { ChordDegreeStrip } from "./ChordDegreeStrip";
 import { ControlsPanel } from "./ControlsPanel";
 import { FretRangeTabs } from "./FretRangeTabs";
 import { MetronomePanel } from "./MetronomePanel";
-import { ProgressionEditor } from "./ProgressionEditor";
 import { ProgressionPanel } from "./ProgressionPanel";
+import { ProgressionQuickEditor } from "./ProgressionQuickEditor";
 import { useAudioEngine } from "../hooks/useAudioEngine";
 import { useBpmControl } from "../hooks/useBpmControl";
 import {
@@ -42,15 +42,9 @@ import {
   makeFretNotes,
 } from "../lib/music";
 import {
-  makeProgressionBar,
-  resizeProgressionBars,
+  createDefaultProgression,
   type ChordProgression,
 } from "../lib/progression";
-
-type PracticeWorkspaceProps = {
-  showProgressionEditor: boolean;
-  pageMode: "practice" | "progression";
-};
 
 type DesktopPanelKey = "controls" | "metronome" | "progression" | "edit";
 type DesktopPanelPosition = { x: number; y: number };
@@ -61,7 +55,7 @@ const bottomSheetHeightBounds = {
   max: 92,
 };
 
-export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeWorkspaceProps) {
+export function PracticeWorkspace() {
   const [root, setRoot] = useState("C");
   const [chordTypeId, setChordTypeId] = useState("m7");
   const [tuningId, setTuningId] = useState("standard");
@@ -69,7 +63,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [isControlsOpen, setIsControlsOpen] = useState(false);
   const [isMetronomeOpen, setIsMetronomeOpen] = useState(false);
   const [isProgressionPanelOpen, setIsProgressionPanelOpen] = useState(false);
-  const [isProgressionEditorOpen, setIsProgressionEditorOpen] = useState(showProgressionEditor);
+  const [isProgressionEditorOpen, setIsProgressionEditorOpen] = useState(false);
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
@@ -86,16 +80,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     Partial<Record<DesktopPanelKey, DesktopPanelPosition>>
   >({});
   const [compactDesktopPanels, setCompactDesktopPanels] = useState<Partial<Record<DesktopPanelKey, boolean>>>({});
-  const [progression, setProgression] = useState<ChordProgression>(() => ({
-    bpm: 120,
-    timeSignature: { beatsPerBar: 4, beatUnit: 4 },
-    bars: [
-      makeProgressionBar(1, { root: "C", chordTypeId: "maj7" }),
-      makeProgressionBar(2, { root: "A", chordTypeId: "m7" }),
-      makeProgressionBar(3, { root: "D", chordTypeId: "m7" }),
-      makeProgressionBar(4, { root: "G", chordTypeId: "7" }),
-    ],
-  }));
+  const [progression, setProgression] = useState<ChordProgression>(() => createDefaultProgression());
   const [progressionRhythm, setProgressionRhythm] = useState<ProgressionRhythm>("chord-tones");
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
   const {
@@ -152,10 +137,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     };
 
     const handleOpenEdit = () => {
-      if (!showProgressionEditor) {
-        return;
-      }
-
       setIsControlsOpen(false);
       setIsMetronomeOpen(false);
       setIsProgressionPanelOpen(false);
@@ -179,7 +160,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       window.removeEventListener("shell:open-progression", handleOpenProgression);
       window.removeEventListener("shell:open-edit", handleOpenEdit);
     };
-  }, [showProgressionEditor]);
+  }, []);
 
   const closePanels = () => {
     setIsControlsOpen(false);
@@ -436,18 +417,11 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     () => Array.from({ length: displayedChordType.intervals.length }, (_, index) => index),
     [displayedChordType],
   );
-  const pageHeader =
-    pageMode === "practice"
-      ? {
-          eyebrow: "Practice Mode",
-          title: "Practice",
-          summary: "指板で音を確認しながら、コード・音域・ガイドトーンを切り替える画面です。",
-        }
-      : {
-          eyebrow: "Progression Edit",
-          title: "Progression Edit",
-          summary: "2拍単位のセルを編集して、2 / 4 / 8 / 16 小節のループを組む画面です。4 小節を基準に見せます。",
-        };
+  const pageHeader = {
+    eyebrow: "Practice Mode",
+    title: "Practice",
+    summary: "指板で音を確認しながら、コード・音域・ガイドトーンを切り替える画面です。",
+  };
 
   useEffect(() => {
     setChordInversion((currentInversion) => Math.min(currentInversion, chordInversions.length - 1));
@@ -527,13 +501,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           cells: nextCells,
         };
       }),
-    }));
-  };
-
-  const handleProgressionBarCountChange = (nextBarCount: number) => {
-    setProgression((currentProgression) => ({
-      ...currentProgression,
-      bars: resizeProgressionBars(currentProgression.bars, nextBarCount),
     }));
   };
 
@@ -633,25 +600,6 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     );
   }
 
-  function renderProgressionEditor(className?: string) {
-    if (!showProgressionEditor) {
-      return null;
-    }
-
-    return (
-      <ProgressionEditor
-        className={className}
-        bars={progression.bars}
-        barCount={progression.bars.length}
-        barCountOptions={[2, 4, 8, 16]}
-        roots={theory.roots}
-        chordTypes={chordTypes}
-        onBarCountChange={handleProgressionBarCountChange}
-        onCellChange={handleProgressionBarCellChange}
-      />
-    );
-  }
-
   return (
     <main className="app">
       <section className="hero">
@@ -660,12 +608,10 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           <p className="heroTitle">{pageHeader.title}</p>
           <p className="heroSummary">{pageHeader.summary}</p>
         </div>
-        {pageMode === "practice" ? (
-          <div className="chordBadge">
-            <strong>{displayedRoot}</strong>
-            <span>{displayedChordType.name}</span>
-          </div>
-        ) : null}
+        <div className="chordBadge">
+          <strong>{displayedRoot}</strong>
+          <span>{displayedChordType.name}</span>
+        </div>
       </section>
 
       <div
@@ -747,29 +693,30 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         )}
         <div className="shellProgression">{renderProgressionPanel()}</div>
       </aside>
-      {showProgressionEditor ? (
-        <aside
-          className={getDesktopPanelClassName("shellEditPanel", "edit", isProgressionEditorOpen)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="コード進行編集"
-          style={getDesktopPanelStyle("edit")}
-        >
-          {renderBottomSheetHandle()}
-          {renderDrawerHeader("edit", "Progression Edit", `${progression.bars.length} bars`)}
-          <div className="shellEdit">{renderProgressionEditor("progressionEditor progressionEditorSheet")}</div>
-        </aside>
-      ) : null}
+      <aside
+        className={getDesktopPanelClassName("shellEditPanel", "edit", isProgressionEditorOpen)}
+        role="dialog"
+        aria-modal="true"
+        aria-label="コード進行クイック編集"
+        style={getDesktopPanelStyle("edit")}
+      >
+        {renderBottomSheetHandle()}
+        {renderDrawerHeader("edit", "Quick Edit", `${progression.bars.length} bars`)}
+        <div className="shellEdit">
+          <ProgressionQuickEditor
+            bars={progression.bars}
+            roots={theory.roots}
+            chordTypes={chordTypes}
+            activeBarIndex={progressionPlayback.progressionPosition.barIndex % progression.bars.length}
+            activeCellIndex={currentProgressionSelection?.cellIndex ?? 0}
+            onCellChange={handleProgressionBarCellChange}
+          />
+        </div>
+      </aside>
 
       <section className="fretboardCanvas">
         <div className="fretboardCanvasHeader">
           <div>
-            {pageMode === "progression" ? (
-              <div className="chordBadge chordBadgeProgression fretboardCanvasBadge">
-                <strong>{displayedRoot}</strong>
-                <span>{displayedChordType.name}</span>
-              </div>
-            ) : null}
             <p className="fretboardCanvasEyebrow">Canvas</p>
             <strong>Bass Fretboard</strong>
           </div>

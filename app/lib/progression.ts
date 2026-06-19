@@ -37,6 +37,19 @@ export type ProgressionPlaybackState = {
   selection?: ProgressionSelection;
 };
 
+export function createDefaultProgression(bpm = 120): ChordProgression {
+  return {
+    bpm,
+    timeSignature: { beatsPerBar: 4, beatUnit: 4 },
+    bars: [
+      makeProgressionBar(1, { root: "C", chordTypeId: "maj7" }),
+      makeProgressionBar(2, { root: "A", chordTypeId: "m7" }),
+      makeProgressionBar(3, { root: "D", chordTypeId: "m7" }),
+      makeProgressionBar(4, { root: "G", chordTypeId: "7" }),
+    ],
+  };
+}
+
 function normalizeNonNegative(value: number) {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
