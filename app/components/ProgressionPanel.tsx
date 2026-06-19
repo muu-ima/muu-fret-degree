@@ -1,5 +1,6 @@
 "use client";
 
+import { type ProgressionRhythm } from "../hooks/useChordPlayback";
 import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../lib/progression";
 
 type ProgressionPanelProps = {
@@ -9,16 +10,11 @@ type ProgressionPanelProps = {
   currentProgressionChordTypeName?: string;
   progressionPosition: ProgressionPosition;
   isProgressionRunning: boolean;
-  showTempoControls: boolean;
-  bpmInput: string;
-  isMetronomeRunning: boolean;
-  currentBeat: number;
+  rhythm: ProgressionRhythm;
   onStartProgression: () => void;
   onStopProgression: () => void;
   onResetProgression: () => void;
-  onBpmInputChange: (value: string) => void;
-  onBpmCommit: (value: string) => void;
-  onToggleMetronome: () => void;
+  onRhythmChange: (rhythm: ProgressionRhythm) => void;
 };
 
 export function ProgressionPanel({
@@ -28,16 +24,11 @@ export function ProgressionPanel({
   currentProgressionChordTypeName,
   progressionPosition,
   isProgressionRunning,
-  showTempoControls,
-  bpmInput,
-  isMetronomeRunning,
-  currentBeat,
+  rhythm,
   onStartProgression,
   onStopProgression,
   onResetProgression,
-  onBpmInputChange,
-  onBpmCommit,
-  onToggleMetronome,
+  onRhythmChange,
 }: ProgressionPanelProps) {
   const currentBarNumber = currentProgressionBar?.bar ?? progressionPosition.barIndex + 1;
   const currentCellIndex = currentProgressionCellIndex ?? Math.min(Math.floor(progressionPosition.beatInBar / 2), 1);
@@ -77,36 +68,27 @@ export function ProgressionPanel({
           Reset
         </button>
       </div>
-      {showTempoControls ? (
-        <div className="progressionTransport">
-          <label className="progressionTempo">
-            BPM
-            <input
-              min="40"
-              max="240"
-              step="1"
-              type="number"
-              value={bpmInput}
-              onBlur={(event) => onBpmCommit(event.target.value)}
-              onChange={(event) => onBpmInputChange(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onBpmCommit(event.currentTarget.value);
-                  event.currentTarget.blur();
-                }
-              }}
-            />
-          </label>
+      <div className="progressionRhythm">
+        <span className="controlLabel">Rhythm</span>
+        <div className="progressionRhythmTabs" role="group" aria-label="ベース伴奏リズム">
           <button
             type="button"
-            className={isMetronomeRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
-            onClick={onToggleMetronome}
+            className={rhythm === "chord-tones" ? "progressionRhythmTab active" : "progressionRhythmTab"}
+            aria-pressed={rhythm === "chord-tones"}
+            onClick={() => onRhythmChange("chord-tones")}
           >
-            <span aria-hidden="true">♫</span>
-            {isMetronomeRunning ? "Beat " + currentBeat : "Metronome"}
+            Chord Tones
+          </button>
+          <button
+            type="button"
+            className={rhythm === "four-beat" ? "progressionRhythmTab active" : "progressionRhythmTab"}
+            aria-pressed={rhythm === "four-beat"}
+            onClick={() => onRhythmChange("four-beat")}
+          >
+            4 Beat
           </button>
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }

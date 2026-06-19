@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type MetronomeTone,
   playBassNote as playBassAudioNote,
   playMetronomeClick as playMetronomeAudioClick,
   playPianoNote as playPianoAudioNote,
@@ -9,14 +10,33 @@ import {
 
 type UseAudioEngineOptions = {
   bpm: number;
+  beatsPerMeasure: number;
+  pulsesPerBeat: number;
+  countInMeasures: number;
+  swingRatio: number;
+  metronomeTone: MetronomeTone;
+  accentFirstBeat: boolean;
+  metronomeVolume: number;
 };
 
-export function useAudioEngine({ bpm }: UseAudioEngineOptions) {
+export function useAudioEngine({
+  bpm,
+  beatsPerMeasure,
+  pulsesPerBeat,
+  countInMeasures,
+  swingRatio,
+  metronomeTone,
+  accentFirstBeat,
+  metronomeVolume,
+}: UseAudioEngineOptions) {
   const audioContext = useRef<AudioContext | null>(null);
   const metronomeTimer = useRef<number | null>(null);
-  const metronomeBeat = useRef(0);
+  const metronomePulse = useRef(0);
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(1);
+  const [currentPulse, setCurrentPulse] = useState(1);
+  const [isCountingIn, setIsCountingIn] = useState(false);
+  const [countInBeatsRemaining, setCountInBeatsRemaining] = useState(0);
 
   const ensureAudioContext = useCallback(() => {
     if (!audioContext.current) {
@@ -27,7 +47,7 @@ export function useAudioEngine({ bpm }: UseAudioEngineOptions) {
 
   const stopMetronome = useCallback(() => {
     if (metronomeTimer.current !== null) {
-      window.clearInterval(metronomeTimer.current);
+      window.clearTimeout(metronomeTimer.current);
       metronomeTimer.current = null;
     }
   }, []);
@@ -58,29 +78,73 @@ export function useAudioEngine({ bpm }: UseAudioEngineOptions) {
     stopMetronome();
 
     if (!isMetronomeRunning) {
+      setIsCountingIn(false);
+      setCountInBeatsRemaining(0);
       return;
     }
 
     const beatMs = (60 / bpm) * 1000;
-    metronomeBeat.current = 0;
+    const pulseMs = beatMs / pulsesPerBeat;
+    const countInBeats = countInMeasures * beatsPerMeasure;
+    const countInPulses = countInBeats * pulsesPerBeat;
+    metronomePulse.current = 0;
 
     const tick = () => {
       const context = ensureAudioContext();
-      const beat = metronomeBeat.current % 4;
+      const absolutePulse = metronomePulse.current;
+      const isCountInPulse = absolutePulse < countInPulses;
+      const playbackPulse = isCountInPulse ? absolutePulse : absolutePulse - countInPulses;
+      const pulseInMeasure = playbackPulse % (beatsPerMeasure * pulsesPerBeat);
+      const beat = Math.floor(pulseInMeasure / pulsesPerBeat);
+      const pulse = pulseInMeasure % pulsesPerBeat;
+      const clickKind =
+        pulse === 0
+          ? accentFirstBeat && beat === 0
+            ? "accent"
+            : "beat"
+          : "subdivision";
       void context.resume();
-      playMetronomeAudioClick(context, context.currentTime, beat === 0);
+      playMetronomeAudioClick(context, context.currentTime, clickKind, metronomeTone, metronomeVolume);
       setCurrentBeat(beat + 1);
-      metronomeBeat.current += 1;
+      setCurrentPulse(pulse + 1);
+      setIsCountingIn(isCountInPulse);
+      if (pulse === 0) {
+        const elapsedCountInBeats = Math.floor(absolutePulse / pulsesPerBeat);
+        setCountInBeatsRemaining(isCountInPulse ? countInBeats - elapsedCountInBeats : 0);
+      }
+      metronomePulse.current += 1;
+
+      const nextPulseMs =
+        pulsesPerBeat === 2 && swingRatio > 0
+          ? pulse === 0
+            ? beatMs * swingRatio
+            : beatMs * (1 - swingRatio)
+          : pulseMs;
+      metronomeTimer.current = window.setTimeout(tick, nextPulseMs);
     };
 
     tick();
-    metronomeTimer.current = window.setInterval(tick, beatMs);
 
     return stopMetronome;
-  }, [bpm, ensureAudioContext, isMetronomeRunning, stopMetronome]);
+  }, [
+    accentFirstBeat,
+    beatsPerMeasure,
+    bpm,
+    countInMeasures,
+    ensureAudioContext,
+    isMetronomeRunning,
+    metronomeVolume,
+    metronomeTone,
+    pulsesPerBeat,
+    stopMetronome,
+    swingRatio,
+  ]);
 
   return {
     currentBeat,
+    currentPulse,
+    countInBeatsRemaining,
+    isCountingIn,
     isMetronomeRunning,
     playBassNote,
     playPianoNote,

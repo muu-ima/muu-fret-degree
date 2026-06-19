@@ -7,7 +7,11 @@ import {
   type FretNote,
   makeTrebleChordMidi,
   pickLowestBassNoteForDegree,
+  pitchClassOf,
+  sharpPitchClasses,
 } from "../lib/music";
+
+export type ProgressionRhythm = "chord-tones" | "four-beat";
 
 type UseChordPlaybackOptions = {
   root: string;
@@ -52,13 +56,36 @@ export function useChordPlayback({
   }, [chordNotes, notes, playBassNote, resumeAudio]);
 
   const playProgressionBeat = useCallback(
-    (beatInCell: number) => {
+    ({
+      beatInBar,
+      rhythm,
+      nextRoot,
+    }: {
+      beatInBar: number;
+      rhythm: ProgressionRhythm;
+      nextRoot?: string;
+    }) => {
       resumeAudio();
-      const chordNote = chordNotes[beatInCell % chordNotes.length];
-      const note = pickLowestBassNoteForDegree(notes, chordNote.degree);
+      const beatInCell = beatInBar % 2;
+      let note: FretNote | undefined;
+
+      if (rhythm === "four-beat" && beatInBar === 3 && nextRoot) {
+        const nextRootIndex = sharpPitchClasses.indexOf(pitchClassOf(nextRoot));
+        const approachPitchClass = sharpPitchClasses[(nextRootIndex + sharpPitchClasses.length - 1) % sharpPitchClasses.length];
+        note = notes
+          .filter((candidate) => candidate.pitchClass === approachPitchClass)
+          .sort((first, second) => first.midi - second.midi)[0];
+      } else if (rhythm === "four-beat") {
+        const degree = beatInCell === 0 ? "1" : chordNotes.find((chordNote) => chordNote.degree === "5")?.degree;
+        note = pickLowestBassNoteForDegree(notes, degree ?? chordNotes[1]?.degree ?? "1");
+      } else {
+        const chordNote = chordNotes[beatInCell % chordNotes.length];
+        note = pickLowestBassNoteForDegree(notes, chordNote.degree);
+      }
 
       if (note) {
-        playBassNote(note.midi, 0, beatInCell === 0 ? 0.85 : 0.6);
+        const duration = rhythm === "four-beat" ? (beatInBar === 3 ? 0.5 : 0.72) : beatInCell === 0 ? 0.85 : 0.6;
+        playBassNote(note.midi, 0, duration);
       }
     },
     [chordNotes, notes, playBassNote, resumeAudio],

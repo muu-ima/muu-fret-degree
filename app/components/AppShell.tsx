@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
-import { LuChartNoAxesColumn, LuMusic4, LuPencil, LuSlidersHorizontal } from "react-icons/lu";
+import { LuChartNoAxesColumn, LuMusic4, LuPencil, LuSlidersHorizontal, LuTimer } from "react-icons/lu";
 
 type AppShellProps = {
   children: ReactNode;
@@ -26,6 +26,13 @@ const panelItems = [
     label: "Controls",
     shortLabel: "Controls",
     description: "Harmony & playback",
+  },
+  {
+    key: "metronome",
+    icon: LuTimer,
+    label: "Metronome",
+    shortLabel: "Tempo",
+    description: "Tempo & pulse",
   },
   {
     key: "progression",
@@ -78,9 +85,19 @@ export function AppShell({ children }: AppShellProps) {
     window.dispatchEvent(new CustomEvent("shell:open-progression"));
   };
 
+  const openMetronome = () => {
+    setActivePanel("metronome");
+    window.dispatchEvent(new CustomEvent("shell:open-metronome"));
+  };
+
   const handlePanelOpen = (key: (typeof panelItems)[number]["key"]) => {
     if (key === "controls") {
       openControls();
+      return;
+    }
+
+    if (key === "metronome") {
+      openMetronome();
       return;
     }
 
@@ -135,7 +152,8 @@ export function AppShell({ children }: AppShellProps) {
             {panelItems.map((item) => {
               const Icon = item.icon;
               if (item.key === "edit") {
-                const isActive = pathname === item.href && activePanel === "edit";
+                const isOnEditPage = pathname === item.href;
+                const isActive = isOnEditPage && activePanel === "edit";
                 return (
                   <Link
                     key={item.key}
@@ -143,7 +161,7 @@ export function AppShell({ children }: AppShellProps) {
                     className={isActive ? "sidebarToolButton active" : "sidebarToolButton"}
                     aria-current={isActive ? "page" : undefined}
                     onClick={(event) => {
-                      if (isActive) {
+                      if (isOnEditPage) {
                         event.preventDefault();
                         openEdit();
                       }

@@ -304,7 +304,8 @@ input {
 
 .shellControls,
 .shellProgression,
-.shellEdit {
+.shellEdit,
+.shellMetronome {
   margin-bottom: 0;
   padding: 0;
   border: 0;
@@ -388,6 +389,348 @@ input {
 
 .bottomSheetHandle {
   display: none;
+}
+
+.metronomePanel {
+  display: grid;
+  gap: 16px;
+}
+
+.metronomeReadout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid rgba(154, 171, 196, 0.14);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(122, 167, 255, 0.1), transparent),
+    rgba(11, 16, 24, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.metronomeReadout.countingIn {
+  border-color: rgba(242, 165, 26, 0.42);
+  background:
+    linear-gradient(180deg, rgba(242, 165, 26, 0.12), transparent),
+    rgba(18, 16, 15, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 241, 211, 0.06),
+    0 0 28px rgba(242, 165, 26, 0.08);
+}
+
+.metronomeReadout.countingIn .panelEyebrow,
+.metronomeReadout.countingIn > div:first-child > span {
+  color: #f5bd59;
+}
+
+.metronomeReadout > div:first-child {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 0 10px;
+}
+
+.panelEyebrow {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+  color: var(--focus);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.metronomeReadout strong {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(2.8rem, 7vw, 4.4rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.95;
+}
+
+.metronomeReadout > div:first-child > span {
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.beatIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 112px;
+}
+
+.beatIndicator span {
+  width: 13px;
+  height: 13px;
+  border: 1px solid rgba(154, 171, 196, 0.3);
+  border-radius: 50%;
+  background: rgba(154, 171, 196, 0.14);
+  transition:
+    background-color 90ms ease,
+    border-color 90ms ease,
+    box-shadow 90ms ease,
+    transform 90ms ease;
+}
+
+.beatIndicator span.active {
+  border-color: rgba(207, 224, 255, 0.84);
+  background: var(--focus);
+  box-shadow: 0 0 16px rgba(122, 167, 255, 0.42);
+  transform: scale(1.12);
+}
+
+.beatIndicator.countingIn span.active {
+  border-color: rgba(255, 232, 189, 0.9);
+  background: #f2a51a;
+  box-shadow: 0 0 16px rgba(242, 165, 26, 0.42);
+}
+
+.pulsePosition {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 5px;
+  min-height: 5px;
+}
+
+.pulsePosition span {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(154, 171, 196, 0.14);
+  transition:
+    background-color 70ms ease,
+    box-shadow 70ms ease;
+}
+
+.pulsePosition span.active {
+  background: #cfe0ff;
+  box-shadow: 0 0 10px rgba(122, 167, 255, 0.36);
+}
+
+.pulsePosition.countingIn span.active {
+  background: #f5bd59;
+  box-shadow: 0 0 10px rgba(242, 165, 26, 0.34);
+}
+
+.metronomeTempoControls {
+  display: grid;
+  grid-template-columns: 40px minmax(120px, 1fr) 40px;
+  align-items: end;
+  gap: 8px;
+}
+
+.tempoStepButton {
+  display: grid;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #334055;
+  border-radius: 50%;
+  background: rgba(20, 26, 36, 0.94);
+  color: var(--ink);
+}
+
+.tempoStepButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.metronomeBpmInput input {
+  width: 100%;
+  text-align: center;
+}
+
+.tempoPresetGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.tempoPresetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tempoPreset {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 7px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #141922;
+  color: var(--muted);
+  text-align: left;
+}
+
+.tempoPreset strong {
+  color: var(--ink);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tempoPreset span {
+  overflow: hidden;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tempoPreset.active {
+  border-color: rgba(122, 167, 255, 0.42);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+}
+
+.tempoPreset.active strong,
+.tempoPreset.active span {
+  color: #fff;
+}
+
+.metronomePrimaryActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.metronomePrimaryActions .actionButton {
+  width: 100%;
+}
+
+.metronomePrimaryActions svg {
+  width: 17px;
+  height: 17px;
+}
+
+.tapTempoButton {
+  flex-wrap: wrap;
+}
+
+.tapTempoButton span {
+  width: 100%;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.metronomeSettings {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.metronomeSettingGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.controlLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.controlLabel small {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.meterTabs,
+.pulseTabs,
+.swingTabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.toneTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.countInTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.meterTab,
+.pulseTab,
+.swingTab,
+.toneTab,
+.countInTab {
+  min-height: 40px;
+  padding: 0 8px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #141922;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.meterTab.active,
+.pulseTab.active,
+.swingTab.active,
+.toneTab.active,
+.countInTab.active {
+  border-color: rgba(122, 167, 255, 0.42);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+}
+
+.countInTab:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.swingTab:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.metronomeVolume {
+  gap: 10px;
+}
+
+.metronomeVolume > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.metronomeVolume output {
+  color: var(--ink);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.metronomeVolume input {
+  width: 100%;
+  accent-color: var(--focus);
 }
 
 .hero {
@@ -1353,6 +1696,35 @@ select:focus-visible,
   min-width: 126px;
 }
 
+.progressionRhythm {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+}
+
+.progressionRhythmTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progressionRhythmTab {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #141922;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.progressionRhythmTab.active {
+  border-color: rgba(122, 167, 255, 0.42);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+}
+
 .progressionTransport {
   grid-column: 1 / -1;
   display: flex;
@@ -2073,6 +2445,33 @@ select:focus-visible,
     padding: 0;
     border: 0;
     background: transparent;
+  }
+
+  .shellMetronome {
+    min-height: 0;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .metronomePanel {
+    gap: 12px;
+  }
+
+  .metronomeReadout {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .metronomeReadout strong {
+    font-size: 2.8rem;
+  }
+
+  .metronomePrimaryActions {
+    grid-template-columns: 1fr;
   }
 
   .shellControls .controlsColumnActions {
