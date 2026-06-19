@@ -411,6 +411,10 @@ input {
   display: none;
 }
 
+.panelDragGrip {
+  display: none;
+}
+
 .metronomePanel {
   display: grid;
   gap: 16px;
@@ -2529,10 +2533,30 @@ select:focus-visible,
   .shellControlsPanel .drawerHeader,
   .shellProgressionPanel .drawerHeader,
   .shellEditPanel .drawerHeader {
+    gap: 8px;
     padding-right: 92px;
     cursor: grab;
     touch-action: none;
     user-select: none;
+  }
+
+  .panelDragGrip {
+    display: inline-grid;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 30px;
+    place-items: center;
+    color: rgba(154, 171, 196, 0.54);
+  }
+
+  .panelDragGrip svg {
+    width: 17px;
+    height: 17px;
+    stroke-width: 2;
+  }
+
+  .drawerHeader:hover .panelDragGrip {
+    color: rgba(207, 224, 255, 0.82);
   }
 
   .shellControlsPanel .drawerHeader:active,

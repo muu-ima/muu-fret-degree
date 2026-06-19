@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { LuMaximize2, LuMinus } from "react-icons/lu";
+import { LuGripVertical, LuMaximize2, LuMinus } from "react-icons/lu";
 import theory from "../../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
@@ -366,6 +366,9 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         onPointerMove={moveDesktopPanel}
         onPointerUp={finishDesktopPanelDrag}
       >
+        <span className="panelDragGrip" aria-hidden="true">
+          <LuGripVertical />
+        </span>
         <span className="panelHeaderText">
           <strong className={titleClassName}>{title}</strong>
           <span className="compactPanelSummary">{compactSummary}</span>
