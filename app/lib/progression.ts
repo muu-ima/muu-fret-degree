@@ -8,7 +8,7 @@ export type ProgressionCell = {
   chordTypeId: string;
 };
 
-export type ProgressionBeatEventType = "hit" | "rest";
+export type ProgressionBeatEventType = "hit" | "rest" | "tie";
 
 export type ProgressionBeat = {
   chordOverride?: ProgressionCell;
@@ -309,6 +309,38 @@ export function getProgressionBeatEventType(
   beatIndex: number,
 ): ProgressionBeatEventType {
   return getProgressionBeat(bar, beatIndex).eventType ?? "hit";
+}
+
+export function countFollowingProgressionTies(
+  progression: ChordProgression,
+  barIndex: number,
+  beatIndex: number,
+) {
+  if (progression.bars.length === 0 || beatIndex < 0 || beatIndex > 3) {
+    return 0;
+  }
+
+  const beatsPerBar = Math.min(
+    4,
+    Math.max(1, Math.floor(progression.timeSignature.beatsPerBar)),
+  );
+  const totalBeats = progression.bars.length * beatsPerBar;
+  const startBeat = barIndex * beatsPerBar + beatIndex;
+  let tieCount = 0;
+
+  for (let offset = 1; offset < totalBeats; offset += 1) {
+    const absoluteBeat = startBeat + offset;
+    const nextBarIndex = Math.floor(absoluteBeat / beatsPerBar) % progression.bars.length;
+    const nextBeatIndex = absoluteBeat % beatsPerBar;
+
+    if (getProgressionBeatEventType(progression.bars[nextBarIndex], nextBeatIndex) !== "tie") {
+      break;
+    }
+
+    tieCount += 1;
+  }
+
+  return tieCount;
 }
 
 export function getProgressionCellForBeat(bar: ProgressionBar, beatIndex: number): ProgressionCell {

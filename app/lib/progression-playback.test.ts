@@ -45,12 +45,14 @@ function plan(
   beatInBar: number,
   nextRoot?: string,
   beatEventType?: ProgressionBeatEventType,
+  followingTieBeats?: number,
 ) {
   return planProgressionBeat({
     beatInBar,
     beatEventType,
     bpm: 120,
     chordNotes,
+    followingTieBeats,
     nextRoot,
     notes: fretNotes,
     rhythm,
@@ -84,13 +86,32 @@ describe("progression playback patterns", () => {
     expect(events[1]).toMatchObject({ startOffset: 0.25, duration: 0.22 });
   });
 
-  it.each([
-    "root-only",
-    "chord-tones",
-    "degree-ascending",
-    "degree-third-first",
-    "four-beat",
-  ] satisfies ProgressionRhythm[])("%s produces no notes for a rest", (rhythm) => {
-    expect(plan(rhythm, 0, undefined, "rest")).toEqual([]);
+  it.each(
+    (["rest", "tie"] as const).flatMap((eventType) =>
+      (
+        [
+          "root-only",
+          "chord-tones",
+          "degree-ascending",
+          "degree-third-first",
+          "four-beat",
+        ] satisfies ProgressionRhythm[]
+      ).map((rhythm) => [rhythm, eventType] as const),
+    ),
+  )("%s produces no notes for a %s", (rhythm, eventType) => {
+    expect(plan(rhythm, 0, undefined, eventType)).toEqual([]);
+  });
+
+  it("extends a single note through following tie beats", () => {
+    const events = plan("root-only", 0, undefined, "hit", 2);
+
+    expect(events).toEqual([{ midi: 36, startOffset: 0, duration: 1.85 }]);
+  });
+
+  it("extends only the last note of a degree flow", () => {
+    const events = plan("degree-ascending", 0, undefined, "hit", 1);
+
+    expect(events[0]).toMatchObject({ midi: 36, duration: 0.22 });
+    expect(events[1]).toMatchObject({ midi: 40, duration: 0.72 });
   });
 });

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import {
+  countFollowingProgressionTies,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   type ChordProgression,
@@ -15,6 +16,7 @@ type UseProgressionBeatSchedulerOptions = {
   playBeat: (options: {
     beatInBar: number;
     beatEventType?: ProgressionBeatEventType;
+    followingTieBeats?: number;
     rhythm: ProgressionRhythm;
     nextRoot?: string;
   }) => void;
@@ -55,6 +57,11 @@ export function useProgressionBeatScheduler({
     playBeat({
       beatInBar,
       beatEventType: getProgressionBeatEventType(currentBar, beatInBar),
+      followingTieBeats: countFollowingProgressionTies(
+        progression,
+        currentBarIndex,
+        beatInBar,
+      ),
       rhythm,
       nextRoot,
     });

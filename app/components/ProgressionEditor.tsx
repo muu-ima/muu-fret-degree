@@ -159,8 +159,12 @@ export function ProgressionEditor({
 
         <div className="progressionApplySection">
           <span className="controlLabel">Beat Event</span>
-          <div className="progressionApplyTabs" role="group" aria-label="拍の発音状態">
-            {(["hit", "rest"] as const).map((eventType) => {
+          <div
+            className="progressionApplyTabs progressionEventTabs"
+            role="group"
+            aria-label="拍の発音状態"
+          >
+            {(["hit", "rest", "tie"] as const).map((eventType) => {
               const isActive = selectedBeatEventType === eventType;
               return (
                 <button
@@ -172,7 +176,7 @@ export function ProgressionEditor({
                     onBeatEventTypeChange(selectedBarIndex, selectedBeatIndex, eventType)
                   }
                 >
-                  {eventType === "hit" ? "Hit" : "Rest"}
+                  {eventType === "hit" ? "Hit" : eventType === "rest" ? "Rest" : "Tie"}
                 </button>
               );
             })}

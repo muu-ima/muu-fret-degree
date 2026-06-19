@@ -75,16 +75,27 @@ export function useChordPlayback({
     ({
       beatInBar,
       beatEventType,
+      followingTieBeats,
       rhythm,
       nextRoot,
     }: {
       beatInBar: number;
       beatEventType?: ProgressionBeatEventType;
+      followingTieBeats?: number;
       rhythm: ProgressionRhythm;
       nextRoot?: string;
     }) => {
       resumeAudio();
-      planProgressionBeat({ beatInBar, beatEventType, bpm, chordNotes, nextRoot, notes, rhythm }).forEach(
+      planProgressionBeat({
+        beatInBar,
+        beatEventType,
+        bpm,
+        chordNotes,
+        followingTieBeats,
+        nextRoot,
+        notes,
+        rhythm,
+      }).forEach(
         ({ midi, startOffset, duration }) => {
           playBassNote(midi, startOffset, duration);
         },

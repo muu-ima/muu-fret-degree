@@ -60,13 +60,13 @@ export function ProgressionChordChart({
                     <button
                       key={beatIndex}
                       type="button"
-                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${isSelected ? " selected" : ""}`}
-                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : "Hit"}`}
+                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${isSelected ? " selected" : ""}`}
+                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : eventType === "tie" ? "Tie" : "Hit"}`}
                       aria-pressed={isSelected}
                       onClick={() => onBeatSelect(barIndex, beatIndex)}
                     >
                       <span className="progressionChartSlash" aria-hidden="true">
-                        {eventType === "rest" ? "—" : "/"}
+                        {eventType === "rest" ? "—" : eventType === "tie" ? "⌒" : "/"}
                       </span>
                       <span className="progressionChartBeatNumber" aria-hidden="true">
                         {beatIndex + 1}

@@ -27,7 +27,7 @@ type ProgressionCell = {
 
 type ProgressionBeat = {
   chordOverride?: ProgressionCell;
-  eventType?: "hit" | "rest";
+  eventType?: "hit" | "rest" | "tie";
 };
 
 type ProgressionBar = {
@@ -43,9 +43,9 @@ type ProgressionBar = {
 - Beat 3-4は `cells[1]` を継承する。
 - 1拍だけコードを変える場合は、その拍にコード上書きを持たせる。
 - 拍データがない既存進行は、4拍すべて発音する既定値として読み込む。
-- `eventType` がない拍は `hit` とし、`rest`だけを明示的に保存する。
+- `eventType` がない拍は `hit` とし、`rest`と`tie`だけを明示的に保存する。
 
-現在は1拍単位のHit / Restまで実装済み。次にTieを追加し、その後16分stepと付点へ拡張する。
+現在は1拍単位のHit / Rest / Tieまで実装済み。次に16分stepと付点へ拡張する。
 
 ## 画面の役割
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  countFollowingProgressionTies,
   createDefaultProgression,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
@@ -60,5 +61,16 @@ describe("progression beat events", () => {
     expect(getProgressionBeatEventType(rested.bars[0], 1)).toBe("rest");
     expect(getProgressionCellForBeat(hit.bars[0], 1)).toEqual(override);
     expect(hit.bars[0].beats?.[1].eventType).toBeUndefined();
+  });
+
+  it("counts consecutive ties within and across bars", () => {
+    let progression = createDefaultProgression();
+    progression = updateProgressionBeatEventType(progression, 0, 1, "tie");
+    progression = updateProgressionBeatEventType(progression, 0, 2, "tie");
+    progression = updateProgressionBeatEventType(progression, 1, 0, "tie");
+
+    expect(countFollowingProgressionTies(progression, 0, 0)).toBe(2);
+    expect(countFollowingProgressionTies(progression, 0, 3)).toBe(1);
+    expect(countFollowingProgressionTies(progression, 1, 0)).toBe(0);
   });
 });
