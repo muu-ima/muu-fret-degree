@@ -42,6 +42,8 @@ Open:
 http://localhost:3000
 ```
 
+日本語の操作説明は [`docs/user-guide.md`](docs/user-guide.md) を参照してください。
+
 Build for production:
 
 ```bash

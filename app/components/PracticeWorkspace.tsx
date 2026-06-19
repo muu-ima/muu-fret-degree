@@ -19,7 +19,7 @@ import { ProgressionEditor } from "./ProgressionEditor";
 import { ProgressionPanel } from "./ProgressionPanel";
 import { useAudioEngine } from "../hooks/useAudioEngine";
 import { useBpmControl } from "../hooks/useBpmControl";
-import { useChordPlayback } from "../hooks/useChordPlayback";
+import { type ProgressionRhythm, useChordPlayback } from "../hooks/useChordPlayback";
 import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
 import { usePersistedProgression } from "../hooks/usePersistedProgression";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
@@ -82,6 +82,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       makeProgressionBar(4, { root: "G", chordTypeId: "7" }),
     ],
   }));
+  const [progressionRhythm, setProgressionRhythm] = useState<ProgressionRhythm>("chord-tones");
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
   const {
     currentBeat,
@@ -396,12 +397,28 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     }
 
     lastProgressionBeatRef.current = progressionPlayback.progressionPosition.beatIndex;
-    playProgressionBeat(progressionPlayback.progressionPosition.beatInBar % 2);
+    const currentBarIndex = progressionPlayback.progressionPosition.barIndex % progression.bars.length;
+    const currentBar = progression.bars[currentBarIndex];
+    const currentCellIndex = currentProgressionSelection?.cellIndex ?? 0;
+    const nextRoot =
+      currentCellIndex === 0
+        ? currentBar.cells[1].root
+        : progression.bars[(currentBarIndex + 1) % progression.bars.length].cells[0].root;
+
+    playProgressionBeat({
+      beatInBar: progressionPlayback.progressionPosition.beatInBar,
+      rhythm: progressionRhythm,
+      nextRoot,
+    });
   }, [
+    currentProgressionSelection?.cellIndex,
     isProgressionSyncActive,
     playProgressionBeat,
+    progression.bars,
     progressionPlayback.progressionPosition.beatInBar,
     progressionPlayback.progressionPosition.beatIndex,
+    progressionPlayback.progressionPosition.barIndex,
+    progressionRhythm,
   ]);
 
   function renderControls(className: string) {
@@ -440,9 +457,11 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         currentProgressionChordTypeName={currentProgressionChordType.name}
         progressionPosition={progressionPlayback.progressionPosition}
         isProgressionRunning={progressionPlayback.isProgressionRunning}
+        rhythm={progressionRhythm}
         onStartProgression={progressionPlayback.startProgression}
         onStopProgression={progressionPlayback.stopProgression}
         onResetProgression={progressionPlayback.resetProgression}
+        onRhythmChange={setProgressionRhythm}
       />
     );
   }

@@ -1696,6 +1696,35 @@ select:focus-visible,
   min-width: 126px;
 }
 
+.progressionRhythm {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+}
+
+.progressionRhythmTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progressionRhythmTab {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #141922;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.progressionRhythmTab.active {
+  border-color: rgba(122, 167, 255, 0.42);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+}
+
 .progressionTransport {
   grid-column: 1 / -1;
   display: flex;

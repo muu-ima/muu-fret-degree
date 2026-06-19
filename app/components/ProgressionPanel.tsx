@@ -1,5 +1,6 @@
 "use client";
 
+import { type ProgressionRhythm } from "../hooks/useChordPlayback";
 import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../lib/progression";
 
 type ProgressionPanelProps = {
@@ -9,9 +10,11 @@ type ProgressionPanelProps = {
   currentProgressionChordTypeName?: string;
   progressionPosition: ProgressionPosition;
   isProgressionRunning: boolean;
+  rhythm: ProgressionRhythm;
   onStartProgression: () => void;
   onStopProgression: () => void;
   onResetProgression: () => void;
+  onRhythmChange: (rhythm: ProgressionRhythm) => void;
 };
 
 export function ProgressionPanel({
@@ -21,9 +24,11 @@ export function ProgressionPanel({
   currentProgressionChordTypeName,
   progressionPosition,
   isProgressionRunning,
+  rhythm,
   onStartProgression,
   onStopProgression,
   onResetProgression,
+  onRhythmChange,
 }: ProgressionPanelProps) {
   const currentBarNumber = currentProgressionBar?.bar ?? progressionPosition.barIndex + 1;
   const currentCellIndex = currentProgressionCellIndex ?? Math.min(Math.floor(progressionPosition.beatInBar / 2), 1);
@@ -62,6 +67,27 @@ export function ProgressionPanel({
           <span aria-hidden="true">↺</span>
           Reset
         </button>
+      </div>
+      <div className="progressionRhythm">
+        <span className="controlLabel">Rhythm</span>
+        <div className="progressionRhythmTabs" role="group" aria-label="ベース伴奏リズム">
+          <button
+            type="button"
+            className={rhythm === "chord-tones" ? "progressionRhythmTab active" : "progressionRhythmTab"}
+            aria-pressed={rhythm === "chord-tones"}
+            onClick={() => onRhythmChange("chord-tones")}
+          >
+            Chord Tones
+          </button>
+          <button
+            type="button"
+            className={rhythm === "four-beat" ? "progressionRhythmTab active" : "progressionRhythmTab"}
+            aria-pressed={rhythm === "four-beat"}
+            onClick={() => onRhythmChange("four-beat")}
+          >
+            4 Beat
+          </button>
+        </div>
       </div>
     </section>
   );
