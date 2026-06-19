@@ -204,6 +204,31 @@ export function pickLowestBassNoteForDegree(notes: FretNote[], degree: string, m
     .sort((a, b) => a.midi - b.midi)[0];
 }
 
+export function pickAscendingBassNotesForDegrees(notes: FretNote[], degrees: string[]) {
+  let previousMidi = -Infinity;
+
+  return degrees.flatMap((degree) => {
+    const nextNote = notes
+      .filter((note) => note.degree === degree && note.midi > previousMidi)
+      .sort((first, second) => {
+        const midiDifference = first.midi - second.midi;
+        if (midiDifference !== 0) {
+          return midiDifference;
+        }
+
+        const openStringDifference = Number(first.fret === 0) - Number(second.fret === 0);
+        return openStringDifference !== 0 ? openStringDifference : first.fret - second.fret;
+      })[0];
+
+    if (!nextNote) {
+      return [];
+    }
+
+    previousMidi = nextNote.midi;
+    return [nextNote];
+  });
+}
+
 export function chordInversionLabel(inversion: number) {
   if (inversion === 0) {
     return "Root";

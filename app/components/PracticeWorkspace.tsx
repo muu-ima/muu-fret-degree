@@ -21,7 +21,11 @@ import { ProgressionEditor } from "./ProgressionEditor";
 import { ProgressionPanel } from "./ProgressionPanel";
 import { useAudioEngine } from "../hooks/useAudioEngine";
 import { useBpmControl } from "../hooks/useBpmControl";
-import { type ProgressionRhythm, useChordPlayback } from "../hooks/useChordPlayback";
+import {
+  type ArpeggioPattern,
+  type ProgressionRhythm,
+  useChordPlayback,
+} from "../hooks/useChordPlayback";
 import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
 import { usePersistedProgression } from "../hooks/usePersistedProgression";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
@@ -69,6 +73,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [selectedFretRangeId, setSelectedFretRangeId] = useState<FretRange["id"]>("low");
   const [chordOctaveId, setChordOctaveId] = useState("C4");
   const [chordInversion, setChordInversion] = useState(0);
+  const [arpeggioPattern, setArpeggioPattern] = useState<ArpeggioPattern>("chord-order");
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
   const [pulsesPerBeat, setPulsesPerBeat] = useState(1);
   const [countInMeasures, setCountInMeasures] = useState(0);
@@ -456,6 +461,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       fretRangeId: selectedFretRangeId,
       chordOctaveId,
       chordInversion,
+      arpeggioPattern,
       showGuideTones,
       bpm,
     },
@@ -466,6 +472,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       setFretRangeId: setSelectedFretRangeId,
       setChordOctaveId,
       setChordInversion,
+      setArpeggioPattern,
       setShowGuideTones,
       commitBpm,
     },
@@ -536,6 +543,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     chordNotes,
     chordOctaveMidi: selectedChordOctave.midi,
     chordInversion,
+    arpeggioPattern,
     notes,
     playBassNote,
     playPianoNote,
@@ -591,12 +599,14 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         tuningId={tuningId}
         chordOctaveId={selectedChordOctave.id}
         chordInversion={chordInversion}
+        arpeggioPattern={arpeggioPattern}
         showGuideTones={showGuideTones}
         onRootChange={setRoot}
         onChordTypeChange={setChordTypeId}
         onTuningChange={setTuningId}
         onChordOctaveChange={setChordOctaveId}
         onChordInversionChange={setChordInversion}
+        onArpeggioPatternChange={setArpeggioPattern}
         onShowGuideTonesChange={setShowGuideTones}
         onPlayArpeggio={playArpeggio}
         onPlayStack={playStack}

@@ -1,6 +1,7 @@
 "use client";
 
 import { type ChordOctave, type ChordType, type Tuning } from "../lib/music";
+import type { ArpeggioPattern } from "../hooks/useChordPlayback";
 
 type ControlsPanelProps = {
   className: string;
@@ -14,12 +15,14 @@ type ControlsPanelProps = {
   tuningId: string;
   chordOctaveId: string;
   chordInversion: number;
+  arpeggioPattern: ArpeggioPattern;
   showGuideTones: boolean;
   onRootChange: (root: string) => void;
   onChordTypeChange: (chordTypeId: string) => void;
   onTuningChange: (tuningId: string) => void;
   onChordOctaveChange: (chordOctaveId: string) => void;
   onChordInversionChange: (chordInversion: number) => void;
+  onArpeggioPatternChange: (pattern: ArpeggioPattern) => void;
   onShowGuideTonesChange: (showGuideTones: boolean) => void;
   onPlayArpeggio: () => void;
   onPlayStack: () => void;
@@ -37,12 +40,14 @@ export function ControlsPanel({
   tuningId,
   chordOctaveId,
   chordInversion,
+  arpeggioPattern,
   showGuideTones,
   onRootChange,
   onChordTypeChange,
   onTuningChange,
   onChordOctaveChange,
   onChordInversionChange,
+  onArpeggioPatternChange,
   onShowGuideTonesChange,
   onPlayArpeggio,
   onPlayStack,
@@ -144,6 +149,18 @@ export function ControlsPanel({
           <span>Arpeggio / Chord</span>
         </div>
         <div className="controlsColumn controlsColumnActions">
+          <label className="controlsPlaybackPattern">
+            Pattern
+            <select
+              value={arpeggioPattern}
+              onChange={(event) => onArpeggioPatternChange(event.target.value as ArpeggioPattern)}
+            >
+              <option value="root-only">Root only</option>
+              <option value="chord-order">Ascending 1 - 3 - 5 - 7</option>
+              <option value="third-first">3 - 1 - 5 - 7</option>
+              <option value="lowest-per-degree">Lowest tones 1 - 3 - 5 - 7</option>
+            </select>
+          </label>
           <button type="button" className="actionButton actionButtonPrimary" onClick={onPlayArpeggio}>
             <span aria-hidden="true">▶</span>
             Arpeggio

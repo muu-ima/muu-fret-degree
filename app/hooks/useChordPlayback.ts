@@ -6,12 +6,14 @@ import {
   type ChordType,
   type FretNote,
   makeTrebleChordMidi,
+  pickAscendingBassNotesForDegrees,
   pickLowestBassNoteForDegree,
   pitchClassOf,
   sharpPitchClasses,
 } from "../lib/music";
 
 export type ProgressionRhythm = "chord-tones" | "four-beat";
+export type ArpeggioPattern = "root-only" | "chord-order" | "third-first" | "lowest-per-degree";
 
 type UseChordPlaybackOptions = {
   root: string;
@@ -19,6 +21,7 @@ type UseChordPlaybackOptions = {
   chordNotes: ChordNote[];
   chordOctaveMidi: number;
   chordInversion: number;
+  arpeggioPattern: ArpeggioPattern;
   notes: FretNote[];
   playBassNote: (midi: number, startOffset?: number, duration?: number) => void;
   playPianoNote: (midi: number, startOffset?: number, duration?: number) => void;
@@ -31,6 +34,7 @@ export function useChordPlayback({
   chordNotes,
   chordOctaveMidi,
   chordInversion,
+  arpeggioPattern,
   notes,
   playBassNote,
   playPianoNote,
@@ -46,14 +50,25 @@ export function useChordPlayback({
 
   const playArpeggio = useCallback(() => {
     resumeAudio();
-    const playable = chordNotes.map((chordNote) => pickLowestBassNoteForDegree(notes, chordNote.degree));
+    const orderedChordNotes = arpeggioPattern === "root-only" ? chordNotes.slice(0, 1) : chordNotes;
+    const playable =
+      arpeggioPattern === "lowest-per-degree"
+        ? orderedChordNotes.map((chordNote) => pickLowestBassNoteForDegree(notes, chordNote.degree))
+        : pickAscendingBassNotesForDegrees(
+            notes,
+            orderedChordNotes.map((chordNote) => chordNote.degree),
+          );
+    const playbackOrder =
+      arpeggioPattern === "third-first" && playable.length > 1
+        ? [playable[1], playable[0], ...playable.slice(2)]
+        : playable;
 
-    playable.forEach((note, index) => {
+    playbackOrder.forEach((note, index) => {
       if (note) {
         playBassNote(note.midi, index * 0.32, 0.7);
       }
     });
-  }, [chordNotes, notes, playBassNote, resumeAudio]);
+  }, [arpeggioPattern, chordNotes, notes, playBassNote, resumeAudio]);
 
   const playProgressionBeat = useCallback(
     ({

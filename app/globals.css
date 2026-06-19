@@ -931,7 +931,7 @@ input {
 }
 
 .controlsColumnActions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(180px, 0.9fr) repeat(2, minmax(0, 1fr));
   align-items: end;
 }
 
@@ -2555,6 +2555,10 @@ select:focus-visible,
 }
 
 @media (min-width: 701px) {
+  .shellControlsPanel:not(.shellMetronomePanel) {
+    width: clamp(780px, 68vw, 1080px);
+  }
+
   .shellControlsPanel,
   .shellProgressionPanel,
   .shellEditPanel {
