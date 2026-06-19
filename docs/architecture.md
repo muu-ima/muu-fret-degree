@@ -300,6 +300,16 @@ MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest /
 
 画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。Root / Chordと小節数の変更は履歴対象にするが、BPM同期と保存データの読み込みは履歴へ積まない。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
 
+### `app/lib/progression-history.ts`
+
+進行編集のUndo / Redo履歴を純粋なreducerとして管理する。
+
+- commit時に現在値をpastへ積み、futureを破棄する。
+- Undo / Redo時も、現在のBPMは維持する。
+- hydrateとBPM同期は編集履歴へ積まない。
+
+Reactには依存せず、`useProgressionState` と単体テストの両方から利用する。
+
 ### `app/providers/ProgressionSessionProvider.tsx`
 
 PracticeとFull Editorで共有する進行Sessionの境界を担当する。
