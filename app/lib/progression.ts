@@ -264,6 +264,60 @@ export function updateProgressionBeatEventType(
   beatIndex: number,
   eventType: ProgressionBeatEventType,
 ): ChordProgression {
+  if (
+    eventType === "tie" &&
+    !canTieProgressionBeat(progression.bars, barIndex, beatIndex)
+  ) {
+    return progression;
+  }
+
+  let nextProgression = setProgressionBeatEventType(
+    progression,
+    barIndex,
+    beatIndex,
+    eventType,
+  );
+  if (eventType !== "rest") {
+    return nextProgression;
+  }
+
+  const totalBeats = progression.bars.length * 4;
+  for (let offset = 1; offset < totalBeats; offset += 1) {
+    const nextLocation = getRelativeBeatLocation(
+      nextProgression.bars,
+      barIndex,
+      beatIndex,
+      offset,
+    );
+    if (!nextLocation) {
+      break;
+    }
+
+    const nextEventType = getProgressionBeatEventType(
+      nextProgression.bars[nextLocation.barIndex],
+      nextLocation.beatIndex,
+    );
+    if (nextEventType !== "tie") {
+      break;
+    }
+
+    nextProgression = setProgressionBeatEventType(
+      nextProgression,
+      nextLocation.barIndex,
+      nextLocation.beatIndex,
+      "rest",
+    );
+  }
+
+  return nextProgression;
+}
+
+function setProgressionBeatEventType(
+  progression: ChordProgression,
+  barIndex: number,
+  beatIndex: number,
+  eventType: ProgressionBeatEventType,
+): ChordProgression {
   const currentBar = progression.bars[barIndex];
   if (!currentBar || beatIndex < 0 || beatIndex > 3) {
     return progression;
@@ -298,6 +352,42 @@ export function updateProgressionBeatEventType(
       return barWithoutBeats;
     }),
   };
+}
+
+export function canTieProgressionBeat(
+  bars: readonly ProgressionBar[],
+  barIndex: number,
+  beatIndex: number,
+) {
+  if (!bars[barIndex] || beatIndex < 0 || beatIndex > 3) {
+    return false;
+  }
+
+  const totalBeats = bars.length * 4;
+  for (let offset = 1; offset < totalBeats; offset += 1) {
+    const previousLocation = getRelativeBeatLocation(
+      bars,
+      barIndex,
+      beatIndex,
+      -offset,
+    );
+    if (!previousLocation) {
+      return false;
+    }
+
+    const previousEventType = getProgressionBeatEventType(
+      bars[previousLocation.barIndex],
+      previousLocation.beatIndex,
+    );
+    if (previousEventType === "hit") {
+      return true;
+    }
+    if (previousEventType === "rest") {
+      return false;
+    }
+  }
+
+  return false;
 }
 
 export function getProgressionBeat(bar: ProgressionBar, beatIndex: number): ProgressionBeat {
@@ -378,4 +468,24 @@ function removeBeatChordOverride(beat: ProgressionBeat): ProgressionBeat {
 function removeBeatEventType(beat: ProgressionBeat): ProgressionBeat {
   const { eventType: _eventType, ...beatWithoutEventType } = beat;
   return beatWithoutEventType;
+}
+
+function getRelativeBeatLocation(
+  bars: readonly ProgressionBar[],
+  barIndex: number,
+  beatIndex: number,
+  offset: number,
+) {
+  if (bars.length === 0) {
+    return undefined;
+  }
+
+  const totalBeats = bars.length * 4;
+  const startBeat = barIndex * 4 + beatIndex;
+  const relativeBeat = ((startBeat + offset) % totalBeats + totalBeats) % totalBeats;
+
+  return {
+    barIndex: Math.floor(relativeBeat / 4),
+    beatIndex: relativeBeat % 4,
+  };
 }

@@ -368,6 +368,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
 - 2拍セル、拍オーバーライド、Hit / Rest / Tie、小節数の更新を純粋関数として提供する。
 - Hitの後ろに続くTie数を、小節跨ぎを含めて最大1ループ未満で数える。
+- 直前に有効なHitがないTieは拒否し、Tie元のHitをRestへ変えた場合は後続TieもRestへ正規化する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 

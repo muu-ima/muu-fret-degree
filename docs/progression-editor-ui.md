@@ -47,6 +47,8 @@ type ProgressionBar = {
 
 現在は1拍単位のHit / Rest / Tieまで実装済み。次に16分stepと付点へ拡張する。
 
+Tieは直前に有効なHitがある場合だけ選択できる。Tie元のHitをRestへ変更した場合は、音のないTieを残さないため、連続する後続TieもRestへ変更する。
+
 ## 画面の役割
 
 - `/progression`: コード譜、小節、拍、タイ、スラーを扱うFull Editor。

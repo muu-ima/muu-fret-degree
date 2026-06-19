@@ -146,6 +146,8 @@ Count-inを設定してProgressionの `Play` を押すと、進行を先頭へ�
 
 Restはコード譜上で横線、Tieは弧として表示されます。Tieは連続指定と小節跨ぎに対応し、度数フローでは直前拍の最後の音だけを伸ばします。Hit / Rest / Tieの変更もUndo / Redoとブラウザ保存の対象です。
 
+Tieには直前のHitが必要です。Tie元のHitをRestへ変更すると、後ろへ連続するTieもRestへ変わります。
+
 - `2 bars`
 - `4 bars`
 - `8 bars`

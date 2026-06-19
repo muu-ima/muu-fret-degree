@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
 import { type ChordType } from "../lib/music";
 import {
+  canTieProgressionBeat,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   type ProgressionBar,
@@ -60,6 +61,11 @@ export function ProgressionEditor({
   const selectedBeatEventType = selectedBar
     ? getProgressionBeatEventType(selectedBar, selectedBeatIndex)
     : "hit";
+  const canTieSelectedBeat = canTieProgressionBeat(
+    bars,
+    selectedBarIndex,
+    selectedBeatIndex,
+  );
   const editScope = beatOverride ? "beat" : "cell";
   const selectedCell = editScope === "beat" ? beatOverride ?? baseCell : baseCell;
 
@@ -166,12 +172,15 @@ export function ProgressionEditor({
           >
             {(["hit", "rest", "tie"] as const).map((eventType) => {
               const isActive = selectedBeatEventType === eventType;
+              const isDisabled = eventType === "tie" && !canTieSelectedBeat;
               return (
                 <button
                   key={eventType}
                   type="button"
                   className={isActive ? "active" : ""}
                   aria-pressed={isActive}
+                  disabled={isDisabled}
+                  title={isDisabled ? "Tieには直前のHitが必要です" : undefined}
                   onClick={() =>
                     onBeatEventTypeChange(selectedBarIndex, selectedBeatIndex, eventType)
                   }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canTieProgressionBeat,
   countFollowingProgressionTies,
   createDefaultProgression,
   getProgressionBeatEventType,
@@ -72,5 +73,30 @@ describe("progression beat events", () => {
     expect(countFollowingProgressionTies(progression, 0, 0)).toBe(2);
     expect(countFollowingProgressionTies(progression, 0, 3)).toBe(1);
     expect(countFollowingProgressionTies(progression, 1, 0)).toBe(0);
+  });
+
+  it("rejects a tie when the preceding event is a rest", () => {
+    const progression = updateProgressionBeatEventType(
+      createDefaultProgression(),
+      0,
+      0,
+      "rest",
+    );
+
+    expect(canTieProgressionBeat(progression.bars, 0, 1)).toBe(false);
+    expect(updateProgressionBeatEventType(progression, 0, 1, "tie")).toBe(progression);
+  });
+
+  it("turns following ties into rests when their source hit becomes a rest", () => {
+    let progression = createDefaultProgression();
+    progression = updateProgressionBeatEventType(progression, 0, 1, "tie");
+    progression = updateProgressionBeatEventType(progression, 0, 2, "tie");
+
+    progression = updateProgressionBeatEventType(progression, 0, 0, "rest");
+
+    expect(getProgressionBeatEventType(progression.bars[0], 0)).toBe("rest");
+    expect(getProgressionBeatEventType(progression.bars[0], 1)).toBe("rest");
+    expect(getProgressionBeatEventType(progression.bars[0], 2)).toBe("rest");
+    expect(getProgressionBeatEventType(progression.bars[0], 3)).toBe("hit");
   });
 });
