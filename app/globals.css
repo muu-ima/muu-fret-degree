@@ -2555,6 +2555,14 @@ select:focus-visible,
 }
 
 @media (min-width: 701px) {
+  .shellControlsPanel,
+  .shellProgressionPanel,
+  .shellEditPanel {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
   .shellControlsPanel .drawerHeader,
   .shellProgressionPanel .drawerHeader,
   .shellEditPanel .drawerHeader {
@@ -2588,6 +2596,21 @@ select:focus-visible,
   .shellProgressionPanel .drawerHeader:active,
   .shellEditPanel .drawerHeader:active {
     cursor: grabbing;
+  }
+
+  .shellControlsPanel:has(.drawerHeader:active),
+  .shellProgressionPanel:has(.drawerHeader:active),
+  .shellEditPanel:has(.drawerHeader:active) {
+    border-color: rgba(var(--panel-accent), 0.42);
+    box-shadow:
+      0 42px 108px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(var(--panel-accent), 0.1);
+  }
+
+  .shellControlsPanel:has(.drawerHeader:active) .panelDragGrip,
+  .shellProgressionPanel:has(.drawerHeader:active) .panelDragGrip,
+  .shellEditPanel:has(.drawerHeader:active) .panelDragGrip {
+    color: rgba(var(--panel-accent), 1);
   }
 
   .compactButton {
