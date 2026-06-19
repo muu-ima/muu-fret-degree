@@ -17,6 +17,13 @@ const navItems = [
     shortLabel: "Practice",
     description: "Fretboard focus",
   },
+  {
+    href: "/progression",
+    icon: LuPencil,
+    label: "Progression Edit",
+    shortLabel: "Edit",
+    description: "Full chord editor",
+  },
 ];
 
 const panelItems = [
@@ -43,11 +50,10 @@ const panelItems = [
   },
   {
     key: "edit",
-    href: "/progression",
     icon: LuPencil,
-    label: "Progression Edit",
-    shortLabel: "Edit",
-    description: "Chord editing",
+    label: "Quick Edit",
+    shortLabel: "Quick Edit",
+    description: "Selected chord",
   },
 ] as const;
 
@@ -56,7 +62,7 @@ export function AppShell({ children }: AppShellProps) {
   const [activePanel, setActivePanel] = useState<(typeof panelItems)[number]["key"] | null>(null);
 
   useEffect(() => {
-    setActivePanel(pathname === "/progression" ? "edit" : null);
+    setActivePanel(null);
   }, [pathname]);
 
   useEffect(() => {
@@ -101,11 +107,16 @@ export function AppShell({ children }: AppShellProps) {
       return;
     }
 
+    if (key === "edit") {
+      openEdit();
+      return;
+    }
+
     openProgression();
   };
 
   return (
-    <div className="appShell">
+    <div className={pathname === "/progression" ? "appShell progressionRoute" : "appShell"}>
       <aside className="appSidebar">
         <div className="sidebarBrand">
           <span className="sidebarBrandMark" aria-hidden="true">
@@ -146,41 +157,11 @@ export function AppShell({ children }: AppShellProps) {
           </nav>
         </div>
 
-        <div className="sidebarSection">
+        {pathname !== "/progression" ? <div className="sidebarSection">
           <p className="sidebarSectionLabel">Panels</p>
           <div className="sidebarTools">
             {panelItems.map((item) => {
               const Icon = item.icon;
-              if (item.key === "edit") {
-                const isOnEditPage = pathname === item.href;
-                const isActive = isOnEditPage && activePanel === "edit";
-                return (
-                  <Link
-                    key={item.key}
-                    href={item.href}
-                    className={isActive ? "sidebarToolButton active" : "sidebarToolButton"}
-                    aria-current={isActive ? "page" : undefined}
-                    onClick={(event) => {
-                      if (isOnEditPage) {
-                        event.preventDefault();
-                        openEdit();
-                      }
-                    }}
-                  >
-                    <span className="sidebarItemIcon" aria-hidden="true">
-                      <Icon />
-                    </span>
-                    <span className="sidebarItemBody">
-                      <strong>
-                        <span className="sidebarItemLabelFull">{item.label}</span>
-                        <span className="sidebarItemLabelShort">{item.shortLabel}</span>
-                      </strong>
-                      <span>{item.description}</span>
-                    </span>
-                  </Link>
-                );
-              }
-
               return (
                 <button
                   key={item.key}
@@ -203,7 +184,7 @@ export function AppShell({ children }: AppShellProps) {
               );
             })}
           </div>
-        </div>
+        </div> : null}
       </aside>
 
       <div className="shellContent">{children}</div>

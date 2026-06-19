@@ -5,12 +5,13 @@ import type { ChordType } from "../lib/music";
 import type {
   ChordProgression,
   ProgressionBar,
+  ProgressionBeat,
   ProgressionCell,
   TimeSignature,
 } from "../lib/progression";
 
 const storageKey = "muu-fret-degree:progression-settings";
-const storageVersion = 2;
+const storageVersion = 3;
 
 type PersistedProgressionSettings = {
   version: number;
@@ -57,12 +58,26 @@ function isProgressionBar(value: unknown, roots: string[], chordTypes: ChordType
     return false;
   }
 
+  const hasValidBeats =
+    value.beats === undefined ||
+    (Array.isArray(value.beats) &&
+      value.beats.length === 4 &&
+      value.beats.every((beat) => isProgressionBeat(beat, roots, chordTypes)));
+
   return (
     isFiniteNumber(value.bar) &&
     Array.isArray(value.cells) &&
     value.cells.length === 2 &&
     isProgressionCell(value.cells[0], roots, chordTypes) &&
-    isProgressionCell(value.cells[1], roots, chordTypes)
+    isProgressionCell(value.cells[1], roots, chordTypes) &&
+    hasValidBeats
+  );
+}
+
+function isProgressionBeat(value: unknown, roots: string[], chordTypes: ChordType[]): value is ProgressionBeat {
+  return (
+    isRecord(value) &&
+    (value.chordOverride === undefined || isProgressionCell(value.chordOverride, roots, chordTypes))
   );
 }
 
@@ -139,6 +154,12 @@ export function usePersistedProgression({
       storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
         ? storedSettings.bars
         : null;
+    const versionTwoBars =
+      storedSettings.version === 2 &&
+      Array.isArray(storedSettings.bars) &&
+      storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
+        ? storedSettings.bars
+        : null;
     const legacyBars =
       storedSettings.version === 1 &&
       Array.isArray(storedSettings.bars) &&
@@ -146,13 +167,15 @@ export function usePersistedProgression({
         ? storedSettings.bars
         : null;
 
-    if (isTimeSignature(storedSettings.timeSignature) && nextBars && nextBars.length > 0) {
+    const currentBars = nextBars ?? versionTwoBars;
+
+    if (isTimeSignature(storedSettings.timeSignature) && currentBars && currentBars.length > 0) {
       const timeSignature = storedSettings.timeSignature;
 
       setProgression((current) => ({
         ...current,
         timeSignature,
-        bars: nextBars,
+        bars: currentBars,
       }));
     } else if (isTimeSignature(storedSettings.timeSignature) && legacyBars && legacyBars.length > 0) {
       const timeSignature = storedSettings.timeSignature;

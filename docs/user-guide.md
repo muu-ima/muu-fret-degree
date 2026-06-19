@@ -117,19 +117,38 @@ Count-in中は上部表示がアンバー色に変わり、残り拍数を表示
 
 ### Rhythm
 
+- `Root Only`: 各拍でRootだけを再生
 - `Chord Tones`: コード構成音を拍ごとに再生
+- `1 - 3 - 5 - 7`: 2拍セル内を上昇する度数フローで再生
+- `3 - 1 - 5 - 7`: 3rdから始まる度数フローで再生
 - `4 Beat`: ジャズの4ビート風ウォーキングベース
 
 `4 Beat` は、各2拍セルを Root と5thで進み、小節の4拍目では次の小節のRootへ半音下からアプローチします。
 
 ## Progression Edit
 
-1小節を `Beats 1-2` と `Beats 3-4` の2セルに分け、RootとChordを設定します。
+`/progression` はコード進行の専用編集画面です。コード譜を見ながら、1小節を `Beats 1-2` と `Beats 3-4` の2セルに分けてRootとChordを設定します。
+
+各Beatでは適用範囲を切り替えられます。
+
+- `Beats 1-2 / Beats 3-4`: 既存の2拍セルを編集
+- `Beat N only`: 選択中の1拍だけコードを上書き
+
+1拍上書きはBeat 1からBeat 4まですべて利用でき、2拍セルへ戻すとその拍の上書きが解除されます。
 
 - `2 bars`
 - `4 bars`
 - `8 bars`
 - `16 bars`
+
+メイン画面の `Quick Edit` パネルでは、選択中の小節だけを編集できます。`Full Editor` を押すと専用編集画面へ移動します。再生、同期、リズム伴奏はメイン画面の `Progression` パネルで操作します。
+
+Full EditorではRoot / Chordと小節数の変更をUndo / Redoできます。
+
+- `Ctrl/Cmd + Z`: Undo
+- `Ctrl/Cmd + Shift + Z` または `Ctrl/Cmd + Y`: Redo
+
+モバイルでは画面下部の `Practice / Undo / Redo` バーから操作します。
 
 編集内容と主要な練習設定はブラウザの `localStorage` に保存されます。
 

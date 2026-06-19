@@ -931,7 +931,7 @@ input {
 }
 
 .controlsColumnActions {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(180px, 0.9fr) repeat(2, minmax(0, 1fr));
   align-items: end;
 }
 
@@ -945,6 +945,11 @@ input {
 .controlsColumnTempo .actionButton,
 .controlsColumnTempo label {
   width: 100%;
+}
+
+.shellControls {
+  container-name: controls-panel;
+  container-type: inline-size;
 }
 
 @media (max-width: 1440px) {
@@ -1774,6 +1779,10 @@ select:focus-visible,
   color: #fff;
 }
 
+.progressionRhythmTab:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
 .progressionTransport {
   grid-column: 1 / -1;
   display: flex;
@@ -1860,50 +1869,433 @@ select:focus-visible,
   font-weight: 700;
 }
 
-.progressionEditorGrid {
+.progressionChordChart {
   display: grid;
   gap: 10px;
-  max-height: clamp(240px, 48vh, 430px);
-  overflow-y: auto;
-  padding-right: 4px;
-  scrollbar-color: rgba(122, 167, 255, 0.6) rgba(255, 255, 255, 0.06);
-}
-
-.progressionEditorRow {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
-  align-items: end;
   padding: 12px;
-  border: 1px solid rgba(154, 171, 196, 0.12);
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
-    rgba(13, 18, 27, 0.44);
-}
-
-.progressionEditorRow strong {
-  font-size: 0.94rem;
-}
-
-.progressionCellGroup {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(154, 171, 196, 0.12);
+  border: 1px solid rgba(154, 171, 196, 0.14);
   border-radius: 16px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
-    rgba(13, 18, 27, 0.44);
+  background: rgba(7, 10, 15, 0.5);
 }
 
-.progressionCellTitle {
-  display: block;
-  font-size: 0.72rem;
+.progressionChordChartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.progressionChordChartHeader span {
+  color: #86aeef;
+  font-size: 0.68rem;
   font-weight: 900;
-  color: var(--muted);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.045em;
+}
+
+.progressionChordChartHeader strong {
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.progressionChordChartGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+  padding-right: 3px;
+  scrollbar-color: rgba(122, 167, 255, 0.52) rgba(255, 255, 255, 0.05);
+}
+
+.progressionChartBar {
+  min-width: 0;
+  padding: 8px 8px 6px;
+  border: 1px solid rgba(154, 171, 196, 0.16);
+  border-radius: 8px;
+  background: rgba(17, 22, 31, 0.78);
+}
+
+.progressionChartBar.selected {
+  border-color: rgba(122, 167, 255, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.1);
+}
+
+.progressionChartBarNumber {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.progressionChartChords {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-height: 24px;
+}
+
+.progressionChartChord {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progressionChartBeats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(205, 214, 228, 0.48);
+  border-right: 1px solid rgba(205, 214, 228, 0.32);
+  border-left: 1px solid rgba(205, 214, 228, 0.32);
+}
+
+.progressionChartBeat {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid rgba(205, 214, 228, 0.12);
+  border-radius: 0;
+  background: transparent;
+  color: #dce5f4;
+}
+
+.progressionChartBeat:last-child {
+  border-right: 0;
+}
+
+.progressionChartBeat.selected {
+  background: rgba(122, 167, 255, 0.14);
+  color: #fff;
+}
+
+.progressionChartBeat:focus-visible {
+  outline: 2px solid #8ab4ff;
+  outline-offset: -2px;
+}
+
+.progressionChartSlash {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.progressionChartBeatNumber {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.52rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.progressionSelectionEditor {
+  display: grid;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(154, 171, 196, 0.14);
+}
+
+.progressionSelectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.progressionSelectionHeader > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.progressionSelectionHeader > div:first-child span,
+.progressionSelectionChord span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.progressionSelectionHeader > div:first-child strong {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.progressionSelectionChord {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.progressionSelectionChord strong {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.progressionBeatTabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progressionBeatTabs button,
+.progressionApplyTabs button,
+.progressionChip {
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #141922;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.76rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.progressionBeatTabs button.active,
+.progressionApplyTabs button.active,
+.progressionChip.active {
+  border-color: rgba(122, 167, 255, 0.5);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.08);
+}
+
+.progressionApplySection {
+  display: grid;
+  gap: 7px;
+}
+
+.progressionApplyTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progressionChipSection {
+  display: grid;
+  gap: 7px;
+}
+
+.progressionChipGrid {
+  display: grid;
+  gap: 6px;
+}
+
+.progressionRootChips {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.progressionChordChips {
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+}
+
+.progressionWorkspace {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+}
+
+.progressionWorkspaceHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.progressionWorkspaceHeader h1 {
+  margin: 0;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.progressionWorkspaceHeader p:last-child {
+  margin: 7px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.progressionWorkspaceActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressionHistoryActions {
+  display: flex;
+  gap: 6px;
+}
+
+.progressionHistoryActions button {
+  display: grid;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(154, 171, 196, 0.2);
+  border-radius: 50%;
+  background: rgba(20, 26, 36, 0.94);
+  color: var(--ink);
+}
+
+.progressionHistoryActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.34;
+}
+
+.progressionHistoryActions svg {
+  width: 17px;
+  height: 17px;
+}
+
+.progressionEditorMobileBar {
+  display: none;
+}
+
+.progressionWorkspaceBack,
+.quickEditorFullLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(122, 167, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(122, 167, 255, 0.1);
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.progressionWorkspaceBack svg,
+.quickEditorFullLink svg {
+  width: 16px;
+  height: 16px;
+}
+
+.progressionEditorFull {
+  padding: 20px;
+}
+
+.progressionEditorFull .progressionChordChartGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-height: 300px;
+}
+
+.progressionQuickEditor {
+  display: grid;
+  gap: 14px;
+}
+
+.quickEditorBarNav {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(154, 171, 196, 0.14);
+  border-radius: 12px;
+  background: rgba(13, 18, 27, 0.5);
+}
+
+.quickEditorBarNav div {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.quickEditorBarNav span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.quickEditorBarNav strong {
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.quickEditorBarNav button {
+  display: grid;
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  min-height: 38px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(154, 171, 196, 0.2);
+  border-radius: 50%;
+  background: rgba(20, 26, 36, 0.92);
+  color: var(--ink);
+}
+
+.quickEditorBarNav button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.quickEditorCellTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.quickEditorCellTabs button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #141922;
+  color: var(--muted);
+}
+
+.quickEditorCellTabs button.active {
+  border-color: rgba(122, 167, 255, 0.44);
+  background: rgba(122, 167, 255, 0.18);
+  color: #fff;
+}
+
+.quickEditorFields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 10px;
+}
+
+.quickEditorFullLink {
+  justify-self: end;
 }
 
 @media (max-width: 1080px) {
@@ -2026,18 +2418,8 @@ select:focus-visible,
     gap: 8px;
   }
 
-  .progressionEditorRow {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .progressionEditorRow strong {
-    grid-column: 1 / -1;
-  }
-
-  .progressionCellGroup {
-    padding: 10px;
+  .progressionChordChartGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2094,6 +2476,10 @@ select:focus-visible,
     scroll-snap-type: x proximity;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .progressionRoute .appSidebar {
+    display: none;
   }
 
   .appSidebar::-webkit-scrollbar {
@@ -2280,6 +2666,139 @@ select:focus-visible,
     border-radius: 16px;
   }
 
+  .progressionWorkspace {
+    padding: 16px 10px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .progressionWorkspaceHeader {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .progressionWorkspaceHeader h1 {
+    font-size: 1.55rem;
+  }
+
+  .progressionWorkspaceBack {
+    align-self: flex-start;
+  }
+
+  .progressionWorkspaceActions {
+    display: none;
+  }
+
+  .progressionEditorMobileBar {
+    position: fixed;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    left: 8px;
+    z-index: 70;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    min-height: 68px;
+    padding: 6px;
+    border: 1px solid rgba(154, 171, 196, 0.18);
+    border-radius: 17px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+      rgba(7, 10, 15, 0.96);
+    box-shadow:
+      0 -18px 54px rgba(0, 0, 0, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .progressionEditorMobileBar a,
+  .progressionEditorMobileBar button {
+    display: grid;
+    grid-template-rows: 28px auto;
+    align-items: center;
+    justify-items: center;
+    gap: 3px;
+    min-width: 0;
+    min-height: 56px;
+    padding: 6px 5px 5px;
+    border: 1px solid rgba(154, 171, 196, 0.15);
+    border-radius: 12px;
+    background: rgba(17, 23, 33, 0.84);
+    color: var(--ink);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .progressionEditorMobileBar button:disabled {
+    cursor: not-allowed;
+    opacity: 0.34;
+  }
+
+  .progressionEditorMobileBar svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .progressionEditorFull {
+    padding: 10px;
+  }
+
+  .progressionEditorFull .progressionChordChartGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progressionSelectionHeader {
+    align-items: flex-start;
+  }
+
+  .progressionSelectionChord {
+    justify-items: end;
+  }
+
+  .progressionSelectionChord strong {
+    font-size: 1.18rem;
+  }
+
+  .progressionBeatTabs {
+    gap: 4px;
+  }
+
+  .progressionBeatTabs button,
+  .progressionApplyTabs button,
+  .progressionChip {
+    min-height: 38px;
+    padding: 0 5px;
+    font-size: 0.7rem;
+  }
+
+  .progressionChipGrid {
+    gap: 4px;
+  }
+
+  .progressionChordChips {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .quickEditorFields {
+    grid-template-columns: 1fr;
+  }
+
+  .progressionChordChart {
+    padding: 9px;
+  }
+
+  .progressionChordChartGrid {
+    gap: 6px;
+    max-height: 210px;
+  }
+
+  .progressionChartBar {
+    padding: 7px 6px 5px;
+  }
+
+  .progressionChartBeat {
+    min-height: 38px;
+  }
+
   .progressionEditorHeader {
     flex-direction: column;
     align-items: start;
@@ -2294,10 +2813,6 @@ select:focus-visible,
     width: 100%;
     min-width: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .progressionEditorRow {
-    grid-template-columns: 1fr;
   }
 
   .progressionButtons {
@@ -2555,6 +3070,14 @@ select:focus-visible,
 }
 
 @media (min-width: 701px) {
+  .shellEditPanel {
+    width: clamp(420px, 42vw, 560px);
+  }
+
+  .shellControlsPanel:not(.shellMetronomePanel) {
+    width: clamp(840px, 74vw, 1160px);
+  }
+
   .shellControlsPanel,
   .shellProgressionPanel,
   .shellEditPanel {
@@ -2678,6 +3201,53 @@ select:focus-visible,
   .shellProgressionPanel.compact .shellProgression,
   .shellEditPanel.compact .shellEdit {
     display: none;
+  }
+}
+
+@container controls-panel (max-width: 960px) {
+  .shellControls .controlsColumnSecondary {
+    grid-template-columns: minmax(150px, 0.7fr) minmax(220px, 1.3fr);
+  }
+
+  .shellControls .controlsColumnSecondary > label:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .shellControls .controlsColumnSecondary .toggle {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .shellControls .controlsColumnSecondary .voicingTabs {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@container controls-panel (max-width: 780px) {
+  .shellControls .controlsColumnActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shellControls .controlsPlaybackPattern {
+    grid-column: 1 / -1;
+  }
+}
+
+@container controls-panel (max-width: 620px) {
+  .shellControls .controlsColumnPrimary,
+  .shellControls .controlsColumnSecondary,
+  .shellControls .controlsColumnActions {
+    grid-template-columns: 1fr;
+  }
+
+  .shellControls .controlsColumnSecondary > label:first-child,
+  .shellControls .controlsColumnSecondary .toggle,
+  .shellControls .controlsColumnSecondary .voicingTabs,
+  .shellControls .controlsPlaybackPattern {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 

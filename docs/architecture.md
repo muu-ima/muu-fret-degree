@@ -71,25 +71,38 @@
 
 ## 責務の分け方
 
+### Progressionの画面分離
+
+コード進行は、メイン画面で再生し、`/progression` で詳細編集する。
+
+- メイン画面は指板、同期再生、伴奏パターン、Quick Editを担当する。
+- `/progression` はコード譜、小節、拍、タイ、スラーなどの編集を担当する。
+- 両画面は `usePersistedProgression` の保存データを共有する。
+- Quick Editは選択中小節のRoot / Chord変更に限定する。
+- 将来は単一のProgression Sessionを共有し、編集画面にもMini Transportと再生位置ハイライトを提供する。
+- 画面ごとにtimerや `AudioContext` を複製しない。
+
+判断理由、トレードオフ、共有ストアへの移行条件は [`docs/progression-editor-ui.md`](./progression-editor-ui.md#設計判断-編集と再生を分離する) を参照する。
+
 ### `app/page.tsx`
 
 ホームの練習ページを担当する。
 
-- `PracticeWorkspace` を `showProgressionEditor=false` で表示する。
+- `PracticeWorkspace` を表示する。
 - Practice モードの入口として、指板と基本操作を見せる。
 
 ### `app/progression/page.tsx`
 
 コード進行編集ページを担当する。
 
-- `PracticeWorkspace` を `showProgressionEditor=true` で表示する。
-- 進行編集を別ルートに分ける。
+- `ProgressionEditorWorkspace` を表示する。
+- 指板や再生パネルを置かず、進行編集を別ルートへ分離する。
 - 2 / 4 / 8 / 16 bars を切り替えられるようにし、4 bars を基準に見通しを保つ。
 - 8 / 16 bars は編集領域内スクロールで扱う。
 
 ### `app/components/PracticeWorkspace.tsx`
 
-アプリ共通の練習画面を担当する。
+メインの練習・再生画面を担当する。
 
 - 選択中の Root / Chord / Tuning / BPM などの state を持つ。
 - `theory.json` から現在のコード種別やチューニングを選ぶ。
@@ -97,6 +110,7 @@
 - UI コンポーネントへ props とイベントハンドラを渡す。
 - 音声 hook から受け取った再生関数を呼び出す。
 - 進行再生中は、現在小節の Root / Chord を表示と再生へ反映する。
+- `ProgressionQuickEditor` へ進行データと更新 callback を渡す。
 
 ここには、大きな SVG 描画、音楽理論の細かい計算、AudioContext のライフサイクル、入力値の正規化ルールを置かない。画面の流れを読むためのファイルとして保つ。
 
@@ -108,6 +122,7 @@
 - `Practice` と `Progression Edit` の入口を常設する。
 - サイドバーは `Modes` と `Panels` のように役割ごとに分けられるようにする。
 - `Controls` のような補助パネルの入口をここに置けるようにする。
+- `Progression Edit` は画面モード、`Quick Edit` はメイン画面の補助パネルとして分ける。
 - モバイルではサイドバーを縮めて、ページ切り替えを残す。
 - 転回形 (Inversion) のように比較したい選択肢は、ドロップダウンよりタブ型の方が向く。
 
@@ -152,20 +167,50 @@
 
 - Play / Stop / Reset を表示する。
 - 現在の小節、2 拍セル、進行中のコードを表示する。
-- Progression モードでは BPM 調整とメトロノームの ON/OFF を表示する。
 - 状態は持たず、`useProgressionPlayback` から受け取った値を表示するだけにする。
 
 ### `app/components/ProgressionEditor.tsx`
 
 コード進行の小節ごとの Root / Chord を編集する。
 
+短期的なUI再構成の方針は [`docs/progression-editor-ui.md`](./progression-editor-ui.md) を参照する。
+
 - 2 / 4 / 8 / 16 小節のループを編集する。
 - 小節数の切り替えは、比較しやすいのでタブ型で見せる。
 - 各小節を 2 拍単位で分割し、前半 / 後半の Root と Chord を選択できる。
-- 状態の保存はしない。編集内容は `PracticeWorkspace` の state に反映するだけにする。
+- 状態の保存はしない。編集内容は親ワークスペースの state に反映するだけにする。
 - `Progression Edit` ページでのみ表示する。
 
-編集内容そのものは `app/components/PracticeWorkspace.tsx` の state に反映する。
+編集内容そのものは `ProgressionEditorWorkspace` の state に反映する。
+
+### `app/components/ProgressionEditorWorkspace.tsx`
+
+`/progression` の専用編集画面を担当する。
+
+- 進行データを読み込み、`ProgressionEditor` へ渡す。
+- 2 / 4 / 8 / 16小節の変更とセル編集をstateへ反映する。
+- 指板、メトロノーム、進行再生の操作は持たない。
+- 編集結果を `usePersistedProgression` でメイン画面と共有する。
+
+### `app/components/ProgressionQuickEditor.tsx`
+
+メイン画面で選択中の小節を素早く編集する。
+
+- 前後の小節と2拍セルを切り替える。
+- Root / Chordを即時変更する。
+- `Full Editor` から `/progression` へ移動する。
+- 小節数、拍、タイ、スラーなどの詳細編集は持たない。
+
+### `app/components/ProgressionChordChart.tsx`
+
+コード進行を簡易コード譜として表示する。
+
+- 各小節のコード名と4拍のリズムスラッシュを表示する。
+- 選択中の小節と拍を視覚的に示す。
+- 拍の選択を callback で `ProgressionEditor` へ返す。
+- 将来は休符、タイ、スラー、1拍コード上書きの表示を担当する。
+
+このコンポーネントは編集データを更新せず、譜面表示と選択操作だけを担当する。
 
 ### `app/hooks/useAudioEngine.ts`
 
@@ -209,6 +254,19 @@ BPM 入力の state と正規化を担当する。
 
 この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
 
+### `app/hooks/useProgressionState.ts`
+
+メイン画面とFull Editorで共通する進行stateと更新規則を担当する。
+
+- 既定のコード進行を初期化する。
+- BPMを進行データへ同期する。
+- 2拍セルの更新処理を一元化する。
+- 小節数変更を一元化する。
+- 進行編集のUndo / Redo履歴を最大100件保持する。
+- `usePersistedProgression` を通じて保存と読み込みを行う。
+
+画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。Root / Chordと小節数の変更は履歴対象にするが、BPM同期と保存データの読み込みは履歴へ積まない。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
+
 ### `app/hooks/usePersistedProgression.ts`
 
 コード進行の編集内容をブラウザ保存する。
@@ -247,7 +305,8 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 
 - BPM と拍子から 1 拍・1 小節の長さを求める。
 - 経過秒数から現在の拍位置と小節番号を求める。
-- 進行データから、現在参照すべき小節と 2 拍セルを選ぶ。
+- 進行データから、現在参照すべき小節と2拍セルを選ぶ。
+- 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。

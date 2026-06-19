@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { ChordOctave, ChordType, FretRange, Tuning } from "../lib/music";
+import type { ArpeggioPattern } from "./useChordPlayback";
 
 const storageKey = "muu-fret-degree:practice-settings";
 const storageVersion = 1;
@@ -14,6 +15,7 @@ type PersistedPracticeSettings = {
   fretRangeId: FretRange["id"];
   chordOctaveId: string;
   chordInversion: number;
+  arpeggioPattern: ArpeggioPattern;
   showGuideTones: boolean;
   bpm: number;
 };
@@ -26,6 +28,7 @@ type UsePersistedPracticeSettingsOptions = {
     fretRangeId: FretRange["id"];
     chordOctaveId: string;
     chordInversion: number;
+    arpeggioPattern: ArpeggioPattern;
     showGuideTones: boolean;
     bpm: number;
   };
@@ -36,6 +39,7 @@ type UsePersistedPracticeSettingsOptions = {
     setFretRangeId: Dispatch<SetStateAction<FretRange["id"]>>;
     setChordOctaveId: Dispatch<SetStateAction<string>>;
     setChordInversion: Dispatch<SetStateAction<number>>;
+    setArpeggioPattern: Dispatch<SetStateAction<ArpeggioPattern>>;
     setShowGuideTones: Dispatch<SetStateAction<boolean>>;
     commitBpm: (value: string) => void;
   };
@@ -58,6 +62,15 @@ function isFiniteBpm(value: unknown): value is number {
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function isArpeggioPattern(value: unknown): value is ArpeggioPattern {
+  return (
+    value === "root-only" ||
+    value === "chord-order" ||
+    value === "third-first" ||
+    value === "lowest-per-degree"
+  );
 }
 
 function isFretRangeId(value: unknown, fretRanges: readonly FretRange[]): value is FretRange["id"] {
@@ -129,6 +142,10 @@ export function usePersistedPracticeSettings({
       setters.setChordInversion(Math.max(0, Math.round(storedSettings.chordInversion)));
     }
 
+    if (isArpeggioPattern(storedSettings.arpeggioPattern)) {
+      setters.setArpeggioPattern(storedSettings.arpeggioPattern);
+    }
+
     if (typeof storedSettings.showGuideTones === "boolean") {
       setters.setShowGuideTones(storedSettings.showGuideTones);
     }
@@ -153,6 +170,7 @@ export function usePersistedPracticeSettings({
       fretRangeId: values.fretRangeId,
       chordOctaveId: values.chordOctaveId,
       chordInversion: values.chordInversion,
+      arpeggioPattern: values.arpeggioPattern,
       showGuideTones: values.showGuideTones,
       bpm: values.bpm,
     };
@@ -167,6 +185,7 @@ export function usePersistedPracticeSettings({
     values.bpm,
     values.chordTypeId,
     values.chordInversion,
+    values.arpeggioPattern,
     values.chordOctaveId,
     values.fretRangeId,
     values.root,

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { PracticeWorkspace } from "../components/PracticeWorkspace";
+import { ProgressionEditorWorkspace } from "../components/ProgressionEditorWorkspace";
 
 export const metadata: Metadata = {
   title: "Progression Edit | Bass Chord Degree Fretboard",
 };
 
 export default function ProgressionPage() {
-  return <PracticeWorkspace pageMode="progression" showProgressionEditor />;
+  return <ProgressionEditorWorkspace />;
 }
