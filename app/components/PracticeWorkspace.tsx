@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { LuGripVertical, LuMaximize2, LuMinus } from "react-icons/lu";
+import { LuGripVertical, LuMaximize2, LuMinus, LuX } from "react-icons/lu";
 import theory from "../../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
@@ -383,7 +383,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           <CompactIcon aria-hidden="true" />
         </button>
         <button type="button" className="closeButton" aria-label="パネルを閉じる" onClick={closePanels}>
-          ×
+          <LuX aria-hidden="true" />
         </button>
       </div>
     );
