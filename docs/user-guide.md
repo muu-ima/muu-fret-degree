@@ -136,6 +136,13 @@ Count-in中は上部表示がアンバー色に変わり、残り拍数を表示
 
 メイン画面の `Quick Edit` パネルでは、選択中の小節だけを編集できます。`Full Editor` を押すと専用編集画面へ移動します。再生、同期、リズム伴奏はメイン画面の `Progression` パネルで操作します。
 
+Full EditorではRoot / Chordと小節数の変更をUndo / Redoできます。
+
+- `Ctrl/Cmd + Z`: Undo
+- `Ctrl/Cmd + Shift + Z` または `Ctrl/Cmd + Y`: Redo
+
+モバイルでは画面下部の `Practice / Undo / Redo` バーから操作します。
+
 編集内容と主要な練習設定はブラウザの `localStorage` に保存されます。
 
 ## Troubleshooting

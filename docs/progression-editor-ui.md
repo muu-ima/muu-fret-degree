@@ -80,6 +80,15 @@ Full Editorが担当するもの:
 
 Quick Editには、小節数変更、拍編集、タイ、スラーなどを追加しない。Quick Editが再びFull Editor化しないよう、役割を限定する。
 
+Full EditorのUndo / Redoは `useProgressionState` が担当する。
+
+- Root / Chordと小節数の変更を履歴へ積む。
+- 選択中の小節・拍、再生位置、パネル状態、BPM同期は履歴対象にしない。
+- 新しい編集を行った場合はRedo履歴を破棄する。
+- 履歴は最大100件とし、永続化するのは現在の進行だけにする。
+- デスクトップはEditorヘッダー、モバイルは専用ボトムバーに操作を置く。
+- `Ctrl/Cmd + Z` でUndo、`Ctrl/Cmd + Shift + Z` または `Ctrl/Cmd + Y` でRedoする。
+
 ### 分離は再生からの孤立を意味しない
 
 Full Editorでも、編集内容と再生位置の関係を確認できるようにする。

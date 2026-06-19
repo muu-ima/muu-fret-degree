@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer, type Dispatch, type SetStateAction } from "react";
 import type { ChordType } from "../lib/music";
 import {
   createDefaultProgression,
@@ -16,50 +16,162 @@ type UseProgressionStateOptions = {
   chordTypes: ChordType[];
 };
 
+type ProgressionHistory = {
+  past: ChordProgression[];
+  present: ChordProgression;
+  future: ChordProgression[];
+};
+
+type ProgressionHistoryAction =
+  | { type: "commit"; update: (current: ChordProgression) => ChordProgression }
+  | { type: "hydrate"; update: SetStateAction<ChordProgression> }
+  | { type: "sync-bpm"; bpm: number }
+  | { type: "undo" }
+  | { type: "redo" };
+
+const historyLimit = 100;
+
+function progressionHistoryReducer(
+  state: ProgressionHistory,
+  action: ProgressionHistoryAction,
+): ProgressionHistory {
+  if (action.type === "commit") {
+    const nextProgression = action.update(state.present);
+    if (nextProgression === state.present) {
+      return state;
+    }
+
+    return {
+      past: [...state.past, state.present].slice(-historyLimit),
+      present: nextProgression,
+      future: [],
+    };
+  }
+
+  if (action.type === "hydrate") {
+    const nextProgression =
+      typeof action.update === "function" ? action.update(state.present) : action.update;
+    return {
+      past: [],
+      present: nextProgression,
+      future: [],
+    };
+  }
+
+  if (action.type === "sync-bpm") {
+    if (state.present.bpm === action.bpm) {
+      return state;
+    }
+
+    return {
+      ...state,
+      present: { ...state.present, bpm: action.bpm },
+    };
+  }
+
+  if (action.type === "undo") {
+    const previous = state.past.at(-1);
+    if (!previous) {
+      return state;
+    }
+
+    return {
+      past: state.past.slice(0, -1),
+      present: { ...previous, bpm: state.present.bpm },
+      future: [state.present, ...state.future].slice(0, historyLimit),
+    };
+  }
+
+  const next = state.future[0];
+  if (!next) {
+    return state;
+  }
+
+  return {
+    past: [...state.past, state.present].slice(-historyLimit),
+    present: { ...next, bpm: state.present.bpm },
+    future: state.future.slice(1),
+  };
+}
+
 export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgressionStateOptions) {
-  const [progression, setProgression] = useState<ChordProgression>(() => createDefaultProgression(bpm));
+  const [history, dispatch] = useReducer(progressionHistoryReducer, undefined, () => ({
+    past: [],
+    present: createDefaultProgression(bpm),
+    future: [],
+  }));
+  const progression = history.present;
+
+  const hydrateProgression: Dispatch<SetStateAction<ChordProgression>> = useCallback((update) => {
+    dispatch({ type: "hydrate", update });
+  }, []);
 
   useEffect(() => {
-    setProgression((currentProgression) =>
-      currentProgression.bpm === bpm ? currentProgression : { ...currentProgression, bpm },
-    );
+    dispatch({ type: "sync-bpm", bpm });
   }, [bpm]);
 
   usePersistedProgression({
     progression,
-    setProgression,
+    setProgression: hydrateProgression,
     roots,
     chordTypes,
   });
 
   const updateCell = useCallback((barIndex: number, cellIndex: number, nextCell: ProgressionCell) => {
-    setProgression((currentProgression) => ({
-      ...currentProgression,
-      bars: currentProgression.bars.map((bar, index) => {
-        if (index !== barIndex) {
-          return bar;
+    dispatch({
+      type: "commit",
+      update: (currentProgression) => {
+        const currentCell = currentProgression.bars[barIndex]?.cells[cellIndex];
+        if (
+          currentCell &&
+          currentCell.root === nextCell.root &&
+          currentCell.chordTypeId === nextCell.chordTypeId
+        ) {
+          return currentProgression;
         }
 
         return {
-          ...bar,
-          cells: [
-            cellIndex === 0 ? nextCell : bar.cells[0],
-            cellIndex === 1 ? nextCell : bar.cells[1],
-          ] as const,
+          ...currentProgression,
+          bars: currentProgression.bars.map((bar, index) => {
+            if (index !== barIndex) {
+              return bar;
+            }
+
+            return {
+              ...bar,
+              cells: [
+                cellIndex === 0 ? nextCell : bar.cells[0],
+                cellIndex === 1 ? nextCell : bar.cells[1],
+              ] as const,
+            };
+          }),
         };
-      }),
-    }));
+      },
+    });
   }, []);
 
   const updateBarCount = useCallback((nextBarCount: number) => {
-    setProgression((currentProgression) => ({
-      ...currentProgression,
-      bars: resizeProgressionBars(currentProgression.bars, nextBarCount),
-    }));
+    dispatch({
+      type: "commit",
+      update: (currentProgression) =>
+        currentProgression.bars.length === nextBarCount
+          ? currentProgression
+          : {
+              ...currentProgression,
+              bars: resizeProgressionBars(currentProgression.bars, nextBarCount),
+            },
+    });
   }, []);
 
+  const undo = useCallback(() => dispatch({ type: "undo" }), []);
+  const redo = useCallback(() => dispatch({ type: "redo" }), []);
+
   return {
+    canRedo: history.future.length > 0,
+    canUndo: history.past.length > 0,
     progression,
+    redo,
+    undo,
     updateBarCount,
     updateCell,
   };

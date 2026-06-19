@@ -262,9 +262,10 @@ BPM 入力の state と正規化を担当する。
 - BPMを進行データへ同期する。
 - 2拍セルの更新処理を一元化する。
 - 小節数変更を一元化する。
+- 進行編集のUndo / Redo履歴を最大100件保持する。
 - `usePersistedProgression` を通じて保存と読み込みを行う。
 
-画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
+画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。Root / Chordと小節数の変更は履歴対象にするが、BPM同期と保存データの読み込みは履歴へ積まない。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
 
 ### `app/hooks/usePersistedProgression.ts`
 

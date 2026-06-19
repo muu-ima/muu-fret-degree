@@ -116,7 +116,7 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <div className="appShell">
+    <div className={pathname === "/progression" ? "appShell progressionRoute" : "appShell"}>
       <aside className="appSidebar">
         <div className="sidebarBrand">
           <span className="sidebarBrandMark" aria-hidden="true">
