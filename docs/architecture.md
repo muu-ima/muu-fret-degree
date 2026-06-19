@@ -295,6 +295,7 @@ MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest /
 - BPMを進行データへ同期する。
 - 2拍セルの更新処理を一元化する。
 - 小節数変更を一元化する。
+- 1拍単位のHit / Rest変更を一元化する。
 - 進行編集のUndo / Redo履歴を最大100件保持する。
 - `usePersistedProgression` を通じて保存と読み込みを行う。
 
@@ -329,6 +330,7 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 - 進行の拍子と小節データを `localStorage` へ保存する。
 - 保存値が壊れている場合や、Root / Chord が現在の候補にない場合は無視する。
 - 読み込み時は既存 state の BPM を保ったまま、進行データだけ復元する。
+- v4でHit / Restを保存し、v1-v3の拍データは暗黙のHitとして読み込む。
 
 ### `app/hooks/usePersistedPracticeSettings.ts`
 
@@ -362,8 +364,9 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 経過秒数から現在の拍位置と小節番号を求める。
 - 進行データから、現在参照すべき小節と2拍セルを選ぶ。
 - 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
+- 拍の`eventType`未指定をHitとして扱い、Restだけを明示的に保持する。
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
-- 2拍セル、拍オーバーライド、小節数の更新を純粋関数として提供する。
+- 2拍セル、拍オーバーライド、Hit / Rest、小節数の更新を純粋関数として提供する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
@@ -374,8 +377,9 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - Root Only、Chord Tones、度数フロー、4 Beatのパターンを解釈する。
 - 各音のMIDI番号、拍内の開始offset、長さを決める。
 - 4 Beatでは次の実効拍のRootへ向かうアプローチ音を選ぶ。
+- Rest拍では再生予定音を返さない。
 
-React、Transport、AudioContextには依存しない。将来Hit / Rest / Tieを追加するときは、譜面イベントを入力に加え、発音しない拍や音価をここで再生予定へ変換する。付点を含む音価は16分音符単位のstepとdurationから秒数へ変換し、リズムスラッシュの表示と再生で同じデータを参照する。
+React、Transport、AudioContextには依存しない。Tieを追加するときは前拍の予定音を延長する情報へ変換する。付点を含む音価は16分音符単位のstepとdurationから秒数へ変換し、リズムスラッシュの表示と再生で同じデータを参照する。
 
 将来は小節末だけでなく、Beat 2からBeat 3など小節内のコード境界も検出し、切り替え直前の拍から次Rootへ自然につなぐアプローチを選べるようにする。常に半音下へ固定せず、半音上、コードトーン経由、アプローチなしを再生パターンとして選択できる設計を検討する。
 

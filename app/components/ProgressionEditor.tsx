@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
 import { type ChordType } from "../lib/music";
 import {
+  getProgressionBeatEventType,
   getProgressionCellForBeat,
   type ProgressionBar,
+  type ProgressionBeatEventType,
   type ProgressionCell,
 } from "../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
@@ -19,6 +21,11 @@ type ProgressionEditorProps = {
   chordTypes: ChordType[];
   onBarCountChange: (barCount: number) => void;
   onBeatChordChange: (barIndex: number, beatIndex: number, cell: ProgressionCell | undefined) => void;
+  onBeatEventTypeChange: (
+    barIndex: number,
+    beatIndex: number,
+    eventType: ProgressionBeatEventType,
+  ) => void;
   onCellChange: (barIndex: number, cellIndex: number, cell: ProgressionCell) => void;
 };
 
@@ -31,6 +38,7 @@ export function ProgressionEditor({
   chordTypes,
   onBarCountChange,
   onBeatChordChange,
+  onBeatEventTypeChange,
   onCellChange,
 }: ProgressionEditorProps) {
   const [selectedBarIndex, setSelectedBarIndex] = useState(0);
@@ -49,6 +57,9 @@ export function ProgressionEditor({
   const selectedCellIndex = Math.floor(selectedBeatIndex / 2);
   const baseCell = selectedBar?.cells[selectedCellIndex];
   const beatOverride = selectedBar?.beats?.[selectedBeatIndex]?.chordOverride;
+  const selectedBeatEventType = selectedBar
+    ? getProgressionBeatEventType(selectedBar, selectedBeatIndex)
+    : "hit";
   const editScope = beatOverride ? "beat" : "cell";
   const selectedCell = editScope === "beat" ? beatOverride ?? baseCell : baseCell;
 
@@ -144,6 +155,28 @@ export function ProgressionEditor({
               </button>
             );
           })}
+        </div>
+
+        <div className="progressionApplySection">
+          <span className="controlLabel">Beat Event</span>
+          <div className="progressionApplyTabs" role="group" aria-label="拍の発音状態">
+            {(["hit", "rest"] as const).map((eventType) => {
+              const isActive = selectedBeatEventType === eventType;
+              return (
+                <button
+                  key={eventType}
+                  type="button"
+                  className={isActive ? "active" : ""}
+                  aria-pressed={isActive}
+                  onClick={() =>
+                    onBeatEventTypeChange(selectedBarIndex, selectedBeatIndex, eventType)
+                  }
+                >
+                  {eventType === "hit" ? "Hit" : "Rest"}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="progressionApplySection">

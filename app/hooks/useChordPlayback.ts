@@ -10,6 +10,7 @@ import {
   pickLowestBassNoteForDegree,
 } from "../lib/music";
 import { planProgressionBeat, type ProgressionRhythm } from "../lib/progression-playback";
+import type { ProgressionBeatEventType } from "../lib/progression";
 
 export type ArpeggioPattern = "root-only" | "chord-order" | "third-first" | "lowest-per-degree";
 
@@ -73,15 +74,17 @@ export function useChordPlayback({
   const playProgressionBeat = useCallback(
     ({
       beatInBar,
+      beatEventType,
       rhythm,
       nextRoot,
     }: {
       beatInBar: number;
+      beatEventType?: ProgressionBeatEventType;
       rhythm: ProgressionRhythm;
       nextRoot?: string;
     }) => {
       resumeAudio();
-      planProgressionBeat({ beatInBar, bpm, chordNotes, nextRoot, notes, rhythm }).forEach(
+      planProgressionBeat({ beatInBar, beatEventType, bpm, chordNotes, nextRoot, notes, rhythm }).forEach(
         ({ midi, startOffset, duration }) => {
           playBassNote(midi, startOffset, duration);
         },

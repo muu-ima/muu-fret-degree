@@ -6,6 +6,7 @@ import {
   pitchClassOf,
   sharpPitchClasses,
 } from "./music";
+import type { ProgressionBeatEventType } from "./progression";
 
 export type ProgressionRhythm =
   | "root-only"
@@ -22,6 +23,7 @@ export type ScheduledBassNote = {
 
 type PlanProgressionBeatOptions = {
   beatInBar: number;
+  beatEventType?: ProgressionBeatEventType;
   bpm: number;
   chordNotes: ChordNote[];
   nextRoot?: string;
@@ -35,12 +37,17 @@ function scheduleNote(note: FretNote | undefined, duration: number): ScheduledBa
 
 export function planProgressionBeat({
   beatInBar,
+  beatEventType = "hit",
   bpm,
   chordNotes,
   nextRoot,
   notes,
   rhythm,
 }: PlanProgressionBeatOptions): ScheduledBassNote[] {
+  if (beatEventType === "rest") {
+    return [];
+  }
+
   const beatInCell = beatInBar % 2;
 
   if (rhythm === "root-only") {

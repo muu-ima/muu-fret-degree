@@ -10,8 +10,10 @@ import {
   createDefaultProgression,
   updateProgressionBarCount,
   updateProgressionBeatChord,
+  updateProgressionBeatEventType,
   updateProgressionCell,
   type ChordProgression,
+  type ProgressionBeatEventType,
   type ProgressionCell,
 } from "../lib/progression";
 import { usePersistedProgression } from "./usePersistedProgression";
@@ -74,6 +76,17 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     [],
   );
 
+  const updateBeatEventType = useCallback(
+    (barIndex: number, beatIndex: number, eventType: ProgressionBeatEventType) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) =>
+          updateProgressionBeatEventType(currentProgression, barIndex, beatIndex, eventType),
+      });
+    },
+    [],
+  );
+
   const undo = useCallback(() => dispatch({ type: "undo" }), []);
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
@@ -86,6 +99,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     undo,
     updateBarCount,
     updateBeatChord,
+    updateBeatEventType,
     updateCell,
   };
 }

@@ -1984,6 +1984,16 @@ select:focus-visible,
   color: #fff;
 }
 
+.progressionChartBeat.rest:not(.selected) {
+  background: rgba(151, 162, 181, 0.05);
+  color: #7f8a9d;
+}
+
+.progressionChartBeat.rest .progressionChartSlash {
+  font-size: 1rem;
+  opacity: 0.72;
+}
+
 .progressionChartBeat:focus-visible {
   outline: 2px solid #8ab4ff;
   outline-offset: -2px;

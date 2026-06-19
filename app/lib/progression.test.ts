@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   createDefaultProgression,
+  getProgressionBeatEventType,
   getProgressionCellForBeat,
   updateProgressionBeatChord,
+  updateProgressionBeatEventType,
 } from "./progression";
 
 describe("progression beat overrides", () => {
@@ -26,5 +28,37 @@ describe("progression beat overrides", () => {
     expect(getProgressionCellForBeat(restored.bars[0], 1)).toEqual(
       progression.bars[0].cells[0],
     );
+  });
+});
+
+describe("progression beat events", () => {
+  it("treats existing beats as hits and stores only rests", () => {
+    const progression = createDefaultProgression();
+
+    expect(getProgressionBeatEventType(progression.bars[0], 0)).toBe("hit");
+
+    const rested = updateProgressionBeatEventType(progression, 0, 0, "rest");
+
+    expect(getProgressionBeatEventType(rested.bars[0], 0)).toBe("rest");
+    expect(rested.bars[0].beats?.[0].eventType).toBe("rest");
+
+    const hit = updateProgressionBeatEventType(rested, 0, 0, "hit");
+
+    expect(getProgressionBeatEventType(hit.bars[0], 0)).toBe("hit");
+    expect(hit.bars[0].beats).toBeUndefined();
+  });
+
+  it("preserves a chord override when changing the beat event", () => {
+    const progression = createDefaultProgression();
+    const override = { root: "F#", chordTypeId: "7" };
+    const overridden = updateProgressionBeatChord(progression, 0, 1, override);
+
+    const rested = updateProgressionBeatEventType(overridden, 0, 1, "rest");
+    const hit = updateProgressionBeatEventType(rested, 0, 1, "hit");
+
+    expect(getProgressionCellForBeat(rested.bars[0], 1)).toEqual(override);
+    expect(getProgressionBeatEventType(rested.bars[0], 1)).toBe("rest");
+    expect(getProgressionCellForBeat(hit.bars[0], 1)).toEqual(override);
+    expect(hit.bars[0].beats?.[1].eventType).toBeUndefined();
   });
 });

@@ -8,8 +8,11 @@ export type ProgressionCell = {
   chordTypeId: string;
 };
 
+export type ProgressionBeatEventType = "hit" | "rest";
+
 export type ProgressionBeat = {
   chordOverride?: ProgressionCell;
+  eventType?: ProgressionBeatEventType;
 };
 
 export type ProgressionBar = {
@@ -231,8 +234,12 @@ export function updateProgressionBeatChord(
   }
 
   const nextBeats = makeProgressionBeats(currentBar);
-  nextBeats[beatIndex] = nextCell ? { chordOverride: { ...nextCell } } : {};
-  const hasOverrides = nextBeats.some((beat) => beat.chordOverride !== undefined);
+  nextBeats[beatIndex] = nextCell
+    ? { ...nextBeats[beatIndex], chordOverride: { ...nextCell } }
+    : removeBeatChordOverride(nextBeats[beatIndex]);
+  const hasBeatData = nextBeats.some(
+    (beat) => beat.chordOverride !== undefined || beat.eventType !== undefined,
+  );
 
   return {
     ...progression,
@@ -241,7 +248,49 @@ export function updateProgressionBeatChord(
         return bar;
       }
 
-      if (hasOverrides) {
+      if (hasBeatData) {
+        return { ...bar, beats: nextBeats };
+      }
+
+      const { beats: _beats, ...barWithoutBeats } = bar;
+      return barWithoutBeats;
+    }),
+  };
+}
+
+export function updateProgressionBeatEventType(
+  progression: ChordProgression,
+  barIndex: number,
+  beatIndex: number,
+  eventType: ProgressionBeatEventType,
+): ChordProgression {
+  const currentBar = progression.bars[barIndex];
+  if (!currentBar || beatIndex < 0 || beatIndex > 3) {
+    return progression;
+  }
+
+  const currentEventType = getProgressionBeatEventType(currentBar, beatIndex);
+  if (currentEventType === eventType) {
+    return progression;
+  }
+
+  const nextBeats = makeProgressionBeats(currentBar);
+  nextBeats[beatIndex] =
+    eventType === "hit"
+      ? removeBeatEventType(nextBeats[beatIndex])
+      : { ...nextBeats[beatIndex], eventType };
+  const hasBeatData = nextBeats.some(
+    (beat) => beat.chordOverride !== undefined || beat.eventType !== undefined,
+  );
+
+  return {
+    ...progression,
+    bars: progression.bars.map((bar, index) => {
+      if (index !== barIndex) {
+        return bar;
+      }
+
+      if (hasBeatData) {
         return { ...bar, beats: nextBeats };
       }
 
@@ -253,6 +302,13 @@ export function updateProgressionBeatChord(
 
 export function getProgressionBeat(bar: ProgressionBar, beatIndex: number): ProgressionBeat {
   return bar.beats?.[beatIndex] ?? {};
+}
+
+export function getProgressionBeatEventType(
+  bar: ProgressionBar,
+  beatIndex: number,
+): ProgressionBeatEventType {
+  return getProgressionBeat(bar, beatIndex).eventType ?? "hit";
 }
 
 export function getProgressionCellForBeat(bar: ProgressionBar, beatIndex: number): ProgressionCell {
@@ -280,4 +336,14 @@ export function makeProgressionBar(
     bar,
     cells: [{ ...firstCell }, { ...secondCell }],
   };
+}
+
+function removeBeatChordOverride(beat: ProgressionBeat): ProgressionBeat {
+  const { chordOverride: _chordOverride, ...beatWithoutChordOverride } = beat;
+  return beatWithoutChordOverride;
+}
+
+function removeBeatEventType(beat: ProgressionBeat): ProgressionBeat {
+  const { eventType: _eventType, ...beatWithoutEventType } = beat;
+  return beatWithoutEventType;
 }

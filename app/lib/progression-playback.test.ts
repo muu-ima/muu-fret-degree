@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ChordNote, FretNote } from "./music";
+import type { ProgressionBeatEventType } from "./progression";
 import {
   planProgressionBeat,
   type ProgressionRhythm,
@@ -39,9 +40,15 @@ function makeFretNote(
   };
 }
 
-function plan(rhythm: ProgressionRhythm, beatInBar: number, nextRoot?: string) {
+function plan(
+  rhythm: ProgressionRhythm,
+  beatInBar: number,
+  nextRoot?: string,
+  beatEventType?: ProgressionBeatEventType,
+) {
   return planProgressionBeat({
     beatInBar,
+    beatEventType,
     bpm: 120,
     chordNotes,
     nextRoot,
@@ -75,5 +82,15 @@ describe("progression playback patterns", () => {
 
     expect(events[0]).toMatchObject({ startOffset: 0, duration: 0.22 });
     expect(events[1]).toMatchObject({ startOffset: 0.25, duration: 0.22 });
+  });
+
+  it.each([
+    "root-only",
+    "chord-tones",
+    "degree-ascending",
+    "degree-third-first",
+    "four-beat",
+  ] satisfies ProgressionRhythm[])("%s produces no notes for a rest", (rhythm) => {
+    expect(plan(rhythm, 0, undefined, "rest")).toEqual([]);
   });
 });

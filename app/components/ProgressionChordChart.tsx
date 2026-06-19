@@ -2,7 +2,11 @@
 
 import type { ChordType } from "../lib/music";
 import { formatChordSymbol } from "../lib/chord-symbol";
-import { getProgressionCellForBeat, type ProgressionBar } from "../lib/progression";
+import {
+  getProgressionBeatEventType,
+  getProgressionCellForBeat,
+  type ProgressionBar,
+} from "../lib/progression";
 
 type ProgressionChordChartProps = {
   bars: readonly ProgressionBar[];
@@ -51,17 +55,18 @@ export function ProgressionChordChart({
                 {[0, 1, 2, 3].map((beatIndex) => {
                   const isSelected = barIndex === selectedBarIndex && beatIndex === selectedBeatIndex;
                   const cell = getProgressionCellForBeat(bar, beatIndex);
+                  const eventType = getProgressionBeatEventType(bar, beatIndex);
                   return (
                     <button
                       key={beatIndex}
                       type="button"
-                      className={isSelected ? "progressionChartBeat selected" : "progressionChartBeat"}
-                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}`}
+                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${isSelected ? " selected" : ""}`}
+                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : "Hit"}`}
                       aria-pressed={isSelected}
                       onClick={() => onBeatSelect(barIndex, beatIndex)}
                     >
                       <span className="progressionChartSlash" aria-hidden="true">
-                        /
+                        {eventType === "rest" ? "—" : "/"}
                       </span>
                       <span className="progressionChartBeatNumber" aria-hidden="true">
                         {beatIndex + 1}
