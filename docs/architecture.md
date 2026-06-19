@@ -71,6 +71,19 @@
 
 ## 責務の分け方
 
+### Progressionの画面分離
+
+コード進行は、メイン画面で再生し、`/progression` で詳細編集する。
+
+- メイン画面は指板、同期再生、伴奏パターン、Quick Editを担当する。
+- `/progression` はコード譜、小節、拍、タイ、スラーなどの編集を担当する。
+- 両画面は `usePersistedProgression` の保存データを共有する。
+- Quick Editは選択中小節のRoot / Chord変更に限定する。
+- 将来は単一のProgression Sessionを共有し、編集画面にもMini Transportと再生位置ハイライトを提供する。
+- 画面ごとにtimerや `AudioContext` を複製しない。
+
+判断理由、トレードオフ、共有ストアへの移行条件は [`docs/progression-editor-ui.md`](./progression-editor-ui.md#設計判断-編集と再生を分離する) を参照する。
+
 ### `app/page.tsx`
 
 ホームの練習ページを担当する。
@@ -240,6 +253,18 @@ BPM 入力の state と正規化を担当する。
 - `app/lib/progression.ts` の純粋関数を使って、現在の拍位置と選択中のセルを 1 回で求める。
 
 この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
+
+### `app/hooks/useProgressionState.ts`
+
+メイン画面とFull Editorで共通する進行stateと更新規則を担当する。
+
+- 既定のコード進行を初期化する。
+- BPMを進行データへ同期する。
+- 2拍セルの更新処理を一元化する。
+- 小節数変更を一元化する。
+- `usePersistedProgression` を通じて保存と読み込みを行う。
+
+画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
 
 ### `app/hooks/usePersistedProgression.ts`
 

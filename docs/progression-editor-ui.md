@@ -48,6 +48,101 @@ type ProgressionBar = {
 
 編集機能をFull Editorへ、再生機能をメイン画面へ分ける。両画面は同じ進行保存データを使用する。
 
+## 設計判断: 編集と再生を分離する
+
+### 判断
+
+Progression Editをメイン画面へ重ね続けず、`/progression` を独立した編集ワークスペースにする。メイン画面にはProgression再生とQuick Editだけを残す。
+
+### 理由
+
+- 指板を見ながら練習する作業と、コード譜全体を組み立てる作業では必要な画面密度が異なる。
+- タイ、スラー、休符、拍編集、Undoをフローティングパネルへ追加すると、指板が隠れ、モバイルのbottom sheetも過密になる。
+- コード譜は横幅と一覧性が重要なため、専用画面の主役として扱う方が自然である。
+- 再生装置をメイン画面へ集約すると、指板、現在コード、伴奏パターンを同時に確認できる。
+- Quick Editを残すことで、練習中の小さな修正のために毎回画面移動する必要がない。
+
+### 境界
+
+メイン画面が担当するもの:
+
+- Bass Fretboard
+- コード進行の同期再生
+- Root Only、度数フロー、4 Beatなどの伴奏選択
+- 選択中小節のRoot / Chordを変更するQuick Edit
+
+Full Editorが担当するもの:
+
+- コード譜の全体表示
+- 小節、2拍セル、1拍の選択と編集
+- 休符、タイ、スラー、スラッシュコード
+- 将来のコピー、貼り付け、Undo / Redo
+
+Quick Editには、小節数変更、拍編集、タイ、スラーなどを追加しない。Quick Editが再びFull Editor化しないよう、役割を限定する。
+
+### 分離は再生からの孤立を意味しない
+
+Full Editorでも、編集内容と再生位置の関係を確認できるようにする。
+
+- コード譜上で現在再生中の小節と拍をハイライトする。
+- Full EditorにはPlay / Stopと現在位置だけのMini Transportを置く。
+- 選択中コードを単体で試聴できるようにする。
+- 編集中の変更は、原則として次の拍または次のスケジュール単位から再生へ反映する。
+- 再生中の小節が表示範囲外へ移動した場合は、ユーザー操作を妨げない範囲で追従表示する。
+
+BPM、伴奏パターン、メトロノームなどの詳細設定はメイン画面に残す。Full Editorへ同じ再生パネルを複製せず、編集確認に必要な最小操作だけを公開する。
+
+再生同期を実装する際は、画面ごとに別のtimerや `AudioContext` を作らない。進行データとTransportを共有する単一のsession/providerをレイアウト階層に置き、メイン画面とFull Editorは同じ再生位置と操作を購読する。
+
+目標となる責務:
+
+```text
+Progression Session
+├─ canonical progression data
+├─ playback position
+├─ transport commands
+└─ persistence
+
+Practice              Full Editor
+├─ full playback UI   ├─ chord chart playhead
+├─ fretboard sync     ├─ mini transport
+└─ quick edit         └─ detailed editing
+```
+
+これにより、画面の役割は分けたまま「編集しながら聴く」「再生位置を見ながら直す」体験を保つ。
+
+### 状態共有
+
+現在は `usePersistedProgression` と `localStorage` を共有境界にする。これは編集画面分離の第一段階であり、再生位置までは共有しない。
+
+進行の初期化、セル更新、小節数変更、永続化の呼び出しは `useProgressionState` に集約する。PracticeとFull Editorは同じ更新commandを利用し、画面ごとに進行更新ロジックを複製しない。
+
+- Full Editorで保存した進行は、メイン画面へ戻った時に読み込まれる。
+- Quick Editの変更も同じ保存データへ反映される。
+- 音声再生中の一時状態やパネルの開閉状態は共有しない。
+
+この方法はルート間の同期には十分で、実装も小さい。一方、複数タブでのリアルタイム同期や、画面を同時表示したまま即時反映する用途には向かない。
+
+### 見直し条件
+
+次の要件が生じた場合は、React Context、外部ストア、または `useSyncExternalStore` を使った進行専用ストアを検討する。
+
+- 複数コンポーネントが同時に進行を頻繁に更新する。
+- 画面遷移なしでFull Editorと再生画面を同時表示する。
+- 複数タブや複数端末で編集内容を即時同期する。
+- Undo / Redo履歴を画面間で共有する。
+- 編集画面とメイン画面で同じTransportと再生位置を共有する。
+
+Mini Transportとコード譜のplayhead同期へ進む段階で、進行データとTransportをまとめたsession/providerへ移行する。それまでは編集モデルを固めるため、永続化hookを共用する。
+
+### トレードオフ
+
+- Full Editorへ移動する操作が1段増える。
+- 画面ごとに進行stateを持つため、同期は保存と再読み込みのタイミングに依存する。
+- Quick EditとFull Editorで同じ更新ルールを守る必要がある。
+
+これらは、メイン画面の視認性と編集画面の拡張性を得るために受け入れる。
+
 ## Phase 1: コード進行エディター
 
 ### 画面構成

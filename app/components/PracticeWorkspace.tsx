@@ -27,8 +27,8 @@ import {
   useChordPlayback,
 } from "../hooks/useChordPlayback";
 import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
-import { usePersistedProgression } from "../hooks/usePersistedProgression";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
+import { useProgressionState } from "../hooks/useProgressionState";
 import { type MetronomeTone } from "../lib/audio";
 import {
   type ChordType,
@@ -41,10 +41,6 @@ import {
   makeChordMap,
   makeFretNotes,
 } from "../lib/music";
-import {
-  createDefaultProgression,
-  type ChordProgression,
-} from "../lib/progression";
 
 type DesktopPanelKey = "controls" | "metronome" | "progression" | "edit";
 type DesktopPanelPosition = { x: number; y: number };
@@ -80,9 +76,13 @@ export function PracticeWorkspace() {
     Partial<Record<DesktopPanelKey, DesktopPanelPosition>>
   >({});
   const [compactDesktopPanels, setCompactDesktopPanels] = useState<Partial<Record<DesktopPanelKey, boolean>>>({});
-  const [progression, setProgression] = useState<ChordProgression>(() => createDefaultProgression());
   const [progressionRhythm, setProgressionRhythm] = useState<ProgressionRhythm>("chord-tones");
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
+  const { progression, updateCell: handleProgressionBarCellChange } = useProgressionState({
+    bpm,
+    roots: theory.roots,
+    chordTypes: theory.chordTypes as ChordType[],
+  });
   const {
     currentBeat,
     currentPulse,
@@ -114,12 +114,6 @@ export function PracticeWorkspace() {
     originY: number;
     width: number;
   } | null>(null);
-
-  useEffect(() => {
-    setProgression((currentProgression) =>
-      currentProgression.bpm === bpm ? currentProgression : { ...currentProgression, bpm },
-    );
-  }, [bpm]);
 
   useEffect(() => {
     const handleOpenControls = () => {
@@ -458,13 +452,6 @@ export function PracticeWorkspace() {
       chordOctaves,
     },
   });
-  usePersistedProgression({
-    progression,
-    setProgression,
-    roots: theory.roots,
-    chordTypes,
-  });
-
   const chordMap = useMemo(
     () => makeChordMap(displayedRoot, displayedChordType, chromatic),
     [displayedRoot, displayedChordType, chromatic],
@@ -478,31 +465,6 @@ export function PracticeWorkspace() {
     () => makeChordNotes(displayedRoot, displayedChordType),
     [displayedChordType, displayedRoot],
   );
-
-  const handleProgressionBarCellChange = (
-    barIndex: number,
-    cellIndex: number,
-    nextCell: ChordProgression["bars"][number]["cells"][number],
-  ) => {
-    setProgression((currentProgression) => ({
-      ...currentProgression,
-      bars: currentProgression.bars.map((bar, index) => {
-        if (index !== barIndex) {
-          return bar;
-        }
-
-        const nextCells = [
-          cellIndex === 0 ? nextCell : bar.cells[0],
-          cellIndex === 1 ? nextCell : bar.cells[1],
-        ] as const;
-
-        return {
-          ...bar,
-          cells: nextCells,
-        };
-      }),
-    }));
-  };
 
   const { playArpeggio, playNote, playProgressionBeat, playStack } = useChordPlayback({
     root: displayedRoot,
