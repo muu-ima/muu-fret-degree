@@ -544,6 +544,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     chordOctaveMidi: selectedChordOctave.midi,
     chordInversion,
     arpeggioPattern,
+    bpm,
     notes,
     playBassNote,
     playPianoNote,

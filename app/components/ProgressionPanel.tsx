@@ -35,6 +35,13 @@ export function ProgressionPanel({
   const currentCellLabel = currentCellIndex === 0 ? "Beats 1-2" : "Beats 3-4";
   const progressLabel = `Bar ${currentBarNumber} • ${currentCellLabel}`;
   const modeLabel = isProgressionRunning ? "Playing" : "Stopped";
+  const rhythmOptions: { value: ProgressionRhythm; label: string }[] = [
+    { value: "root-only", label: "Root Only" },
+    { value: "chord-tones", label: "Chord Tones" },
+    { value: "degree-ascending", label: "1 - 3 - 5 - 7" },
+    { value: "degree-third-first", label: "3 - 1 - 5 - 7" },
+    { value: "four-beat", label: "4 Beat" },
+  ];
 
   return (
     <section className="progressionPanel" aria-label="コード進行再生">
@@ -71,22 +78,17 @@ export function ProgressionPanel({
       <div className="progressionRhythm">
         <span className="controlLabel">Rhythm</span>
         <div className="progressionRhythmTabs" role="group" aria-label="ベース伴奏リズム">
-          <button
-            type="button"
-            className={rhythm === "chord-tones" ? "progressionRhythmTab active" : "progressionRhythmTab"}
-            aria-pressed={rhythm === "chord-tones"}
-            onClick={() => onRhythmChange("chord-tones")}
-          >
-            Chord Tones
-          </button>
-          <button
-            type="button"
-            className={rhythm === "four-beat" ? "progressionRhythmTab active" : "progressionRhythmTab"}
-            aria-pressed={rhythm === "four-beat"}
-            onClick={() => onRhythmChange("four-beat")}
-          >
-            4 Beat
-          </button>
+          {rhythmOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={rhythm === option.value ? "progressionRhythmTab active" : "progressionRhythmTab"}
+              aria-pressed={rhythm === option.value}
+              onClick={() => onRhythmChange(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       </div>
     </section>
