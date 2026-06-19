@@ -77,9 +77,10 @@
 
 - メイン画面は指板、同期再生、伴奏パターン、Quick Editを担当する。
 - `/progression` はコード譜、小節、拍、タイ、スラーなどの編集を担当する。
-- 両画面は `usePersistedProgression` の保存データを共有する。
+- 両画面は `ProgressionSessionProvider` の進行データと編集履歴を共有する。
 - Quick Editは選択中小節のRoot / Chord変更に限定する。
-- 将来は単一のProgression Sessionを共有し、編集画面にもMini Transportと再生位置ハイライトを提供する。
+- Transportと発音処理はまだPractice側に置き、音声エンジンと同時にSessionへ移す。
+- 将来は編集画面にもMini Transportと再生位置ハイライトを提供する。
 - 画面ごとにtimerや `AudioContext` を複製しない。
 
 判断理由、トレードオフ、共有ストアへの移行条件は [`docs/progression-editor-ui.md`](./progression-editor-ui.md#設計判断-編集と再生を分離する) を参照する。
@@ -285,6 +286,16 @@ MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest /
 - `usePersistedProgression` を通じて保存と読み込みを行う。
 
 画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。Root / Chordと小節数の変更は履歴対象にするが、BPM同期と保存データの読み込みは履歴へ積まない。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
+
+### `app/providers/ProgressionSessionProvider.tsx`
+
+PracticeとFull Editorで共有する進行Sessionの境界を担当する。
+
+- `useProgressionState` をレイアウト階層で一度だけ生成する。
+- canonicalな進行データ、更新command、Undo / Redo履歴を両画面へ提供する。
+- PracticeのBPMを `syncBpm` で進行データへ同期する。
+
+現段階ではTransportと音声エンジンを提供しない。画面遷移後に時計だけが進む状態を避けるため、Transport、scheduler、音声エンジンは移行単位を揃える。
 
 ### `app/hooks/usePersistedProgression.ts`
 

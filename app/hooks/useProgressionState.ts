@@ -108,9 +108,13 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     dispatch({ type: "hydrate", update });
   }, []);
 
+  const syncBpm = useCallback((nextBpm: number) => {
+    dispatch({ type: "sync-bpm", bpm: nextBpm });
+  }, []);
+
   useEffect(() => {
-    dispatch({ type: "sync-bpm", bpm });
-  }, [bpm]);
+    syncBpm(bpm);
+  }, [bpm, syncBpm]);
 
   usePersistedProgression({
     progression,
@@ -154,6 +158,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     canUndo: history.past.length > 0,
     progression,
     redo,
+    syncBpm,
     undo,
     updateBarCount,
     updateBeatChord,

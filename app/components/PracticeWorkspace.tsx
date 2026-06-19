@@ -29,8 +29,8 @@ import {
 import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
 import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
-import { useProgressionState } from "../hooks/useProgressionState";
 import { type MetronomeTone } from "../lib/audio";
+import { useProgressionSession } from "../providers/ProgressionSessionProvider";
 import {
   type ChordType,
   type FretNote,
@@ -79,11 +79,11 @@ export function PracticeWorkspace() {
   const [compactDesktopPanels, setCompactDesktopPanels] = useState<Partial<Record<DesktopPanelKey, boolean>>>({});
   const [progressionRhythm, setProgressionRhythm] = useState<ProgressionRhythm>("chord-tones");
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
-  const { progression, updateCell: handleProgressionBarCellChange } = useProgressionState({
-    bpm,
-    roots: theory.roots,
-    chordTypes: theory.chordTypes as ChordType[],
-  });
+  const {
+    progression,
+    syncBpm: syncProgressionBpm,
+    updateCell: handleProgressionBarCellChange,
+  } = useProgressionSession();
   const {
     currentBeat,
     currentPulse,
@@ -114,6 +114,10 @@ export function PracticeWorkspace() {
     originY: number;
     width: number;
   } | null>(null);
+
+  useEffect(() => {
+    syncProgressionBpm(bpm);
+  }, [bpm, syncProgressionBpm]);
 
   useEffect(() => {
     const handleOpenControls = () => {

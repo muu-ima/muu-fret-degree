@@ -101,7 +101,7 @@ Full Editorでも、編集内容と再生位置の関係を確認できるよう
 
 BPM、伴奏パターン、メトロノームなどの詳細設定はメイン画面に残す。Full Editorへ同じ再生パネルを複製せず、編集確認に必要な最小操作だけを公開する。
 
-再生同期を実装する際は、画面ごとに別のtimerや `AudioContext` を作らない。進行データとTransportを共有する単一のsession/providerをレイアウト階層に置き、メイン画面とFull Editorは同じ再生位置と操作を購読する。
+再生同期を実装する際は、画面ごとに別のtimerや `AudioContext` を作らない。進行データはレイアウト階層の単一Sessionで共有し、Transportと音声エンジンも準備が整った段階で同じSession境界へ移す。
 
 目標となる責務:
 
@@ -122,33 +122,31 @@ Practice              Full Editor
 
 ### 状態共有
 
-現在は `usePersistedProgression` と `localStorage` を共有境界にする。これは編集画面分離の第一段階であり、再生位置までは共有しない。
+現在は `ProgressionSessionProvider` を共有境界にする。進行の初期化、セル更新、小節数変更、永続化、Undo / Redo履歴は `useProgressionState` に集約し、PracticeとFull Editorは同じSessionと更新commandを利用する。
 
-進行の初期化、セル更新、小節数変更、永続化の呼び出しは `useProgressionState` に集約する。PracticeとFull Editorは同じ更新commandを利用し、画面ごとに進行更新ロジックを複製しない。
+- ルート遷移を挟んでも進行データと編集履歴を維持する。
+- Full EditorとQuick Editの変更を同じcanonical dataへ即時反映する。
+- `usePersistedProgression` はSession内で一度だけ実行する。
+- 音声再生中の状態やパネルの開閉状態はまだ共有しない。
 
-- Full Editorで保存した進行は、メイン画面へ戻った時に読み込まれる。
-- Quick Editの変更も同じ保存データへ反映される。
-- 音声再生中の一時状態やパネルの開閉状態は共有しない。
-
-この方法はルート間の同期には十分で、実装も小さい。一方、複数タブでのリアルタイム同期や、画面を同時表示したまま即時反映する用途には向かない。
+複数タブや複数端末での同期は対象外とし、必要になった時点で `storage` eventや外部ストアを検討する。
 
 ### 見直し条件
 
-次の要件が生じた場合は、React Context、外部ストア、または `useSyncExternalStore` を使った進行専用ストアを検討する。
+次の要件が生じた場合は、現在のReact Contextを外部ストア、または `useSyncExternalStore` を使った進行専用ストアへ発展させる。
 
 - 複数コンポーネントが同時に進行を頻繁に更新する。
 - 画面遷移なしでFull Editorと再生画面を同時表示する。
 - 複数タブや複数端末で編集内容を即時同期する。
-- Undo / Redo履歴を画面間で共有する。
 - 編集画面とメイン画面で同じTransportと再生位置を共有する。
 
-Mini Transportとコード譜のplayhead同期へ進む段階で、進行データとTransportをまとめたsession/providerへ移行する。それまでは編集モデルを固めるため、永続化hookを共用する。
+Mini Transportとコード譜のplayhead同期へ進む段階で、Transport、scheduler、音声エンジンを同じSession境界へ移行する。時計だけを先に共有せず、発音のライフサイクルとセットで扱う。
 
 ### トレードオフ
 
 - Full Editorへ移動する操作が1段増える。
-- 画面ごとに進行stateを持つため、同期は保存と再読み込みのタイミングに依存する。
-- Quick EditとFull Editorで同じ更新ルールを守る必要がある。
+- Session Context更新時の再レンダー範囲に注意する必要がある。
+- Transport共有時は、音声エンジンの所有位置も同時に見直す必要がある。
 
 これらは、メイン画面の視認性と編集画面の拡張性を得るために受け入れる。
 
