@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, M_PLUS_Rounded_1c } from "next/font/google";
 import { AppShell } from "./components/AppShell";
+import { ProgressionSessionProvider } from "./providers/ProgressionSessionProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,7 +33,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${inter.variable} ${rounded.variable} ${mono.variable}`}>
-        <AppShell>{children}</AppShell>
+        <ProgressionSessionProvider>
+          <AppShell>{children}</AppShell>
+        </ProgressionSessionProvider>
       </body>
     </html>
   );

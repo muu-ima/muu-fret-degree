@@ -1,7 +1,7 @@
 "use client";
 
-import { type ProgressionRhythm } from "../hooks/useChordPlayback";
 import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../lib/progression";
+import type { ProgressionRhythm } from "../lib/progression-playback";
 
 type ProgressionPanelProps = {
   currentProgressionBar?: ProgressionBar;
@@ -9,6 +9,7 @@ type ProgressionPanelProps = {
   currentProgressionCellIndex?: number;
   currentProgressionChordTypeName?: string;
   progressionPosition: ProgressionPosition;
+  isProgressionCountingIn: boolean;
   isProgressionRunning: boolean;
   rhythm: ProgressionRhythm;
   onStartProgression: () => void;
@@ -23,6 +24,7 @@ export function ProgressionPanel({
   currentProgressionCellIndex,
   currentProgressionChordTypeName,
   progressionPosition,
+  isProgressionCountingIn,
   isProgressionRunning,
   rhythm,
   onStartProgression,
@@ -34,7 +36,12 @@ export function ProgressionPanel({
   const currentCellIndex = currentProgressionCellIndex ?? Math.min(Math.floor(progressionPosition.beatInBar / 2), 1);
   const currentCellLabel = currentCellIndex === 0 ? "Beats 1-2" : "Beats 3-4";
   const progressLabel = `Bar ${currentBarNumber} • ${currentCellLabel}`;
-  const modeLabel = isProgressionRunning ? "Playing" : "Stopped";
+  const isProgressionActive = isProgressionCountingIn || isProgressionRunning;
+  const modeLabel = isProgressionCountingIn
+    ? "Count-in"
+    : isProgressionRunning
+      ? "Playing"
+      : "Stopped";
   const rhythmOptions: { value: ProgressionRhythm; label: string }[] = [
     { value: "root-only", label: "Root Only" },
     { value: "chord-tones", label: "Chord Tones" },
@@ -62,11 +69,11 @@ export function ProgressionPanel({
         </div>
       </div>
       <div className="progressionButtons">
-        <button type="button" className="actionButton actionButtonPrimary" onClick={onStartProgression} disabled={isProgressionRunning}>
+        <button type="button" className="actionButton actionButtonPrimary" onClick={onStartProgression} disabled={isProgressionActive}>
           <span aria-hidden="true">▶</span>
           Play
         </button>
-        <button type="button" className="actionButton" onClick={onStopProgression} disabled={!isProgressionRunning}>
+        <button type="button" className="actionButton" onClick={onStopProgression} disabled={!isProgressionActive}>
           <span aria-hidden="true">■</span>
           Stop
         </button>

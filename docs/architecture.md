@@ -77,9 +77,11 @@
 
 - メイン画面は指板、同期再生、伴奏パターン、Quick Editを担当する。
 - `/progression` はコード譜、小節、拍、タイ、スラーなどの編集を担当する。
-- 両画面は `usePersistedProgression` の保存データを共有する。
+- 両画面は `ProgressionSessionProvider` の進行データと編集履歴を共有する。
 - Quick Editは選択中小節のRoot / Chord変更に限定する。
-- 将来は単一のProgression Sessionを共有し、編集画面にもMini Transportと再生位置ハイライトを提供する。
+- TransportとAudio OutputはSessionのruntime Contextで共有する。
+- 進行schedulerとメトロノームtimerは、再生UIを持つPractice側に置く。
+- 将来は編集画面にもMini Transportと再生位置ハイライトを提供する。
 - 画面ごとにtimerや `AudioContext` を複製しない。
 
 判断理由、トレードオフ、共有ストアへの移行条件は [`docs/progression-editor-ui.md`](./progression-editor-ui.md#設計判断-編集と再生を分離する) を参照する。
@@ -212,15 +214,26 @@
 
 このコンポーネントは編集データを更新せず、譜面表示と選択操作だけを担当する。
 
-### `app/hooks/useAudioEngine.ts`
+### `app/hooks/useAudioOutput.ts`
 
-音声再生に必要な React state とブラウザ API の接続を担当する。
+AudioContextと音源出力を担当する。
 
-- `AudioContext` を必要になったタイミングで作る。
-- ベース音、ピアノ音、メトロノーム音を鳴らす関数を返す。
-- メトロノームの開始 / 停止、現在拍、タイマーを管理する。
+- `AudioContext` をユーザー操作後に必要になったタイミングで作る。
+- ベース音、ピアノ音、メトロノームクリックを `app/lib/audio.ts` へ委譲する。
+- AudioContextの再開操作を提供する。
 
-この hook は、どのコードをどの順番で鳴らすかは決めない。`page.tsx` が選んだ MIDI 番号を、音声再生へつなぐ。
+拍位置やコード進行は参照せず、指定された音を鳴らすことだけを担当する。
+
+### `app/hooks/useMetronome.ts`
+
+メトロノームのtimerと表示状態を担当する。
+
+- 開始 / 停止、現在拍、現在pulse、count-inを管理する。
+- BPM、pulse、swingから次のtickまでの時間を決める。
+- 発音は注入された `playClick` へ委譲する。
+- Count-in完了時の最初の再生拍をcallbackで通知する。
+
+AudioContextを直接所有しないため、将来Sessionの音声出力と同じContextを共有できる。
 
 ### `app/hooks/useBpmControl.ts`
 
@@ -240,19 +253,39 @@ BPM 入力の state と正規化を担当する。
 - 指板上の単音をベース音で鳴らす。
 - コード構成音を低フレット側からアルペジオ再生する。
 - コード構成音を、基準オクターブと転回形を反映したピアノ風の積み音で再生する。
-- 進行再生中の拍ごとのベース音も鳴らす。
+- `planProgressionBeat` が返した予定音をAudio Outputへ渡す。
 
-この hook は、実際の音色合成や `AudioContext` の管理はしない。`useAudioEngine` から受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
+この hook は、実際の音色合成や `AudioContext` の管理はしない。進行伴奏のパターン解釈も純粋なplannerへ委譲する。
 
 ### `app/hooks/useProgressionPlayback.ts`
 
-コード進行再生の状態管理と現在位置の追跡を担当する。
+Transportの経過時間をコード進行上の位置へ変換する。
 
-- 再生の開始 / 停止 / リセットを扱う。
-- `requestAnimationFrame` で経過秒数を更新する。
+- `useTransport` から経過秒数と再生状態を受け取る。
 - `app/lib/progression.ts` の純粋関数を使って、現在の拍位置と選択中のセルを 1 回で求める。
 
 この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
+
+### `app/hooks/useProgressionBeatScheduler.ts`
+
+Transportの拍位置を、進行伴奏の発音要求へつなぐ。
+
+- 再生中に拍が切り替わったことを検出する。
+- 同じ拍で発音要求が重複しないようにする。
+- 次の実効拍からRootを求め、1拍overrideも伴奏へ反映する。
+- 現在拍、次Root、伴奏パターンを `useChordPlayback` へ渡す。
+
+MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest / Tieを追加するときは、この境界で拍イベントを解釈してから発音処理へ渡す。
+
+### `app/hooks/useTransport.ts`
+
+再生対象に依存しないTransportの時計を担当する。
+
+- 再生の開始 / 停止 / 再開 / リセットを扱う。
+- `requestAnimationFrame` で経過秒数を更新する。
+- コード進行、拍子、発音内容は参照しない。
+
+進行位置の計算や音声スケジューリングをここへ入れず、時間管理だけを共有できる形に保つ。
 
 ### `app/hooks/useProgressionState.ts`
 
@@ -266,6 +299,28 @@ BPM 入力の state と正規化を担当する。
 - `usePersistedProgression` を通じて保存と読み込みを行う。
 
 画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。Root / Chordと小節数の変更は履歴対象にするが、BPM同期と保存データの読み込みは履歴へ積まない。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
+
+### `app/lib/progression-history.ts`
+
+進行編集のUndo / Redo履歴を純粋なreducerとして管理する。
+
+- commit時に現在値をpastへ積み、futureを破棄する。
+- Undo / Redo時も、現在のBPMは維持する。
+- hydrateとBPM同期は編集履歴へ積まない。
+
+Reactには依存せず、`useProgressionState` と単体テストの両方から利用する。
+
+### `app/providers/ProgressionSessionProvider.tsx`
+
+PracticeとFull Editorで共有する進行Sessionの境界を担当する。
+
+- `useProgressionState` をレイアウト階層で一度だけ生成する。
+- canonicalな進行データ、更新command、Undo / Redo履歴を両画面へ提供する。
+- PracticeのBPMを `syncBpm` で進行データへ同期する。
+- `useProgressionPlayback` と `useAudioOutput` をruntime Contextとして提供する。
+- データContextとTransport Contextを分け、再生フレームでFull Editor全体を再レンダーしない。
+
+進行schedulerはPractice側に残し、Practiceのアンマウント時にTransportを停止する。Full EditorにMini Transportを追加するまでは、編集画面の背後で再生を継続しない。
 
 ### `app/hooks/usePersistedProgression.ts`
 
@@ -308,8 +363,19 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 進行データから、現在参照すべき小節と2拍セルを選ぶ。
 - 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
+- 2拍セル、拍オーバーライド、小節数の更新を純粋関数として提供する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
+
+### `app/lib/progression-playback.ts`
+
+進行伴奏の1拍分を、再生予定音の配列へ変換する。
+
+- Root Only、Chord Tones、度数フロー、4 Beatのパターンを解釈する。
+- 各音のMIDI番号、拍内の開始offset、長さを決める。
+- 4 Beatでは次の実効拍のRootへ向かうアプローチ音を選ぶ。
+
+React、Transport、AudioContextには依存しない。将来Hit / Rest / Tieを追加するときは、譜面イベントを入力に加え、発音しない拍や音価をここで再生予定へ変換する。
 
 ### `app/lib/audio.ts`
 

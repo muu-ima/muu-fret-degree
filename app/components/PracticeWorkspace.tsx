@@ -5,6 +5,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -19,17 +20,21 @@ import { FretRangeTabs } from "./FretRangeTabs";
 import { MetronomePanel } from "./MetronomePanel";
 import { ProgressionPanel } from "./ProgressionPanel";
 import { ProgressionQuickEditor } from "./ProgressionQuickEditor";
-import { useAudioEngine } from "../hooks/useAudioEngine";
 import { useBpmControl } from "../hooks/useBpmControl";
 import {
   type ArpeggioPattern,
-  type ProgressionRhythm,
   useChordPlayback,
 } from "../hooks/useChordPlayback";
-import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
+import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
+import { useMetronome } from "../hooks/useMetronome";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
-import { useProgressionState } from "../hooks/useProgressionState";
 import { type MetronomeTone } from "../lib/audio";
+import type { ProgressionRhythm } from "../lib/progression-playback";
+import {
+  useProgressionSession,
+  useProgressionTransport,
+  useSessionAudioOutput,
+} from "../providers/ProgressionSessionProvider";
 import {
   type ChordType,
   type FretNote,
@@ -77,23 +82,40 @@ export function PracticeWorkspace() {
   >({});
   const [compactDesktopPanels, setCompactDesktopPanels] = useState<Partial<Record<DesktopPanelKey, boolean>>>({});
   const [progressionRhythm, setProgressionRhythm] = useState<ProgressionRhythm>("chord-tones");
+  const [isProgressionCountingIn, setIsProgressionCountingIn] = useState(false);
   const { bpm, bpmInput, commitBpm, updateBpm } = useBpmControl();
-  const { progression, updateCell: handleProgressionBarCellChange } = useProgressionState({
-    bpm,
-    roots: theory.roots,
-    chordTypes: theory.chordTypes as ChordType[],
-  });
+  const {
+    progression,
+    syncBpm: syncProgressionBpm,
+    updateCell: handleProgressionBarCellChange,
+  } = useProgressionSession();
+  const {
+    playBassNote,
+    playMetronomeClick,
+    playPianoNote,
+    resumeAudio,
+  } = useSessionAudioOutput();
+  const progressionPlayback = useProgressionTransport();
+  const progressionCountInArmedRef = useRef(false);
+  const handleProgressionCountInComplete = useCallback(() => {
+    if (!progressionCountInArmedRef.current) {
+      return;
+    }
+
+    progressionCountInArmedRef.current = false;
+    setIsProgressionCountingIn(false);
+    progressionPlayback.startProgression();
+  }, [progressionPlayback.startProgression]);
   const {
     currentBeat,
     currentPulse,
     countInBeatsRemaining,
     isCountingIn,
     isMetronomeRunning,
-    playBassNote,
-    playPianoNote,
-    resumeAudio,
+    startMetronome,
+    stopMetronome,
     toggleMetronome,
-  } = useAudioEngine({
+  } = useMetronome({
     bpm,
     beatsPerMeasure,
     pulsesPerBeat,
@@ -102,9 +124,10 @@ export function PracticeWorkspace() {
     metronomeTone,
     accentFirstBeat,
     metronomeVolume,
+    playClick: playMetronomeClick,
+    resumeAudio,
+    onCountInComplete: handleProgressionCountInComplete,
   });
-  const progressionPlayback = useProgressionPlayback({ progression });
-  const lastProgressionBeatRef = useRef<number | null>(null);
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
   const desktopPanelDragRef = useRef<{
     key: DesktopPanelKey;
@@ -114,6 +137,27 @@ export function PracticeWorkspace() {
     originY: number;
     width: number;
   } | null>(null);
+
+  useEffect(() => {
+    syncProgressionBpm(bpm);
+  }, [bpm, syncProgressionBpm]);
+
+  useEffect(() => {
+    if (!isProgressionCountingIn || countInMeasures > 0) {
+      return;
+    }
+
+    progressionCountInArmedRef.current = false;
+    setIsProgressionCountingIn(false);
+    stopMetronome();
+  }, [countInMeasures, isProgressionCountingIn, stopMetronome]);
+
+  useEffect(
+    () => () => {
+      progressionPlayback.stopProgression();
+    },
+    [progressionPlayback.stopProgression],
+  );
 
   useEffect(() => {
     const handleOpenControls = () => {
@@ -480,40 +524,13 @@ export function PracticeWorkspace() {
     resumeAudio,
   });
 
-  useEffect(() => {
-    if (!isProgressionSyncActive) {
-      lastProgressionBeatRef.current = null;
-      return;
-    }
-
-    if (lastProgressionBeatRef.current === progressionPlayback.progressionPosition.beatIndex) {
-      return;
-    }
-
-    lastProgressionBeatRef.current = progressionPlayback.progressionPosition.beatIndex;
-    const currentBarIndex = progressionPlayback.progressionPosition.barIndex % progression.bars.length;
-    const currentBar = progression.bars[currentBarIndex];
-    const currentCellIndex = currentProgressionSelection?.cellIndex ?? 0;
-    const nextRoot =
-      currentCellIndex === 0
-        ? currentBar.cells[1].root
-        : progression.bars[(currentBarIndex + 1) % progression.bars.length].cells[0].root;
-
-    playProgressionBeat({
-      beatInBar: progressionPlayback.progressionPosition.beatInBar,
-      rhythm: progressionRhythm,
-      nextRoot,
-    });
-  }, [
-    currentProgressionSelection?.cellIndex,
-    isProgressionSyncActive,
-    playProgressionBeat,
-    progression.bars,
-    progressionPlayback.progressionPosition.beatInBar,
-    progressionPlayback.progressionPosition.beatIndex,
-    progressionPlayback.progressionPosition.barIndex,
-    progressionRhythm,
-  ]);
+  useProgressionBeatScheduler({
+    isRunning: isProgressionSyncActive,
+    playBeat: playProgressionBeat,
+    position: progressionPlayback.progressionPosition,
+    progression,
+    rhythm: progressionRhythm,
+  });
 
   function renderControls(className: string) {
     return (
@@ -552,14 +569,53 @@ export function PracticeWorkspace() {
         currentProgressionCellIndex={currentProgressionSelection?.cellIndex}
         currentProgressionChordTypeName={currentProgressionChordType.name}
         progressionPosition={progressionPlayback.progressionPosition}
+        isProgressionCountingIn={isProgressionCountingIn}
         isProgressionRunning={progressionPlayback.isProgressionRunning}
         rhythm={progressionRhythm}
-        onStartProgression={progressionPlayback.startProgression}
-        onStopProgression={progressionPlayback.stopProgression}
-        onResetProgression={progressionPlayback.resetProgression}
+        onStartProgression={handleStartProgression}
+        onStopProgression={handleStopProgression}
+        onResetProgression={handleResetProgression}
         onRhythmChange={setProgressionRhythm}
       />
     );
+  }
+
+  function handleStartProgression() {
+    if (countInMeasures <= 0) {
+      progressionPlayback.startProgression();
+      return;
+    }
+
+    progressionPlayback.resetProgression();
+    progressionCountInArmedRef.current = true;
+    setIsProgressionCountingIn(true);
+    startMetronome();
+  }
+
+  function handleStopProgression() {
+    if (progressionCountInArmedRef.current) {
+      progressionCountInArmedRef.current = false;
+      setIsProgressionCountingIn(false);
+      stopMetronome();
+    }
+    progressionPlayback.stopProgression();
+  }
+
+  function handleResetProgression() {
+    if (progressionCountInArmedRef.current) {
+      progressionCountInArmedRef.current = false;
+      setIsProgressionCountingIn(false);
+      stopMetronome();
+    }
+    progressionPlayback.resetProgression();
+  }
+
+  function handleToggleMetronome() {
+    if (isProgressionCountingIn && isMetronomeRunning) {
+      progressionCountInArmedRef.current = false;
+      setIsProgressionCountingIn(false);
+    }
+    toggleMetronome();
   }
 
   return (
@@ -634,7 +690,7 @@ export function PracticeWorkspace() {
             onToneChange={setMetronomeTone}
             onAccentFirstBeatChange={setAccentFirstBeat}
             onVolumeChange={setMetronomeVolume}
-            onToggle={toggleMetronome}
+            onToggle={handleToggleMetronome}
           />
         </div>
       </aside>

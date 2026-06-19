@@ -1,14 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  type MetronomeTone,
-  playBassNote as playBassAudioNote,
-  playMetronomeClick as playMetronomeAudioClick,
-  playPianoNote as playPianoAudioNote,
-} from "../lib/audio";
+import type { MetronomeClickKind, MetronomeTone } from "../lib/audio";
 
-type UseAudioEngineOptions = {
+type UseMetronomeOptions = {
   bpm: number;
   beatsPerMeasure: number;
   pulsesPerBeat: number;
@@ -17,9 +12,12 @@ type UseAudioEngineOptions = {
   metronomeTone: MetronomeTone;
   accentFirstBeat: boolean;
   metronomeVolume: number;
+  playClick: (kind: MetronomeClickKind, tone: MetronomeTone, volume: number) => void;
+  resumeAudio: () => void;
+  onCountInComplete?: () => void;
 };
 
-export function useAudioEngine({
+export function useMetronome({
   bpm,
   beatsPerMeasure,
   pulsesPerBeat,
@@ -28,54 +26,50 @@ export function useAudioEngine({
   metronomeTone,
   accentFirstBeat,
   metronomeVolume,
-}: UseAudioEngineOptions) {
-  const audioContext = useRef<AudioContext | null>(null);
+  playClick,
+  resumeAudio,
+  onCountInComplete,
+}: UseMetronomeOptions) {
   const metronomeTimer = useRef<number | null>(null);
   const metronomePulse = useRef(0);
+  const onCountInCompleteRef = useRef(onCountInComplete);
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
+  const [runCycle, setRunCycle] = useState(0);
   const [currentBeat, setCurrentBeat] = useState(1);
   const [currentPulse, setCurrentPulse] = useState(1);
   const [isCountingIn, setIsCountingIn] = useState(false);
   const [countInBeatsRemaining, setCountInBeatsRemaining] = useState(0);
 
-  const ensureAudioContext = useCallback(() => {
-    if (!audioContext.current) {
-      audioContext.current = new AudioContext();
-    }
-    return audioContext.current;
-  }, []);
+  onCountInCompleteRef.current = onCountInComplete;
 
-  const stopMetronome = useCallback(() => {
+  const clearMetronomeTimer = useCallback(() => {
     if (metronomeTimer.current !== null) {
       window.clearTimeout(metronomeTimer.current);
       metronomeTimer.current = null;
     }
   }, []);
 
-  const playBassNote = useCallback(
-    (midi: number, startOffset = 0, duration = 0.85) => {
-      playBassAudioNote(ensureAudioContext(), midi, startOffset, duration);
-    },
-    [ensureAudioContext],
-  );
-
-  const playPianoNote = useCallback(
-    (midi: number, startOffset = 0, duration = 1.8) => {
-      playPianoAudioNote(ensureAudioContext(), midi, startOffset, duration);
-    },
-    [ensureAudioContext],
-  );
-
-  const resumeAudio = useCallback(() => {
-    void ensureAudioContext().resume();
-  }, [ensureAudioContext]);
-
-  const toggleMetronome = useCallback(() => {
-    setIsMetronomeRunning((running) => !running);
+  const startMetronome = useCallback(() => {
+    setRunCycle((current) => current + 1);
+    setIsMetronomeRunning(true);
   }, []);
 
+  const stopMetronome = useCallback(() => {
+    clearMetronomeTimer();
+    setIsMetronomeRunning(false);
+  }, [clearMetronomeTimer]);
+
+  const toggleMetronome = useCallback(() => {
+    if (isMetronomeRunning) {
+      stopMetronome();
+      return;
+    }
+
+    startMetronome();
+  }, [isMetronomeRunning, startMetronome, stopMetronome]);
+
   useEffect(() => {
-    stopMetronome();
+    clearMetronomeTimer();
 
     if (!isMetronomeRunning) {
       setIsCountingIn(false);
@@ -90,21 +84,23 @@ export function useAudioEngine({
     metronomePulse.current = 0;
 
     const tick = () => {
-      const context = ensureAudioContext();
       const absolutePulse = metronomePulse.current;
       const isCountInPulse = absolutePulse < countInPulses;
       const playbackPulse = isCountInPulse ? absolutePulse : absolutePulse - countInPulses;
       const pulseInMeasure = playbackPulse % (beatsPerMeasure * pulsesPerBeat);
       const beat = Math.floor(pulseInMeasure / pulsesPerBeat);
       const pulse = pulseInMeasure % pulsesPerBeat;
-      const clickKind =
+      const clickKind: MetronomeClickKind =
         pulse === 0
           ? accentFirstBeat && beat === 0
             ? "accent"
             : "beat"
           : "subdivision";
-      void context.resume();
-      playMetronomeAudioClick(context, context.currentTime, clickKind, metronomeTone, metronomeVolume);
+      resumeAudio();
+      playClick(clickKind, metronomeTone, metronomeVolume);
+      if (countInPulses > 0 && absolutePulse === countInPulses) {
+        onCountInCompleteRef.current?.();
+      }
       setCurrentBeat(beat + 1);
       setCurrentPulse(pulse + 1);
       setIsCountingIn(isCountInPulse);
@@ -125,18 +121,20 @@ export function useAudioEngine({
 
     tick();
 
-    return stopMetronome;
+    return clearMetronomeTimer;
   }, [
     accentFirstBeat,
     beatsPerMeasure,
     bpm,
+    clearMetronomeTimer,
     countInMeasures,
-    ensureAudioContext,
     isMetronomeRunning,
-    metronomeVolume,
     metronomeTone,
+    metronomeVolume,
+    playClick,
     pulsesPerBeat,
-    stopMetronome,
+    resumeAudio,
+    runCycle,
     swingRatio,
   ]);
 
@@ -146,9 +144,8 @@ export function useAudioEngine({
     countInBeatsRemaining,
     isCountingIn,
     isMetronomeRunning,
-    playBassNote,
-    playPianoNote,
-    resumeAudio,
+    startMetronome,
+    stopMetronome,
     toggleMetronome,
   };
 }

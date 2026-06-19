@@ -4,17 +4,14 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { LuArrowLeft, LuRedo2, LuUndo2 } from "react-icons/lu";
 import theory from "../../data/theory.json";
-import { useProgressionState } from "../hooks/useProgressionState";
 import type { ChordType } from "../lib/music";
+import { useProgressionSession } from "../providers/ProgressionSessionProvider";
 import { ProgressionEditor } from "./ProgressionEditor";
 
 export function ProgressionEditorWorkspace() {
   const chordTypes = theory.chordTypes as ChordType[];
   const { canRedo, canUndo, progression, redo, undo, updateBarCount, updateBeatChord, updateCell } =
-    useProgressionState({
-      roots: theory.roots,
-      chordTypes,
-    });
+    useProgressionSession();
 
   useEffect(() => {
     const handleHistoryShortcut = (event: KeyboardEvent) => {

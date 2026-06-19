@@ -50,6 +50,12 @@ Build for production:
 npm run build
 ```
 
+Run the pure progression and playback tests:
+
+```bash
+npm test
+```
+
 ## Project Structure
 
 ```txt
