@@ -27,6 +27,7 @@ import {
   useChordPlayback,
 } from "../hooks/useChordPlayback";
 import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
+import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
 import { useProgressionState } from "../hooks/useProgressionState";
 import { type MetronomeTone } from "../lib/audio";
@@ -104,7 +105,6 @@ export function PracticeWorkspace() {
     metronomeVolume,
   });
   const progressionPlayback = useProgressionPlayback({ progression });
-  const lastProgressionBeatRef = useRef<number | null>(null);
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
   const desktopPanelDragRef = useRef<{
     key: DesktopPanelKey;
@@ -480,40 +480,13 @@ export function PracticeWorkspace() {
     resumeAudio,
   });
 
-  useEffect(() => {
-    if (!isProgressionSyncActive) {
-      lastProgressionBeatRef.current = null;
-      return;
-    }
-
-    if (lastProgressionBeatRef.current === progressionPlayback.progressionPosition.beatIndex) {
-      return;
-    }
-
-    lastProgressionBeatRef.current = progressionPlayback.progressionPosition.beatIndex;
-    const currentBarIndex = progressionPlayback.progressionPosition.barIndex % progression.bars.length;
-    const currentBar = progression.bars[currentBarIndex];
-    const currentCellIndex = currentProgressionSelection?.cellIndex ?? 0;
-    const nextRoot =
-      currentCellIndex === 0
-        ? currentBar.cells[1].root
-        : progression.bars[(currentBarIndex + 1) % progression.bars.length].cells[0].root;
-
-    playProgressionBeat({
-      beatInBar: progressionPlayback.progressionPosition.beatInBar,
-      rhythm: progressionRhythm,
-      nextRoot,
-    });
-  }, [
-    currentProgressionSelection?.cellIndex,
-    isProgressionSyncActive,
-    playProgressionBeat,
-    progression.bars,
-    progressionPlayback.progressionPosition.beatInBar,
-    progressionPlayback.progressionPosition.beatIndex,
-    progressionPlayback.progressionPosition.barIndex,
-    progressionRhythm,
-  ]);
+  useProgressionBeatScheduler({
+    isRunning: isProgressionSyncActive,
+    playBeat: playProgressionBeat,
+    position: progressionPlayback.progressionPosition,
+    progression,
+    rhythm: progressionRhythm,
+  });
 
   function renderControls(className: string) {
     return (

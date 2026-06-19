@@ -246,13 +246,32 @@ BPM 入力の state と正規化を担当する。
 
 ### `app/hooks/useProgressionPlayback.ts`
 
-コード進行再生の状態管理と現在位置の追跡を担当する。
+Transportの経過時間をコード進行上の位置へ変換する。
 
-- 再生の開始 / 停止 / リセットを扱う。
-- `requestAnimationFrame` で経過秒数を更新する。
+- `useTransport` から経過秒数と再生状態を受け取る。
 - `app/lib/progression.ts` の純粋関数を使って、現在の拍位置と選択中のセルを 1 回で求める。
 
 この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
+
+### `app/hooks/useProgressionBeatScheduler.ts`
+
+Transportの拍位置を、進行伴奏の発音要求へつなぐ。
+
+- 再生中に拍が切り替わったことを検出する。
+- 同じ拍で発音要求が重複しないようにする。
+- 現在位置から次のコードのRootを求め、伴奏パターンとともに `useChordPlayback` へ渡す。
+
+MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest / Tieを追加するときは、この境界で拍イベントを解釈してから発音処理へ渡す。
+
+### `app/hooks/useTransport.ts`
+
+再生対象に依存しないTransportの時計を担当する。
+
+- 再生の開始 / 停止 / 再開 / リセットを扱う。
+- `requestAnimationFrame` で経過秒数を更新する。
+- コード進行、拍子、発音内容は参照しない。
+
+進行位置の計算や音声スケジューリングをここへ入れず、時間管理だけを共有できる形に保つ。
 
 ### `app/hooks/useProgressionState.ts`
 
@@ -308,6 +327,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 進行データから、現在参照すべき小節と2拍セルを選ぶ。
 - 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
+- 2拍セル、拍オーバーライド、小節数の更新を純粋関数として提供する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 

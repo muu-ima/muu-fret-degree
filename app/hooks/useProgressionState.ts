@@ -4,8 +4,9 @@ import { useCallback, useEffect, useReducer, type Dispatch, type SetStateAction 
 import type { ChordType } from "../lib/music";
 import {
   createDefaultProgression,
-  makeProgressionBeats,
-  resizeProgressionBars,
+  updateProgressionBarCount,
+  updateProgressionBeatChord,
+  updateProgressionCell,
   type ChordProgression,
   type ProgressionCell,
 } from "../lib/progression";
@@ -121,33 +122,8 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
   const updateCell = useCallback((barIndex: number, cellIndex: number, nextCell: ProgressionCell) => {
     dispatch({
       type: "commit",
-      update: (currentProgression) => {
-        const currentCell = currentProgression.bars[barIndex]?.cells[cellIndex];
-        if (
-          currentCell &&
-          currentCell.root === nextCell.root &&
-          currentCell.chordTypeId === nextCell.chordTypeId
-        ) {
-          return currentProgression;
-        }
-
-        return {
-          ...currentProgression,
-          bars: currentProgression.bars.map((bar, index) => {
-            if (index !== barIndex) {
-              return bar;
-            }
-
-            return {
-              ...bar,
-              cells: [
-                cellIndex === 0 ? nextCell : bar.cells[0],
-                cellIndex === 1 ? nextCell : bar.cells[1],
-              ] as const,
-            };
-          }),
-        };
-      },
+      update: (currentProgression) =>
+        updateProgressionCell(currentProgression, barIndex, cellIndex, nextCell),
     });
   }, []);
 
@@ -155,12 +131,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     dispatch({
       type: "commit",
       update: (currentProgression) =>
-        currentProgression.bars.length === nextBarCount
-          ? currentProgression
-          : {
-              ...currentProgression,
-              bars: resizeProgressionBars(currentProgression.bars, nextBarCount),
-            },
+        updateProgressionBarCount(currentProgression, nextBarCount),
     });
   }, []);
 
@@ -168,40 +139,8 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     (barIndex: number, beatIndex: number, nextCell: ProgressionCell | undefined) => {
       dispatch({
         type: "commit",
-        update: (currentProgression) => {
-          const currentBar = currentProgression.bars[barIndex];
-          if (!currentBar || beatIndex < 0 || beatIndex > 3) {
-            return currentProgression;
-          }
-
-          const currentOverride = currentBar.beats?.[beatIndex]?.chordOverride;
-          const hasSameOverride =
-            currentOverride?.root === nextCell?.root &&
-            currentOverride?.chordTypeId === nextCell?.chordTypeId;
-          if ((currentOverride === undefined && nextCell === undefined) || hasSameOverride) {
-            return currentProgression;
-          }
-
-          const nextBeats = makeProgressionBeats(currentBar);
-          nextBeats[beatIndex] = nextCell ? { chordOverride: { ...nextCell } } : {};
-          const hasOverrides = nextBeats.some((beat) => beat.chordOverride !== undefined);
-
-          return {
-            ...currentProgression,
-            bars: currentProgression.bars.map((bar, index) => {
-              if (index !== barIndex) {
-                return bar;
-              }
-
-              if (hasOverrides) {
-                return { ...bar, beats: nextBeats };
-              }
-
-              const { beats: _beats, ...barWithoutBeats } = bar;
-              return barWithoutBeats;
-            }),
-          };
-        },
+        update: (currentProgression) =>
+          updateProgressionBeatChord(currentProgression, barIndex, beatIndex, nextCell),
       });
     },
     [],

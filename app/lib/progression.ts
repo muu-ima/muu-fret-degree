@@ -165,6 +165,92 @@ export function resizeProgressionBars(bars: readonly ProgressionBar[], nextLengt
   }));
 }
 
+export function updateProgressionBarCount(
+  progression: ChordProgression,
+  nextBarCount: number,
+): ChordProgression {
+  if (progression.bars.length === nextBarCount) {
+    return progression;
+  }
+
+  return {
+    ...progression,
+    bars: resizeProgressionBars(progression.bars, nextBarCount),
+  };
+}
+
+export function updateProgressionCell(
+  progression: ChordProgression,
+  barIndex: number,
+  cellIndex: number,
+  nextCell: ProgressionCell,
+): ChordProgression {
+  const currentCell = progression.bars[barIndex]?.cells[cellIndex];
+  if (
+    currentCell?.root === nextCell.root &&
+    currentCell.chordTypeId === nextCell.chordTypeId
+  ) {
+    return progression;
+  }
+
+  return {
+    ...progression,
+    bars: progression.bars.map((bar, index) => {
+      if (index !== barIndex) {
+        return bar;
+      }
+
+      return {
+        ...bar,
+        cells: [
+          cellIndex === 0 ? nextCell : bar.cells[0],
+          cellIndex === 1 ? nextCell : bar.cells[1],
+        ] as const,
+      };
+    }),
+  };
+}
+
+export function updateProgressionBeatChord(
+  progression: ChordProgression,
+  barIndex: number,
+  beatIndex: number,
+  nextCell: ProgressionCell | undefined,
+): ChordProgression {
+  const currentBar = progression.bars[barIndex];
+  if (!currentBar || beatIndex < 0 || beatIndex > 3) {
+    return progression;
+  }
+
+  const currentOverride = currentBar.beats?.[beatIndex]?.chordOverride;
+  const hasSameOverride =
+    currentOverride?.root === nextCell?.root &&
+    currentOverride?.chordTypeId === nextCell?.chordTypeId;
+  if ((currentOverride === undefined && nextCell === undefined) || hasSameOverride) {
+    return progression;
+  }
+
+  const nextBeats = makeProgressionBeats(currentBar);
+  nextBeats[beatIndex] = nextCell ? { chordOverride: { ...nextCell } } : {};
+  const hasOverrides = nextBeats.some((beat) => beat.chordOverride !== undefined);
+
+  return {
+    ...progression,
+    bars: progression.bars.map((bar, index) => {
+      if (index !== barIndex) {
+        return bar;
+      }
+
+      if (hasOverrides) {
+        return { ...bar, beats: nextBeats };
+      }
+
+      const { beats: _beats, ...barWithoutBeats } = bar;
+      return barWithoutBeats;
+    }),
+  };
+}
+
 export function getProgressionBeat(bar: ProgressionBar, beatIndex: number): ProgressionBeat {
   return bar.beats?.[beatIndex] ?? {};
 }
