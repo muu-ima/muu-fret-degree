@@ -1,7 +1,7 @@
 "use client";
 
-import { type ProgressionRhythm } from "../hooks/useChordPlayback";
 import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../lib/progression";
+import type { ProgressionRhythm } from "../lib/progression-playback";
 
 type ProgressionPanelProps = {
   currentProgressionBar?: ProgressionBar;

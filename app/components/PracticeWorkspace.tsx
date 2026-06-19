@@ -22,13 +22,13 @@ import { ProgressionQuickEditor } from "./ProgressionQuickEditor";
 import { useBpmControl } from "../hooks/useBpmControl";
 import {
   type ArpeggioPattern,
-  type ProgressionRhythm,
   useChordPlayback,
 } from "../hooks/useChordPlayback";
 import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
 import { useMetronome } from "../hooks/useMetronome";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
 import { type MetronomeTone } from "../lib/audio";
+import type { ProgressionRhythm } from "../lib/progression-playback";
 import {
   useProgressionSession,
   useProgressionTransport,

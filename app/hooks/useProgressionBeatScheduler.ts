@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ProgressionRhythm } from "./useChordPlayback";
-import type { ChordProgression, ProgressionPosition } from "../lib/progression";
+import {
+  getProgressionCellForBeat,
+  type ChordProgression,
+  type ProgressionPosition,
+} from "../lib/progression";
+import type { ProgressionRhythm } from "../lib/progression-playback";
 
 type UseProgressionBeatSchedulerOptions = {
   isRunning: boolean;
@@ -39,17 +43,15 @@ export function useProgressionBeatScheduler({
 
     lastBeatRef.current = beatIndex;
     const currentBarIndex = barIndex % bars.length;
-    const currentBar = bars[currentBarIndex];
-    const currentCellIndex = Math.min(Math.floor(beatInBar / 2), 1);
-    const nextRoot =
-      currentCellIndex === 0
-        ? currentBar.cells[1].root
-        : bars[(currentBarIndex + 1) % bars.length].cells[0].root;
+    const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
+    const nextBeatInBar = (beatInBar + 1) % beatsPerBar;
+    const nextBarIndex = nextBeatInBar === 0 ? (currentBarIndex + 1) % bars.length : currentBarIndex;
+    const nextRoot = getProgressionCellForBeat(bars[nextBarIndex], nextBeatInBar).root;
 
     playBeat({
       beatInBar,
       rhythm,
       nextRoot,
     });
-  }, [barIndex, bars, beatIndex, beatInBar, isRunning, playBeat, rhythm]);
+  }, [barIndex, bars, beatIndex, beatInBar, isRunning, playBeat, progression.timeSignature.beatsPerBar, rhythm]);
 }

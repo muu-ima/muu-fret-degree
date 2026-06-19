@@ -8,16 +8,9 @@ import {
   makeTrebleChordMidi,
   pickAscendingBassNotesForDegrees,
   pickLowestBassNoteForDegree,
-  pitchClassOf,
-  sharpPitchClasses,
 } from "../lib/music";
+import { planProgressionBeat, type ProgressionRhythm } from "../lib/progression-playback";
 
-export type ProgressionRhythm =
-  | "root-only"
-  | "chord-tones"
-  | "degree-ascending"
-  | "degree-third-first"
-  | "four-beat";
 export type ArpeggioPattern = "root-only" | "chord-order" | "third-first" | "lowest-per-degree";
 
 type UseChordPlaybackOptions = {
@@ -88,45 +81,11 @@ export function useChordPlayback({
       nextRoot?: string;
     }) => {
       resumeAudio();
-      const beatInCell = beatInBar % 2;
-      let note: FretNote | undefined;
-
-      if (rhythm === "root-only") {
-        note = pickLowestBassNoteForDegree(notes, "1");
-      } else if (rhythm === "degree-ascending" || rhythm === "degree-third-first") {
-        const ascendingNotes = pickAscendingBassNotesForDegrees(
-          notes,
-          chordNotes.map((chordNote) => chordNote.degree),
-        );
-        const degreeFlow =
-          rhythm === "degree-third-first" && ascendingNotes.length > 1
-            ? [ascendingNotes[1], ascendingNotes[0], ...ascendingNotes.slice(2)]
-            : ascendingNotes;
-        const notesThisBeat = degreeFlow.slice(beatInCell * 2, beatInCell * 2 + 2);
-        const beatDuration = 60 / Math.max(1, bpm);
-
-        notesThisBeat.forEach((flowNote, index) => {
-          playBassNote(flowNote.midi, index * (beatDuration / 2), beatDuration * 0.44);
-        });
-        return;
-      } else if (rhythm === "four-beat" && beatInBar === 3 && nextRoot) {
-        const nextRootIndex = sharpPitchClasses.indexOf(pitchClassOf(nextRoot));
-        const approachPitchClass = sharpPitchClasses[(nextRootIndex + sharpPitchClasses.length - 1) % sharpPitchClasses.length];
-        note = notes
-          .filter((candidate) => candidate.pitchClass === approachPitchClass)
-          .sort((first, second) => first.midi - second.midi)[0];
-      } else if (rhythm === "four-beat") {
-        const degree = beatInCell === 0 ? "1" : chordNotes.find((chordNote) => chordNote.degree === "5")?.degree;
-        note = pickLowestBassNoteForDegree(notes, degree ?? chordNotes[1]?.degree ?? "1");
-      } else {
-        const chordNote = chordNotes[beatInCell % chordNotes.length];
-        note = pickLowestBassNoteForDegree(notes, chordNote.degree);
-      }
-
-      if (note) {
-        const duration = rhythm === "four-beat" ? (beatInBar === 3 ? 0.5 : 0.72) : beatInCell === 0 ? 0.85 : 0.6;
-        playBassNote(note.midi, 0, duration);
-      }
+      planProgressionBeat({ beatInBar, bpm, chordNotes, nextRoot, notes, rhythm }).forEach(
+        ({ midi, startOffset, duration }) => {
+          playBassNote(midi, startOffset, duration);
+        },
+      );
     },
     [bpm, chordNotes, notes, playBassNote, resumeAudio],
   );

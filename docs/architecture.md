@@ -252,9 +252,9 @@ BPM 入力の state と正規化を担当する。
 - 指板上の単音をベース音で鳴らす。
 - コード構成音を低フレット側からアルペジオ再生する。
 - コード構成音を、基準オクターブと転回形を反映したピアノ風の積み音で再生する。
-- 進行再生中の拍ごとのベース音も鳴らす。
+- `planProgressionBeat` が返した予定音をAudio Outputへ渡す。
 
-この hook は、実際の音色合成や `AudioContext` の管理はしない。SessionのAudio Outputから受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
+この hook は、実際の音色合成や `AudioContext` の管理はしない。進行伴奏のパターン解釈も純粋なplannerへ委譲する。
 
 ### `app/hooks/useProgressionPlayback.ts`
 
@@ -271,7 +271,8 @@ Transportの拍位置を、進行伴奏の発音要求へつなぐ。
 
 - 再生中に拍が切り替わったことを検出する。
 - 同じ拍で発音要求が重複しないようにする。
-- 現在位置から次のコードのRootを求め、伴奏パターンとともに `useChordPlayback` へ渡す。
+- 次の実効拍からRootを求め、1拍overrideも伴奏へ反映する。
+- 現在拍、次Root、伴奏パターンを `useChordPlayback` へ渡す。
 
 MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest / Tieを追加するときは、この境界で拍イベントを解釈してから発音処理へ渡す。
 
@@ -354,6 +355,16 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 2拍セル、拍オーバーライド、小節数の更新を純粋関数として提供する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
+
+### `app/lib/progression-playback.ts`
+
+進行伴奏の1拍分を、再生予定音の配列へ変換する。
+
+- Root Only、Chord Tones、度数フロー、4 Beatのパターンを解釈する。
+- 各音のMIDI番号、拍内の開始offset、長さを決める。
+- 4 Beatでは次の実効拍のRootへ向かうアプローチ音を選ぶ。
+
+React、Transport、AudioContextには依存しない。将来Hit / Rest / Tieを追加するときは、譜面イベントを入力に加え、発音しない拍や音価をここで再生予定へ変換する。
 
 ### `app/lib/audio.ts`
 
