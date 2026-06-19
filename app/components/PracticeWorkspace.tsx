@@ -19,18 +19,21 @@ import { FretRangeTabs } from "./FretRangeTabs";
 import { MetronomePanel } from "./MetronomePanel";
 import { ProgressionPanel } from "./ProgressionPanel";
 import { ProgressionQuickEditor } from "./ProgressionQuickEditor";
-import { useAudioEngine } from "../hooks/useAudioEngine";
 import { useBpmControl } from "../hooks/useBpmControl";
 import {
   type ArpeggioPattern,
   type ProgressionRhythm,
   useChordPlayback,
 } from "../hooks/useChordPlayback";
-import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
 import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
+import { useMetronome } from "../hooks/useMetronome";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
 import { type MetronomeTone } from "../lib/audio";
-import { useProgressionSession } from "../providers/ProgressionSessionProvider";
+import {
+  useProgressionSession,
+  useProgressionTransport,
+  useSessionAudioOutput,
+} from "../providers/ProgressionSessionProvider";
 import {
   type ChordType,
   type FretNote,
@@ -85,16 +88,19 @@ export function PracticeWorkspace() {
     updateCell: handleProgressionBarCellChange,
   } = useProgressionSession();
   const {
+    playBassNote,
+    playMetronomeClick,
+    playPianoNote,
+    resumeAudio,
+  } = useSessionAudioOutput();
+  const {
     currentBeat,
     currentPulse,
     countInBeatsRemaining,
     isCountingIn,
     isMetronomeRunning,
-    playBassNote,
-    playPianoNote,
-    resumeAudio,
     toggleMetronome,
-  } = useAudioEngine({
+  } = useMetronome({
     bpm,
     beatsPerMeasure,
     pulsesPerBeat,
@@ -103,8 +109,10 @@ export function PracticeWorkspace() {
     metronomeTone,
     accentFirstBeat,
     metronomeVolume,
+    playClick: playMetronomeClick,
+    resumeAudio,
   });
-  const progressionPlayback = useProgressionPlayback({ progression });
+  const progressionPlayback = useProgressionTransport();
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
   const desktopPanelDragRef = useRef<{
     key: DesktopPanelKey;
@@ -118,6 +126,13 @@ export function PracticeWorkspace() {
   useEffect(() => {
     syncProgressionBpm(bpm);
   }, [bpm, syncProgressionBpm]);
+
+  useEffect(
+    () => () => {
+      progressionPlayback.stopProgression();
+    },
+    [progressionPlayback.stopProgression],
+  );
 
   useEffect(() => {
     const handleOpenControls = () => {

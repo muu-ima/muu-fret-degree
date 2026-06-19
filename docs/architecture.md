@@ -79,7 +79,8 @@
 - `/progression` はコード譜、小節、拍、タイ、スラーなどの編集を担当する。
 - 両画面は `ProgressionSessionProvider` の進行データと編集履歴を共有する。
 - Quick Editは選択中小節のRoot / Chord変更に限定する。
-- Transportと発音処理はまだPractice側に置き、音声エンジンと同時にSessionへ移す。
+- TransportとAudio OutputはSessionのruntime Contextで共有する。
+- 進行schedulerとメトロノームtimerは、再生UIを持つPractice側に置く。
 - 将来は編集画面にもMini Transportと再生位置ハイライトを提供する。
 - 画面ごとにtimerや `AudioContext` を複製しない。
 
@@ -213,15 +214,6 @@
 
 このコンポーネントは編集データを更新せず、譜面表示と選択操作だけを担当する。
 
-### `app/hooks/useAudioEngine.ts`
-
-Practice画面向けに音声出力とメトロノームを組み立てる互換hook。
-
-- `useAudioOutput` と `useMetronome` を接続する。
-- 既存コンポーネントへ同じ戻り値を提供する。
-
-音源、メトロノームtimer、コード選択ロジックを直接持たない。
-
 ### `app/hooks/useAudioOutput.ts`
 
 AudioContextと音源出力を担当する。
@@ -262,7 +254,7 @@ BPM 入力の state と正規化を担当する。
 - コード構成音を、基準オクターブと転回形を反映したピアノ風の積み音で再生する。
 - 進行再生中の拍ごとのベース音も鳴らす。
 
-この hook は、実際の音色合成や `AudioContext` の管理はしない。`useAudioEngine` から受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
+この hook は、実際の音色合成や `AudioContext` の管理はしない。SessionのAudio Outputから受け取った再生関数へ、どの MIDI 番号を渡すかを決める。
 
 ### `app/hooks/useProgressionPlayback.ts`
 
@@ -313,8 +305,10 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 - `useProgressionState` をレイアウト階層で一度だけ生成する。
 - canonicalな進行データ、更新command、Undo / Redo履歴を両画面へ提供する。
 - PracticeのBPMを `syncBpm` で進行データへ同期する。
+- `useProgressionPlayback` と `useAudioOutput` をruntime Contextとして提供する。
+- データContextとTransport Contextを分け、再生フレームでFull Editor全体を再レンダーしない。
 
-現段階ではTransportと音声エンジンを提供しない。画面遷移後に時計だけが進む状態を避けるため、Transport、scheduler、音声エンジンは移行単位を揃える。
+進行schedulerはPractice側に残し、Practiceのアンマウント時にTransportを停止する。Full EditorにMini Transportを追加するまでは、編集画面の背後で再生を継続しない。
 
 ### `app/hooks/usePersistedProgression.ts`
 

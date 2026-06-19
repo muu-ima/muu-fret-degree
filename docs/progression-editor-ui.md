@@ -101,7 +101,7 @@ Full Editorでも、編集内容と再生位置の関係を確認できるよう
 
 BPM、伴奏パターン、メトロノームなどの詳細設定はメイン画面に残す。Full Editorへ同じ再生パネルを複製せず、編集確認に必要な最小操作だけを公開する。
 
-再生同期を実装する際は、画面ごとに別のtimerや `AudioContext` を作らない。進行データはレイアウト階層の単一Sessionで共有し、Transportと音声エンジンも準備が整った段階で同じSession境界へ移す。
+画面ごとに別のtimerや `AudioContext` を作らない。進行データ、Transport、Audio Outputはレイアウト階層の単一Sessionで共有し、メトロノームtimerと進行schedulerは利用する画面側から接続する。
 
 目標となる責務:
 
@@ -127,7 +127,8 @@ Practice              Full Editor
 - ルート遷移を挟んでも進行データと編集履歴を維持する。
 - Full EditorとQuick Editの変更を同じcanonical dataへ即時反映する。
 - `usePersistedProgression` はSession内で一度だけ実行する。
-- 音声再生中の状態やパネルの開閉状態はまだ共有しない。
+- TransportとAudio Outputは専用runtime Contextで共有する。
+- メトロノーム状態、進行scheduler、パネルの開閉状態はPractice側に置く。
 
 複数タブや複数端末での同期は対象外とし、必要になった時点で `storage` eventや外部ストアを検討する。
 
@@ -138,15 +139,15 @@ Practice              Full Editor
 - 複数コンポーネントが同時に進行を頻繁に更新する。
 - 画面遷移なしでFull Editorと再生画面を同時表示する。
 - 複数タブや複数端末で編集内容を即時同期する。
-- 編集画面とメイン画面で同じTransportと再生位置を共有する。
+- 再生位置を購読するコンポーネントが増え、Context更新が性能上の問題になる。
 
-Mini Transportとコード譜のplayhead同期へ進む段階で、Transport、scheduler、音声エンジンを同じSession境界へ移行する。時計だけを先に共有せず、発音のライフサイクルとセットで扱う。
+Mini Transportとコード譜のplayhead同期へ進む段階で、Full Editorから共有Transportを購読する。現段階ではPracticeを離れるとTransportを停止し、見えない再生を残さない。
 
 ### トレードオフ
 
 - Full Editorへ移動する操作が1段増える。
 - Session Context更新時の再レンダー範囲に注意する必要がある。
-- Transport共有時は、音声エンジンの所有位置も同時に見直す必要がある。
+- Mini Transport追加時は、再生中の編集反映タイミングを明確にする必要がある。
 
 これらは、メイン画面の視認性と編集画面の拡張性を得るために受け入れる。
 
