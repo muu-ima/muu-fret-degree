@@ -277,8 +277,8 @@ input {
 .shellProgressionPanel,
 .shellEditPanel {
   position: fixed;
-  top: 64px;
-  left: calc(var(--shell-sidebar-width) + ((100vw - var(--shell-sidebar-width)) / 2));
+  top: var(--desktop-panel-y, 64px);
+  left: var(--desktop-panel-x, calc(var(--shell-sidebar-width) + ((100vw - var(--shell-sidebar-width)) / 2)));
   z-index: 40;
   display: none;
   width: clamp(720px, 62vw, 980px);
@@ -300,6 +300,12 @@ input {
 .shellProgressionPanel.open,
 .shellEditPanel.open {
   display: block;
+}
+
+.shellControlsPanel.dragged,
+.shellProgressionPanel.dragged,
+.shellEditPanel.dragged {
+  transform: none;
 }
 
 .shellControls,
@@ -388,6 +394,10 @@ input {
 }
 
 .bottomSheetHandle {
+  display: none;
+}
+
+.compactButton {
   display: none;
 }
 
@@ -1017,7 +1027,7 @@ input {
   .shellControlsPanel,
   .shellProgressionPanel,
   .shellEditPanel {
-    top: 72px;
+    top: var(--desktop-panel-y, 72px);
     width: min(680px, calc(100vw - var(--shell-sidebar-width) - 28px));
     max-width: calc(100vw - var(--shell-sidebar-width) - 28px);
     padding: 18px 20px 20px;
@@ -1055,7 +1065,7 @@ input {
   .shellControlsPanel,
   .shellProgressionPanel,
   .shellEditPanel {
-    top: 68px;
+    top: var(--desktop-panel-y, 68px);
     width: min(560px, calc(100vw - var(--shell-sidebar-width) - 28px));
     max-width: calc(100vw - var(--shell-sidebar-width) - 28px);
     padding: 16px 18px 18px;
@@ -2502,6 +2512,76 @@ select:focus-visible,
 
   .degreeCard strong {
     font-size: 1.15rem;
+  }
+}
+
+@media (min-width: 701px) {
+  .shellControlsPanel .drawerHeader,
+  .shellProgressionPanel .drawerHeader,
+  .shellEditPanel .drawerHeader {
+    padding-right: 92px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .shellControlsPanel .drawerHeader:active,
+  .shellProgressionPanel .drawerHeader:active,
+  .shellEditPanel .drawerHeader:active {
+    cursor: grabbing;
+  }
+
+  .compactButton {
+    position: absolute;
+    top: 50%;
+    right: 42px;
+    transform: translateY(-50%);
+    display: grid;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(154, 171, 196, 0.2);
+    border-radius: 50%;
+    background: rgba(20, 26, 36, 0.94);
+    color: var(--ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .compactButton:hover {
+    border-color: rgba(122, 167, 255, 0.38);
+    background: rgba(31, 40, 55, 0.98);
+  }
+
+  .compactButton svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .shellControlsPanel.compact,
+  .shellProgressionPanel.compact,
+  .shellEditPanel.compact {
+    width: min(360px, calc(100vw - var(--shell-sidebar-width) - 24px));
+    max-height: none;
+    overflow: hidden;
+    padding: 12px 16px;
+    border-radius: 18px;
+  }
+
+  .shellControlsPanel.compact .drawerHeader,
+  .shellProgressionPanel.compact .drawerHeader,
+  .shellEditPanel.compact .drawerHeader {
+    min-height: 36px;
+    margin-bottom: 0;
+  }
+
+  .shellControlsPanel.compact .shellControls,
+  .shellControlsPanel.compact .shellMetronome,
+  .shellProgressionPanel.compact .shellProgression,
+  .shellEditPanel.compact .shellEdit {
+    display: none;
   }
 }
 

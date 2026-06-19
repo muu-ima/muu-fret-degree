@@ -4,11 +4,13 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { LuMaximize2, LuMinus } from "react-icons/lu";
 import theory from "../../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
@@ -46,6 +48,9 @@ type PracticeWorkspaceProps = {
   pageMode: "practice" | "progression";
 };
 
+type DesktopPanelKey = "controls" | "metronome" | "progression" | "edit";
+type DesktopPanelPosition = { x: number; y: number };
+
 const bottomSheetHeightBounds = {
   min: 44,
   default: 78,
@@ -72,6 +77,10 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const [accentFirstBeat, setAccentFirstBeat] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.7);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(bottomSheetHeightBounds.default);
+  const [desktopPanelPositions, setDesktopPanelPositions] = useState<
+    Partial<Record<DesktopPanelKey, DesktopPanelPosition>>
+  >({});
+  const [compactDesktopPanels, setCompactDesktopPanels] = useState<Partial<Record<DesktopPanelKey, boolean>>>({});
   const [progression, setProgression] = useState<ChordProgression>(() => ({
     bpm: 120,
     timeSignature: { beatsPerBar: 4, beatUnit: 4 },
@@ -107,6 +116,14 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const progressionPlayback = useProgressionPlayback({ progression });
   const lastProgressionBeatRef = useRef<number | null>(null);
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
+  const desktopPanelDragRef = useRef<{
+    key: DesktopPanelKey;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+    width: number;
+  } | null>(null);
 
   useEffect(() => {
     setProgression((currentProgression) =>
@@ -165,6 +182,76 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
     setIsProgressionPanelOpen(false);
     setIsProgressionEditorOpen(false);
     window.dispatchEvent(new CustomEvent("shell:panel-close"));
+  };
+
+  const beginDesktopPanelDrag = (key: DesktopPanelKey, event: PointerEvent<HTMLDivElement>) => {
+    if (window.matchMedia("(max-width: 700px)").matches) {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+    if (target.closest("button")) {
+      return;
+    }
+
+    const panel = event.currentTarget.closest("aside");
+    if (!panel) {
+      return;
+    }
+
+    const bounds = panel.getBoundingClientRect();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    desktopPanelDragRef.current = {
+      key,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: bounds.left,
+      originY: bounds.top,
+      width: bounds.width,
+    };
+    setDesktopPanelPositions((positions) => ({
+      ...positions,
+      [key]: { x: bounds.left, y: bounds.top },
+    }));
+  };
+
+  const moveDesktopPanel = (event: PointerEvent<HTMLDivElement>) => {
+    const drag = desktopPanelDragRef.current;
+    if (!drag) {
+      return;
+    }
+
+    const nextX = drag.originX + event.clientX - drag.startX;
+    const nextY = drag.originY + event.clientY - drag.startY;
+    const maxX = Math.max(8, window.innerWidth - drag.width - 8);
+    const maxY = Math.max(8, window.innerHeight - 64);
+
+    setDesktopPanelPositions((positions) => ({
+      ...positions,
+      [drag.key]: {
+        x: Math.min(maxX, Math.max(8, nextX)),
+        y: Math.min(maxY, Math.max(8, nextY)),
+      },
+    }));
+  };
+
+  const finishDesktopPanelDrag = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    desktopPanelDragRef.current = null;
+  };
+
+  const resetDesktopPanelPosition = (key: DesktopPanelKey) => {
+    setDesktopPanelPositions((positions) => {
+      const nextPositions = { ...positions };
+      delete nextPositions[key];
+      return nextPositions;
+    });
+  };
+
+  const toggleDesktopPanelCompact = (key: DesktopPanelKey) => {
+    setCompactDesktopPanels((panels) => ({ ...panels, [key]: !panels[key] }));
   };
 
   const updatePulsesPerBeat = (pulses: number) => {
@@ -232,6 +319,64 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
   const bottomSheetStyle = {
     "--bottom-sheet-height": `${bottomSheetHeight}dvh`,
   } as CSSProperties;
+
+  const getDesktopPanelStyle = (key: DesktopPanelKey) => {
+    const position = desktopPanelPositions[key];
+    return {
+      ...bottomSheetStyle,
+      ...(position
+        ? {
+            "--desktop-panel-x": `${position.x}px`,
+            "--desktop-panel-y": `${position.y}px`,
+          }
+        : {}),
+    } as CSSProperties;
+  };
+
+  const getDesktopPanelClassName = (baseClassName: string, key: DesktopPanelKey, isOpen: boolean) =>
+    [
+      baseClassName,
+      isOpen ? "open" : "",
+      desktopPanelPositions[key] ? "dragged" : "",
+      compactDesktopPanels[key] ? "compact" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+  const renderDrawerHeader = (key: DesktopPanelKey, title: ReactNode, titleClassName?: string) => {
+    const isCompact = Boolean(compactDesktopPanels[key]);
+    const CompactIcon = isCompact ? LuMaximize2 : LuMinus;
+
+    return (
+      <div
+        className="drawerHeader"
+        title="ドラッグしてパネルを移動"
+        onDoubleClick={(event) => {
+          if (!(event.target as HTMLElement).closest("button")) {
+            resetDesktopPanelPosition(key);
+          }
+        }}
+        onPointerCancel={finishDesktopPanelDrag}
+        onPointerDown={(event) => beginDesktopPanelDrag(key, event)}
+        onPointerMove={moveDesktopPanel}
+        onPointerUp={finishDesktopPanelDrag}
+      >
+        <strong className={titleClassName}>{title}</strong>
+        <button
+          type="button"
+          className="compactButton"
+          aria-label={isCompact ? "パネルを展開" : "パネルをコンパクト表示"}
+          title={isCompact ? "パネルを展開" : "パネルをコンパクト表示"}
+          onClick={() => toggleDesktopPanelCompact(key)}
+        >
+          <CompactIcon aria-hidden="true" />
+        </button>
+        <button type="button" className="closeButton" aria-label="パネルを閉じる" onClick={closePanels}>
+          ×
+        </button>
+      </div>
+    );
+  };
 
   const renderBottomSheetHandle = () => (
     <button
@@ -510,35 +655,29 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         onClick={closePanels}
       />
       <aside
-        className={isControlsOpen ? "shellControlsPanel open" : "shellControlsPanel"}
+        className={getDesktopPanelClassName("shellControlsPanel", "controls", isControlsOpen)}
         role="dialog"
         aria-modal="true"
         aria-label="コードとチューニング"
-        style={bottomSheetStyle}
+        style={getDesktopPanelStyle("controls")}
       >
         {renderBottomSheetHandle()}
-        <div className="drawerHeader">
-          <strong className="chordTitleValue">{root} {chordType.name}</strong>
-          <button type="button" className="closeButton" onClick={closePanels}>
-            ×
-          </button>
-        </div>
+        {renderDrawerHeader("controls", `${root} ${chordType.name}`, "chordTitleValue")}
         {renderControls("controls shellControls")}
       </aside>
       <aside
-        className={isMetronomeOpen ? "shellControlsPanel shellMetronomePanel open" : "shellControlsPanel shellMetronomePanel"}
+        className={getDesktopPanelClassName(
+          "shellControlsPanel shellMetronomePanel",
+          "metronome",
+          isMetronomeOpen,
+        )}
         role="dialog"
         aria-modal="true"
         aria-label="メトロノーム"
-        style={bottomSheetStyle}
+        style={getDesktopPanelStyle("metronome")}
       >
         {renderBottomSheetHandle()}
-        <div className="drawerHeader">
-          <strong>Metronome</strong>
-          <button type="button" className="closeButton" onClick={closePanels}>
-            ×
-          </button>
-        </div>
+        {renderDrawerHeader("metronome", "Metronome")}
         <div className="shellMetronome">
           <MetronomePanel
             isPanelOpen={isMetronomeOpen}
@@ -570,36 +709,26 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         </div>
       </aside>
       <aside
-        className={isProgressionPanelOpen ? "shellProgressionPanel open" : "shellProgressionPanel"}
+        className={getDesktopPanelClassName("shellProgressionPanel", "progression", isProgressionPanelOpen)}
         role="dialog"
         aria-modal="true"
         aria-label="コード進行再生"
-        style={bottomSheetStyle}
+        style={getDesktopPanelStyle("progression")}
       >
         {renderBottomSheetHandle()}
-        <div className="drawerHeader">
-          <strong>Progression</strong>
-          <button type="button" className="closeButton" onClick={closePanels}>
-            ×
-          </button>
-        </div>
+        {renderDrawerHeader("progression", "Progression")}
         <div className="shellProgression">{renderProgressionPanel()}</div>
       </aside>
       {showProgressionEditor ? (
         <aside
-          className={isProgressionEditorOpen ? "shellEditPanel open" : "shellEditPanel"}
+          className={getDesktopPanelClassName("shellEditPanel", "edit", isProgressionEditorOpen)}
           role="dialog"
           aria-modal="true"
           aria-label="コード進行編集"
-          style={bottomSheetStyle}
+          style={getDesktopPanelStyle("edit")}
         >
           {renderBottomSheetHandle()}
-          <div className="drawerHeader">
-            <strong>Progression Edit</strong>
-            <button type="button" className="closeButton" onClick={closePanels}>
-              ×
-            </button>
-          </div>
+          {renderDrawerHeader("edit", "Progression Edit")}
           <div className="shellEdit">{renderProgressionEditor("progressionEditor progressionEditorSheet")}</div>
         </aside>
       ) : null}
