@@ -231,6 +231,7 @@ AudioContextと音源出力を担当する。
 - 開始 / 停止、現在拍、現在pulse、count-inを管理する。
 - BPM、pulse、swingから次のtickまでの時間を決める。
 - 発音は注入された `playClick` へ委譲する。
+- Count-in完了時の最初の再生拍をcallbackで通知する。
 
 AudioContextを直接所有しないため、将来Sessionの音声出力と同じContextを共有できる。
 

@@ -14,6 +14,7 @@ type UseMetronomeOptions = {
   metronomeVolume: number;
   playClick: (kind: MetronomeClickKind, tone: MetronomeTone, volume: number) => void;
   resumeAudio: () => void;
+  onCountInComplete?: () => void;
 };
 
 export function useMetronome({
@@ -27,28 +28,48 @@ export function useMetronome({
   metronomeVolume,
   playClick,
   resumeAudio,
+  onCountInComplete,
 }: UseMetronomeOptions) {
   const metronomeTimer = useRef<number | null>(null);
   const metronomePulse = useRef(0);
+  const onCountInCompleteRef = useRef(onCountInComplete);
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
+  const [runCycle, setRunCycle] = useState(0);
   const [currentBeat, setCurrentBeat] = useState(1);
   const [currentPulse, setCurrentPulse] = useState(1);
   const [isCountingIn, setIsCountingIn] = useState(false);
   const [countInBeatsRemaining, setCountInBeatsRemaining] = useState(0);
 
-  const stopMetronome = useCallback(() => {
+  onCountInCompleteRef.current = onCountInComplete;
+
+  const clearMetronomeTimer = useCallback(() => {
     if (metronomeTimer.current !== null) {
       window.clearTimeout(metronomeTimer.current);
       metronomeTimer.current = null;
     }
   }, []);
 
-  const toggleMetronome = useCallback(() => {
-    setIsMetronomeRunning((running) => !running);
+  const startMetronome = useCallback(() => {
+    setRunCycle((current) => current + 1);
+    setIsMetronomeRunning(true);
   }, []);
 
+  const stopMetronome = useCallback(() => {
+    clearMetronomeTimer();
+    setIsMetronomeRunning(false);
+  }, [clearMetronomeTimer]);
+
+  const toggleMetronome = useCallback(() => {
+    if (isMetronomeRunning) {
+      stopMetronome();
+      return;
+    }
+
+    startMetronome();
+  }, [isMetronomeRunning, startMetronome, stopMetronome]);
+
   useEffect(() => {
-    stopMetronome();
+    clearMetronomeTimer();
 
     if (!isMetronomeRunning) {
       setIsCountingIn(false);
@@ -77,6 +98,9 @@ export function useMetronome({
           : "subdivision";
       resumeAudio();
       playClick(clickKind, metronomeTone, metronomeVolume);
+      if (countInPulses > 0 && absolutePulse === countInPulses) {
+        onCountInCompleteRef.current?.();
+      }
       setCurrentBeat(beat + 1);
       setCurrentPulse(pulse + 1);
       setIsCountingIn(isCountInPulse);
@@ -97,11 +121,12 @@ export function useMetronome({
 
     tick();
 
-    return stopMetronome;
+    return clearMetronomeTimer;
   }, [
     accentFirstBeat,
     beatsPerMeasure,
     bpm,
+    clearMetronomeTimer,
     countInMeasures,
     isMetronomeRunning,
     metronomeTone,
@@ -109,7 +134,7 @@ export function useMetronome({
     playClick,
     pulsesPerBeat,
     resumeAudio,
-    stopMetronome,
+    runCycle,
     swingRatio,
   ]);
 
@@ -119,6 +144,8 @@ export function useMetronome({
     countInBeatsRemaining,
     isCountingIn,
     isMetronomeRunning,
+    startMetronome,
+    stopMetronome,
     toggleMetronome,
   };
 }
