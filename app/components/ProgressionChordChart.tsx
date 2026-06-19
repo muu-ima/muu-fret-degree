@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChordType } from "../lib/music";
+import { formatChordSymbol } from "../lib/chord-symbol";
 import type { ProgressionBar } from "../lib/progression";
 
 type ProgressionChordChartProps = {
@@ -10,31 +11,6 @@ type ProgressionChordChartProps = {
   selectedBeatIndex: number;
   onBeatSelect: (barIndex: number, beatIndex: number) => void;
 };
-
-const chordSuffixes: Record<string, string> = {
-  maj: "",
-  min: "m",
-  dim: "dim",
-  aug: "aug",
-  maj7: "maj7",
-  "7": "7",
-  m7: "m7",
-  m7b5: "m7b5",
-  dim7: "dim7",
-  sus4: "sus4",
-  "6": "6",
-  m6: "m6",
-};
-
-function chordSymbol(root: string, chordTypeId: string, chordTypes: ChordType[]) {
-  const suffix = chordSuffixes[chordTypeId];
-  if (suffix !== undefined) {
-    return `${root}${suffix}`;
-  }
-
-  const chordType = chordTypes.find((item) => item.id === chordTypeId);
-  return `${root} ${chordType?.name ?? chordTypeId}`;
-}
 
 export function ProgressionChordChart({
   bars,
@@ -53,8 +29,8 @@ export function ProgressionChordChart({
       </div>
       <div className="progressionChordChartGrid">
         {bars.map((bar, barIndex) => {
-          const firstSymbol = chordSymbol(bar.cells[0].root, bar.cells[0].chordTypeId, chordTypes);
-          const secondSymbol = chordSymbol(bar.cells[1].root, bar.cells[1].chordTypeId, chordTypes);
+          const firstSymbol = formatChordSymbol(bar.cells[0].root, bar.cells[0].chordTypeId, chordTypes);
+          const secondSymbol = formatChordSymbol(bar.cells[1].root, bar.cells[1].chordTypeId, chordTypes);
           const usesSingleChord = firstSymbol === secondSymbol;
 
           return (
