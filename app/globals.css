@@ -276,9 +276,10 @@ input {
 .shellControlsPanel,
 .shellProgressionPanel,
 .shellEditPanel {
+  --panel-accent: 122, 167, 255;
   position: fixed;
-  top: 64px;
-  left: calc(var(--shell-sidebar-width) + ((100vw - var(--shell-sidebar-width)) / 2));
+  top: var(--desktop-panel-y, 64px);
+  left: var(--desktop-panel-x, calc(var(--shell-sidebar-width) + ((100vw - var(--shell-sidebar-width)) / 2)));
   z-index: 40;
   display: none;
   width: clamp(720px, 62vw, 980px);
@@ -296,10 +297,28 @@ input {
   transform: translateX(-50%);
 }
 
+.shellMetronomePanel {
+  --panel-accent: 42, 196, 181;
+}
+
+.shellProgressionPanel {
+  --panel-accent: 160, 126, 255;
+}
+
+.shellEditPanel {
+  --panel-accent: 232, 77, 91;
+}
+
 .shellControlsPanel.open,
 .shellProgressionPanel.open,
 .shellEditPanel.open {
   display: block;
+}
+
+.shellControlsPanel.dragged,
+.shellProgressionPanel.dragged,
+.shellEditPanel.dragged {
+  transform: none;
 }
 
 .shellControls,
@@ -337,6 +356,18 @@ input {
   padding-right: 50px;
 }
 
+.panelHeaderText {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  padding-left: 10px;
+  border-left: 2px solid rgba(var(--panel-accent), 0.68);
+}
+
+.compactPanelSummary {
+  display: none;
+}
+
 .shellControlsPanel .drawerHeader strong,
 .shellProgressionPanel .drawerHeader strong,
 .shellEditPanel .drawerHeader strong {
@@ -365,29 +396,47 @@ input {
   min-height: 34px;
   place-items: center;
   padding: 0;
-  border: 1px solid rgba(196, 211, 232, 0.22);
+  border: 1px solid rgba(154, 171, 196, 0.22);
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.15), transparent),
-    rgba(221, 230, 243, 0.96);
-  color: #151d29;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent),
+    rgba(20, 26, 36, 0.96);
+  color: #dce6f5;
   font-size: 0.86rem;
   font-weight: 900;
   line-height: 1;
   box-shadow:
-    0 14px 26px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.68);
+    0 10px 22px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .shellControlsPanel .closeButton:hover,
 .shellProgressionPanel .closeButton:hover,
 .shellEditPanel .closeButton:hover {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent),
-    rgba(244, 248, 255, 1);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
+    rgba(48, 27, 34, 0.98);
+  border-color: rgba(232, 77, 91, 0.42);
+  color: #fff;
+}
+
+.shellControlsPanel .closeButton svg,
+.shellProgressionPanel .closeButton svg,
+.shellEditPanel .closeButton svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.4;
 }
 
 .bottomSheetHandle {
+  display: none;
+}
+
+.compactButton {
+  display: none;
+}
+
+.panelDragGrip {
   display: none;
 }
 
@@ -1017,7 +1066,7 @@ input {
   .shellControlsPanel,
   .shellProgressionPanel,
   .shellEditPanel {
-    top: 72px;
+    top: var(--desktop-panel-y, 72px);
     width: min(680px, calc(100vw - var(--shell-sidebar-width) - 28px));
     max-width: calc(100vw - var(--shell-sidebar-width) - 28px);
     padding: 18px 20px 20px;
@@ -1055,7 +1104,7 @@ input {
   .shellControlsPanel,
   .shellProgressionPanel,
   .shellEditPanel {
-    top: 68px;
+    top: var(--desktop-panel-y, 68px);
     width: min(560px, calc(100vw - var(--shell-sidebar-width) - 28px));
     max-width: calc(100vw - var(--shell-sidebar-width) - 28px);
     padding: 16px 18px 18px;
@@ -2502,6 +2551,133 @@ select:focus-visible,
 
   .degreeCard strong {
     font-size: 1.15rem;
+  }
+}
+
+@media (min-width: 701px) {
+  .shellControlsPanel,
+  .shellProgressionPanel,
+  .shellEditPanel {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .shellControlsPanel .drawerHeader,
+  .shellProgressionPanel .drawerHeader,
+  .shellEditPanel .drawerHeader {
+    gap: 8px;
+    padding-right: 92px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .panelDragGrip {
+    display: inline-grid;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 30px;
+    place-items: center;
+    color: rgba(var(--panel-accent), 0.58);
+  }
+
+  .panelDragGrip svg {
+    width: 17px;
+    height: 17px;
+    stroke-width: 2;
+  }
+
+  .drawerHeader:hover .panelDragGrip {
+    color: rgba(var(--panel-accent), 0.92);
+  }
+
+  .shellControlsPanel .drawerHeader:active,
+  .shellProgressionPanel .drawerHeader:active,
+  .shellEditPanel .drawerHeader:active {
+    cursor: grabbing;
+  }
+
+  .shellControlsPanel:has(.drawerHeader:active),
+  .shellProgressionPanel:has(.drawerHeader:active),
+  .shellEditPanel:has(.drawerHeader:active) {
+    border-color: rgba(var(--panel-accent), 0.42);
+    box-shadow:
+      0 42px 108px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(var(--panel-accent), 0.1);
+  }
+
+  .shellControlsPanel:has(.drawerHeader:active) .panelDragGrip,
+  .shellProgressionPanel:has(.drawerHeader:active) .panelDragGrip,
+  .shellEditPanel:has(.drawerHeader:active) .panelDragGrip {
+    color: rgba(var(--panel-accent), 1);
+  }
+
+  .compactButton {
+    position: absolute;
+    top: 50%;
+    right: 42px;
+    transform: translateY(-50%);
+    display: grid;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(154, 171, 196, 0.2);
+    border-radius: 50%;
+    background: rgba(20, 26, 36, 0.94);
+    color: var(--ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .compactButton:hover {
+    border-color: rgba(122, 167, 255, 0.38);
+    background: rgba(31, 40, 55, 0.98);
+  }
+
+  .compactButton svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .shellControlsPanel.compact,
+  .shellProgressionPanel.compact,
+  .shellEditPanel.compact {
+    width: min(360px, calc(100vw - var(--shell-sidebar-width) - 24px));
+    max-height: none;
+    overflow: hidden;
+    padding: 12px 16px;
+    border-radius: 18px;
+  }
+
+  .shellControlsPanel.compact .drawerHeader,
+  .shellProgressionPanel.compact .drawerHeader,
+  .shellEditPanel.compact .drawerHeader {
+    min-height: 36px;
+    margin-bottom: 0;
+  }
+
+  .shellControlsPanel.compact .compactPanelSummary,
+  .shellProgressionPanel.compact .compactPanelSummary,
+  .shellEditPanel.compact .compactPanelSummary {
+    display: block;
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shellControlsPanel.compact .shellControls,
+  .shellControlsPanel.compact .shellMetronome,
+  .shellProgressionPanel.compact .shellProgression,
+  .shellEditPanel.compact .shellEdit {
+    display: none;
   }
 }
 
