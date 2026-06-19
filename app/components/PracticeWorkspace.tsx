@@ -343,7 +343,12 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
       .filter(Boolean)
       .join(" ");
 
-  const renderDrawerHeader = (key: DesktopPanelKey, title: ReactNode, titleClassName?: string) => {
+  const renderDrawerHeader = (
+    key: DesktopPanelKey,
+    title: ReactNode,
+    compactSummary: ReactNode,
+    titleClassName?: string,
+  ) => {
     const isCompact = Boolean(compactDesktopPanels[key]);
     const CompactIcon = isCompact ? LuMaximize2 : LuMinus;
 
@@ -361,7 +366,10 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         onPointerMove={moveDesktopPanel}
         onPointerUp={finishDesktopPanelDrag}
       >
-        <strong className={titleClassName}>{title}</strong>
+        <span className="panelHeaderText">
+          <strong className={titleClassName}>{title}</strong>
+          <span className="compactPanelSummary">{compactSummary}</span>
+        </span>
         <button
           type="button"
           className="compactButton"
@@ -662,7 +670,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         style={getDesktopPanelStyle("controls")}
       >
         {renderBottomSheetHandle()}
-        {renderDrawerHeader("controls", `${root} ${chordType.name}`, "chordTitleValue")}
+        {renderDrawerHeader("controls", `${root} ${chordType.name}`, tuning.name, "chordTitleValue")}
         {renderControls("controls shellControls")}
       </aside>
       <aside
@@ -677,7 +685,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         style={getDesktopPanelStyle("metronome")}
       >
         {renderBottomSheetHandle()}
-        {renderDrawerHeader("metronome", "Metronome")}
+        {renderDrawerHeader("metronome", "Metronome", `${bpm} BPM · ${beatsPerMeasure}/4`)}
         <div className="shellMetronome">
           <MetronomePanel
             isPanelOpen={isMetronomeOpen}
@@ -716,7 +724,13 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         style={getDesktopPanelStyle("progression")}
       >
         {renderBottomSheetHandle()}
-        {renderDrawerHeader("progression", "Progression")}
+        {renderDrawerHeader(
+          "progression",
+          "Progression",
+          `Bar ${progressionPlayback.currentProgressionBar?.bar ?? progressionPlayback.progressionPosition.barIndex + 1} · ${
+            progressionRhythm === "four-beat" ? "4 Beat" : "Chord Tones"
+          }`,
+        )}
         <div className="shellProgression">{renderProgressionPanel()}</div>
       </aside>
       {showProgressionEditor ? (
@@ -728,7 +742,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
           style={getDesktopPanelStyle("edit")}
         >
           {renderBottomSheetHandle()}
-          {renderDrawerHeader("edit", "Progression Edit")}
+          {renderDrawerHeader("edit", "Progression Edit", `${progression.bars.length} bars`)}
           <div className="shellEdit">{renderProgressionEditor("progressionEditor progressionEditorSheet")}</div>
         </aside>
       ) : null}

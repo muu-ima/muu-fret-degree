@@ -343,6 +343,16 @@ input {
   padding-right: 50px;
 }
 
+.panelHeaderText {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.compactPanelSummary {
+  display: none;
+}
+
 .shellControlsPanel .drawerHeader strong,
 .shellProgressionPanel .drawerHeader strong,
 .shellEditPanel .drawerHeader strong {
@@ -2575,6 +2585,20 @@ select:focus-visible,
   .shellEditPanel.compact .drawerHeader {
     min-height: 36px;
     margin-bottom: 0;
+  }
+
+  .shellControlsPanel.compact .compactPanelSummary,
+  .shellProgressionPanel.compact .compactPanelSummary,
+  .shellEditPanel.compact .compactPanelSummary {
+    display: block;
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .shellControlsPanel.compact .shellControls,
