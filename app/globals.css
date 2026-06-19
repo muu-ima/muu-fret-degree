@@ -947,6 +947,11 @@ input {
   width: 100%;
 }
 
+.shellControls {
+  container-name: controls-panel;
+  container-type: inline-size;
+}
+
 @media (max-width: 1440px) {
   .appShell {
     --shell-sidebar-width: clamp(208px, 18vw, 252px);
@@ -3009,7 +3014,7 @@ select:focus-visible,
   }
 
   .shellControlsPanel:not(.shellMetronomePanel) {
-    width: clamp(780px, 68vw, 1080px);
+    width: clamp(840px, 74vw, 1160px);
   }
 
   .shellControlsPanel,
@@ -3135,6 +3140,53 @@ select:focus-visible,
   .shellProgressionPanel.compact .shellProgression,
   .shellEditPanel.compact .shellEdit {
     display: none;
+  }
+}
+
+@container controls-panel (max-width: 960px) {
+  .shellControls .controlsColumnSecondary {
+    grid-template-columns: minmax(150px, 0.7fr) minmax(220px, 1.3fr);
+  }
+
+  .shellControls .controlsColumnSecondary > label:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .shellControls .controlsColumnSecondary .toggle {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .shellControls .controlsColumnSecondary .voicingTabs {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@container controls-panel (max-width: 780px) {
+  .shellControls .controlsColumnActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shellControls .controlsPlaybackPattern {
+    grid-column: 1 / -1;
+  }
+}
+
+@container controls-panel (max-width: 620px) {
+  .shellControls .controlsColumnPrimary,
+  .shellControls .controlsColumnSecondary,
+  .shellControls .controlsColumnActions {
+    grid-template-columns: 1fr;
+  }
+
+  .shellControls .controlsColumnSecondary > label:first-child,
+  .shellControls .controlsColumnSecondary .toggle,
+  .shellControls .controlsColumnSecondary .voicingTabs,
+  .shellControls .controlsPlaybackPattern {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 
