@@ -522,6 +522,7 @@ export function PracticeWorkspace({ showProgressionEditor, pageMode }: PracticeW
         </div>
         <div className="shellMetronome">
           <MetronomePanel
+            isPanelOpen={isMetronomeOpen}
             bpm={bpm}
             bpmInput={bpmInput}
             currentBeat={currentBeat}

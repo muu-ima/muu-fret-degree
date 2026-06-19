@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LuMinus, LuPlay, LuPlus, LuSquare, LuTimerReset } from "react-icons/lu";
 import { type MetronomeTone } from "../lib/audio";
 
 type MetronomePanelProps = {
+  isPanelOpen: boolean;
   bpm: number;
   bpmInput: string;
   currentBeat: number;
@@ -64,6 +65,7 @@ const tempoPresets = [
 ];
 
 export function MetronomePanel({
+  isPanelOpen,
   bpm,
   bpmInput,
   currentBeat,
@@ -92,11 +94,14 @@ export function MetronomePanel({
   const tapTimesRef = useRef<number[]>([]);
   const [tapCount, setTapCount] = useState(0);
 
-  const adjustBpm = (amount: number) => {
-    onBpmCommit(String(bpm + amount));
-  };
+  const adjustBpm = useCallback(
+    (amount: number) => {
+      onBpmCommit(String(bpm + amount));
+    },
+    [bpm, onBpmCommit],
+  );
 
-  const handleTapTempo = () => {
+  const handleTapTempo = useCallback(() => {
     const now = performance.now();
     const previousTap = tapTimesRef.current.at(-1);
 
@@ -117,7 +122,50 @@ export function MetronomePanel({
     const intervals = taps.slice(1).map((tap, index) => tap - taps[index]);
     const averageInterval = intervals.reduce((total, interval) => total + interval, 0) / intervals.length;
     onBpmCommit(String(Math.round(60000 / averageInterval)));
-  };
+  }, [onBpmCommit]);
+
+  useEffect(() => {
+    if (!isPanelOpen) {
+      return;
+    }
+
+    const handleShortcut = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isFormControl =
+        target?.isContentEditable ||
+        target?.tagName === "INPUT" ||
+        target?.tagName === "SELECT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "BUTTON";
+
+      if (isFormControl || event.repeat) {
+        return;
+      }
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        onToggle();
+        return;
+      }
+
+      if (event.key.toLowerCase() === "t") {
+        event.preventDefault();
+        handleTapTempo();
+        return;
+      }
+
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault();
+        const direction = event.key === "ArrowUp" ? 1 : -1;
+        adjustBpm(direction * (event.shiftKey ? 5 : 1));
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => {
+      window.removeEventListener("keydown", handleShortcut);
+    };
+  }, [adjustBpm, handleTapTempo, isPanelOpen, onToggle]);
 
   return (
     <section className="metronomePanel" aria-label="メトロノーム設定">
@@ -150,7 +198,13 @@ export function MetronomePanel({
       </div>
 
       <div className="metronomeTempoControls">
-        <button type="button" className="tempoStepButton" onClick={() => adjustBpm(-1)} aria-label="BPMを1下げる">
+        <button
+          type="button"
+          className="tempoStepButton"
+          onClick={() => adjustBpm(-1)}
+          aria-label="BPMを1下げる"
+          aria-keyshortcuts="ArrowDown"
+        >
           <LuMinus />
         </button>
         <label className="metronomeBpmInput">
@@ -171,7 +225,13 @@ export function MetronomePanel({
             }}
           />
         </label>
-        <button type="button" className="tempoStepButton" onClick={() => adjustBpm(1)} aria-label="BPMを1上げる">
+        <button
+          type="button"
+          className="tempoStepButton"
+          onClick={() => adjustBpm(1)}
+          aria-label="BPMを1上げる"
+          aria-keyshortcuts="ArrowUp"
+        >
           <LuPlus />
         </button>
       </div>
@@ -195,7 +255,12 @@ export function MetronomePanel({
       </div>
 
       <div className="metronomePrimaryActions">
-        <button type="button" className="actionButton tapTempoButton" onClick={handleTapTempo}>
+        <button
+          type="button"
+          className="actionButton tapTempoButton"
+          onClick={handleTapTempo}
+          aria-keyshortcuts="T"
+        >
           <LuTimerReset aria-hidden="true" />
           Tap Tempo
           <span>{tapCount > 1 ? `${tapCount} taps` : "Tap repeatedly"}</span>
@@ -204,6 +269,7 @@ export function MetronomePanel({
           type="button"
           className={isRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
           onClick={onToggle}
+          aria-keyshortcuts="Space"
         >
           {isRunning ? <LuSquare aria-hidden="true" /> : <LuPlay aria-hidden="true" />}
           {isCountingIn
