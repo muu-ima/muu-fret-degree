@@ -278,7 +278,7 @@ Maj   Min sus4  6    m6
 
 - スラッシュコードとベース音指定
 - 発音と休符
-- 音価
+- 音価（4分、8分、付点4分、付点8分など）
 - タイ
 - スラー
 - リズムスラッシュ表示
@@ -318,12 +318,24 @@ type BeatEvent = {
   slurToNext?: boolean;
 };
 
+type RhythmEvent = {
+  startStep: number;
+  durationSteps: number;
+  type: "hit" | "rest";
+  tieToNext?: boolean;
+};
+
 type ProgressionBar = {
   bar: number;
   cells: readonly [ProgressionCell, ProgressionCell];
   beats?: readonly [BeatEvent, BeatEvent, BeatEvent, BeatEvent];
+  rhythm?: RhythmEvent[];
 };
 ```
+
+`RhythmEvent` は1小節を16分音符単位の16stepとして扱う。`durationSteps` は4分音符を`4`、8分音符を`2`、付点4分音符を`6`、付点8分音符を`3`として表現する。タイは別イベントを追加せず、前のイベントの音を次へ持続させる情報として保持する。
+
+コード譜では `hit` を音価に応じたリズムスラッシュで描画し、付点はスラッシュの右側へ表示する。タイは隣接するスラッシュを弧で結ぶ。最初は1拍単位のHit / Rest / Tieを実装し、その後16分stepへ拡張して付点と細かなリズムを扱う。
 
 `beats` は既存データを読み込めるよう任意項目から始める。値がない場合は、各拍が所属する2拍セルのコードを継承し、4分音符で発音する。
 
