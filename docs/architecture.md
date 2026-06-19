@@ -215,13 +215,32 @@
 
 ### `app/hooks/useAudioEngine.ts`
 
-音声再生に必要な React state とブラウザ API の接続を担当する。
+Practice画面向けに音声出力とメトロノームを組み立てる互換hook。
 
-- `AudioContext` を必要になったタイミングで作る。
-- ベース音、ピアノ音、メトロノーム音を鳴らす関数を返す。
-- メトロノームの開始 / 停止、現在拍、タイマーを管理する。
+- `useAudioOutput` と `useMetronome` を接続する。
+- 既存コンポーネントへ同じ戻り値を提供する。
 
-この hook は、どのコードをどの順番で鳴らすかは決めない。`page.tsx` が選んだ MIDI 番号を、音声再生へつなぐ。
+音源、メトロノームtimer、コード選択ロジックを直接持たない。
+
+### `app/hooks/useAudioOutput.ts`
+
+AudioContextと音源出力を担当する。
+
+- `AudioContext` をユーザー操作後に必要になったタイミングで作る。
+- ベース音、ピアノ音、メトロノームクリックを `app/lib/audio.ts` へ委譲する。
+- AudioContextの再開操作を提供する。
+
+拍位置やコード進行は参照せず、指定された音を鳴らすことだけを担当する。
+
+### `app/hooks/useMetronome.ts`
+
+メトロノームのtimerと表示状態を担当する。
+
+- 開始 / 停止、現在拍、現在pulse、count-inを管理する。
+- BPM、pulse、swingから次のtickまでの時間を決める。
+- 発音は注入された `playClick` へ委譲する。
+
+AudioContextを直接所有しないため、将来Sessionの音声出力と同じContextを共有できる。
 
 ### `app/hooks/useBpmControl.ts`
 
