@@ -2,7 +2,7 @@
 
 import type { ChordType } from "../lib/music";
 import { formatChordSymbol } from "../lib/chord-symbol";
-import type { ProgressionBar } from "../lib/progression";
+import { getProgressionCellForBeat, type ProgressionBar } from "../lib/progression";
 
 type ProgressionChordChartProps = {
   bars: readonly ProgressionBar[];
@@ -29,9 +29,10 @@ export function ProgressionChordChart({
       </div>
       <div className="progressionChordChartGrid">
         {bars.map((bar, barIndex) => {
-          const firstSymbol = formatChordSymbol(bar.cells[0].root, bar.cells[0].chordTypeId, chordTypes);
-          const secondSymbol = formatChordSymbol(bar.cells[1].root, bar.cells[1].chordTypeId, chordTypes);
-          const usesSingleChord = firstSymbol === secondSymbol;
+          const beatSymbols = [0, 1, 2, 3].map((beatIndex) => {
+            const cell = getProgressionCellForBeat(bar, beatIndex);
+            return formatChordSymbol(cell.root, cell.chordTypeId, chordTypes);
+          });
 
           return (
             <article
@@ -40,20 +41,22 @@ export function ProgressionChordChart({
             >
               <span className="progressionChartBarNumber">Bar {bar.bar}</span>
               <div className="progressionChartChords">
-                <strong className={usesSingleChord ? "progressionChartChord full" : "progressionChartChord"}>
-                  {firstSymbol}
-                </strong>
-                {!usesSingleChord && <strong className="progressionChartChord">{secondSymbol}</strong>}
+                {beatSymbols.map((symbol, beatIndex) => (
+                  <strong className="progressionChartChord" key={beatIndex}>
+                    {beatIndex === 0 || symbol !== beatSymbols[beatIndex - 1] ? symbol : ""}
+                  </strong>
+                ))}
               </div>
               <div className="progressionChartBeats">
                 {[0, 1, 2, 3].map((beatIndex) => {
                   const isSelected = barIndex === selectedBarIndex && beatIndex === selectedBeatIndex;
+                  const cell = getProgressionCellForBeat(bar, beatIndex);
                   return (
                     <button
                       key={beatIndex}
                       type="button"
                       className={isSelected ? "progressionChartBeat selected" : "progressionChartBeat"}
-                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}`}
+                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}`}
                       aria-pressed={isSelected}
                       onClick={() => onBeatSelect(barIndex, beatIndex)}
                     >

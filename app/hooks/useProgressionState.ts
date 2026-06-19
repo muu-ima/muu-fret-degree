@@ -4,6 +4,7 @@ import { useCallback, useEffect, useReducer, type Dispatch, type SetStateAction 
 import type { ChordType } from "../lib/music";
 import {
   createDefaultProgression,
+  makeProgressionBeats,
   resizeProgressionBars,
   type ChordProgression,
   type ProgressionCell,
@@ -163,6 +164,49 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     });
   }, []);
 
+  const updateBeatChord = useCallback(
+    (barIndex: number, beatIndex: number, nextCell: ProgressionCell | undefined) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) => {
+          const currentBar = currentProgression.bars[barIndex];
+          if (!currentBar || beatIndex < 0 || beatIndex > 3) {
+            return currentProgression;
+          }
+
+          const currentOverride = currentBar.beats?.[beatIndex]?.chordOverride;
+          const hasSameOverride =
+            currentOverride?.root === nextCell?.root &&
+            currentOverride?.chordTypeId === nextCell?.chordTypeId;
+          if ((currentOverride === undefined && nextCell === undefined) || hasSameOverride) {
+            return currentProgression;
+          }
+
+          const nextBeats = makeProgressionBeats(currentBar);
+          nextBeats[beatIndex] = nextCell ? { chordOverride: { ...nextCell } } : {};
+          const hasOverrides = nextBeats.some((beat) => beat.chordOverride !== undefined);
+
+          return {
+            ...currentProgression,
+            bars: currentProgression.bars.map((bar, index) => {
+              if (index !== barIndex) {
+                return bar;
+              }
+
+              if (hasOverrides) {
+                return { ...bar, beats: nextBeats };
+              }
+
+              const { beats: _beats, ...barWithoutBeats } = bar;
+              return barWithoutBeats;
+            }),
+          };
+        },
+      });
+    },
+    [],
+  );
+
   const undo = useCallback(() => dispatch({ type: "undo" }), []);
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
@@ -173,6 +217,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     redo,
     undo,
     updateBarCount,
+    updateBeatChord,
     updateCell,
   };
 }

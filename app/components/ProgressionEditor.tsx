@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
 import { type ChordType } from "../lib/music";
-import { type ProgressionBar, type ProgressionCell } from "../lib/progression";
+import {
+  getProgressionCellForBeat,
+  type ProgressionBar,
+  type ProgressionCell,
+} from "../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
 
 type ProgressionEditorProps = {
@@ -14,6 +18,7 @@ type ProgressionEditorProps = {
   roots: string[];
   chordTypes: ChordType[];
   onBarCountChange: (barCount: number) => void;
+  onBeatChordChange: (barIndex: number, beatIndex: number, cell: ProgressionCell | undefined) => void;
   onCellChange: (barIndex: number, cellIndex: number, cell: ProgressionCell) => void;
 };
 
@@ -25,6 +30,7 @@ export function ProgressionEditor({
   roots,
   chordTypes,
   onBarCountChange,
+  onBeatChordChange,
   onCellChange,
 }: ProgressionEditorProps) {
   const [selectedBarIndex, setSelectedBarIndex] = useState(0);
@@ -41,11 +47,37 @@ export function ProgressionEditor({
 
   const selectedBar = bars[selectedBarIndex] ?? bars[0];
   const selectedCellIndex = Math.floor(selectedBeatIndex / 2);
-  const selectedCell = selectedBar?.cells[selectedCellIndex];
+  const baseCell = selectedBar?.cells[selectedCellIndex];
+  const beatOverride = selectedBar?.beats?.[selectedBeatIndex]?.chordOverride;
+  const editScope = beatOverride ? "beat" : "cell";
+  const selectedCell = editScope === "beat" ? beatOverride ?? baseCell : baseCell;
 
   if (!selectedBar || !selectedCell) {
     return null;
   }
+
+  const applyCellChange = (nextCell: ProgressionCell) => {
+    if (editScope === "beat") {
+      onBeatChordChange(selectedBarIndex, selectedBeatIndex, nextCell);
+      return;
+    }
+
+    onCellChange(selectedBarIndex, selectedCellIndex, nextCell);
+  };
+
+  const useCellScope = () => {
+    onBeatChordChange(selectedBarIndex, selectedBeatIndex, undefined);
+  };
+
+  const useBeatScope = () => {
+    if (!beatOverride) {
+      onBeatChordChange(
+        selectedBarIndex,
+        selectedBeatIndex,
+        getProgressionCellForBeat(selectedBar, selectedBeatIndex),
+      );
+    }
+  };
 
   return (
     <section className={className} aria-label="コード進行編集">
@@ -88,7 +120,11 @@ export function ProgressionEditor({
           </div>
           <div className="progressionSelectionChord">
             <strong>{formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}</strong>
-            <span>Editing Beats {selectedCellIndex === 0 ? "1-2" : "3-4"}</span>
+            <span>
+              {editScope === "beat"
+                ? `Beat ${selectedBeatIndex + 1} override`
+                : `Editing Beats ${selectedCellIndex === 0 ? "1-2" : "3-4"}`}
+            </span>
           </div>
         </div>
 
@@ -110,6 +146,28 @@ export function ProgressionEditor({
           })}
         </div>
 
+        <div className="progressionApplySection">
+          <span className="controlLabel">Apply To</span>
+          <div className="progressionApplyTabs" role="group" aria-label="コードの適用範囲">
+            <button
+              type="button"
+              className={editScope === "cell" ? "active" : ""}
+              aria-pressed={editScope === "cell"}
+              onClick={useCellScope}
+            >
+              Beats {selectedCellIndex === 0 ? "1-2" : "3-4"}
+            </button>
+            <button
+              type="button"
+              className={editScope === "beat" ? "active" : ""}
+              aria-pressed={editScope === "beat"}
+              onClick={useBeatScope}
+            >
+              Beat {selectedBeatIndex + 1} only
+            </button>
+          </div>
+        </div>
+
         <div className="progressionChipSection">
           <span className="controlLabel">Root</span>
           <div className="progressionChipGrid progressionRootChips" role="group" aria-label="Root">
@@ -121,7 +179,7 @@ export function ProgressionEditor({
                   type="button"
                   className={isSelected ? "progressionChip active" : "progressionChip"}
                   aria-pressed={isSelected}
-                  onClick={() => onCellChange(selectedBarIndex, selectedCellIndex, { ...selectedCell, root })}
+                  onClick={() => applyCellChange({ ...selectedCell, root })}
                 >
                   {root}
                 </button>
@@ -143,7 +201,7 @@ export function ProgressionEditor({
                   aria-pressed={isSelected}
                   title={chordType.name}
                   onClick={() =>
-                    onCellChange(selectedBarIndex, selectedCellIndex, {
+                    applyCellChange({
                       ...selectedCell,
                       chordTypeId: chordType.id,
                     })

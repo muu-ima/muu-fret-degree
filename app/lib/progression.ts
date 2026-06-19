@@ -8,9 +8,14 @@ export type ProgressionCell = {
   chordTypeId: string;
 };
 
+export type ProgressionBeat = {
+  chordOverride?: ProgressionCell;
+};
+
 export type ProgressionBar = {
   bar: number;
   cells: readonly [ProgressionCell, ProgressionCell];
+  beats?: readonly [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat];
 };
 
 export type ChordProgression = {
@@ -129,7 +134,7 @@ export function getProgressionPlaybackState(
     position,
     selection: {
       bar,
-      cell: bar.cells[cellIndex],
+      cell: getProgressionCellForBeat(bar, position.beatInBar),
       cellIndex,
     },
   };
@@ -149,7 +154,35 @@ export function resizeProgressionBars(bars: readonly ProgressionBar[], nextLengt
       ProgressionCell,
       ProgressionCell,
     ],
+    ...(bars[index % bars.length].beats
+      ? {
+          beats: bars[index % bars.length].beats?.map((beat) => ({
+            ...beat,
+            ...(beat.chordOverride ? { chordOverride: { ...beat.chordOverride } } : {}),
+          })) as [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat],
+        }
+      : {}),
   }));
+}
+
+export function getProgressionBeat(bar: ProgressionBar, beatIndex: number): ProgressionBeat {
+  return bar.beats?.[beatIndex] ?? {};
+}
+
+export function getProgressionCellForBeat(bar: ProgressionBar, beatIndex: number): ProgressionCell {
+  const cellIndex = Math.min(Math.floor(beatIndex / 2), bar.cells.length - 1);
+  return getProgressionBeat(bar, beatIndex).chordOverride ?? bar.cells[cellIndex];
+}
+
+export function makeProgressionBeats(bar: ProgressionBar): [
+  ProgressionBeat,
+  ProgressionBeat,
+  ProgressionBeat,
+  ProgressionBeat,
+] {
+  return [0, 1, 2, 3].map((beatIndex) => ({
+    ...getProgressionBeat(bar, beatIndex),
+  })) as [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat];
 }
 
 export function makeProgressionBar(

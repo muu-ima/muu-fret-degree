@@ -1938,7 +1938,7 @@ select:focus-visible,
 
 .progressionChartChords {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   min-height: 24px;
 }
 
@@ -1951,10 +1951,6 @@ select:focus-visible,
   letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.progressionChartChord.full {
-  grid-column: 1 / -1;
 }
 
 .progressionChartBeats {
@@ -2065,6 +2061,7 @@ select:focus-visible,
 }
 
 .progressionBeatTabs button,
+.progressionApplyTabs button,
 .progressionChip {
   min-width: 0;
   min-height: 40px;
@@ -2081,11 +2078,23 @@ select:focus-visible,
 }
 
 .progressionBeatTabs button.active,
+.progressionApplyTabs button.active,
 .progressionChip.active {
   border-color: rgba(122, 167, 255, 0.5);
   background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
   color: #fff;
   box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.08);
+}
+
+.progressionApplySection {
+  display: grid;
+  gap: 7px;
+}
+
+.progressionApplyTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .progressionChipSection {
@@ -2754,6 +2763,7 @@ select:focus-visible,
   }
 
   .progressionBeatTabs button,
+  .progressionApplyTabs button,
   .progressionChip {
     min-height: 38px;
     padding: 0 5px;

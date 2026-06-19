@@ -10,10 +10,11 @@ import { ProgressionEditor } from "./ProgressionEditor";
 
 export function ProgressionEditorWorkspace() {
   const chordTypes = theory.chordTypes as ChordType[];
-  const { canRedo, canUndo, progression, redo, undo, updateBarCount, updateCell } = useProgressionState({
-    roots: theory.roots,
-    chordTypes,
-  });
+  const { canRedo, canUndo, progression, redo, undo, updateBarCount, updateBeatChord, updateCell } =
+    useProgressionState({
+      roots: theory.roots,
+      chordTypes,
+    });
 
   useEffect(() => {
     const handleHistoryShortcut = (event: KeyboardEvent) => {
@@ -85,6 +86,7 @@ export function ProgressionEditorWorkspace() {
         roots={theory.roots}
         chordTypes={chordTypes}
         onBarCountChange={updateBarCount}
+        onBeatChordChange={updateBeatChord}
         onCellChange={updateCell}
       />
 
