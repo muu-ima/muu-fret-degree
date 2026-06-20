@@ -6,7 +6,10 @@ import {
   pitchClassOf,
   sharpPitchClasses,
 } from "./music";
-import type { ProgressionBeatEventType, ProgressionDurationSteps } from "./progression";
+import type {
+  ProgressionBeatEventType,
+  ProgressionDurationSteps,
+} from "./progression-model";
 
 export type ProgressionRhythm =
   | "root-only"
