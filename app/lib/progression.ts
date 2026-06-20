@@ -21,6 +21,7 @@ import {
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,
 } from "./progression-rhythm";
+import { canSetProgressionRhythmDuration } from "./progression-rhythm-collision";
 import { canTieProgressionBeat, getRelativeBeatLocation } from "./progression-ties";
 
 export {
@@ -57,6 +58,8 @@ export {
   getProgressionRhythmEvents,
   getProgressionSustainingEventAtStep,
 } from "./progression-rhythm";
+
+export { canSetProgressionRhythmDuration } from "./progression-rhythm-collision";
 
 export {
   canTieProgressionBeat,
@@ -399,35 +402,6 @@ export function updateProgressionRhythmEvent(
         eventType: "tie",
       })
     : nextProgression;
-}
-
-export function canSetProgressionRhythmDuration(
-  bar: ProgressionBar,
-  startStep: number,
-  durationSteps: ProgressionDurationSteps,
-  nextBar?: ProgressionBar,
-) {
-  if (
-    !Number.isInteger(startStep) ||
-    startStep < 0 ||
-    startStep >= 16
-  ) {
-    return false;
-  }
-
-  if (startStep + durationSteps > 16) {
-    if (startStep !== 12 || durationSteps !== 6 || !nextBar) {
-      return false;
-    }
-
-    const nextBarHead = nextBar.rhythm?.find((event) => event.startStep === 0);
-    return !nextBarHead || nextBarHead.eventType === "tie";
-  }
-
-  const nextExplicitEvent = bar.rhythm
-    ?.filter((event) => event.startStep > startStep)
-    .sort((first, second) => first.startStep - second.startStep)[0];
-  return !nextExplicitEvent || startStep + durationSteps <= nextExplicitEvent.startStep;
 }
 
 export function removeProgressionRhythmEvent(
