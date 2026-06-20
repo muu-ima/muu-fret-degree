@@ -351,6 +351,7 @@ export function ProgressionEditor({
                 selectedBar,
                 selectedStartStep,
                 option.steps,
+                bars[(selectedBarIndex + 1) % bars.length],
               );
               return (
                 <button

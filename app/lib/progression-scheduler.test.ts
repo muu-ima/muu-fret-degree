@@ -82,4 +82,21 @@ describe("progression step scheduling", () => {
     });
     expect(getProgressionStepPlaybackRequest(progression, positionAtStep(4))).toBeUndefined();
   });
+
+  it("uses an explicit tie when a dotted quarter crosses into the next bar", () => {
+    const progression = updateProgressionBeatDuration(
+      createDefaultProgression(120),
+      0,
+      3,
+      6,
+    );
+
+    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(12))).toMatchObject({
+      durationSteps: 6,
+      followingTieBeats: 0,
+    });
+    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(16))).toMatchObject({
+      beatEventType: "tie",
+    });
+  });
 });

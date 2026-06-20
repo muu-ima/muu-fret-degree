@@ -240,6 +240,63 @@ describe("progression beat events", () => {
     expect(getProgressionBeatEventType(progression.bars[0], 1)).toBe("hit");
   });
 
+  it("ties a dotted quarter from beat four into the next bar", () => {
+    const progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 3, 6);
+
+    expect(progression.bars[0].rhythm).toContainEqual({
+      startStep: 12,
+      durationSteps: 6,
+      eventType: "hit",
+    });
+    expect(progression.bars[1].rhythm).toContainEqual({
+      startStep: 0,
+      durationSteps: 4,
+      eventType: "tie",
+    });
+  });
+
+  it("shortens a cross-bar dotted quarter when the next bar head is edited", () => {
+    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 3, 6);
+
+    progression = updateProgressionBeatEventType(progression, 1, 0, "hit");
+
+    expect(getProgressionBeatDuration(progression.bars[0], 3)).toBe(4);
+    expect(getProgressionBeatEventType(progression.bars[1], 0)).toBe("hit");
+    expect(progression.bars[0].rhythm).toBeUndefined();
+    expect(progression.bars[1].rhythm).toBeUndefined();
+  });
+
+  it("ties the final bar back into the first bar", () => {
+    const progression = createDefaultProgression();
+    const lastBarIndex = progression.bars.length - 1;
+    const updated = updateProgressionBeatDuration(progression, lastBarIndex, 3, 6);
+
+    expect(getProgressionBeatEventType(updated.bars[0], 0)).toBe("tie");
+    expect(updated.bars[lastBarIndex].rhythm).toContainEqual({
+      startStep: 12,
+      durationSteps: 6,
+      eventType: "hit",
+    });
+  });
+
+  it("shortens a cross-bar dotted quarter when a preset edits the next bar", () => {
+    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 3, 6);
+
+    progression = applyProgressionBeatSubdivision(progression, 1, 0, "eighths");
+
+    expect(getProgressionBeatDuration(progression.bars[0], 3)).toBe(4);
+    expect(getProgressionBeatSubdivision(progression.bars[1], 0)).toBe("eighths");
+  });
+
+  it("removes an automatic tie when a preset replaces its dotted-quarter source", () => {
+    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 3, 6);
+
+    progression = applyProgressionBeatSubdivision(progression, 0, 3, "sixteenths");
+
+    expect(getProgressionBeatSubdivision(progression.bars[0], 3)).toBe("sixteenths");
+    expect(getProgressionBeatEventType(progression.bars[1], 0)).toBe("hit");
+  });
+
   it("applies two eighth-note hits to only the selected beat", () => {
     const progression = applyProgressionBeatSubdivision(
       createDefaultProgression(),
