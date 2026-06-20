@@ -2,13 +2,22 @@
 
 import type { ChordType } from "../lib/music";
 import { formatChordSymbol } from "../lib/chord-symbol";
-import { getProgressionCellForBeat, type ProgressionBar } from "../lib/progression";
+import {
+  getProgressionBeatDuration,
+  getProgressionBeatEventType,
+  getProgressionCellForBeat,
+  getProgressionRhythmEventAtStep,
+  getProgressionSustainingEventAtStep,
+  progressionStepsPerBeat,
+  type ProgressionBar,
+} from "../lib/progression";
 
 type ProgressionChordChartProps = {
   bars: readonly ProgressionBar[];
   chordTypes: ChordType[];
   selectedBarIndex: number;
   selectedBeatIndex: number;
+  selectedStepInBeat: number;
   onBeatSelect: (barIndex: number, beatIndex: number) => void;
 };
 
@@ -17,6 +26,7 @@ export function ProgressionChordChart({
   chordTypes,
   selectedBarIndex,
   selectedBeatIndex,
+  selectedStepInBeat,
   onBeatSelect,
 }: ProgressionChordChartProps) {
   return (
@@ -51,17 +61,60 @@ export function ProgressionChordChart({
                 {[0, 1, 2, 3].map((beatIndex) => {
                   const isSelected = barIndex === selectedBarIndex && beatIndex === selectedBeatIndex;
                   const cell = getProgressionCellForBeat(bar, beatIndex);
+                  const eventType = getProgressionBeatEventType(bar, beatIndex);
+                  const durationSteps = getProgressionBeatDuration(bar, beatIndex);
+                  const durationLabel =
+                    durationSteps === 1
+                      ? "16"
+                      : durationSteps === 2
+                        ? "8"
+                        : durationSteps === 3
+                          ? "8·"
+                          : durationSteps === 6
+                            ? "4·"
+                            : "4";
                   return (
                     <button
                       key={beatIndex}
                       type="button"
-                      className={isSelected ? "progressionChartBeat selected" : "progressionChartBeat"}
-                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}`}
+                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${isSelected ? " selected" : ""}`}
+                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : eventType === "tie" ? "Tie" : `Hit, ${durationLabel}`}`}
                       aria-pressed={isSelected}
                       onClick={() => onBeatSelect(barIndex, beatIndex)}
                     >
                       <span className="progressionChartSlash" aria-hidden="true">
-                        /
+                        {eventType === "rest" ? "—" : eventType === "tie" ? "⌒" : "/"}
+                      </span>
+                      {eventType === "hit" ? (
+                        <span className="progressionChartDuration" aria-hidden="true">
+                          {durationLabel}
+                        </span>
+                      ) : null}
+                      <span className="progressionChartStepLane" aria-hidden="true">
+                        {[0, 1, 2, 3].map((stepInBeat) => {
+                          const startStep = beatIndex * progressionStepsPerBeat + stepInBeat;
+                          const stepEvent = getProgressionRhythmEventAtStep(bar, startStep);
+                          const sustainingEvent = stepEvent
+                            ? undefined
+                            : getProgressionSustainingEventAtStep(bar, startStep);
+                          const isStepSelected = isSelected && selectedStepInBeat === stepInBeat;
+                          return (
+                            <span
+                              key={stepInBeat}
+                              className={`progressionChartStep${stepEvent ? ` ${stepEvent.eventType}` : sustainingEvent ? " held" : " empty"}${isStepSelected ? " selected" : ""}`}
+                            >
+                              {stepEvent
+                                ? stepEvent.eventType === "hit"
+                                  ? "/"
+                                  : stepEvent.eventType === "rest"
+                                    ? "—"
+                                    : "⌒"
+                                : sustainingEvent
+                                  ? "━"
+                                  : "·"}
+                            </span>
+                          );
+                        })}
                       </span>
                       <span className="progressionChartBeatNumber" aria-hidden="true">
                         {beatIndex + 1}

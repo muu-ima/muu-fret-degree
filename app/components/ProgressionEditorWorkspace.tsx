@@ -10,8 +10,21 @@ import { ProgressionEditor } from "./ProgressionEditor";
 
 export function ProgressionEditorWorkspace() {
   const chordTypes = theory.chordTypes as ChordType[];
-  const { canRedo, canUndo, progression, redo, undo, updateBarCount, updateBeatChord, updateCell } =
-    useProgressionSession();
+  const {
+    applyBeatSubdivision,
+    canRedo,
+    canUndo,
+    progression,
+    redo,
+    removeRhythmEvent,
+    undo,
+    updateBarCount,
+    updateBeatChord,
+    updateBeatDuration,
+    updateBeatEventType,
+    updateCell,
+    updateRhythmEvent,
+  } = useProgressionSession();
 
   useEffect(() => {
     const handleHistoryShortcut = (event: KeyboardEvent) => {
@@ -83,8 +96,13 @@ export function ProgressionEditorWorkspace() {
         roots={theory.roots}
         chordTypes={chordTypes}
         onBarCountChange={updateBarCount}
+        onBeatSubdivisionChange={applyBeatSubdivision}
         onBeatChordChange={updateBeatChord}
+        onBeatDurationChange={updateBeatDuration}
+        onBeatEventTypeChange={updateBeatEventType}
         onCellChange={updateCell}
+        onRhythmEventChange={updateRhythmEvent}
+        onRhythmEventRemove={removeRhythmEvent}
       />
 
       <nav className="progressionEditorMobileBar" aria-label="編集操作">

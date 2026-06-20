@@ -6,6 +6,7 @@ import {
   pitchClassOf,
   sharpPitchClasses,
 } from "./music";
+import type { ProgressionBeatEventType, ProgressionDurationSteps } from "./progression";
 
 export type ProgressionRhythm =
   | "root-only"
@@ -22,8 +23,11 @@ export type ScheduledBassNote = {
 
 type PlanProgressionBeatOptions = {
   beatInBar: number;
+  beatEventType?: ProgressionBeatEventType;
   bpm: number;
   chordNotes: ChordNote[];
+  durationSteps?: ProgressionDurationSteps;
+  followingTieBeats?: number;
   nextRoot?: string;
   notes: FretNote[];
   rhythm: ProgressionRhythm;
@@ -33,18 +37,58 @@ function scheduleNote(note: FretNote | undefined, duration: number): ScheduledBa
   return note ? [{ midi: note.midi, startOffset: 0, duration }] : [];
 }
 
+function extendLastNoteForTies(
+  events: ScheduledBassNote[],
+  durationSteps: ProgressionDurationSteps,
+  followingTieBeats: number,
+  bpm: number,
+) {
+  if (events.length === 0) {
+    return [];
+  }
+
+  const beatDuration = 60 / Math.max(1, bpm);
+  const targetDuration = (beatDuration * durationSteps) / 4;
+  const eventsWithinDuration = events.filter((event) => event.startOffset < targetDuration);
+
+  return eventsWithinDuration.map((event, index) => {
+    const isLastEvent = index === eventsWithinDuration.length - 1;
+    const nextStartOffset = eventsWithinDuration[index + 1]?.startOffset ?? targetDuration;
+    const availableDuration = Math.max(0.04, nextStartOffset - event.startOffset);
+
+    return {
+      ...event,
+      duration: isLastEvent
+        ? availableDuration + beatDuration * followingTieBeats
+        : Math.min(event.duration, availableDuration),
+    };
+  });
+}
+
 export function planProgressionBeat({
   beatInBar,
+  beatEventType = "hit",
   bpm,
   chordNotes,
+  durationSteps = 4,
+  followingTieBeats = 0,
   nextRoot,
   notes,
   rhythm,
 }: PlanProgressionBeatOptions): ScheduledBassNote[] {
+  if (beatEventType !== "hit") {
+    return [];
+  }
+
   const beatInCell = beatInBar % 2;
 
   if (rhythm === "root-only") {
-    return scheduleNote(pickLowestBassNoteForDegree(notes, "1"), beatInCell === 0 ? 0.85 : 0.6);
+    return extendLastNoteForTies(
+      scheduleNote(pickLowestBassNoteForDegree(notes, "1"), beatInCell === 0 ? 0.85 : 0.6),
+      durationSteps,
+      followingTieBeats,
+      bpm,
+    );
   }
 
   if (rhythm === "degree-ascending" || rhythm === "degree-third-first") {
@@ -59,11 +103,16 @@ export function planProgressionBeat({
     const notesThisBeat = degreeFlow.slice(beatInCell * 2, beatInCell * 2 + 2);
     const beatDuration = 60 / Math.max(1, bpm);
 
-    return notesThisBeat.map((note, index) => ({
-      midi: note.midi,
-      startOffset: index * (beatDuration / 2),
-      duration: beatDuration * 0.44,
-    }));
+    return extendLastNoteForTies(
+      notesThisBeat.map((note, index) => ({
+        midi: note.midi,
+        startOffset: index * (beatDuration / 2),
+        duration: beatDuration * 0.44,
+      })),
+      durationSteps,
+      followingTieBeats,
+      bpm,
+    );
   }
 
   if (rhythm === "four-beat" && beatInBar === 3 && nextRoot) {
@@ -77,7 +126,12 @@ export function planProgressionBeat({
     const approachNote = notes
       .filter((candidate) => candidate.pitchClass === approachPitchClass)
       .sort((first, second) => first.midi - second.midi)[0];
-    return scheduleNote(approachNote, 0.5);
+    return extendLastNoteForTies(
+      scheduleNote(approachNote, 0.5),
+      durationSteps,
+      followingTieBeats,
+      bpm,
+    );
   }
 
   if (rhythm === "four-beat") {
@@ -85,15 +139,25 @@ export function planProgressionBeat({
       beatInCell === 0
         ? "1"
         : chordNotes.find((chordNote) => chordNote.degree === "5")?.degree;
-    return scheduleNote(
-      pickLowestBassNoteForDegree(notes, degree ?? chordNotes[1]?.degree ?? "1"),
-      0.72,
+    return extendLastNoteForTies(
+      scheduleNote(
+        pickLowestBassNoteForDegree(notes, degree ?? chordNotes[1]?.degree ?? "1"),
+        0.72,
+      ),
+      durationSteps,
+      followingTieBeats,
+      bpm,
     );
   }
 
   const chordNote = chordNotes[beatInCell % chordNotes.length];
-  return scheduleNote(
-    chordNote ? pickLowestBassNoteForDegree(notes, chordNote.degree) : undefined,
-    beatInCell === 0 ? 0.85 : 0.6,
+  return extendLastNoteForTies(
+    scheduleNote(
+      chordNote ? pickLowestBassNoteForDegree(notes, chordNote.degree) : undefined,
+      beatInCell === 0 ? 0.85 : 0.6,
+    ),
+    durationSteps,
+    followingTieBeats,
+    bpm,
   );
 }

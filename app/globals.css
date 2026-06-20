@@ -1965,9 +1965,11 @@ select:focus-visible,
   position: relative;
   display: grid;
   min-width: 0;
-  min-height: 42px;
+  min-height: 58px;
   place-items: center;
-  padding: 0;
+  grid-template-rows: 1fr auto;
+  gap: 3px;
+  padding: 7px 3px 5px;
   border: 0;
   border-right: 1px solid rgba(205, 214, 228, 0.12);
   border-radius: 0;
@@ -1984,6 +1986,25 @@ select:focus-visible,
   color: #fff;
 }
 
+.progressionChartBeat.rest:not(.selected) {
+  background: rgba(151, 162, 181, 0.05);
+  color: #7f8a9d;
+}
+
+.progressionChartBeat.rest .progressionChartSlash {
+  font-size: 1rem;
+  opacity: 0.72;
+}
+
+.progressionChartBeat.tie:not(.selected) {
+  background: rgba(122, 167, 255, 0.05);
+  color: #9aabd0;
+}
+
+.progressionChartBeat.tie .progressionChartSlash {
+  font-size: 1.05rem;
+}
+
 .progressionChartBeat:focus-visible {
   outline: 2px solid #8ab4ff;
   outline-offset: -2px;
@@ -1996,10 +2017,52 @@ select:focus-visible,
   line-height: 1;
 }
 
+.progressionChartStepLane {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+}
+
+.progressionChartStep {
+  display: grid;
+  min-width: 0;
+  min-height: 13px;
+  place-items: center;
+  border-radius: 3px;
+  color: #8e9bb0;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.48rem;
+  line-height: 1;
+}
+
+.progressionChartStep.empty {
+  color: #465166;
+}
+
+.progressionChartStep.rest {
+  color: #758196;
+}
+
+.progressionChartStep.held {
+  color: #aebbd0;
+  background: rgba(122, 167, 255, 0.06);
+}
+
+.progressionChartStep.tie {
+  color: #91a6d1;
+}
+
+.progressionChartStep.selected {
+  background: rgba(122, 167, 255, 0.24);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.28);
+}
+
 .progressionChartBeatNumber {
   position: absolute;
-  right: 3px;
-  bottom: 2px;
+  top: 3px;
+  left: 4px;
   color: var(--muted);
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.52rem;
@@ -2060,6 +2123,76 @@ select:focus-visible,
   gap: 6px;
 }
 
+.progressionStepSection {
+  display: grid;
+  gap: 7px;
+}
+
+.progressionStepTabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(154, 171, 196, 0.14);
+  border-radius: 12px;
+  background: rgba(7, 10, 15, 0.34);
+}
+
+.progressionStepTabs button {
+  display: grid;
+  min-width: 0;
+  min-height: 46px;
+  place-content: center;
+  gap: 2px;
+  padding: 0;
+  border: 1px solid #2d394c;
+  border-radius: 8px;
+  background: #111721;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 800;
+}
+
+.progressionStepTabs button span {
+  font-size: 0.68rem;
+}
+
+.progressionStepTabs button small {
+  min-height: 15px;
+  color: #dce5f4;
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.progressionStepTabs button.empty small {
+  color: #536075;
+}
+
+.progressionStepTabs button.rest small {
+  color: #8f9bad;
+}
+
+.progressionStepTabs button.held {
+  border-color: rgba(122, 167, 255, 0.2);
+  background: rgba(122, 167, 255, 0.06);
+}
+
+.progressionStepTabs button.held small {
+  color: #aebbd0;
+}
+
+.progressionStepTabs button.active {
+  border-color: rgba(122, 167, 255, 0.58);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.08);
+}
+
+.progressionStepTabs button:focus-visible {
+  outline: 2px solid #8ab4ff;
+  outline-offset: 2px;
+}
+
 .progressionBeatTabs button,
 .progressionApplyTabs button,
 .progressionChip {
@@ -2095,6 +2228,40 @@ select:focus-visible,
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+}
+
+.progressionEventTabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.progressionSubdivisionTabs {
+  width: min(100%, 330px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.progressionSubdivisionTabs button {
+  min-height: 36px;
+}
+
+.progressionDurationTabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.progressionChartDuration {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  min-width: 18px;
+  padding: 2px 3px;
+  border: 1px solid rgba(154, 171, 196, 0.14);
+  border-radius: 4px;
+  background: rgba(7, 10, 15, 0.48);
+  color: #aab7ca;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.48rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: center;
 }
 
 .progressionChipSection {
@@ -2762,6 +2929,15 @@ select:focus-visible,
     gap: 4px;
   }
 
+  .progressionStepTabs {
+    gap: 4px;
+    padding: 5px;
+  }
+
+  .progressionStepTabs button {
+    min-height: 42px;
+  }
+
   .progressionBeatTabs button,
   .progressionApplyTabs button,
   .progressionChip {
@@ -2796,7 +2972,13 @@ select:focus-visible,
   }
 
   .progressionChartBeat {
-    min-height: 38px;
+    min-height: 54px;
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+
+  .progressionChartStep {
+    font-size: 0.44rem;
   }
 
   .progressionEditorHeader {

@@ -262,20 +262,31 @@ BPM 入力の state と正規化を担当する。
 Transportの経過時間をコード進行上の位置へ変換する。
 
 - `useTransport` から経過秒数と再生状態を受け取る。
-- `app/lib/progression.ts` の純粋関数を使って、現在の拍位置と選択中のセルを 1 回で求める。
+- `app/lib/progression.ts` の純粋関数を使って、現在の拍・16分step位置と選択中のセルを 1 回で求める。
 
 この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
 
 ### `app/hooks/useProgressionBeatScheduler.ts`
 
-Transportの拍位置を、進行伴奏の発音要求へつなぐ。
+Transportの16分step位置を、進行伴奏の発音要求へつなぐ。
 
-- 再生中に拍が切り替わったことを検出する。
-- 同じ拍で発音要求が重複しないようにする。
+- 再生中に16分stepが切り替わったことを検出する。
+- 現在stepにRhythmイベントがある場合だけ発音要求を作る。
+- 同じstepで発音要求が重複しないようにする。
 - 次の実効拍からRootを求め、1拍overrideも伴奏へ反映する。
-- 現在拍、次Root、伴奏パターンを `useChordPlayback` へ渡す。
+- 現在拍、音価、次Root、伴奏パターンを `useChordPlayback` へ渡す。
 
-MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest / Tieを追加するときは、この境界で拍イベントを解釈してから発音処理へ渡す。
+MIDI番号の選択やWeb Audio APIの操作は持たない。1拍内に複数Hitがある場合、次拍のTieはその拍で最後に置かれたHitを延長する。
+
+### `app/hooks/useProgressionStepScheduler.ts`
+
+Transportの16分step位置が切り替わったことを一度だけ通知する。
+
+- 再生開始時と各`stepIndex`の変化を検出する。
+- 同じstepでcallbackが重複しないようにする。
+- 停止時に直前stepを破棄し、再開位置をもう一度通知できるようにする。
+
+step schedulerは各16分位置を通知し、進行schedulerはその位置にRhythmイベントがある場合だけ発音する。拍頭にイベントがない既存データは、互換規則により4分音符のHitとして扱う。
 
 ### `app/hooks/useTransport.ts`
 
@@ -295,6 +306,8 @@ MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest /
 - BPMを進行データへ同期する。
 - 2拍セルの更新処理を一元化する。
 - 小節数変更を一元化する。
+- 1拍単位のHit / Rest / Tieと音価変更を一元化する。
+- 任意の16分stepに置くHit / Restの追加・更新・削除を一元化する。
 - 進行編集のUndo / Redo履歴を最大100件保持する。
 - `usePersistedProgression` を通じて保存と読み込みを行う。
 
@@ -329,6 +342,10 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 - 進行の拍子と小節データを `localStorage` へ保存する。
 - 保存値が壊れている場合や、Root / Chord が現在の候補にない場合は無視する。
 - 読み込み時は既存 state の BPM を保ったまま、進行データだけ復元する。
+- v8では付点4分の6step音価を保存する。v7のRhythmイベントはそのまま読み込む。
+- v7からHarmonyの拍上書きとRhythmイベントを分けて保存する。
+- v2-v6の拍内に保存されたHit / Rest / Tieと音価は、読み込み時に16分step上のRhythmイベントへ移行する。
+- 旧データの音価未指定拍は4分音符、イベント未指定拍はHitとして読み込む。
 
 ### `app/hooks/usePersistedPracticeSettings.ts`
 
@@ -359,13 +376,21 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 コード進行再生のデータ型と現在位置計算を担当する。
 
 - BPM と拍子から 1 拍・1 小節の長さを求める。
-- 経過秒数から現在の拍位置と小節番号を求める。
+- 経過秒数から現在の拍位置、小節番号、16分step位置を求める。
 - 進行データから、現在参照すべき小節と2拍セルを選ぶ。
 - 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
+- `beats`はHarmonyの1拍コード上書きだけを保持する。
+- `rhythm`は16分音符単位の`startStep`、`eventType`、`durationSteps`を保持する。
+- 拍頭にRhythmイベントがない場合はHitの4分音符として扱い、既定値と異なるイベントだけを明示的に保持する。
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
-- 2拍セル、拍オーバーライド、小節数の更新を純粋関数として提供する。
+- 2拍セル、拍オーバーライド、Hit / Rest / Tie、音価、小節数の更新を純粋関数として提供する。
+- Hitの後ろに続くTie数を、小節跨ぎを含めて最大1ループ未満で数える。
+- 直前に有効なHitがないTieは拒否し、Tie元のHitをRestへ変えた場合は後続TieもRestへ正規化する。
+- Beat 4の付点4分は次小節頭へTieを自動配置し、次小節頭の再編集時は元音価を4stepへ短縮する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
+
+4/4では1拍を4step、1小節を16stepとして扱う。Full Editorは選択中の拍を`1 / e / & / a`へ展開し、任意stepのHit / Restを編集できる。schedulerは各stepの明示イベントを発音し、小節カードは拍の主記号と4stepの補助レーンを重ねて表示する。Harmonyデータへタイミング情報は戻さない。
 
 ### `app/lib/progression-playback.ts`
 
@@ -374,8 +399,11 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - Root Only、Chord Tones、度数フロー、4 Beatのパターンを解釈する。
 - 各音のMIDI番号、拍内の開始offset、長さを決める。
 - 4 Beatでは次の実効拍のRootへ向かうアプローチ音を選ぶ。
+- Rest拍では再生予定音を返さない。
+- Tie拍では再発音せず、直前のHitが生成する最後の予定音をTie拍数ぶん延長する。
+- Hitの1 / 2 / 3 / 4 / 6step音価に収まる予定音だけを残し、最後の音を音価終端まで伸ばす。
 
-React、Transport、AudioContextには依存しない。将来Hit / Rest / Tieを追加するときは、譜面イベントを入力に加え、発音しない拍や音価をここで再生予定へ変換する。付点を含む音価は16分音符単位のstepとdurationから秒数へ変換し、リズムスラッシュの表示と再生で同じデータを参照する。
+React、Transport、AudioContextには依存しない。付点を含む音価は16分音符単位のstepとdurationから秒数へ変換し、リズムスラッシュの表示と再生で同じデータを参照する。
 
 将来は小節末だけでなく、Beat 2からBeat 3など小節内のコード境界も検出し、切り替え直前の拍から次Rootへ自然につなぐアプローチを選べるようにする。常に半音下へ固定せず、半音上、コードトーン経由、アプローチなしを再生パターンとして選択できる設計を検討する。
 

@@ -7,12 +7,20 @@ import {
   progressionHistoryReducer,
 } from "../lib/progression-history";
 import {
+  applyProgressionBeatSubdivision,
   createDefaultProgression,
+  removeProgressionRhythmEvent,
   updateProgressionBarCount,
   updateProgressionBeatChord,
+  updateProgressionBeatDuration,
+  updateProgressionBeatEventType,
   updateProgressionCell,
+  updateProgressionRhythmEvent,
   type ChordProgression,
+  type ProgressionBeatEventType,
   type ProgressionCell,
+  type ProgressionDurationSteps,
+  type ProgressionSubdivision,
 } from "../lib/progression";
 import { usePersistedProgression } from "./usePersistedProgression";
 
@@ -74,18 +82,96 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     [],
   );
 
+  const updateBeatEventType = useCallback(
+    (barIndex: number, beatIndex: number, eventType: ProgressionBeatEventType) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) =>
+          updateProgressionBeatEventType(currentProgression, barIndex, beatIndex, eventType),
+      });
+    },
+    [],
+  );
+
+  const updateBeatDuration = useCallback(
+    (barIndex: number, beatIndex: number, durationSteps: ProgressionDurationSteps) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) =>
+          updateProgressionBeatDuration(
+            currentProgression,
+            barIndex,
+            beatIndex,
+            durationSteps,
+          ),
+      });
+    },
+    [],
+  );
+
+  const updateRhythmEvent = useCallback(
+    (
+      barIndex: number,
+      startStep: number,
+      eventType: ProgressionBeatEventType,
+      durationSteps: ProgressionDurationSteps,
+    ) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) =>
+          updateProgressionRhythmEvent(
+            currentProgression,
+            barIndex,
+            startStep,
+            eventType,
+            durationSteps,
+          ),
+      });
+    },
+    [],
+  );
+
+  const removeRhythmEvent = useCallback((barIndex: number, startStep: number) => {
+    dispatch({
+      type: "commit",
+      update: (currentProgression) =>
+        removeProgressionRhythmEvent(currentProgression, barIndex, startStep),
+    });
+  }, []);
+
+  const applyBeatSubdivision = useCallback(
+    (barIndex: number, beatIndex: number, subdivision: ProgressionSubdivision) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) =>
+          applyProgressionBeatSubdivision(
+            currentProgression,
+            barIndex,
+            beatIndex,
+            subdivision,
+          ),
+      });
+    },
+    [],
+  );
+
   const undo = useCallback(() => dispatch({ type: "undo" }), []);
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
   return {
+    applyBeatSubdivision,
     canRedo: history.future.length > 0,
     canUndo: history.past.length > 0,
     progression,
     redo,
+    removeRhythmEvent,
     syncBpm,
     undo,
     updateBarCount,
     updateBeatChord,
+    updateBeatDuration,
+    updateBeatEventType,
     updateCell,
+    updateRhythmEvent,
   };
 }

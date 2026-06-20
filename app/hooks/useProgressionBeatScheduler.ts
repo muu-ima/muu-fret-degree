@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback } from "react";
 import {
-  getProgressionCellForBeat,
   type ChordProgression,
+  type ProgressionBeatEventType,
+  type ProgressionDurationSteps,
   type ProgressionPosition,
 } from "../lib/progression";
 import type { ProgressionRhythm } from "../lib/progression-playback";
+import { getProgressionStepPlaybackRequest } from "../lib/progression-scheduler";
+import { useProgressionStepScheduler } from "./useProgressionStepScheduler";
 
 type UseProgressionBeatSchedulerOptions = {
   isRunning: boolean;
   playBeat: (options: {
     beatInBar: number;
+    beatEventType?: ProgressionBeatEventType;
+    durationSteps?: ProgressionDurationSteps;
+    followingTieBeats?: number;
     rhythm: ProgressionRhythm;
     nextRoot?: string;
   }) => void;
@@ -27,31 +33,31 @@ export function useProgressionBeatScheduler({
   progression,
   rhythm,
 }: UseProgressionBeatSchedulerOptions) {
-  const lastBeatRef = useRef<number | null>(null);
-  const { barIndex, beatIndex, beatInBar } = position;
   const bars = progression.bars;
 
-  useEffect(() => {
-    if (!isRunning || bars.length === 0) {
-      lastBeatRef.current = null;
+  const scheduleBeat = useCallback((stepPosition: ProgressionPosition) => {
+    if (bars.length === 0) {
       return;
     }
 
-    if (lastBeatRef.current === beatIndex) {
+    const request = getProgressionStepPlaybackRequest(progression, stepPosition);
+    if (!request) {
       return;
     }
-
-    lastBeatRef.current = beatIndex;
-    const currentBarIndex = barIndex % bars.length;
-    const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
-    const nextBeatInBar = (beatInBar + 1) % beatsPerBar;
-    const nextBarIndex = nextBeatInBar === 0 ? (currentBarIndex + 1) % bars.length : currentBarIndex;
-    const nextRoot = getProgressionCellForBeat(bars[nextBarIndex], nextBeatInBar).root;
 
     playBeat({
-      beatInBar,
+      beatInBar: request.beatInBar,
+      beatEventType: request.beatEventType,
+      durationSteps: request.durationSteps,
+      followingTieBeats: request.followingTieBeats,
       rhythm,
-      nextRoot,
+      nextRoot: request.nextRoot,
     });
-  }, [barIndex, bars, beatIndex, beatInBar, isRunning, playBeat, progression.timeSignature.beatsPerBar, rhythm]);
+  }, [bars, playBeat, progression, rhythm]);
+
+  useProgressionStepScheduler({
+    isRunning,
+    onStep: scheduleBeat,
+    position,
+  });
 }
