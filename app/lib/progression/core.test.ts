@@ -18,7 +18,7 @@ import {
   updateProgressionBeatEventType,
   updateProgressionBeatDuration,
   updateProgressionRhythmEvent,
-} from "./progression";
+} from ".";
 
 describe("progression position", () => {
   it("tracks sixteenth-note steps without changing beat positions", () => {
@@ -181,7 +181,7 @@ describe("progression beat events", () => {
   });
 
   it("adds and removes an event at an arbitrary sixteenth-note step", () => {
-    const progression = createDefaultProgression();
+    const progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 2);
     const added = updateProgressionRhythmEvent(progression, 0, 2, "hit", 2);
 
     expect(getProgressionRhythmEvents(added.bars[0])).toEqual([
@@ -231,13 +231,14 @@ describe("progression beat events", () => {
     expect(getProgressionSustainingEventAtStep(progression.bars[0], 4)?.startStep).toBe(0);
   });
 
-  it("shortens a dotted-quarter hit when a new hit is added on the covered beat", () => {
-    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 6);
+  it("rejects a new hit on a beat covered by a dotted quarter", () => {
+    const progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 6);
 
-    progression = updateProgressionBeatEventType(progression, 0, 1, "hit");
+    const updated = updateProgressionBeatEventType(progression, 0, 1, "hit");
 
-    expect(getProgressionBeatDuration(progression.bars[0], 0)).toBe(4);
-    expect(getProgressionBeatEventType(progression.bars[0], 1)).toBe("hit");
+    expect(updated).toBe(progression);
+    expect(getProgressionBeatDuration(updated.bars[0], 0)).toBe(6);
+    expect(getProgressionBeatEventType(updated.bars[0], 1)).toBe("tie");
   });
 
   it("ties a dotted quarter from beat four into the next bar", () => {
@@ -255,15 +256,14 @@ describe("progression beat events", () => {
     });
   });
 
-  it("shortens a cross-bar dotted quarter when the next bar head is edited", () => {
-    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 3, 6);
+  it("rejects editing a next-bar head covered by a dotted quarter", () => {
+    const progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 3, 6);
 
-    progression = updateProgressionBeatEventType(progression, 1, 0, "hit");
+    const updated = updateProgressionBeatEventType(progression, 1, 0, "hit");
 
-    expect(getProgressionBeatDuration(progression.bars[0], 3)).toBe(4);
-    expect(getProgressionBeatEventType(progression.bars[1], 0)).toBe("hit");
-    expect(progression.bars[0].rhythm).toBeUndefined();
-    expect(progression.bars[1].rhythm).toBeUndefined();
+    expect(updated).toBe(progression);
+    expect(getProgressionBeatDuration(updated.bars[0], 3)).toBe(6);
+    expect(getProgressionBeatEventType(updated.bars[1], 0)).toBe("tie");
   });
 
   it("ties the final bar back into the first bar", () => {

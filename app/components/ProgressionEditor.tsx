@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
 import { type ChordType } from "../lib/music";
 import {
-  canSetProgressionRhythmDuration,
   canTieProgressionBeat,
   getProgressionBeatDuration,
   getProgressionBeatEventType,
@@ -17,6 +16,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionCell,
   type ProgressionDurationSteps,
+  type ProgressionPlacementValidation,
   type ProgressionSubdivision,
 } from "../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
@@ -53,7 +53,25 @@ type ProgressionEditorProps = {
     durationSteps: ProgressionDurationSteps,
   ) => void;
   onRhythmEventRemove: (barIndex: number, startStep: number) => void;
+  validateRhythmPlacement: (
+    barIndex: number,
+    startStep: number,
+    durationSteps: ProgressionDurationSteps,
+  ) => ProgressionPlacementValidation;
 };
+
+function getPlacementValidationMessage(validation: ProgressionPlacementValidation) {
+  if (validation.canPlace) {
+    return undefined;
+  }
+  if (validation.reason === "occupied-by-prior-event") {
+    return "この位置は先行イベントの音価内です";
+  }
+  if (validation.reason === "overlaps-following-event") {
+    return "この音価は後続イベントと重なります";
+  }
+  return "この位置にはイベントを配置できません";
+}
 
 export function ProgressionEditor({
   className = "progressionEditor",
@@ -70,6 +88,7 @@ export function ProgressionEditor({
   onCellChange,
   onRhythmEventChange,
   onRhythmEventRemove,
+  validateRhythmPlacement,
 }: ProgressionEditorProps) {
   const [selectedBarIndex, setSelectedBarIndex] = useState(0);
   const [selectedBeatIndex, setSelectedBeatIndex] = useState(0);
@@ -293,7 +312,15 @@ export function ProgressionEditor({
               : (["empty", "hit", "rest"] as const)
             ).map((eventType) => {
               const isActive = selectedBeatEventType === eventType;
-              const isDisabled = eventType === "tie" && !canTieSelectedBeat;
+              const placementValidation = validateRhythmPlacement(
+                selectedBarIndex,
+                selectedStartStep,
+                selectedBeatDuration,
+              );
+              const placementMessage = getPlacementValidationMessage(placementValidation);
+              const isTieDisabled = eventType === "tie" && !canTieSelectedBeat;
+              const isPlacementDisabled = eventType !== "empty" && !placementValidation.canPlace;
+              const isDisabled = isTieDisabled || isPlacementDisabled;
               return (
                 <button
                   key={eventType}
@@ -301,7 +328,13 @@ export function ProgressionEditor({
                   className={isActive ? "active" : ""}
                   aria-pressed={isActive}
                   disabled={isDisabled}
-                  title={isDisabled ? "Tieには直前のHitが必要です" : undefined}
+                  title={
+                    isTieDisabled
+                      ? "Tieには直前のHitが必要です"
+                      : isPlacementDisabled
+                        ? placementMessage
+                        : undefined
+                  }
                   onClick={() => {
                     if (eventType === "empty") {
                       onRhythmEventRemove(selectedBarIndex, selectedStartStep);
@@ -347,19 +380,20 @@ export function ProgressionEditor({
               ] as const
             ).map((option) => {
               const isActive = selectedBeatDuration === option.steps;
-              const canUseDuration = canSetProgressionRhythmDuration(
-                selectedBar,
+              const placementValidation = validateRhythmPlacement(
+                selectedBarIndex,
                 selectedStartStep,
                 option.steps,
-                bars[(selectedBarIndex + 1) % bars.length],
               );
+              const placementMessage = getPlacementValidationMessage(placementValidation);
               return (
                 <button
                   key={option.steps}
                   type="button"
                   className={isActive ? "active" : ""}
                   aria-pressed={isActive}
-                  disabled={selectedBeatEventType !== "hit" || !canUseDuration}
+                  disabled={selectedBeatEventType !== "hit" || !placementValidation.canPlace}
+                  title={!placementValidation.canPlace ? placementMessage : undefined}
                   onClick={() => {
                     if (selectedStepInBeat === 0) {
                       onBeatDurationChange(selectedBarIndex, selectedBeatIndex, option.steps);

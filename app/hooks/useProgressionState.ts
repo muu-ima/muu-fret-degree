@@ -1,13 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, type Dispatch, type SetStateAction } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import type { ChordType } from "../lib/music";
 import {
   createProgressionHistory,
   progressionHistoryReducer,
-} from "../lib/progression-history";
+} from "../lib/progression/history";
 import {
   applyProgressionBeatSubdivision,
+  createProgressionVirtualTimeline,
   createDefaultProgression,
   removeProgressionRhythmEvent,
   updateProgressionBarCount,
@@ -16,6 +24,7 @@ import {
   updateProgressionBeatEventType,
   updateProgressionCell,
   updateProgressionRhythmEvent,
+  validateProgressionRhythmPlacementAtPosition,
   type ChordProgression,
   type ProgressionBeatEventType,
   type ProgressionCell,
@@ -35,6 +44,10 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     createProgressionHistory(createDefaultProgression(bpm)),
   );
   const progression = history.present;
+  const rhythmTimeline = useMemo(
+    () => createProgressionVirtualTimeline(progression),
+    [progression],
+  );
 
   const hydrateProgression: Dispatch<SetStateAction<ChordProgression>> = useCallback((update) => {
     dispatch({ type: "hydrate", update });
@@ -139,6 +152,21 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     });
   }, []);
 
+  const validateRhythmPlacement = useCallback(
+    (
+      barIndex: number,
+      startStep: number,
+      durationSteps: ProgressionDurationSteps,
+    ) =>
+      validateProgressionRhythmPlacementAtPosition(
+        rhythmTimeline,
+        barIndex,
+        startStep,
+        durationSteps,
+      ),
+    [rhythmTimeline],
+  );
+
   const applyBeatSubdivision = useCallback(
     (barIndex: number, beatIndex: number, subdivision: ProgressionSubdivision) => {
       dispatch({
@@ -173,5 +201,6 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     updateBeatEventType,
     updateCell,
     updateRhythmEvent,
+    validateRhythmPlacement,
   };
 }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { ChordNote, FretNote } from "./music";
-import type { ProgressionBeatEventType, ProgressionDurationSteps } from "./progression";
+import type { ChordNote, FretNote } from "../music";
+import type { ProgressionBeatEventType, ProgressionDurationSteps } from "./model";
 import {
   planProgressionBeat,
   type ProgressionRhythm,
-} from "./progression-playback";
+} from "./playback";
 
 const chordNotes: ChordNote[] = [
   { degree: "1", semitones: 0, note: "C" },

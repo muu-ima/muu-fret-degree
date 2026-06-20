@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   type ChordProgression,
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionPosition,
-} from "../lib/progression";
-import type { ProgressionRhythm } from "../lib/progression-playback";
-import { getProgressionStepPlaybackRequest } from "../lib/progression-scheduler";
+} from "../lib/progression/model";
+import type { ProgressionRhythm } from "../lib/progression/playback";
+import { getProgressionStepPlaybackRequest } from "../lib/progression/scheduler";
+import { createProgressionVirtualTimeline } from "../lib/progression/rhythm/timeline";
 import { useProgressionStepScheduler } from "./useProgressionStepScheduler";
 
 type UseProgressionBeatSchedulerOptions = {
@@ -34,13 +35,17 @@ export function useProgressionBeatScheduler({
   rhythm,
 }: UseProgressionBeatSchedulerOptions) {
   const bars = progression.bars;
+  const timeline = useMemo(
+    () => createProgressionVirtualTimeline(progression),
+    [progression],
+  );
 
   const scheduleBeat = useCallback((stepPosition: ProgressionPosition) => {
     if (bars.length === 0) {
       return;
     }
 
-    const request = getProgressionStepPlaybackRequest(progression, stepPosition);
+    const request = getProgressionStepPlaybackRequest(progression, stepPosition, timeline);
     if (!request) {
       return;
     }
@@ -53,7 +58,7 @@ export function useProgressionBeatScheduler({
       rhythm,
       nextRoot: request.nextRoot,
     });
-  }, [bars, playBeat, progression, rhythm]);
+  }, [bars, playBeat, progression, rhythm, timeline]);
 
   useProgressionStepScheduler({
     isRunning,

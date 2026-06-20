@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { ProgressionBar } from "./progression";
+import type { ProgressionBar } from "./model";
 import {
   migrateBeatRhythmToEvents,
   type LegacyBeatRhythm,
-} from "./progression-migration";
+} from "./migration";
 
 describe("progression persistence migration", () => {
   it("separates legacy beat harmony from rhythm events", () => {

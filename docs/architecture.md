@@ -313,7 +313,7 @@ step schedulerは各16分位置を通知し、進行schedulerはその位置にR
 
 画面コンポーネントは `setProgression` を直接扱わず、`updateCell` や `updateBarCount` を呼ぶ。Root / Chordと小節数の変更は履歴対象にするが、BPM同期と保存データの読み込みは履歴へ積まない。将来の拍、タイ、スラー更新もこのhookへ追加し、画面ごとに更新規則を複製しない。
 
-### `app/lib/progression-history.ts`
+### `app/lib/progression/history.ts`
 
 進行編集のUndo / Redo履歴を純粋なreducerとして管理する。
 
@@ -371,28 +371,32 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 
 DOM、React state、Web Audio API には依存させない。純粋な計算に寄せることで、あとからテストを書きやすくする。
 
-### `app/lib/progression.ts`
+### `app/lib/progression/`
 
-コード進行再生のデータ型と現在位置計算を担当する。
+コード進行ドメインの純粋関数を、責務ごとのモジュールへ分けて管理する。`index.ts` は既存利用側へ互換APIを公開する入口とし、実装規則は置かない。
 
-- BPM と拍子から 1 拍・1 小節の長さを求める。
-- 経過秒数から現在の拍位置、小節番号、16分step位置を求める。
-- 進行データから、現在参照すべき小節と2拍セルを選ぶ。
-- 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
-- `beats`はHarmonyの1拍コード上書きだけを保持する。
-- `rhythm`は16分音符単位の`startStep`、`eventType`、`durationSteps`を保持する。
-- 拍頭にRhythmイベントがない場合はHitの4分音符として扱い、既定値と異なるイベントだけを明示的に保持する。
-- 小節数を変更したときに、既存パターンを複製して伸縮する。
-- 2拍セル、拍オーバーライド、Hit / Rest / Tie、音価、小節数の更新を純粋関数として提供する。
-- Hitの後ろに続くTie数を、小節跨ぎを含めて最大1ループ未満で数える。
-- 直前に有効なHitがないTieは拒否し、Tie元のHitをRestへ変えた場合は後続TieもRestへ正規化する。
-- Beat 4の付点4分は次小節頭へTieを自動配置し、次小節頭の再編集時は元音価を4stepへ短縮する。
+- `model.ts`: 保存データ型、定数、既定進行。
+- `harmony.ts`: 2拍セル継承と1拍コード上書き。
+- `structure.ts`: 小節数変更と既存パターンの複製。
+- `timeline.ts`: BPM、拍子、経過秒数から拍・小節・16分step位置への変換。
+- `rhythm/queries.ts`: 明示イベントと既定4分音符を合成したRhythm照会。
+- `rhythm/commands.ts`: Hit / Rest / Tie、音価、プリセットの編集command。
+- `rhythm/collision.ts`: イベント配置と音価の衝突判定。
+- `rhythm/boundary.ts`: 小節跨ぎ付点4分と自動Tieの整合性。
+- `rhythm/store.ts`: 明示Rhythmイベント配列の低レベル更新。
+- `rhythm/ties.ts`: Tie可否と後続Tie数の照会。
+- `rhythm/timeline.ts`: 実小節を仮想2周へ展開した絶対step占有と配置衝突理由。
+- `scheduler.ts`: schedulerへ渡すstep単位の再生要求生成。
+- `persistence.ts` / `migration.ts`: 保存値のvalidationと旧形式migration。
+- `history.ts`: Undo / Redoの純粋reducer。
 
-このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
+これらのモジュールは、再生中の時間管理や UI 更新を持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
 4/4では1拍を4step、1小節を16stepとして扱う。Full Editorは選択中の拍を`1 / e / & / a`へ展開し、任意stepのHit / Restを編集できる。schedulerは各stepの明示イベントを発音し、小節カードは拍の主記号と4stepの補助レーンを重ねて表示する。Harmonyデータへタイミング情報は戻さない。
 
-### `app/lib/progression-playback.ts`
+仮想タイムラインは同じ実小節列を判定時だけ2周へ展開する。先行イベントの占有範囲を優先し、占有中のstepや後続イベントへ重なる音価には純粋関数から衝突理由を返す。仮想2周目は`localStorage`、Undo / Redo履歴、Editorの編集対象へ含めない。
+
+### `app/lib/progression/playback.ts`
 
 進行伴奏の1拍分を、再生予定音の配列へ変換する。
 

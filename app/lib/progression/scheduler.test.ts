@@ -5,8 +5,8 @@ import {
   updateProgressionBeatEventType,
   updateProgressionBeatDuration,
   updateProgressionRhythmEvent,
-} from "./progression";
-import { getProgressionStepPlaybackRequest } from "./progression-scheduler";
+} from ".";
+import { getProgressionStepPlaybackRequest } from "./scheduler";
 
 function positionAtStep(step: number) {
   return getProgressionPosition(step * 0.125, 120, {
@@ -40,8 +40,9 @@ describe("progression step scheduling", () => {
   });
 
   it("returns an explicit subdivision rest without producing a default hit", () => {
+    const shortened = updateProgressionBeatDuration(createDefaultProgression(120), 0, 0, 2);
     const progression = updateProgressionRhythmEvent(
-      createDefaultProgression(120),
+      shortened,
       0,
       2,
       "rest",
@@ -57,6 +58,7 @@ describe("progression step scheduling", () => {
 
   it("extends the last subdivision hit into a following tied beat", () => {
     let progression = createDefaultProgression(120);
+    progression = updateProgressionRhythmEvent(progression, 0, 0, "hit", 1);
     progression = updateProgressionRhythmEvent(progression, 0, 3, "hit", 1);
     progression = updateProgressionBeatEventType(progression, 0, 1, "tie");
 
@@ -83,7 +85,7 @@ describe("progression step scheduling", () => {
     expect(getProgressionStepPlaybackRequest(progression, positionAtStep(4))).toBeUndefined();
   });
 
-  it("uses an explicit tie when a dotted quarter crosses into the next bar", () => {
+  it("does not schedule the covered tie when a dotted quarter crosses into the next bar", () => {
     const progression = updateProgressionBeatDuration(
       createDefaultProgression(120),
       0,
@@ -95,8 +97,22 @@ describe("progression step scheduling", () => {
       durationSteps: 6,
       followingTieBeats: 0,
     });
-    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(16))).toMatchObject({
-      beatEventType: "tie",
-    });
+    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(16))).toBeUndefined();
+  });
+
+  it("does not retrigger the loop head covered by the final bar", () => {
+    const initial = createDefaultProgression(120);
+    const lastBarIndex = initial.bars.length - 1;
+    const progression = updateProgressionBeatDuration(initial, lastBarIndex, 3, 6);
+    const loopSteps = progression.bars.length * 16;
+
+    expect(getProgressionStepPlaybackRequest(
+      progression,
+      positionAtStep(loopSteps - 4),
+    )).toMatchObject({ durationSteps: 6 });
+    expect(getProgressionStepPlaybackRequest(
+      progression,
+      positionAtStep(loopSteps),
+    )).toBeUndefined();
   });
 });

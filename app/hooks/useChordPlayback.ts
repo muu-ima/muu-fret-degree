@@ -9,7 +9,7 @@ import {
   pickAscendingBassNotesForDegrees,
   pickLowestBassNoteForDegree,
 } from "../lib/music";
-import { planProgressionBeat, type ProgressionRhythm } from "../lib/progression-playback";
+import { planProgressionBeat, type ProgressionRhythm } from "../lib/progression/playback";
 import type {
   ProgressionBeatEventType,
   ProgressionDurationSteps,
