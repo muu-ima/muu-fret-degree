@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyProgressionBeatSubdivision,
   canTieProgressionBeat,
   countFollowingProgressionTies,
   createDefaultProgression,
   getProgressionBeatEventType,
   getProgressionBeatDuration,
+  getProgressionBeatSubdivision,
   getProgressionCellForBeat,
   getProgressionPosition,
   getProgressionRhythmEvents,
+  getProgressionSustainingEventAtStep,
   isProgressionBeatStart,
   progressionStepsPerBeat,
   removeProgressionRhythmEvent,
@@ -205,5 +208,54 @@ describe("progression beat events", () => {
     expect(updateProgressionRhythmEvent(progression, 0, 15, "hit", 2)).toBe(
       progression,
     );
+  });
+
+  it("identifies steps held by eighth and dotted-eighth notes", () => {
+    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 2);
+
+    expect(getProgressionSustainingEventAtStep(progression.bars[0], 1)?.startStep).toBe(0);
+    expect(getProgressionSustainingEventAtStep(progression.bars[0], 2)).toBeUndefined();
+
+    progression = updateProgressionBeatDuration(progression, 0, 0, 3);
+
+    expect(getProgressionSustainingEventAtStep(progression.bars[0], 2)?.startStep).toBe(0);
+    expect(getProgressionSustainingEventAtStep(progression.bars[0], 3)).toBeUndefined();
+  });
+
+  it("applies two eighth-note hits to only the selected beat", () => {
+    const progression = applyProgressionBeatSubdivision(
+      createDefaultProgression(),
+      0,
+      1,
+      "eighths",
+    );
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 4, durationSteps: 2, eventType: "hit" },
+      { startStep: 6, durationSteps: 2, eventType: "hit" },
+    ]);
+    expect(getProgressionBeatSubdivision(progression.bars[0], 1)).toBe("eighths");
+    expect(getProgressionBeatDuration(progression.bars[0], 0)).toBe(4);
+    expect(applyProgressionBeatSubdivision(progression, 0, 1, "eighths")).toBe(
+      progression,
+    );
+  });
+
+  it("replaces the selected beat with four sixteenth-note hits", () => {
+    let progression = applyProgressionBeatSubdivision(
+      createDefaultProgression(),
+      0,
+      0,
+      "eighths",
+    );
+    progression = applyProgressionBeatSubdivision(progression, 0, 0, "sixteenths");
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 0, durationSteps: 1, eventType: "hit" },
+      { startStep: 1, durationSteps: 1, eventType: "hit" },
+      { startStep: 2, durationSteps: 1, eventType: "hit" },
+      { startStep: 3, durationSteps: 1, eventType: "hit" },
+    ]);
+    expect(getProgressionBeatSubdivision(progression.bars[0], 0)).toBe("sixteenths");
   });
 });

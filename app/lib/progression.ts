@@ -10,6 +10,7 @@ export type ProgressionCell = {
 
 export type ProgressionBeatEventType = "hit" | "rest" | "tie";
 export type ProgressionDurationSteps = 1 | 2 | 3 | 4;
+export type ProgressionSubdivision = "eighths" | "sixteenths";
 
 export type ProgressionBeat = {
   chordOverride?: ProgressionCell;
@@ -468,6 +469,43 @@ export function removeProgressionRhythmEvent(
   };
 }
 
+export function applyProgressionBeatSubdivision(
+  progression: ChordProgression,
+  barIndex: number,
+  beatIndex: number,
+  subdivision: ProgressionSubdivision,
+): ChordProgression {
+  const currentBar = progression.bars[barIndex];
+  if (!currentBar || beatIndex < 0 || beatIndex > 3) {
+    return progression;
+  }
+  if (getProgressionBeatSubdivision(currentBar, beatIndex) === subdivision) {
+    return progression;
+  }
+
+  const beatStartStep = beatIndex * progressionStepsPerBeat;
+  const beatEndStep = beatStartStep + progressionStepsPerBeat;
+  const stepOffsets = subdivision === "eighths" ? [0, 2] : [0, 1, 2, 3];
+  const durationSteps: ProgressionDurationSteps = subdivision === "eighths" ? 2 : 1;
+  const nextRhythm = [
+    ...(currentBar.rhythm?.filter(
+      (event) => event.startStep < beatStartStep || event.startStep >= beatEndStep,
+    ) ?? []),
+    ...stepOffsets.map((stepOffset) => ({
+      startStep: beatStartStep + stepOffset,
+      durationSteps,
+      eventType: "hit" as const,
+    })),
+  ].sort((first, second) => first.startStep - second.startStep);
+
+  return {
+    ...progression,
+    bars: progression.bars.map((bar, index) =>
+      index === barIndex ? { ...bar, rhythm: nextRhythm } : bar,
+    ),
+  };
+}
+
 export function canTieProgressionBeat(
   bars: readonly ProgressionBar[],
   barIndex: number,
@@ -558,6 +596,61 @@ export function getProgressionRhythmEvents(bar: ProgressionBar) {
       const event = getProgressionRhythmEventAtStep(bar, startStep);
       return event ? [event] : [];
     });
+}
+
+export function getProgressionSustainingEventAtStep(
+  bar: ProgressionBar,
+  step: number,
+): ProgressionRhythmEvent | undefined {
+  return getProgressionRhythmEvents(bar)
+    .filter(
+      (event) =>
+        event.eventType === "hit" &&
+        event.startStep < step &&
+        event.startStep + event.durationSteps > step,
+    )
+    .at(-1);
+}
+
+export function getProgressionBeatSubdivision(
+  bar: ProgressionBar,
+  beatIndex: number,
+): ProgressionSubdivision | undefined {
+  const beatStartStep = beatIndex * progressionStepsPerBeat;
+  const beatEndStep = beatStartStep + progressionStepsPerBeat;
+  const events = getProgressionRhythmEvents(bar).filter(
+    (event) => event.startStep >= beatStartStep && event.startStep < beatEndStep,
+  );
+  const relativeEvents = events.map((event) => ({
+    ...event,
+    startStep: event.startStep - beatStartStep,
+  }));
+
+  if (
+    relativeEvents.length === 2 &&
+    relativeEvents.every(
+      (event, index) =>
+        event.startStep === index * 2 &&
+        event.durationSteps === 2 &&
+        event.eventType === "hit",
+    )
+  ) {
+    return "eighths";
+  }
+
+  if (
+    relativeEvents.length === 4 &&
+    relativeEvents.every(
+      (event, index) =>
+        event.startStep === index &&
+        event.durationSteps === 1 &&
+        event.eventType === "hit",
+    )
+  ) {
+    return "sixteenths";
+  }
+
+  return undefined;
 }
 
 export function countFollowingProgressionTies(

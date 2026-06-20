@@ -11,6 +11,7 @@ import { ProgressionEditor } from "./ProgressionEditor";
 export function ProgressionEditorWorkspace() {
   const chordTypes = theory.chordTypes as ChordType[];
   const {
+    applyBeatSubdivision,
     canRedo,
     canUndo,
     progression,
@@ -95,6 +96,7 @@ export function ProgressionEditorWorkspace() {
         roots={theory.roots}
         chordTypes={chordTypes}
         onBarCountChange={updateBarCount}
+        onBeatSubdivisionChange={applyBeatSubdivision}
         onBeatChordChange={updateBeatChord}
         onBeatDurationChange={updateBeatDuration}
         onBeatEventTypeChange={updateBeatEventType}

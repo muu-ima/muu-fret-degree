@@ -7,13 +7,16 @@ import {
   canTieProgressionBeat,
   getProgressionBeatDuration,
   getProgressionBeatEventType,
+  getProgressionBeatSubdivision,
   getProgressionCellForBeat,
   getProgressionRhythmEventAtStep,
+  getProgressionSustainingEventAtStep,
   progressionStepsPerBeat,
   type ProgressionBar,
   type ProgressionBeatEventType,
   type ProgressionCell,
   type ProgressionDurationSteps,
+  type ProgressionSubdivision,
 } from "../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
 
@@ -25,6 +28,11 @@ type ProgressionEditorProps = {
   roots: string[];
   chordTypes: ChordType[];
   onBarCountChange: (barCount: number) => void;
+  onBeatSubdivisionChange: (
+    barIndex: number,
+    beatIndex: number,
+    subdivision: ProgressionSubdivision,
+  ) => void;
   onBeatChordChange: (barIndex: number, beatIndex: number, cell: ProgressionCell | undefined) => void;
   onBeatDurationChange: (
     barIndex: number,
@@ -54,6 +62,7 @@ export function ProgressionEditor({
   roots,
   chordTypes,
   onBarCountChange,
+  onBeatSubdivisionChange,
   onBeatChordChange,
   onBeatDurationChange,
   onBeatEventTypeChange,
@@ -76,6 +85,9 @@ export function ProgressionEditor({
   };
 
   const selectedBar = bars[selectedBarIndex] ?? bars[0];
+  const selectedSubdivision = selectedBar
+    ? getProgressionBeatSubdivision(selectedBar, selectedBeatIndex)
+    : undefined;
   const selectedCellIndex = Math.floor(selectedBeatIndex / 2);
   const baseCell = selectedBar?.cells[selectedCellIndex];
   const beatOverride = selectedBar?.beats?.[selectedBeatIndex]?.chordOverride;
@@ -128,6 +140,11 @@ export function ProgressionEditor({
         getProgressionCellForBeat(selectedBar, selectedBeatIndex),
       );
     }
+  };
+
+  const applySubdivision = (subdivision: ProgressionSubdivision) => {
+    setSelectedStepInBeat(0);
+    onBeatSubdivisionChange(selectedBarIndex, selectedBeatIndex, subdivision);
   };
 
   return (
@@ -199,24 +216,64 @@ export function ProgressionEditor({
           })}
         </div>
 
+        <div className="progressionApplySection">
+          <span className="controlLabel">Rhythm Preset</span>
+          <div className="progressionApplyTabs progressionSubdivisionTabs" role="group" aria-label="拍の分割プリセット">
+            {(
+              [
+                { value: "eighths", label: "8ths ×2" },
+                { value: "sixteenths", label: "16ths ×4" },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={selectedSubdivision === option.value ? "active" : ""}
+                aria-pressed={selectedSubdivision === option.value}
+                onClick={() => applySubdivision(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="progressionStepSection">
-          <span className="controlLabel">16th Step</span>
-          <div className="progressionStepTabs" role="tablist" aria-label="編集する16分位置">
-            {["1", "e", "&", "a"].map((label, stepInBeat) => {
+          <span className="controlLabel">Start Position</span>
+          <div className="progressionStepTabs" role="tablist" aria-label="編集する開始位置">
+            {[
+              { label: "1", stepInBeat: 0 },
+              { label: "e", stepInBeat: 1 },
+              { label: "&", stepInBeat: 2 },
+              { label: "a", stepInBeat: 3 },
+            ].map(({ label, stepInBeat }) => {
               const startStep = selectedBeatIndex * progressionStepsPerBeat + stepInBeat;
               const event = getProgressionRhythmEventAtStep(selectedBar, startStep);
+              const sustainingEvent = event
+                ? undefined
+                : getProgressionSustainingEventAtStep(selectedBar, startStep);
               const isSelected = selectedStepInBeat === stepInBeat;
               return (
                 <button
                   key={label}
                   type="button"
-                  className={`${isSelected ? "active" : ""}${event ? ` ${event.eventType}` : " empty"}`}
+                  className={`${isSelected ? "active" : ""}${event ? ` ${event.eventType}` : sustainingEvent ? " held" : " empty"}`}
                   aria-selected={isSelected}
                   role="tab"
                   onClick={() => setSelectedStepInBeat(stepInBeat)}
                 >
                   <span>{label}</span>
-                  <small>{event ? (event.eventType === "hit" ? "/" : event.eventType === "rest" ? "—" : "⌒") : "·"}</small>
+                  <small>
+                    {event
+                      ? event.eventType === "hit"
+                        ? "/"
+                        : event.eventType === "rest"
+                          ? "—"
+                          : "⌒"
+                      : sustainingEvent
+                        ? "━"
+                        : "·"}
+                  </small>
                 </button>
               );
             })}
@@ -283,7 +340,7 @@ export function ProgressionEditor({
               [
                 { steps: 1, label: "1/16" },
                 { steps: 2, label: "1/8" },
-                { steps: 3, label: "1/8." },
+                { steps: 3, label: "1/8 ·" },
                 { steps: 4, label: "1/4" },
               ] as const
             ).map((option) => {

@@ -2044,6 +2044,11 @@ select:focus-visible,
   color: #758196;
 }
 
+.progressionChartStep.held {
+  color: #aebbd0;
+  background: rgba(122, 167, 255, 0.06);
+}
+
 .progressionChartStep.tie {
   color: #91a6d1;
 }
@@ -2167,6 +2172,15 @@ select:focus-visible,
   color: #8f9bad;
 }
 
+.progressionStepTabs button.held {
+  border-color: rgba(122, 167, 255, 0.2);
+  background: rgba(122, 167, 255, 0.06);
+}
+
+.progressionStepTabs button.held small {
+  color: #aebbd0;
+}
+
 .progressionStepTabs button.active {
   border-color: rgba(122, 167, 255, 0.58);
   background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
@@ -2220,6 +2234,15 @@ select:focus-visible,
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.progressionSubdivisionTabs {
+  width: min(100%, 330px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.progressionSubdivisionTabs button {
+  min-height: 36px;
+}
+
 .progressionDurationTabs {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -2228,11 +2251,17 @@ select:focus-visible,
   position: absolute;
   top: 3px;
   right: 4px;
-  color: #8f9cb0;
+  min-width: 18px;
+  padding: 2px 3px;
+  border: 1px solid rgba(154, 171, 196, 0.14);
+  border-radius: 4px;
+  background: rgba(7, 10, 15, 0.48);
+  color: #aab7ca;
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.48rem;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  text-align: center;
 }
 
 .progressionChipSection {

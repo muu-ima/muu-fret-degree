@@ -7,6 +7,7 @@ import {
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   getProgressionRhythmEventAtStep,
+  getProgressionSustainingEventAtStep,
   progressionStepsPerBeat,
   type ProgressionBar,
 } from "../lib/progression";
@@ -91,11 +92,14 @@ export function ProgressionChordChart({
                         {[0, 1, 2, 3].map((stepInBeat) => {
                           const startStep = beatIndex * progressionStepsPerBeat + stepInBeat;
                           const stepEvent = getProgressionRhythmEventAtStep(bar, startStep);
+                          const sustainingEvent = stepEvent
+                            ? undefined
+                            : getProgressionSustainingEventAtStep(bar, startStep);
                           const isStepSelected = isSelected && selectedStepInBeat === stepInBeat;
                           return (
                             <span
                               key={stepInBeat}
-                              className={`progressionChartStep${stepEvent ? ` ${stepEvent.eventType}` : " empty"}${isStepSelected ? " selected" : ""}`}
+                              className={`progressionChartStep${stepEvent ? ` ${stepEvent.eventType}` : sustainingEvent ? " held" : " empty"}${isStepSelected ? " selected" : ""}`}
                             >
                               {stepEvent
                                 ? stepEvent.eventType === "hit"
@@ -103,7 +107,9 @@ export function ProgressionChordChart({
                                   : stepEvent.eventType === "rest"
                                     ? "—"
                                     : "⌒"
-                                : "·"}
+                                : sustainingEvent
+                                  ? "━"
+                                  : "·"}
                             </span>
                           );
                         })}
