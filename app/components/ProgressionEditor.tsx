@@ -437,44 +437,40 @@ export function ProgressionEditor({
           </div>
         </div>
 
-        <div className="progressionChipSection">
-          <span className="controlLabel">Root</span>
-          <div className="progressionChipGrid progressionRootChips" role="group" aria-label="Root">
-            {roots.map((root) => {
-              const isSelected = selectedCell.root === root;
-              return (
-                <button
-                  key={root}
-                  type="button"
-                  className={isSelected ? "progressionChip active" : "progressionChip"}
-                  aria-pressed={isSelected}
-                  onClick={() => applyCellChange({ ...selectedCell, root })}
-                >
-                  {root}
-                </button>
-              );
-            })}
+        <div className="progressionHarmonyFields">
+          <div className="progressionChipSection">
+            <span className="controlLabel">Root</span>
+            <EditorCombobox
+              ariaLabel="Root"
+              searchPlaceholder="ルートを検索…"
+              value={selectedCell.root}
+              options={roots.map((root) => ({
+                value: root,
+                label: root,
+              }))}
+              onValueChange={(root) => applyCellChange({ ...selectedCell, root })}
+            />
           </div>
-        </div>
 
-        <div className="progressionChipSection">
-          <span className="controlLabel">Chord</span>
-          <EditorCombobox
-            ariaLabel="Chord"
-            searchPlaceholder="コードタイプを検索…"
-            value={selectedCell.chordTypeId}
-            options={chordTypes.map((chordType) => ({
-              value: chordType.id,
-              label: formatChordTypeSymbol(chordType.id, chordTypes),
-              description: chordType.name,
-            }))}
-            onValueChange={(chordTypeId) =>
-              applyCellChange({
-                ...selectedCell,
-                chordTypeId,
-              })
-            }
-          />
+          <div className="progressionChipSection">
+            <span className="controlLabel">Chord</span>
+            <EditorCombobox
+              ariaLabel="Chord"
+              searchPlaceholder="コードタイプを検索…"
+              value={selectedCell.chordTypeId}
+              options={chordTypes.map((chordType) => ({
+                value: chordType.id,
+                label: formatChordTypeSymbol(chordType.id, chordTypes),
+                description: chordType.name,
+              }))}
+              onValueChange={(chordTypeId) =>
+                applyCellChange({
+                  ...selectedCell,
+                  chordTypeId,
+                })
+              }
+            />
+          </div>
         </div>
       </section>
     </section>

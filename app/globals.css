@@ -2269,6 +2269,16 @@ select:focus-visible,
   gap: 7px;
 }
 
+.progressionHarmonyFields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  gap: 10px;
+}
+
+.progressionHarmonyFields .editorCombobox {
+  width: 100%;
+}
+
 .progressionChipGrid {
   display: grid;
   gap: 6px;
@@ -3063,6 +3073,10 @@ select:focus-visible,
 
   .progressionSelectionHeader {
     align-items: flex-start;
+  }
+
+  .progressionHarmonyFields {
+    grid-template-columns: 1fr;
   }
 
   .progressionSelectionChord {
