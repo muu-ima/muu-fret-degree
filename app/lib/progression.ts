@@ -1,75 +1,36 @@
-export type TimeSignature = {
-  beatsPerBar: number;
-  beatUnit: number;
-};
+import {
+  progressionStepsPerBeat,
+  type ChordProgression,
+  type ProgressionBar,
+  type ProgressionBeat,
+  type ProgressionBeatEventType,
+  type ProgressionCell,
+  type ProgressionDurationSteps,
+  type ProgressionPlaybackState,
+  type ProgressionPosition,
+  type ProgressionRhythmEvent,
+  type ProgressionSelection,
+  type ProgressionSubdivision,
+  type TimeSignature,
+} from "./progression-model";
 
-export type ProgressionCell = {
-  root: string;
-  chordTypeId: string;
-};
-
-export type ProgressionBeatEventType = "hit" | "rest" | "tie";
-export type ProgressionDurationSteps = 1 | 2 | 3 | 4 | 6;
-export type ProgressionSubdivision = "eighths" | "sixteenths";
-
-export type ProgressionBeat = {
-  chordOverride?: ProgressionCell;
-};
-
-export type ProgressionRhythmEvent = {
-  startStep: number;
-  durationSteps: ProgressionDurationSteps;
-  eventType: ProgressionBeatEventType;
-};
-
-export type ProgressionBar = {
-  bar: number;
-  cells: readonly [ProgressionCell, ProgressionCell];
-  beats?: readonly [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat];
-  rhythm?: readonly ProgressionRhythmEvent[];
-};
-
-export type ChordProgression = {
-  bpm: number;
-  timeSignature: TimeSignature;
-  bars: readonly ProgressionBar[];
-};
-
-export type ProgressionPosition = {
-  elapsedSeconds: number;
-  beatIndex: number;
-  barIndex: number;
-  beatInBar: number;
-  stepIndex: number;
-  stepInBeat: number;
-  stepInBar: number;
-};
-
-export type ProgressionSelection = {
-  bar: ProgressionBar;
-  cell: ProgressionCell;
-  cellIndex: number;
-};
-
-export type ProgressionPlaybackState = {
-  position: ProgressionPosition;
-  selection?: ProgressionSelection;
-};
-
-export const progressionStepsPerBeat = 4;
-
-export function createDefaultProgression(bpm = 120): ChordProgression {
-  return {
-    bpm,
-    timeSignature: { beatsPerBar: 4, beatUnit: 4 },
-    bars: [
-      makeProgressionBar(1, { root: "C", chordTypeId: "maj7" }),
-      makeProgressionBar(2, { root: "A", chordTypeId: "m7" }),
-      makeProgressionBar(3, { root: "D", chordTypeId: "m7" }),
-      makeProgressionBar(4, { root: "G", chordTypeId: "7" }),
-    ],
-  };
-}
+export {
+  createDefaultProgression,
+  makeProgressionBar,
+  progressionStepsPerBeat,
+  type ChordProgression,
+  type ProgressionBar,
+  type ProgressionBeat,
+  type ProgressionBeatEventType,
+  type ProgressionCell,
+  type ProgressionDurationSteps,
+  type ProgressionPlaybackState,
+  type ProgressionPosition,
+  type ProgressionRhythmEvent,
+  type ProgressionSelection,
+  type ProgressionSubdivision,
+  type TimeSignature,
+} from "./progression-model";
 
 function normalizeNonNegative(value: number) {
   return Number.isFinite(value) && value > 0 ? value : 0;
@@ -830,17 +791,6 @@ export function makeProgressionBeats(bar: ProgressionBar): [
   return [0, 1, 2, 3].map((beatIndex) => ({
     ...getProgressionBeat(bar, beatIndex),
   })) as [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat];
-}
-
-export function makeProgressionBar(
-  bar: number,
-  firstCell: ProgressionCell,
-  secondCell: ProgressionCell = firstCell,
-): ProgressionBar {
-  return {
-    bar,
-    cells: [{ ...firstCell }, { ...secondCell }],
-  };
 }
 
 function removeBeatChordOverride(beat: ProgressionBeat): ProgressionBeat {
