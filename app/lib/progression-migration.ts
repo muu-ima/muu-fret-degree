@@ -4,7 +4,13 @@ import type {
   ProgressionBeatEventType,
   ProgressionCell,
   ProgressionDurationSteps,
-} from "./progression";
+} from "./progression-model";
+
+export type LegacyProgressionBar = {
+  bar: number;
+  root: string;
+  chordTypeId: string;
+};
 
 export type LegacyBeatRhythm = ProgressionBeat & {
   durationSteps?: ProgressionDurationSteps;
@@ -34,4 +40,14 @@ export function migrateBeatRhythmToEvents(bars: readonly ProgressionBar[]): Prog
       ...(rhythm.length > 0 ? { rhythm } : {}),
     };
   });
+}
+
+export function migrateLegacyBars(bars: readonly LegacyProgressionBar[]): ProgressionBar[] {
+  return bars.map((bar) => ({
+    bar: bar.bar,
+    cells: [
+      { root: bar.root, chordTypeId: bar.chordTypeId },
+      { root: bar.root, chordTypeId: bar.chordTypeId },
+    ],
+  }));
 }
