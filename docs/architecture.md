@@ -262,7 +262,7 @@ BPM 入力の state と正規化を担当する。
 Transportの経過時間をコード進行上の位置へ変換する。
 
 - `useTransport` から経過秒数と再生状態を受け取る。
-- `app/lib/progression.ts` の純粋関数を使って、現在の拍位置と選択中のセルを 1 回で求める。
+- `app/lib/progression.ts` の純粋関数を使って、現在の拍・16分step位置と選択中のセルを 1 回で求める。
 
 この hook は、進行データそのものの編集はしない。入力された進行を時間に同期させる役割に絞る。
 
@@ -361,7 +361,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 コード進行再生のデータ型と現在位置計算を担当する。
 
 - BPM と拍子から 1 拍・1 小節の長さを求める。
-- 経過秒数から現在の拍位置と小節番号を求める。
+- 経過秒数から現在の拍位置、小節番号、16分step位置を求める。
 - 進行データから、現在参照すべき小節と2拍セルを選ぶ。
 - 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
 - 拍の`eventType`未指定をHitとして扱い、RestとTieだけを明示的に保持する。
@@ -371,6 +371,8 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 直前に有効なHitがないTieは拒否し、Tie元のHitをRestへ変えた場合は後続TieもRestへ正規化する。
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
+
+4/4では1拍を4step、1小節を16stepとして扱う。現行の拍schedulerは従来どおりbeat位置を使い、付点・8分・16分イベントを接続する段階でstep位置を購読する。
 
 ### `app/lib/progression-playback.ts`
 

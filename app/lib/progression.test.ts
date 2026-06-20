@@ -5,9 +5,46 @@ import {
   createDefaultProgression,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
+  getProgressionPosition,
+  progressionStepsPerBeat,
   updateProgressionBeatChord,
   updateProgressionBeatEventType,
 } from "./progression";
+
+describe("progression position", () => {
+  it("tracks sixteenth-note steps without changing beat positions", () => {
+    const timeSignature = { beatsPerBar: 4, beatUnit: 4 };
+
+    expect(progressionStepsPerBeat).toBe(4);
+    expect(getProgressionPosition(0.125, 120, timeSignature)).toMatchObject({
+      beatIndex: 0,
+      beatInBar: 0,
+      stepIndex: 1,
+      stepInBeat: 1,
+      stepInBar: 1,
+    });
+    expect(getProgressionPosition(0.5, 120, timeSignature)).toMatchObject({
+      beatIndex: 1,
+      beatInBar: 1,
+      stepIndex: 4,
+      stepInBeat: 0,
+      stepInBar: 4,
+    });
+  });
+
+  it("wraps steps at the next bar", () => {
+    const position = getProgressionPosition(2, 120, { beatsPerBar: 4, beatUnit: 4 });
+
+    expect(position).toMatchObject({
+      barIndex: 1,
+      beatIndex: 4,
+      beatInBar: 0,
+      stepIndex: 16,
+      stepInBeat: 0,
+      stepInBar: 0,
+    });
+  });
+});
 
 describe("progression beat overrides", () => {
   it("overrides only the selected beat and restores the inherited cell", () => {

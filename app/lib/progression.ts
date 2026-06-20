@@ -32,6 +32,9 @@ export type ProgressionPosition = {
   beatIndex: number;
   barIndex: number;
   beatInBar: number;
+  stepIndex: number;
+  stepInBeat: number;
+  stepInBar: number;
 };
 
 export type ProgressionSelection = {
@@ -44,6 +47,8 @@ export type ProgressionPlaybackState = {
   position: ProgressionPosition;
   selection?: ProgressionSelection;
 };
+
+export const progressionStepsPerBeat = 4;
 
 export function createDefaultProgression(bpm = 120): ChordProgression {
   return {
@@ -92,17 +97,26 @@ export function getProgressionPosition(
       beatIndex: 0,
       barIndex: 0,
       beatInBar: 0,
+      stepIndex: 0,
+      stepInBeat: 0,
+      stepInBar: 0,
     };
   }
 
   const beatIndex = Math.floor(safeElapsedSeconds / beatLength);
   const barIndex = Math.floor(safeElapsedSeconds / barLength);
+  const stepLength = beatLength / progressionStepsPerBeat;
+  const stepIndex = Math.floor(safeElapsedSeconds / stepLength);
+  const beatsPerBar = Math.max(1, Math.floor(timeSignature.beatsPerBar));
 
   return {
     elapsedSeconds: safeElapsedSeconds,
     beatIndex,
     barIndex,
-    beatInBar: beatIndex % Math.max(1, Math.floor(timeSignature.beatsPerBar)),
+    beatInBar: beatIndex % beatsPerBar,
+    stepIndex,
+    stepInBeat: stepIndex % progressionStepsPerBeat,
+    stepInBar: stepIndex % (beatsPerBar * progressionStepsPerBeat),
   };
 }
 
