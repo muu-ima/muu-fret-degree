@@ -3,7 +3,6 @@ import {
   type ChordProgression,
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
-  type ProgressionRhythmEvent,
   type ProgressionSubdivision,
 } from "./progression-model";
 import {
@@ -14,6 +13,10 @@ import {
   getProgressionRhythmEvents,
 } from "./progression-rhythm";
 import { canSetProgressionRhythmDuration } from "./progression-rhythm-collision";
+import {
+  removeExplicitProgressionRhythmEvent,
+  setProgressionRhythmEvent,
+} from "./progression-rhythm-store";
 import { canTieProgressionBeat, getRelativeBeatLocation } from "./progression-ties";
 
 export function updateProgressionBeatEventType(
@@ -205,32 +208,6 @@ export function removeProgressionRhythmEvent(
   return removeExplicitProgressionRhythmEvent(progression, barIndex, startStep);
 }
 
-function removeExplicitProgressionRhythmEvent(
-  progression: ChordProgression,
-  barIndex: number,
-  startStep: number,
-) {
-  const currentBar = progression.bars[barIndex];
-  if (!currentBar?.rhythm?.some((event) => event.startStep === startStep)) {
-    return progression;
-  }
-
-  const nextRhythm = currentBar.rhythm.filter((event) => event.startStep !== startStep);
-  return {
-    ...progression,
-    bars: progression.bars.map((bar, index) => {
-      if (index !== barIndex) {
-        return bar;
-      }
-      if (nextRhythm.length > 0) {
-        return { ...bar, rhythm: nextRhythm };
-      }
-      const { rhythm: _rhythm, ...barWithoutRhythm } = bar;
-      return barWithoutRhythm;
-    }),
-  };
-}
-
 export function applyProgressionBeatSubdivision(
   progression: ChordProgression,
   barIndex: number,
@@ -292,39 +269,5 @@ export function applyProgressionBeatSubdivision(
     bars: nextProgression.bars.map((bar, index) =>
       index === barIndex ? { ...bar, rhythm: nextRhythm } : bar,
     ),
-  };
-}
-
-function setProgressionRhythmEvent(
-  progression: ChordProgression,
-  barIndex: number,
-  nextEvent: ProgressionRhythmEvent,
-): ChordProgression {
-  const currentBar = progression.bars[barIndex];
-  if (!currentBar) {
-    return progression;
-  }
-
-  const isDefaultBeatEvent =
-    nextEvent.startStep % progressionStepsPerBeat === 0 &&
-    nextEvent.eventType === "hit" &&
-    nextEvent.durationSteps === progressionStepsPerBeat;
-  const nextRhythm = [
-    ...(currentBar.rhythm?.filter((event) => event.startStep !== nextEvent.startStep) ?? []),
-    ...(isDefaultBeatEvent ? [] : [nextEvent]),
-  ].sort((first, second) => first.startStep - second.startStep);
-
-  return {
-    ...progression,
-    bars: progression.bars.map((bar, index) => {
-      if (index !== barIndex) {
-        return bar;
-      }
-      if (nextRhythm.length > 0) {
-        return { ...bar, rhythm: nextRhythm };
-      }
-      const { rhythm: _rhythm, ...barWithoutRhythm } = bar;
-      return barWithoutRhythm;
-    }),
   };
 }
