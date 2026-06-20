@@ -9,7 +9,7 @@ import {
 import type {
   ProgressionBeatEventType,
   ProgressionDurationSteps,
-} from "./progression-model";
+} from "./progression/model";
 
 export type ProgressionRhythm =
   | "root-only"

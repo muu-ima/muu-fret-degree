@@ -3,7 +3,7 @@ import type {
   ProgressionBar,
   ProgressionBeat,
   ProgressionCell,
-} from "./progression-model";
+} from "./model";
 
 export function updateProgressionCell(
   progression: ChordProgression,

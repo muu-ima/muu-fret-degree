@@ -6,7 +6,7 @@ import {
   createPersistedProgressionSettings,
   parsePersistedProgressionSettings,
 } from "../lib/progression-persistence";
-import type { ChordProgression } from "../lib/progression-model";
+import type { ChordProgression } from "../lib/progression/model";
 
 const storageKey = "muu-fret-degree:progression-settings";
 

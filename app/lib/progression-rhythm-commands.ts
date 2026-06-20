@@ -4,7 +4,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionSubdivision,
-} from "./progression-model";
+} from "./progression/model";
 import {
   getProgressionBeatDuration,
   getProgressionBeatEventType,

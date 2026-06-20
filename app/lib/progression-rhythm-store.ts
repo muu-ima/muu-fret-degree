@@ -2,7 +2,7 @@ import {
   progressionStepsPerBeat,
   type ChordProgression,
   type ProgressionRhythmEvent,
-} from "./progression-model";
+} from "./progression/model";
 
 export function removeExplicitProgressionRhythmEvent(
   progression: ChordProgression,

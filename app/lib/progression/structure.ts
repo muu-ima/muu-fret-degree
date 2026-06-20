@@ -3,7 +3,7 @@ import type {
   ProgressionBar,
   ProgressionBeat,
   ProgressionCell,
-} from "./progression-model";
+} from "./model";
 
 export function resizeProgressionBars(bars: readonly ProgressionBar[], nextLength: number) {
   if (nextLength <= 0) {

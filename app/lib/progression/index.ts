@@ -14,7 +14,7 @@ export {
   type ProgressionSelection,
   type ProgressionSubdivision,
   type TimeSignature,
-} from "./progression-model";
+} from "./model";
 
 export {
   getProgressionBeat,
@@ -22,7 +22,7 @@ export {
   makeProgressionBeats,
   updateProgressionBeatChord,
   updateProgressionCell,
-} from "./progression-harmony";
+} from "./harmony";
 
 export {
   getProgressionBeatDuration,
@@ -31,9 +31,9 @@ export {
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,
   getProgressionSustainingEventAtStep,
-} from "./progression-rhythm";
+} from "../progression-rhythm";
 
-export { canSetProgressionRhythmDuration } from "./progression-rhythm-collision";
+export { canSetProgressionRhythmDuration } from "../progression-rhythm-collision";
 
 export {
   applyProgressionBeatSubdivision,
@@ -41,12 +41,12 @@ export {
   updateProgressionBeatDuration,
   updateProgressionBeatEventType,
   updateProgressionRhythmEvent,
-} from "./progression-rhythm-commands";
+} from "../progression-rhythm-commands";
 
 export {
   resizeProgressionBars,
   updateProgressionBarCount,
-} from "./progression-structure";
+} from "./structure";
 
 export {
   getCurrentProgressionBar,
@@ -56,10 +56,10 @@ export {
   isProgressionBeatStart,
   secondsPerBar,
   secondsPerBeat,
-} from "./progression-timeline";
+} from "./timeline";
 
 export {
   canTieProgressionBeat,
   countFollowingProgressionTies,
   getRelativeBeatLocation,
-} from "./progression-ties";
+} from "../progression-ties";

@@ -1,4 +1,4 @@
-import { getProgressionCellForBeat } from "./progression-harmony";
+import { getProgressionCellForBeat } from "./harmony";
 import {
   progressionStepsPerBeat,
   type ChordProgression,
@@ -7,7 +7,7 @@ import {
   type ProgressionPosition,
   type ProgressionSelection,
   type TimeSignature,
-} from "./progression-model";
+} from "./model";
 
 function normalizeNonNegative(value: number) {
   return Number.isFinite(value) && value > 0 ? value : 0;

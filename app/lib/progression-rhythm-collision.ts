@@ -1,7 +1,7 @@
 import type {
   ProgressionBar,
   ProgressionDurationSteps,
-} from "./progression-model";
+} from "./progression/model";
 
 export function canSetProgressionRhythmDuration(
   bar: ProgressionBar,

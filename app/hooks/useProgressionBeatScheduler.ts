@@ -6,7 +6,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionPosition,
-} from "../lib/progression-model";
+} from "../lib/progression/model";
 import type { ProgressionRhythm } from "../lib/progression-playback";
 import { getProgressionStepPlaybackRequest } from "../lib/progression-scheduler";
 import { useProgressionStepScheduler } from "./useProgressionStepScheduler";

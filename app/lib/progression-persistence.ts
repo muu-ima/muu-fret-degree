@@ -12,7 +12,7 @@ import type {
   ProgressionDurationSteps,
   ProgressionRhythmEvent,
   TimeSignature,
-} from "./progression-model";
+} from "./progression/model";
 
 export const progressionStorageVersion = 8;
 

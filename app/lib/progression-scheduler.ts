@@ -1,9 +1,9 @@
-import { getProgressionCellForBeat } from "./progression-harmony";
+import { getProgressionCellForBeat } from "./progression/harmony";
 import {
   progressionStepsPerBeat,
   type ChordProgression,
   type ProgressionPosition,
-} from "./progression-model";
+} from "./progression/model";
 import {
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,

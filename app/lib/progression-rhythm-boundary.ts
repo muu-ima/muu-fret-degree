@@ -1,7 +1,7 @@
 import type {
   ChordProgression,
   ProgressionRhythmEvent,
-} from "./progression-model";
+} from "./progression/model";
 import {
   removeExplicitProgressionRhythmEvent,
   setProgressionRhythmEvent,
