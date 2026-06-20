@@ -2,17 +2,13 @@
 
 import { useCallback } from "react";
 import {
-  countFollowingProgressionTies,
-  getProgressionBeatDuration,
-  getProgressionBeatEventType,
-  getProgressionCellForBeat,
-  isProgressionBeatStart,
   type ChordProgression,
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionPosition,
 } from "../lib/progression";
 import type { ProgressionRhythm } from "../lib/progression-playback";
+import { getProgressionStepPlaybackRequest } from "../lib/progression-scheduler";
 import { useProgressionStepScheduler } from "./useProgressionStepScheduler";
 
 type UseProgressionBeatSchedulerOptions = {
@@ -40,28 +36,22 @@ export function useProgressionBeatScheduler({
   const bars = progression.bars;
 
   const scheduleBeat = useCallback((stepPosition: ProgressionPosition) => {
-    if (!isProgressionBeatStart(stepPosition) || bars.length === 0) {
+    if (bars.length === 0) {
       return;
     }
 
-    const currentBarIndex = stepPosition.barIndex % bars.length;
-    const currentBar = bars[currentBarIndex];
-    const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
-    const nextBeatInBar = (stepPosition.beatInBar + 1) % beatsPerBar;
-    const nextBarIndex = nextBeatInBar === 0 ? (currentBarIndex + 1) % bars.length : currentBarIndex;
-    const nextRoot = getProgressionCellForBeat(bars[nextBarIndex], nextBeatInBar).root;
+    const request = getProgressionStepPlaybackRequest(progression, stepPosition);
+    if (!request) {
+      return;
+    }
 
     playBeat({
-      beatInBar: stepPosition.beatInBar,
-      beatEventType: getProgressionBeatEventType(currentBar, stepPosition.beatInBar),
-      durationSteps: getProgressionBeatDuration(currentBar, stepPosition.beatInBar),
-      followingTieBeats: countFollowingProgressionTies(
-        progression,
-        currentBarIndex,
-        stepPosition.beatInBar,
-      ),
+      beatInBar: request.beatInBar,
+      beatEventType: request.beatEventType,
+      durationSteps: request.durationSteps,
+      followingTieBeats: request.followingTieBeats,
       rhythm,
-      nextRoot,
+      nextRoot: request.nextRoot,
     });
   }, [bars, playBeat, progression, rhythm]);
 

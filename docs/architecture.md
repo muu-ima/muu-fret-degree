@@ -268,14 +268,15 @@ Transportの経過時間をコード進行上の位置へ変換する。
 
 ### `app/hooks/useProgressionBeatScheduler.ts`
 
-Transportの拍位置を、進行伴奏の発音要求へつなぐ。
+Transportの16分step位置を、進行伴奏の発音要求へつなぐ。
 
-- 再生中に拍が切り替わったことを検出する。
-- 同じ拍で発音要求が重複しないようにする。
+- 再生中に16分stepが切り替わったことを検出する。
+- 現在stepにRhythmイベントがある場合だけ発音要求を作る。
+- 同じstepで発音要求が重複しないようにする。
 - 次の実効拍からRootを求め、1拍overrideも伴奏へ反映する。
-- 現在拍、次Root、伴奏パターンを `useChordPlayback` へ渡す。
+- 現在拍、音価、次Root、伴奏パターンを `useChordPlayback` へ渡す。
 
-MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest / Tieを追加するときは、この境界で拍イベントを解釈してから発音処理へ渡す。
+MIDI番号の選択やWeb Audio APIの操作は持たない。1拍内に複数Hitがある場合、次拍のTieはその拍で最後に置かれたHitを延長する。
 
 ### `app/hooks/useProgressionStepScheduler.ts`
 
@@ -285,7 +286,7 @@ Transportの16分step位置が切り替わったことを一度だけ通知す�
 - 同じstepでcallbackが重複しないようにする。
 - 停止時に直前stepを破棄し、再開位置をもう一度通知できるようにする。
 
-現行のbeat schedulerは`stepInBeat === 0`だけを利用する。8分・16分・付点イベントを追加する段階で、同じstep通知へ細かなリズムschedulerを接続する。
+step schedulerは各16分位置を通知し、進行schedulerはその位置にRhythmイベントがある場合だけ発音する。拍頭にイベントがない既存データは、互換規則により4分音符のHitとして扱う。
 
 ### `app/hooks/useTransport.ts`
 
@@ -387,7 +388,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
-4/4では1拍を4step、1小節を16stepとして扱う。Full Editorは選択中の拍を`1 / e / & / a`へ展開し、任意stepのHit / Restを編集できる。現行の拍schedulerと小節カード描画は互換getterを通じて拍頭のRhythmイベントを参照するため、次段で任意stepの発音と譜面描画を接続する。Harmonyデータへタイミング情報は戻さない。
+4/4では1拍を4step、1小節を16stepとして扱う。Full Editorは選択中の拍を`1 / e / & / a`へ展開し、任意stepのHit / Restを編集できる。schedulerは各stepの明示イベントを発音し、小節カード描画は引き続き拍頭を中心に表示する。Harmonyデータへタイミング情報は戻さない。
 
 ### `app/lib/progression-playback.ts`
 
