@@ -122,6 +122,7 @@ describe("progression playback patterns", () => {
     [2, 0.25],
     [3, 0.375],
     [4, 0.5],
+    [6, 0.75],
   ] satisfies [ProgressionDurationSteps, number][])(
     "%s steps produce a %s second gate at 120 BPM",
     (durationSteps, expectedDuration) => {

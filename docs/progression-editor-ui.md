@@ -31,7 +31,7 @@ type ProgressionBeat = {
 
 type ProgressionRhythmEvent = {
   startStep: number;
-  durationSteps: 1 | 2 | 3 | 4;
+  durationSteps: 1 | 2 | 3 | 4 | 6;
   eventType: "hit" | "rest" | "tie";
 };
 
@@ -52,7 +52,7 @@ type ProgressionBar = {
 - Harmonyの拍上書きは`beats`、発音位置と音価は`rhythm`へ分けて保存する。
 - 拍頭にRhythmイベントがない場合は4分音符の`hit`とし、既定値と異なるイベントだけを明示的に保存する。
 
-現在は拍頭から始まる1/16、1/8、付点1/8、1/4、1拍単位のHit / Rest / Tieに加え、選択中の拍を4分割して任意stepへHit / Restを配置・再生できる。小節カードにも各拍の4step補助レーンを表示する。付点4分は次拍の途中まで跨ぐため、イベント重複規則を拡張する段階で追加する。
+現在は1/16、1/8、付点1/8、1/4、付点1/4と、1拍単位のHit / Rest / Tieに加え、選択中の拍を4分割して任意stepへHit / Restを配置・再生できる。小節カードにも各拍の4step補助レーンを表示する。付点4分が覆う次拍頭は再発音せず、途中へ明示Hitを置く場合は前の音価をその位置までへ短縮する。
 
 Tieは直前に有効なHitがある場合だけ選択できる。Tie元のHitをRestへ変更した場合は、音のないTieを残さないため、連続する後続TieもRestへ変更する。
 
@@ -336,7 +336,7 @@ type ProgressionBar = {
 };
 ```
 
-`RhythmEvent` は1小節を16分音符単位の16stepとして扱う。現行の`durationSteps`は4分音符を`4`、8分音符を`2`、付点8分音符を`3`として表現する。付点4分音符の`6`は任意step配置とイベント重複規則を実装するときに型へ追加する。Tieは現段階では独立イベントとして保存し、直前のHitを再発音せず延長する。
+`RhythmEvent` は1小節を16分音符単位の16stepとして扱う。`durationSteps`は4分音符を`4`、8分音符を`2`、付点8分音符を`3`、付点4分音符を`6`として表現する。Tieは独立イベントとして保存し、直前のHitを再発音せず延長する。
 
 Transportの`ProgressionPosition`は累積`stepIndex`、拍内`stepInBeat`、小節内`stepInBar`を持つ。既存の拍再生を維持したまま、このstep位置を細かなリズムイベントの発火基準へ段階的に接続する。
 
@@ -346,7 +346,7 @@ Transportの`ProgressionPosition`は累積`stepIndex`、拍内`stepInBeat`、小
 
 Start Positionは常に`1 / e / & / a`の4コマを表示し、音価とは分離する。選択拍には入力補助として`8ths ×2`と`16ths ×4`のRhythmプリセットを用意する。8分プリセットは`1 / &`へ2stepのHitを置き、16分プリセットは4位置すべてへ1stepのHitを置く。プリセットは選択拍のRhythmイベントを置き換える編集commandとして扱い、Undo / Redo対象にする。
 
-付点4分音符は6stepとして同じ16分グリッド上へ追加する。拍境界を越える音価になるため、後続イベントとの重複時に前の音価を短縮する規則と、小節境界を越える場合のTie表現を定めてから実装する。
+付点4分音符は6stepとして同じ16分グリッド上で扱う。現段階では小節内だけに配置でき、後続の明示イベントへ重なる場合は選択できない。小節境界を越える配置は、次小節へのTie表現と再生期間を定めてから追加する。
 
 `beats` はHarmonyだけを扱う。値がない場合は、各拍が所属する2拍セルのコードを継承する。Rhythmは`rhythm`へ集約し、保存形式v2-v6の拍内リズム情報はv7読み込み時に移行する。
 

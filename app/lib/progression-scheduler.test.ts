@@ -3,6 +3,7 @@ import {
   createDefaultProgression,
   getProgressionPosition,
   updateProgressionBeatEventType,
+  updateProgressionBeatDuration,
   updateProgressionRhythmEvent,
 } from "./progression";
 import { getProgressionStepPlaybackRequest } from "./progression-scheduler";
@@ -65,5 +66,20 @@ describe("progression step scheduling", () => {
     expect(getProgressionStepPlaybackRequest(progression, positionAtStep(3))).toMatchObject({
       followingTieBeats: 1,
     });
+  });
+
+  it("does not retrigger or overextend a dotted quarter on the next beat", () => {
+    const progression = updateProgressionBeatDuration(
+      createDefaultProgression(120),
+      0,
+      0,
+      6,
+    );
+
+    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(0))).toMatchObject({
+      durationSteps: 6,
+      followingTieBeats: 0,
+    });
+    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(4))).toBeUndefined();
   });
 });

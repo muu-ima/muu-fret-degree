@@ -9,7 +9,7 @@ export type ProgressionCell = {
 };
 
 export type ProgressionBeatEventType = "hit" | "rest" | "tie";
-export type ProgressionDurationSteps = 1 | 2 | 3 | 4;
+export type ProgressionDurationSteps = 1 | 2 | 3 | 4 | 6;
 export type ProgressionSubdivision = "eighths" | "sixteenths";
 
 export type ProgressionBeat = {
@@ -357,11 +357,13 @@ function setProgressionBeatEventType(
     return progression;
   }
 
-  return setProgressionRhythmEvent(progression, barIndex, {
-    startStep: beatIndex * progressionStepsPerBeat,
-    durationSteps: getProgressionBeatDuration(currentBar, beatIndex),
+  return updateProgressionRhythmEvent(
+    progression,
+    barIndex,
+    beatIndex * progressionStepsPerBeat,
     eventType,
-  });
+    getProgressionBeatDuration(currentBar, beatIndex),
+  );
 }
 
 export function updateProgressionBeatDuration(
@@ -380,11 +382,13 @@ export function updateProgressionBeatDuration(
     return progression;
   }
 
-  return setProgressionRhythmEvent(progression, barIndex, {
-    startStep: beatIndex * progressionStepsPerBeat,
+  return updateProgressionRhythmEvent(
+    progression,
+    barIndex,
+    beatIndex * progressionStepsPerBeat,
+    getProgressionBeatEventType(currentBar, beatIndex),
     durationSteps,
-    eventType: getProgressionBeatEventType(currentBar, beatIndex),
-  });
+  );
 }
 
 export function updateProgressionRhythmEvent(
@@ -395,13 +399,7 @@ export function updateProgressionRhythmEvent(
   durationSteps: ProgressionDurationSteps,
 ): ChordProgression {
   const currentBar = progression.bars[barIndex];
-  if (
-    !currentBar ||
-    !Number.isInteger(startStep) ||
-    startStep < 0 ||
-    startStep >= 16 ||
-    startStep + durationSteps > 16
-  ) {
+  if (!currentBar || !canSetProgressionRhythmDuration(currentBar, startStep, durationSteps)) {
     return progression;
   }
 
@@ -435,6 +433,26 @@ export function updateProgressionRhythmEvent(
     durationSteps,
     eventType,
   });
+}
+
+export function canSetProgressionRhythmDuration(
+  bar: ProgressionBar,
+  startStep: number,
+  durationSteps: ProgressionDurationSteps,
+) {
+  if (
+    !Number.isInteger(startStep) ||
+    startStep < 0 ||
+    startStep >= 16 ||
+    startStep + durationSteps > 16
+  ) {
+    return false;
+  }
+
+  const nextExplicitEvent = bar.rhythm
+    ?.filter((event) => event.startStep > startStep)
+    .sort((first, second) => first.startStep - second.startStep)[0];
+  return !nextExplicitEvent || startStep + durationSteps <= nextExplicitEvent.startStep;
 }
 
 export function removeProgressionRhythmEvent(
@@ -550,10 +568,9 @@ export function getProgressionBeatEventType(
   bar: ProgressionBar,
   beatIndex: number,
 ): ProgressionBeatEventType {
-  return (
-    getProgressionRhythmEventAtStep(bar, beatIndex * progressionStepsPerBeat)?.eventType ??
-    "hit"
-  );
+  const startStep = beatIndex * progressionStepsPerBeat;
+  return getProgressionRhythmEventAtStep(bar, startStep)?.eventType ??
+    (getProgressionSustainingEventAtStep(bar, startStep) ? "tie" : "hit");
 }
 
 export function getProgressionBeatDuration(
@@ -573,6 +590,16 @@ export function getProgressionRhythmEventAtStep(
   const explicitEvent = bar.rhythm?.find((event) => event.startStep === startStep);
   if (explicitEvent) {
     return explicitEvent;
+  }
+
+  const isCoveredByExplicitHit = bar.rhythm?.some(
+    (event) =>
+      event.eventType === "hit" &&
+      event.startStep < startStep &&
+      event.startStep + event.durationSteps > startStep,
+  );
+  if (isCoveredByExplicitHit) {
+    return undefined;
   }
 
   if (startStep >= 0 && startStep < 16 && startStep % progressionStepsPerBeat === 0) {

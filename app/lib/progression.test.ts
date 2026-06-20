@@ -222,6 +222,24 @@ describe("progression beat events", () => {
     expect(getProgressionSustainingEventAtStep(progression.bars[0], 3)).toBeUndefined();
   });
 
+  it("lets a dotted-quarter hit cover the following beat head", () => {
+    const progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 6);
+    const events = getProgressionRhythmEvents(progression.bars[0]);
+
+    expect(events.map((event) => event.startStep)).toEqual([0, 8, 12]);
+    expect(getProgressionBeatEventType(progression.bars[0], 1)).toBe("tie");
+    expect(getProgressionSustainingEventAtStep(progression.bars[0], 4)?.startStep).toBe(0);
+  });
+
+  it("shortens a dotted-quarter hit when a new hit is added on the covered beat", () => {
+    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 6);
+
+    progression = updateProgressionBeatEventType(progression, 0, 1, "hit");
+
+    expect(getProgressionBeatDuration(progression.bars[0], 0)).toBe(4);
+    expect(getProgressionBeatEventType(progression.bars[0], 1)).toBe("hit");
+  });
+
   it("applies two eighth-note hits to only the selected beat", () => {
     const progression = applyProgressionBeatSubdivision(
       createDefaultProgression(),

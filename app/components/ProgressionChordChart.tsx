@@ -70,7 +70,9 @@ export function ProgressionChordChart({
                         ? "8"
                         : durationSteps === 3
                           ? "8·"
-                          : "4";
+                          : durationSteps === 6
+                            ? "4·"
+                            : "4";
                   return (
                     <button
                       key={beatIndex}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
 import { type ChordType } from "../lib/music";
 import {
+  canSetProgressionRhythmDuration,
   canTieProgressionBeat,
   getProgressionBeatDuration,
   getProgressionBeatEventType,
@@ -342,17 +343,22 @@ export function ProgressionEditor({
                 { steps: 2, label: "1/8" },
                 { steps: 3, label: "1/8 ·" },
                 { steps: 4, label: "1/4" },
+                { steps: 6, label: "1/4 ·" },
               ] as const
             ).map((option) => {
               const isActive = selectedBeatDuration === option.steps;
-              const fitsInBeat = option.steps <= progressionStepsPerBeat - selectedStepInBeat;
+              const canUseDuration = canSetProgressionRhythmDuration(
+                selectedBar,
+                selectedStartStep,
+                option.steps,
+              );
               return (
                 <button
                   key={option.steps}
                   type="button"
                   className={isActive ? "active" : ""}
                   aria-pressed={isActive}
-                  disabled={selectedBeatEventType !== "hit" || !fitsInBeat}
+                  disabled={selectedBeatEventType !== "hit" || !canUseDuration}
                   onClick={() => {
                     if (selectedStepInBeat === 0) {
                       onBeatDurationChange(selectedBarIndex, selectedBeatIndex, option.steps);

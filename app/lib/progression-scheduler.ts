@@ -38,7 +38,7 @@ export function getProgressionStepPlaybackRequest(
     beatInBar: position.beatInBar,
     beatEventType: rhythmEvent.eventType,
     durationSteps: rhythmEvent.durationSteps,
-    followingTieBeats: !hasLaterEventInBeat
+    followingTieBeats: !hasLaterEventInBeat && rhythmEvent.durationSteps <= progressionStepsPerBeat
       ? countFollowingProgressionTies(
           progression,
           currentBarIndex,
