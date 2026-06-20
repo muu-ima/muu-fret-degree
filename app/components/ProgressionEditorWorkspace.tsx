@@ -18,6 +18,7 @@ export function ProgressionEditorWorkspace() {
     undo,
     updateBarCount,
     updateBeatChord,
+    updateBeatDuration,
     updateBeatEventType,
     updateCell,
   } = useProgressionSession();
@@ -93,6 +94,7 @@ export function ProgressionEditorWorkspace() {
         chordTypes={chordTypes}
         onBarCountChange={updateBarCount}
         onBeatChordChange={updateBeatChord}
+        onBeatDurationChange={updateBeatDuration}
         onBeatEventTypeChange={updateBeatEventType}
         onCellChange={updateCell}
       />

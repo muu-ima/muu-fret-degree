@@ -5,11 +5,13 @@ import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
 import { type ChordType } from "../lib/music";
 import {
   canTieProgressionBeat,
+  getProgressionBeatDuration,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   type ProgressionBar,
   type ProgressionBeatEventType,
   type ProgressionCell,
+  type ProgressionDurationSteps,
 } from "../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
 
@@ -22,6 +24,11 @@ type ProgressionEditorProps = {
   chordTypes: ChordType[];
   onBarCountChange: (barCount: number) => void;
   onBeatChordChange: (barIndex: number, beatIndex: number, cell: ProgressionCell | undefined) => void;
+  onBeatDurationChange: (
+    barIndex: number,
+    beatIndex: number,
+    durationSteps: ProgressionDurationSteps,
+  ) => void;
   onBeatEventTypeChange: (
     barIndex: number,
     beatIndex: number,
@@ -39,6 +46,7 @@ export function ProgressionEditor({
   chordTypes,
   onBarCountChange,
   onBeatChordChange,
+  onBeatDurationChange,
   onBeatEventTypeChange,
   onCellChange,
 }: ProgressionEditorProps) {
@@ -61,6 +69,9 @@ export function ProgressionEditor({
   const selectedBeatEventType = selectedBar
     ? getProgressionBeatEventType(selectedBar, selectedBeatIndex)
     : "hit";
+  const selectedBeatDuration = selectedBar
+    ? getProgressionBeatDuration(selectedBar, selectedBeatIndex)
+    : 4;
   const canTieSelectedBeat = canTieProgressionBeat(
     bars,
     selectedBarIndex,
@@ -186,6 +197,40 @@ export function ProgressionEditor({
                   }
                 >
                   {eventType === "hit" ? "Hit" : eventType === "rest" ? "Rest" : "Tie"}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="progressionApplySection">
+          <span className="controlLabel">Note Value</span>
+          <div
+            className="progressionApplyTabs progressionDurationTabs"
+            role="group"
+            aria-label="拍の音価"
+          >
+            {(
+              [
+                { steps: 1, label: "1/16" },
+                { steps: 2, label: "1/8" },
+                { steps: 3, label: "1/8." },
+                { steps: 4, label: "1/4" },
+              ] as const
+            ).map((option) => {
+              const isActive = selectedBeatDuration === option.steps;
+              return (
+                <button
+                  key={option.steps}
+                  type="button"
+                  className={isActive ? "active" : ""}
+                  aria-pressed={isActive}
+                  disabled={selectedBeatEventType !== "hit"}
+                  onClick={() =>
+                    onBeatDurationChange(selectedBarIndex, selectedBeatIndex, option.steps)
+                  }
+                >
+                  {option.label}
                 </button>
               );
             })}

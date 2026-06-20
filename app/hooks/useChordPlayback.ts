@@ -10,7 +10,10 @@ import {
   pickLowestBassNoteForDegree,
 } from "../lib/music";
 import { planProgressionBeat, type ProgressionRhythm } from "../lib/progression-playback";
-import type { ProgressionBeatEventType } from "../lib/progression";
+import type {
+  ProgressionBeatEventType,
+  ProgressionDurationSteps,
+} from "../lib/progression";
 
 export type ArpeggioPattern = "root-only" | "chord-order" | "third-first" | "lowest-per-degree";
 
@@ -75,12 +78,14 @@ export function useChordPlayback({
     ({
       beatInBar,
       beatEventType,
+      durationSteps,
       followingTieBeats,
       rhythm,
       nextRoot,
     }: {
       beatInBar: number;
       beatEventType?: ProgressionBeatEventType;
+      durationSteps?: ProgressionDurationSteps;
       followingTieBeats?: number;
       rhythm: ProgressionRhythm;
       nextRoot?: string;
@@ -91,6 +96,7 @@ export function useChordPlayback({
         beatEventType,
         bpm,
         chordNotes,
+        durationSteps,
         followingTieBeats,
         nextRoot,
         notes,

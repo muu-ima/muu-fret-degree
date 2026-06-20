@@ -305,7 +305,7 @@ Transportの16分step位置が切り替わったことを一度だけ通知す�
 - BPMを進行データへ同期する。
 - 2拍セルの更新処理を一元化する。
 - 小節数変更を一元化する。
-- 1拍単位のHit / Rest / Tie変更を一元化する。
+- 1拍単位のHit / Rest / Tieと音価変更を一元化する。
 - 進行編集のUndo / Redo履歴を最大100件保持する。
 - `usePersistedProgression` を通じて保存と読み込みを行う。
 
@@ -340,7 +340,7 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 - 進行の拍子と小節データを `localStorage` へ保存する。
 - 保存値が壊れている場合や、Root / Chord が現在の候補にない場合は無視する。
 - 読み込み時は既存 state の BPM を保ったまま、進行データだけ復元する。
-- v5でHit / Rest / Tieを保存し、v1-v4の未指定拍は暗黙のHitとして読み込む。
+- v6でHit / Rest / Tieと1-4stepの音価を保存し、v1-v5の音価未指定拍は4分音符として読み込む。
 
 ### `app/hooks/usePersistedPracticeSettings.ts`
 
@@ -375,8 +375,9 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 進行データから、現在参照すべき小節と2拍セルを選ぶ。
 - 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
 - 拍の`eventType`未指定をHitとして扱い、RestとTieだけを明示的に保持する。
+- 拍の`durationSteps`未指定を4分音符として扱い、1/16・1/8・付点1/8だけを明示的に保持する。
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
-- 2拍セル、拍オーバーライド、Hit / Rest / Tie、小節数の更新を純粋関数として提供する。
+- 2拍セル、拍オーバーライド、Hit / Rest / Tie、音価、小節数の更新を純粋関数として提供する。
 - Hitの後ろに続くTie数を、小節跨ぎを含めて最大1ループ未満で数える。
 - 直前に有効なHitがないTieは拒否し、Tie元のHitをRestへ変えた場合は後続TieもRestへ正規化する。
 
@@ -393,6 +394,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 4 Beatでは次の実効拍のRootへ向かうアプローチ音を選ぶ。
 - Rest拍では再生予定音を返さない。
 - Tie拍では再発音せず、直前のHitが生成する最後の予定音をTie拍数ぶん延長する。
+- Hitの1-4step音価に収まる予定音だけを残し、最後の音を音価終端まで伸ばす。
 
 React、Transport、AudioContextには依存しない。付点を含む音価は16分音符単位のstepとdurationから秒数へ変換し、リズムスラッシュの表示と再生で同じデータを参照する。
 

@@ -11,7 +11,7 @@ import type {
 } from "../lib/progression";
 
 const storageKey = "muu-fret-degree:progression-settings";
-const storageVersion = 5;
+const storageVersion = 6;
 
 type PersistedProgressionSettings = {
   version: number;
@@ -77,6 +77,11 @@ function isProgressionBar(value: unknown, roots: string[], chordTypes: ChordType
 function isProgressionBeat(value: unknown, roots: string[], chordTypes: ChordType[]): value is ProgressionBeat {
   return (
     isRecord(value) &&
+    (value.durationSteps === undefined ||
+      value.durationSteps === 1 ||
+      value.durationSteps === 2 ||
+      value.durationSteps === 3 ||
+      value.durationSteps === 4) &&
     (value.eventType === undefined ||
       value.eventType === "hit" ||
       value.eventType === "rest" ||
@@ -176,6 +181,12 @@ export function usePersistedProgression({
       storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
         ? storedSettings.bars
         : null;
+    const versionFiveBars =
+      storedSettings.version === 5 &&
+      Array.isArray(storedSettings.bars) &&
+      storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
+        ? storedSettings.bars
+        : null;
     const legacyBars =
       storedSettings.version === 1 &&
       Array.isArray(storedSettings.bars) &&
@@ -183,7 +194,8 @@ export function usePersistedProgression({
         ? storedSettings.bars
         : null;
 
-    const currentBars = nextBars ?? versionFourBars ?? versionThreeBars ?? versionTwoBars;
+    const currentBars =
+      nextBars ?? versionFiveBars ?? versionFourBars ?? versionThreeBars ?? versionTwoBars;
 
     if (isTimeSignature(storedSettings.timeSignature) && currentBars && currentBars.length > 0) {
       const timeSignature = storedSettings.timeSignature;

@@ -3,6 +3,7 @@
 import type { ChordType } from "../lib/music";
 import { formatChordSymbol } from "../lib/chord-symbol";
 import {
+  getProgressionBeatDuration,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   type ProgressionBar,
@@ -56,18 +57,32 @@ export function ProgressionChordChart({
                   const isSelected = barIndex === selectedBarIndex && beatIndex === selectedBeatIndex;
                   const cell = getProgressionCellForBeat(bar, beatIndex);
                   const eventType = getProgressionBeatEventType(bar, beatIndex);
+                  const durationSteps = getProgressionBeatDuration(bar, beatIndex);
+                  const durationLabel =
+                    durationSteps === 1
+                      ? "16"
+                      : durationSteps === 2
+                        ? "8"
+                        : durationSteps === 3
+                          ? "8·"
+                          : "4";
                   return (
                     <button
                       key={beatIndex}
                       type="button"
                       className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${isSelected ? " selected" : ""}`}
-                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : eventType === "tie" ? "Tie" : "Hit"}`}
+                      aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : eventType === "tie" ? "Tie" : `Hit, ${durationLabel}`}`}
                       aria-pressed={isSelected}
                       onClick={() => onBeatSelect(barIndex, beatIndex)}
                     >
                       <span className="progressionChartSlash" aria-hidden="true">
                         {eventType === "rest" ? "—" : eventType === "tie" ? "⌒" : "/"}
                       </span>
+                      {eventType === "hit" ? (
+                        <span className="progressionChartDuration" aria-hidden="true">
+                          {durationLabel}
+                        </span>
+                      ) : null}
                       <span className="progressionChartBeatNumber" aria-hidden="true">
                         {beatIndex + 1}
                       </span>

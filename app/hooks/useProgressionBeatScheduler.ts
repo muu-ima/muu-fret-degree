@@ -3,11 +3,13 @@
 import { useCallback } from "react";
 import {
   countFollowingProgressionTies,
+  getProgressionBeatDuration,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   isProgressionBeatStart,
   type ChordProgression,
   type ProgressionBeatEventType,
+  type ProgressionDurationSteps,
   type ProgressionPosition,
 } from "../lib/progression";
 import type { ProgressionRhythm } from "../lib/progression-playback";
@@ -18,6 +20,7 @@ type UseProgressionBeatSchedulerOptions = {
   playBeat: (options: {
     beatInBar: number;
     beatEventType?: ProgressionBeatEventType;
+    durationSteps?: ProgressionDurationSteps;
     followingTieBeats?: number;
     rhythm: ProgressionRhythm;
     nextRoot?: string;
@@ -51,6 +54,7 @@ export function useProgressionBeatScheduler({
     playBeat({
       beatInBar: stepPosition.beatInBar,
       beatEventType: getProgressionBeatEventType(currentBar, stepPosition.beatInBar),
+      durationSteps: getProgressionBeatDuration(currentBar, stepPosition.beatInBar),
       followingTieBeats: countFollowingProgressionTies(
         progression,
         currentBarIndex,

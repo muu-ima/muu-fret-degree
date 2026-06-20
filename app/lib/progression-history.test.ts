@@ -6,6 +6,8 @@ import {
 import {
   createDefaultProgression,
   getProgressionBeatEventType,
+  getProgressionBeatDuration,
+  updateProgressionBeatDuration,
   updateProgressionBeatEventType,
   updateProgressionCell,
 } from "./progression";
@@ -48,5 +50,18 @@ describe("progression history", () => {
 
     history = progressionHistoryReducer(history, { type: "redo" });
     expect(getProgressionBeatEventType(history.present.bars[0], 2)).toBe("rest");
+  });
+
+  it("tracks note-value edits in undo history", () => {
+    let history = createProgressionHistory(createDefaultProgression());
+
+    history = progressionHistoryReducer(history, {
+      type: "commit",
+      update: (progression) => updateProgressionBeatDuration(progression, 0, 0, 3),
+    });
+    expect(getProgressionBeatDuration(history.present.bars[0], 0)).toBe(3);
+
+    history = progressionHistoryReducer(history, { type: "undo" });
+    expect(getProgressionBeatDuration(history.present.bars[0], 0)).toBe(4);
   });
 });

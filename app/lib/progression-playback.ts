@@ -6,7 +6,7 @@ import {
   pitchClassOf,
   sharpPitchClasses,
 } from "./music";
-import type { ProgressionBeatEventType } from "./progression";
+import type { ProgressionBeatEventType, ProgressionDurationSteps } from "./progression";
 
 export type ProgressionRhythm =
   | "root-only"
@@ -26,6 +26,7 @@ type PlanProgressionBeatOptions = {
   beatEventType?: ProgressionBeatEventType;
   bpm: number;
   chordNotes: ChordNote[];
+  durationSteps?: ProgressionDurationSteps;
   followingTieBeats?: number;
   nextRoot?: string;
   notes: FretNote[];
@@ -38,19 +39,30 @@ function scheduleNote(note: FretNote | undefined, duration: number): ScheduledBa
 
 function extendLastNoteForTies(
   events: ScheduledBassNote[],
+  durationSteps: ProgressionDurationSteps,
   followingTieBeats: number,
   bpm: number,
 ) {
-  if (events.length === 0 || followingTieBeats <= 0) {
-    return events;
+  if (events.length === 0) {
+    return [];
   }
 
   const beatDuration = 60 / Math.max(1, bpm);
-  return events.map((event, index) =>
-    index === events.length - 1
-      ? { ...event, duration: event.duration + beatDuration * followingTieBeats }
-      : event,
-  );
+  const targetDuration = (beatDuration * durationSteps) / 4;
+  const eventsWithinDuration = events.filter((event) => event.startOffset < targetDuration);
+
+  return eventsWithinDuration.map((event, index) => {
+    const isLastEvent = index === eventsWithinDuration.length - 1;
+    const nextStartOffset = eventsWithinDuration[index + 1]?.startOffset ?? targetDuration;
+    const availableDuration = Math.max(0.04, nextStartOffset - event.startOffset);
+
+    return {
+      ...event,
+      duration: isLastEvent
+        ? availableDuration + beatDuration * followingTieBeats
+        : Math.min(event.duration, availableDuration),
+    };
+  });
 }
 
 export function planProgressionBeat({
@@ -58,6 +70,7 @@ export function planProgressionBeat({
   beatEventType = "hit",
   bpm,
   chordNotes,
+  durationSteps = 4,
   followingTieBeats = 0,
   nextRoot,
   notes,
@@ -72,6 +85,7 @@ export function planProgressionBeat({
   if (rhythm === "root-only") {
     return extendLastNoteForTies(
       scheduleNote(pickLowestBassNoteForDegree(notes, "1"), beatInCell === 0 ? 0.85 : 0.6),
+      durationSteps,
       followingTieBeats,
       bpm,
     );
@@ -95,6 +109,7 @@ export function planProgressionBeat({
         startOffset: index * (beatDuration / 2),
         duration: beatDuration * 0.44,
       })),
+      durationSteps,
       followingTieBeats,
       bpm,
     );
@@ -113,6 +128,7 @@ export function planProgressionBeat({
       .sort((first, second) => first.midi - second.midi)[0];
     return extendLastNoteForTies(
       scheduleNote(approachNote, 0.5),
+      durationSteps,
       followingTieBeats,
       bpm,
     );
@@ -128,6 +144,7 @@ export function planProgressionBeat({
         pickLowestBassNoteForDegree(notes, degree ?? chordNotes[1]?.degree ?? "1"),
         0.72,
       ),
+      durationSteps,
       followingTieBeats,
       bpm,
     );
@@ -139,6 +156,7 @@ export function planProgressionBeat({
       chordNote ? pickLowestBassNoteForDegree(notes, chordNote.degree) : undefined,
       beatInCell === 0 ? 0.85 : 0.6,
     ),
+    durationSteps,
     followingTieBeats,
     bpm,
   );

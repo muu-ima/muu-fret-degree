@@ -4,12 +4,14 @@ import {
   countFollowingProgressionTies,
   createDefaultProgression,
   getProgressionBeatEventType,
+  getProgressionBeatDuration,
   getProgressionCellForBeat,
   getProgressionPosition,
   isProgressionBeatStart,
   progressionStepsPerBeat,
   updateProgressionBeatChord,
   updateProgressionBeatEventType,
+  updateProgressionBeatDuration,
 } from "./progression";
 
 describe("progression position", () => {
@@ -143,5 +145,19 @@ describe("progression beat events", () => {
     expect(getProgressionBeatEventType(progression.bars[0], 1)).toBe("rest");
     expect(getProgressionBeatEventType(progression.bars[0], 2)).toBe("rest");
     expect(getProgressionBeatEventType(progression.bars[0], 3)).toBe("hit");
+  });
+
+  it("stores short note values and removes the default quarter-note value", () => {
+    const progression = createDefaultProgression();
+
+    expect(getProgressionBeatDuration(progression.bars[0], 0)).toBe(4);
+
+    const dottedEighth = updateProgressionBeatDuration(progression, 0, 0, 3);
+    expect(getProgressionBeatDuration(dottedEighth.bars[0], 0)).toBe(3);
+    expect(dottedEighth.bars[0].beats?.[0].durationSteps).toBe(3);
+
+    const quarter = updateProgressionBeatDuration(dottedEighth, 0, 0, 4);
+    expect(getProgressionBeatDuration(quarter.bars[0], 0)).toBe(4);
+    expect(quarter.bars[0].beats).toBeUndefined();
   });
 });
