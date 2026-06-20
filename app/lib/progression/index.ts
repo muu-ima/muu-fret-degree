@@ -63,3 +63,14 @@ export {
   countFollowingProgressionTies,
   getRelativeBeatLocation,
 } from "./rhythm/ties";
+
+export {
+  createProgressionVirtualTimeline,
+  progressionStepsPerBar,
+  progressionVirtualLoopCount,
+  validateProgressionRhythmPlacement,
+  type ProgressionPlacementCollisionReason,
+  type ProgressionPlacementValidation,
+  type ProgressionVirtualRhythmEvent,
+  type ProgressionVirtualTimeline,
+} from "./rhythm/timeline";
