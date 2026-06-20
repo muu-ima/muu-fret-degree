@@ -42,6 +42,8 @@ export function EditorCombobox({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [popoverSide, setPopoverSide] = useState<"top" | "bottom">("bottom");
+  const [listMaxHeight, setListMaxHeight] = useState(260);
   const selectedOption = options.find((option) => option.value === value);
   const filteredOptions = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -66,9 +68,32 @@ export function EditorCombobox({
       return;
     }
 
+    const updatePopoverLayout = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) {
+        return;
+      }
+
+      const rect = trigger.getBoundingClientRect();
+      const viewportGap = 12;
+      const popoverChromeHeight = 58;
+      const availableBelow = window.innerHeight - rect.bottom - viewportGap;
+      const availableAbove = rect.top - viewportGap;
+      const nextSide = availableBelow < 240 && availableAbove > availableBelow
+        ? "top"
+        : "bottom";
+      const availableHeight = nextSide === "top" ? availableAbove : availableBelow;
+
+      setPopoverSide(nextSide);
+      setListMaxHeight(Math.max(96, Math.min(260, availableHeight - popoverChromeHeight)));
+    };
+
     setQuery("");
     setActiveIndex(Math.max(options.findIndex((option) => option.value === value), 0));
-    window.requestAnimationFrame(() => inputRef.current?.focus());
+    window.requestAnimationFrame(() => {
+      updatePopoverLayout();
+      inputRef.current?.focus();
+    });
 
     const handlePointerDown = (event: PointerEvent) => {
       if (!wrapperRef.current?.contains(event.target as Node)) {
@@ -76,7 +101,13 @@ export function EditorCombobox({
       }
     };
     document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("resize", updatePopoverLayout);
+    window.addEventListener("scroll", updatePopoverLayout, true);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("resize", updatePopoverLayout);
+      window.removeEventListener("scroll", updatePopoverLayout, true);
+    };
   }, [isOpen, options, value]);
 
   useEffect(() => {
@@ -140,7 +171,7 @@ export function EditorCombobox({
       </button>
 
       {isOpen ? (
-        <div className="editorComboboxPopover">
+        <div className={`editorComboboxPopover ${popoverSide}`}>
           <div className="editorComboboxSearch">
             <LuSearch aria-hidden="true" />
             <input
@@ -162,7 +193,12 @@ export function EditorCombobox({
               onKeyDown={handleInputKeyDown}
             />
           </div>
-          <div id={listboxId} className="editorComboboxList" role="listbox">
+          <div
+            id={listboxId}
+            className="editorComboboxList"
+            role="listbox"
+            style={{ maxHeight: listMaxHeight }}
+          >
             {filteredOptions.length === 0 ? (
               <p className="editorComboboxEmpty">{emptyMessage}</p>
             ) : (
