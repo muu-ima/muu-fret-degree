@@ -6,6 +6,7 @@ import {
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   getProgressionPosition,
+  isProgressionBeatStart,
   progressionStepsPerBeat,
   updateProgressionBeatChord,
   updateProgressionBeatEventType,
@@ -43,6 +44,13 @@ describe("progression position", () => {
       stepInBeat: 0,
       stepInBar: 0,
     });
+  });
+
+  it("identifies only the first step of each beat as a beat start", () => {
+    const timeSignature = { beatsPerBar: 4, beatUnit: 4 };
+
+    expect(isProgressionBeatStart(getProgressionPosition(0.125, 120, timeSignature))).toBe(false);
+    expect(isProgressionBeatStart(getProgressionPosition(0.5, 120, timeSignature))).toBe(true);
   });
 });
 

@@ -277,6 +277,16 @@ Transportの拍位置を、進行伴奏の発音要求へつなぐ。
 
 MIDI番号の選択やWeb Audio APIの操作は持たない。将来Hit / Rest / Tieを追加するときは、この境界で拍イベントを解釈してから発音処理へ渡す。
 
+### `app/hooks/useProgressionStepScheduler.ts`
+
+Transportの16分step位置が切り替わったことを一度だけ通知する。
+
+- 再生開始時と各`stepIndex`の変化を検出する。
+- 同じstepでcallbackが重複しないようにする。
+- 停止時に直前stepを破棄し、再開位置をもう一度通知できるようにする。
+
+現行のbeat schedulerは`stepInBeat === 0`だけを利用する。8分・16分・付点イベントを追加する段階で、同じstep通知へ細かなリズムschedulerを接続する。
+
 ### `app/hooks/useTransport.ts`
 
 再生対象に依存しないTransportの時計を担当する。

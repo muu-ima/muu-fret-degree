@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback } from "react";
 import {
   countFollowingProgressionTies,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
+  isProgressionBeatStart,
   type ChordProgression,
   type ProgressionBeatEventType,
   type ProgressionPosition,
 } from "../lib/progression";
 import type { ProgressionRhythm } from "../lib/progression-playback";
+import { useProgressionStepScheduler } from "./useProgressionStepScheduler";
 
 type UseProgressionBeatSchedulerOptions = {
   isRunning: boolean;
@@ -32,38 +34,36 @@ export function useProgressionBeatScheduler({
   progression,
   rhythm,
 }: UseProgressionBeatSchedulerOptions) {
-  const lastBeatRef = useRef<number | null>(null);
-  const { barIndex, beatIndex, beatInBar } = position;
   const bars = progression.bars;
 
-  useEffect(() => {
-    if (!isRunning || bars.length === 0) {
-      lastBeatRef.current = null;
+  const scheduleBeat = useCallback((stepPosition: ProgressionPosition) => {
+    if (!isProgressionBeatStart(stepPosition) || bars.length === 0) {
       return;
     }
 
-    if (lastBeatRef.current === beatIndex) {
-      return;
-    }
-
-    lastBeatRef.current = beatIndex;
-    const currentBarIndex = barIndex % bars.length;
+    const currentBarIndex = stepPosition.barIndex % bars.length;
     const currentBar = bars[currentBarIndex];
     const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
-    const nextBeatInBar = (beatInBar + 1) % beatsPerBar;
+    const nextBeatInBar = (stepPosition.beatInBar + 1) % beatsPerBar;
     const nextBarIndex = nextBeatInBar === 0 ? (currentBarIndex + 1) % bars.length : currentBarIndex;
     const nextRoot = getProgressionCellForBeat(bars[nextBarIndex], nextBeatInBar).root;
 
     playBeat({
-      beatInBar,
-      beatEventType: getProgressionBeatEventType(currentBar, beatInBar),
+      beatInBar: stepPosition.beatInBar,
+      beatEventType: getProgressionBeatEventType(currentBar, stepPosition.beatInBar),
       followingTieBeats: countFollowingProgressionTies(
         progression,
         currentBarIndex,
-        beatInBar,
+        stepPosition.beatInBar,
       ),
       rhythm,
       nextRoot,
     });
-  }, [barIndex, bars, beatIndex, beatInBar, isRunning, playBeat, progression.timeSignature.beatsPerBar, rhythm]);
+  }, [bars, playBeat, progression, rhythm]);
+
+  useProgressionStepScheduler({
+    isRunning,
+    onStep: scheduleBeat,
+    position,
+  });
 }

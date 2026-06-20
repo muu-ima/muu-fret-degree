@@ -120,6 +120,10 @@ export function getProgressionPosition(
   };
 }
 
+export function isProgressionBeatStart(position: ProgressionPosition) {
+  return position.stepInBeat === 0;
+}
+
 export function getCurrentProgressionBar(
   progression: ChordProgression,
   elapsedSeconds: number,
