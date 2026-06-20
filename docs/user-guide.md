@@ -131,6 +131,8 @@ Count-inを設定してProgressionの `Play` を押すと、進行を先頭へ�
 
 `/progression` はコード進行の専用編集画面です。コード譜を見ながら、1小節を `Beats 1-2` と `Beats 3-4` の2セルに分けてRootとChordを設定します。
 
+RootとChordは検索可能なComboboxから選択します。ボタンを押して候補を開き、文字入力または上下キーで候補を絞り、Enterで確定できます。Escapeまたは外側クリックで閉じます。
+
 各Beatでは適用範囲を切り替えられます。
 
 - `Beats 1-2 / Beats 3-4`: 既存の2拍セルを編集
