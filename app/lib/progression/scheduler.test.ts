@@ -83,7 +83,7 @@ describe("progression step scheduling", () => {
     expect(getProgressionStepPlaybackRequest(progression, positionAtStep(4))).toBeUndefined();
   });
 
-  it("uses an explicit tie when a dotted quarter crosses into the next bar", () => {
+  it("does not schedule the covered tie when a dotted quarter crosses into the next bar", () => {
     const progression = updateProgressionBeatDuration(
       createDefaultProgression(120),
       0,
@@ -95,8 +95,22 @@ describe("progression step scheduling", () => {
       durationSteps: 6,
       followingTieBeats: 0,
     });
-    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(16))).toMatchObject({
-      beatEventType: "tie",
-    });
+    expect(getProgressionStepPlaybackRequest(progression, positionAtStep(16))).toBeUndefined();
+  });
+
+  it("does not retrigger the loop head covered by the final bar", () => {
+    const initial = createDefaultProgression(120);
+    const lastBarIndex = initial.bars.length - 1;
+    const progression = updateProgressionBeatDuration(initial, lastBarIndex, 3, 6);
+    const loopSteps = progression.bars.length * 16;
+
+    expect(getProgressionStepPlaybackRequest(
+      progression,
+      positionAtStep(loopSteps - 4),
+    )).toMatchObject({ durationSteps: 6 });
+    expect(getProgressionStepPlaybackRequest(
+      progression,
+      positionAtStep(loopSteps),
+    )).toBeUndefined();
   });
 });

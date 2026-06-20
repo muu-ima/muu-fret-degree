@@ -66,6 +66,7 @@ export {
 
 export {
   createProgressionVirtualTimeline,
+  getProgressionVirtualRhythmEventAtPosition,
   progressionStepsPerBar,
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,

@@ -161,3 +161,25 @@ export function validateProgressionRhythmPlacementAtPosition(
     ? priorEventValidation
     : firstLoopValidation;
 }
+
+export function getProgressionVirtualRhythmEventAtPosition(
+  timeline: ProgressionVirtualTimeline,
+  barIndex: number,
+  startStep: number,
+) {
+  const barCount = timeline.stepsPerLoop / progressionStepsPerBar;
+  if (
+    !Number.isInteger(barIndex) ||
+    barIndex < 0 ||
+    barIndex >= barCount ||
+    !Number.isInteger(startStep) ||
+    startStep < 0 ||
+    startStep >= progressionStepsPerBar
+  ) {
+    return undefined;
+  }
+
+  const absoluteStartStep =
+    timeline.stepsPerLoop + barIndex * progressionStepsPerBar + startStep;
+  return timeline.events.find((event) => event.absoluteStartStep === absoluteStartStep);
+}
