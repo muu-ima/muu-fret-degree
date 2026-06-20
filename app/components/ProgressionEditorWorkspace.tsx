@@ -24,6 +24,7 @@ export function ProgressionEditorWorkspace() {
     updateBeatEventType,
     updateCell,
     updateRhythmEvent,
+    validateRhythmPlacement,
   } = useProgressionSession();
 
   useEffect(() => {
@@ -103,6 +104,7 @@ export function ProgressionEditorWorkspace() {
         onCellChange={updateCell}
         onRhythmEventChange={updateRhythmEvent}
         onRhythmEventRemove={removeRhythmEvent}
+        validateRhythmPlacement={validateRhythmPlacement}
       />
 
       <nav className="progressionEditorMobileBar" aria-label="編集操作">
