@@ -10,7 +10,6 @@ import {
   getProgressionBeatEventType,
   getProgressionBeatSubdivision,
   getProgressionRhythmEventAtStep,
-  getProgressionRhythmEvents,
 } from "./queries";
 import { canSetProgressionRhythmDuration } from "./collision";
 import {
@@ -24,6 +23,10 @@ import {
   setProgressionRhythmEvent,
 } from "./store";
 import { canTieProgressionBeat, getRelativeBeatLocation } from "./ties";
+import {
+  createProgressionVirtualTimeline,
+  validateProgressionRhythmPlacementAtPosition,
+} from "./timeline";
 
 export function updateProgressionBeatEventType(
   progression: ChordProgression,
@@ -130,9 +133,16 @@ export function updateProgressionRhythmEvent(
     ? (barIndex + 1) % progression.bars.length
     : barIndex;
   const nextBar = progression.bars[nextBarIndex];
+  const placementValidation = validateProgressionRhythmPlacementAtPosition(
+    createProgressionVirtualTimeline(progression),
+    barIndex,
+    startStep,
+    durationSteps,
+  );
   if (
     !currentBar ||
-    !canSetProgressionRhythmDuration(currentBar, startStep, durationSteps, nextBar)
+    !canSetProgressionRhythmDuration(currentBar, startStep, durationSteps, nextBar) ||
+    !placementValidation.canPlace
   ) {
     return progression;
   }
@@ -153,22 +163,6 @@ export function updateProgressionRhythmEvent(
 
   if (startStep === 0 && eventType !== "tie" && progression.bars.length > 0) {
     nextProgression = shortenProgressionCrossBarSource(nextProgression, barIndex);
-  }
-
-  const previousEvent = getProgressionRhythmEvents(currentBar)
-    .filter((event) => event.startStep < startStep && event.eventType === "hit")
-    .at(-1);
-  if (previousEvent) {
-    const distanceToNextEvent = startStep - previousEvent.startStep;
-    if (
-      distanceToNextEvent < previousEvent.durationSteps &&
-      distanceToNextEvent <= progressionStepsPerBeat
-    ) {
-      nextProgression = setProgressionRhythmEvent(nextProgression, barIndex, {
-        ...previousEvent,
-        durationSteps: distanceToNextEvent as ProgressionDurationSteps,
-      });
-    }
   }
 
   nextProgression = setProgressionRhythmEvent(nextProgression, barIndex, {

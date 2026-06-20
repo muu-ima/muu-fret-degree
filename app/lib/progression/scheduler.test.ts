@@ -40,8 +40,9 @@ describe("progression step scheduling", () => {
   });
 
   it("returns an explicit subdivision rest without producing a default hit", () => {
+    const shortened = updateProgressionBeatDuration(createDefaultProgression(120), 0, 0, 2);
     const progression = updateProgressionRhythmEvent(
-      createDefaultProgression(120),
+      shortened,
       0,
       2,
       "rest",
@@ -57,6 +58,7 @@ describe("progression step scheduling", () => {
 
   it("extends the last subdivision hit into a following tied beat", () => {
     let progression = createDefaultProgression(120);
+    progression = updateProgressionRhythmEvent(progression, 0, 0, "hit", 1);
     progression = updateProgressionRhythmEvent(progression, 0, 3, "hit", 1);
     progression = updateProgressionBeatEventType(progression, 0, 1, "tie");
 
