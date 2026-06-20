@@ -5,7 +5,7 @@ import {
   type ProgressionDurationSteps,
   type ProgressionRhythmEvent,
   type ProgressionSubdivision,
-} from "./progression/model";
+} from "../model";
 
 export function getProgressionBeatEventType(
   bar: ProgressionBar,

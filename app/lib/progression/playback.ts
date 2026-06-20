@@ -5,11 +5,11 @@ import {
   pickLowestBassNoteForDegree,
   pitchClassOf,
   sharpPitchClasses,
-} from "./music";
+} from "../music";
 import type {
   ProgressionBeatEventType,
   ProgressionDurationSteps,
-} from "./progression/model";
+} from "./model";
 
 export type ProgressionRhythm =
   | "root-only"

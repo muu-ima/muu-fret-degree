@@ -1,11 +1,11 @@
 import type {
   ChordProgression,
   ProgressionRhythmEvent,
-} from "./progression/model";
+} from "../model";
 import {
   removeExplicitProgressionRhythmEvent,
   setProgressionRhythmEvent,
-} from "./progression-rhythm-store";
+} from "./store";
 
 export function isCrossBarDottedQuarter(
   event: ProgressionRhythmEvent | undefined,

@@ -5,8 +5,8 @@ import {
   updateProgressionBeatEventType,
   updateProgressionBeatDuration,
   updateProgressionRhythmEvent,
-} from "./progression";
-import { getProgressionStepPlaybackRequest } from "./progression-scheduler";
+} from ".";
+import { getProgressionStepPlaybackRequest } from "./scheduler";
 
 function positionAtStep(step: number) {
   return getProgressionPosition(step * 0.125, 120, {

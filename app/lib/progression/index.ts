@@ -31,9 +31,9 @@ export {
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,
   getProgressionSustainingEventAtStep,
-} from "../progression-rhythm";
+} from "./rhythm/queries";
 
-export { canSetProgressionRhythmDuration } from "../progression-rhythm-collision";
+export { canSetProgressionRhythmDuration } from "./rhythm/collision";
 
 export {
   applyProgressionBeatSubdivision,
@@ -41,7 +41,7 @@ export {
   updateProgressionBeatDuration,
   updateProgressionBeatEventType,
   updateProgressionRhythmEvent,
-} from "../progression-rhythm-commands";
+} from "./rhythm/commands";
 
 export {
   resizeProgressionBars,
@@ -62,4 +62,4 @@ export {
   canTieProgressionBeat,
   countFollowingProgressionTies,
   getRelativeBeatLocation,
-} from "../progression-ties";
+} from "./rhythm/ties";

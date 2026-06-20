@@ -4,26 +4,26 @@ import {
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionSubdivision,
-} from "./progression/model";
+} from "../model";
 import {
   getProgressionBeatDuration,
   getProgressionBeatEventType,
   getProgressionBeatSubdivision,
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,
-} from "./progression-rhythm";
-import { canSetProgressionRhythmDuration } from "./progression-rhythm-collision";
+} from "./queries";
+import { canSetProgressionRhythmDuration } from "./collision";
 import {
   addProgressionCrossBarTie,
   isCrossBarDottedQuarter,
   removeProgressionCrossBarTie,
   shortenProgressionCrossBarSource,
-} from "./progression-rhythm-boundary";
+} from "./boundary";
 import {
   removeExplicitProgressionRhythmEvent,
   setProgressionRhythmEvent,
-} from "./progression-rhythm-store";
-import { canTieProgressionBeat, getRelativeBeatLocation } from "./progression-ties";
+} from "./store";
+import { canTieProgressionBeat, getRelativeBeatLocation } from "./ties";
 
 export function updateProgressionBeatEventType(
   progression: ChordProgression,

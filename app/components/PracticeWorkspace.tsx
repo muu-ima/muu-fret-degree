@@ -29,7 +29,7 @@ import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatSchedule
 import { useMetronome } from "../hooks/useMetronome";
 import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
 import { type MetronomeTone } from "../lib/audio";
-import type { ProgressionRhythm } from "../lib/progression-playback";
+import type { ProgressionRhythm } from "../lib/progression/playback";
 import {
   useProgressionSession,
   useProgressionTransport,

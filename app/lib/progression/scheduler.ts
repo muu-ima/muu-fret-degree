@@ -1,14 +1,14 @@
-import { getProgressionCellForBeat } from "./progression/harmony";
+import { getProgressionCellForBeat } from "./harmony";
 import {
   progressionStepsPerBeat,
   type ChordProgression,
   type ProgressionPosition,
-} from "./progression/model";
+} from "./model";
 import {
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,
-} from "./progression-rhythm";
-import { countFollowingProgressionTies } from "./progression-ties";
+} from "./rhythm/queries";
+import { countFollowingProgressionTies } from "./rhythm/ties";
 
 export function getProgressionStepPlaybackRequest(
   progression: ChordProgression,

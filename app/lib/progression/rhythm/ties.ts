@@ -1,5 +1,5 @@
-import type { ChordProgression, ProgressionBar } from "./progression/model";
-import { getProgressionBeatEventType } from "./progression-rhythm";
+import type { ChordProgression, ProgressionBar } from "../model";
+import { getProgressionBeatEventType } from "./queries";
 
 export function canTieProgressionBeat(
   bars: readonly ProgressionBar[],
