@@ -306,6 +306,7 @@ Transportの16分step位置が切り替わったことを一度だけ通知す�
 - 2拍セルの更新処理を一元化する。
 - 小節数変更を一元化する。
 - 1拍単位のHit / Rest / Tieと音価変更を一元化する。
+- 任意の16分stepに置くHit / Restの追加・更新・削除を一元化する。
 - 進行編集のUndo / Redo履歴を最大100件保持する。
 - `usePersistedProgression` を通じて保存と読み込みを行う。
 
@@ -386,7 +387,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
-4/4では1拍を4step、1小節を16stepとして扱う。現行UIと拍schedulerは互換getterを通じて拍頭のRhythmイベントを参照する。今後、任意stepの編集と発音を追加しても、Harmonyデータへタイミング情報を戻さない。
+4/4では1拍を4step、1小節を16stepとして扱う。Full Editorは選択中の拍を`1 / e / & / a`へ展開し、任意stepのHit / Restを編集できる。現行の拍schedulerと小節カード描画は互換getterを通じて拍頭のRhythmイベントを参照するため、次段で任意stepの発音と譜面描画を接続する。Harmonyデータへタイミング情報は戻さない。
 
 ### `app/lib/progression-playback.ts`
 

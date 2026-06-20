@@ -386,6 +386,88 @@ export function updateProgressionBeatDuration(
   });
 }
 
+export function updateProgressionRhythmEvent(
+  progression: ChordProgression,
+  barIndex: number,
+  startStep: number,
+  eventType: ProgressionBeatEventType,
+  durationSteps: ProgressionDurationSteps,
+): ChordProgression {
+  const currentBar = progression.bars[barIndex];
+  if (
+    !currentBar ||
+    !Number.isInteger(startStep) ||
+    startStep < 0 ||
+    startStep >= 16 ||
+    startStep + durationSteps > 16
+  ) {
+    return progression;
+  }
+
+  const currentEvent = getProgressionRhythmEventAtStep(currentBar, startStep);
+  if (
+    currentEvent?.eventType === eventType &&
+    currentEvent.durationSteps === durationSteps
+  ) {
+    return progression;
+  }
+
+  let nextProgression = progression;
+  const previousEvent = getProgressionRhythmEvents(currentBar)
+    .filter((event) => event.startStep < startStep && event.eventType === "hit")
+    .at(-1);
+  if (previousEvent) {
+    const distanceToNextEvent = startStep - previousEvent.startStep;
+    if (
+      distanceToNextEvent < previousEvent.durationSteps &&
+      distanceToNextEvent <= progressionStepsPerBeat
+    ) {
+      nextProgression = setProgressionRhythmEvent(nextProgression, barIndex, {
+        ...previousEvent,
+        durationSteps: distanceToNextEvent as ProgressionDurationSteps,
+      });
+    }
+  }
+
+  return setProgressionRhythmEvent(nextProgression, barIndex, {
+    startStep,
+    durationSteps,
+    eventType,
+  });
+}
+
+export function removeProgressionRhythmEvent(
+  progression: ChordProgression,
+  barIndex: number,
+  startStep: number,
+): ChordProgression {
+  const currentBar = progression.bars[barIndex];
+  if (
+    !currentBar ||
+    startStep % progressionStepsPerBeat === 0 ||
+    !currentBar.rhythm?.some((event) => event.startStep === startStep)
+  ) {
+    return progression;
+  }
+
+  const nextRhythm = currentBar.rhythm.filter((event) => event.startStep !== startStep);
+  return {
+    ...progression,
+    bars: progression.bars.map((bar, index) => {
+      if (index !== barIndex) {
+        return bar;
+      }
+
+      if (nextRhythm.length > 0) {
+        return { ...bar, rhythm: nextRhythm };
+      }
+
+      const { rhythm: _rhythm, ...barWithoutRhythm } = bar;
+      return barWithoutRhythm;
+    }),
+  };
+}
+
 export function canTieProgressionBeat(
   bars: readonly ProgressionBar[],
   barIndex: number,

@@ -8,11 +8,13 @@ import {
 } from "../lib/progression-history";
 import {
   createDefaultProgression,
+  removeProgressionRhythmEvent,
   updateProgressionBarCount,
   updateProgressionBeatChord,
   updateProgressionBeatDuration,
   updateProgressionBeatEventType,
   updateProgressionCell,
+  updateProgressionRhythmEvent,
   type ChordProgression,
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
@@ -105,6 +107,36 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     [],
   );
 
+  const updateRhythmEvent = useCallback(
+    (
+      barIndex: number,
+      startStep: number,
+      eventType: ProgressionBeatEventType,
+      durationSteps: ProgressionDurationSteps,
+    ) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) =>
+          updateProgressionRhythmEvent(
+            currentProgression,
+            barIndex,
+            startStep,
+            eventType,
+            durationSteps,
+          ),
+      });
+    },
+    [],
+  );
+
+  const removeRhythmEvent = useCallback((barIndex: number, startStep: number) => {
+    dispatch({
+      type: "commit",
+      update: (currentProgression) =>
+        removeProgressionRhythmEvent(currentProgression, barIndex, startStep),
+    });
+  }, []);
+
   const undo = useCallback(() => dispatch({ type: "undo" }), []);
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
@@ -113,6 +145,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     canUndo: history.past.length > 0,
     progression,
     redo,
+    removeRhythmEvent,
     syncBpm,
     undo,
     updateBarCount,
@@ -120,5 +153,6 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     updateBeatDuration,
     updateBeatEventType,
     updateCell,
+    updateRhythmEvent,
   };
 }

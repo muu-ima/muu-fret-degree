@@ -10,9 +10,11 @@ import {
   getProgressionRhythmEvents,
   isProgressionBeatStart,
   progressionStepsPerBeat,
+  removeProgressionRhythmEvent,
   updateProgressionBeatChord,
   updateProgressionBeatEventType,
   updateProgressionBeatDuration,
+  updateProgressionRhythmEvent,
 } from "./progression";
 
 describe("progression position", () => {
@@ -173,5 +175,35 @@ describe("progression beat events", () => {
     expect(events.map((event) => event.startStep)).toEqual([0, 4, 8, 12]);
     expect(events.map((event) => event.durationSteps)).toEqual([4, 2, 4, 4]);
     expect(progression.bars[0].rhythm).toHaveLength(1);
+  });
+
+  it("adds and removes an event at an arbitrary sixteenth-note step", () => {
+    const progression = createDefaultProgression();
+    const added = updateProgressionRhythmEvent(progression, 0, 2, "hit", 2);
+
+    expect(getProgressionRhythmEvents(added.bars[0])).toEqual([
+      { startStep: 0, durationSteps: 2, eventType: "hit" },
+      { startStep: 2, durationSteps: 2, eventType: "hit" },
+      { startStep: 4, durationSteps: 4, eventType: "hit" },
+      { startStep: 8, durationSteps: 4, eventType: "hit" },
+      { startStep: 12, durationSteps: 4, eventType: "hit" },
+    ]);
+
+    const removed = removeProgressionRhythmEvent(added, 0, 2);
+
+    expect(getProgressionRhythmEvents(removed.bars[0])).toEqual([
+      { startStep: 0, durationSteps: 2, eventType: "hit" },
+      { startStep: 4, durationSteps: 4, eventType: "hit" },
+      { startStep: 8, durationSteps: 4, eventType: "hit" },
+      { startStep: 12, durationSteps: 4, eventType: "hit" },
+    ]);
+  });
+
+  it("rejects rhythm events that extend beyond the bar", () => {
+    const progression = createDefaultProgression();
+
+    expect(updateProgressionRhythmEvent(progression, 0, 15, "hit", 2)).toBe(
+      progression,
+    );
   });
 });

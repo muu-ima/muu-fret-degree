@@ -15,12 +15,14 @@ export function ProgressionEditorWorkspace() {
     canUndo,
     progression,
     redo,
+    removeRhythmEvent,
     undo,
     updateBarCount,
     updateBeatChord,
     updateBeatDuration,
     updateBeatEventType,
     updateCell,
+    updateRhythmEvent,
   } = useProgressionSession();
 
   useEffect(() => {
@@ -97,6 +99,8 @@ export function ProgressionEditorWorkspace() {
         onBeatDurationChange={updateBeatDuration}
         onBeatEventTypeChange={updateBeatEventType}
         onCellChange={updateCell}
+        onRhythmEventChange={updateRhythmEvent}
+        onRhythmEventRemove={removeRhythmEvent}
       />
 
       <nav className="progressionEditorMobileBar" aria-label="編集操作">
