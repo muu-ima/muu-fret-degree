@@ -6,6 +6,8 @@ import {
   getProgressionBeatDuration,
   getProgressionBeatEventType,
   getProgressionCellForBeat,
+  getProgressionRhythmEventAtStep,
+  progressionStepsPerBeat,
   type ProgressionBar,
 } from "../lib/progression";
 
@@ -14,6 +16,7 @@ type ProgressionChordChartProps = {
   chordTypes: ChordType[];
   selectedBarIndex: number;
   selectedBeatIndex: number;
+  selectedStepInBeat: number;
   onBeatSelect: (barIndex: number, beatIndex: number) => void;
 };
 
@@ -22,6 +25,7 @@ export function ProgressionChordChart({
   chordTypes,
   selectedBarIndex,
   selectedBeatIndex,
+  selectedStepInBeat,
   onBeatSelect,
 }: ProgressionChordChartProps) {
   return (
@@ -83,6 +87,27 @@ export function ProgressionChordChart({
                           {durationLabel}
                         </span>
                       ) : null}
+                      <span className="progressionChartStepLane" aria-hidden="true">
+                        {[0, 1, 2, 3].map((stepInBeat) => {
+                          const startStep = beatIndex * progressionStepsPerBeat + stepInBeat;
+                          const stepEvent = getProgressionRhythmEventAtStep(bar, startStep);
+                          const isStepSelected = isSelected && selectedStepInBeat === stepInBeat;
+                          return (
+                            <span
+                              key={stepInBeat}
+                              className={`progressionChartStep${stepEvent ? ` ${stepEvent.eventType}` : " empty"}${isStepSelected ? " selected" : ""}`}
+                            >
+                              {stepEvent
+                                ? stepEvent.eventType === "hit"
+                                  ? "/"
+                                  : stepEvent.eventType === "rest"
+                                    ? "—"
+                                    : "⌒"
+                                : "·"}
+                            </span>
+                          );
+                        })}
+                      </span>
                       <span className="progressionChartBeatNumber" aria-hidden="true">
                         {beatIndex + 1}
                       </span>

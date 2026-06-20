@@ -1965,9 +1965,11 @@ select:focus-visible,
   position: relative;
   display: grid;
   min-width: 0;
-  min-height: 42px;
+  min-height: 58px;
   place-items: center;
-  padding: 0;
+  grid-template-rows: 1fr auto;
+  gap: 3px;
+  padding: 7px 3px 5px;
   border: 0;
   border-right: 1px solid rgba(205, 214, 228, 0.12);
   border-radius: 0;
@@ -2015,10 +2017,47 @@ select:focus-visible,
   line-height: 1;
 }
 
+.progressionChartStepLane {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+}
+
+.progressionChartStep {
+  display: grid;
+  min-width: 0;
+  min-height: 13px;
+  place-items: center;
+  border-radius: 3px;
+  color: #8e9bb0;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.48rem;
+  line-height: 1;
+}
+
+.progressionChartStep.empty {
+  color: #465166;
+}
+
+.progressionChartStep.rest {
+  color: #758196;
+}
+
+.progressionChartStep.tie {
+  color: #91a6d1;
+}
+
+.progressionChartStep.selected {
+  background: rgba(122, 167, 255, 0.24);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.28);
+}
+
 .progressionChartBeatNumber {
   position: absolute;
-  right: 3px;
-  bottom: 2px;
+  top: 3px;
+  left: 4px;
   color: var(--muted);
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.52rem;
@@ -2904,7 +2943,13 @@ select:focus-visible,
   }
 
   .progressionChartBeat {
-    min-height: 38px;
+    min-height: 54px;
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+
+  .progressionChartStep {
+    font-size: 0.44rem;
   }
 
   .progressionEditorHeader {

@@ -159,6 +159,7 @@ export function ProgressionEditor({
         chordTypes={chordTypes}
         selectedBarIndex={selectedBarIndex}
         selectedBeatIndex={selectedBeatIndex}
+        selectedStepInBeat={selectedStepInBeat}
         onBeatSelect={selectBeat}
       />
       <section className="progressionSelectionEditor" aria-label="選択中のコードを編集">
