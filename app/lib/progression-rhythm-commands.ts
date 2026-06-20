@@ -14,6 +14,12 @@ import {
 } from "./progression-rhythm";
 import { canSetProgressionRhythmDuration } from "./progression-rhythm-collision";
 import {
+  addProgressionCrossBarTie,
+  isCrossBarDottedQuarter,
+  removeProgressionCrossBarTie,
+  shortenProgressionCrossBarSource,
+} from "./progression-rhythm-boundary";
+import {
   removeExplicitProgressionRhythmEvent,
   setProgressionRhythmEvent,
 } from "./progression-rhythm-store";
@@ -137,28 +143,16 @@ export function updateProgressionRhythmEvent(
   }
 
   let nextProgression = progression;
-  const wasCrossBarDottedQuarter =
-    startStep === 12 && currentEvent?.eventType === "hit" && currentEvent.durationSteps === 6;
+  const wasCrossBarDottedQuarter = isCrossBarDottedQuarter(currentEvent);
   const willCrossBarDottedQuarter =
     startStep === 12 && eventType === "hit" && durationSteps === 6;
 
   if (wasCrossBarDottedQuarter && !willCrossBarDottedQuarter) {
-    nextProgression = removeExplicitProgressionRhythmEvent(nextProgression, nextBarIndex, 0);
+    nextProgression = removeProgressionCrossBarTie(nextProgression, barIndex);
   }
 
   if (startStep === 0 && eventType !== "tie" && progression.bars.length > 0) {
-    const previousBarIndex =
-      (barIndex + progression.bars.length - 1) % progression.bars.length;
-    const crossingSource = progression.bars[previousBarIndex].rhythm?.find(
-      (event) =>
-        event.startStep === 12 && event.eventType === "hit" && event.durationSteps === 6,
-    );
-    if (crossingSource) {
-      nextProgression = setProgressionRhythmEvent(nextProgression, previousBarIndex, {
-        ...crossingSource,
-        durationSteps: 4,
-      });
-    }
+    nextProgression = shortenProgressionCrossBarSource(nextProgression, barIndex);
   }
 
   const previousEvent = getProgressionRhythmEvents(currentBar)
@@ -184,11 +178,7 @@ export function updateProgressionRhythmEvent(
   });
 
   return willCrossBarDottedQuarter
-    ? setProgressionRhythmEvent(nextProgression, nextBarIndex, {
-        startStep: 0,
-        durationSteps: 4,
-        eventType: "tie",
-      })
+    ? addProgressionCrossBarTie(nextProgression, barIndex)
     : nextProgression;
 }
 
@@ -223,29 +213,11 @@ export function applyProgressionBeatSubdivision(
   }
 
   let nextProgression = progression;
-  if (beatIndex === 3) {
-    const crossingSource = currentBar.rhythm?.find(
-      (event) =>
-        event.startStep === 12 && event.eventType === "hit" && event.durationSteps === 6,
-    );
-    if (crossingSource) {
-      const nextBarIndex = (barIndex + 1) % progression.bars.length;
-      nextProgression = removeExplicitProgressionRhythmEvent(nextProgression, nextBarIndex, 0);
-    }
+  if (beatIndex === 3 && currentBar.rhythm?.some(isCrossBarDottedQuarter)) {
+    nextProgression = removeProgressionCrossBarTie(nextProgression, barIndex);
   }
   if (beatIndex === 0) {
-    const previousBarIndex =
-      (barIndex + progression.bars.length - 1) % progression.bars.length;
-    const crossingSource = progression.bars[previousBarIndex].rhythm?.find(
-      (event) =>
-        event.startStep === 12 && event.eventType === "hit" && event.durationSteps === 6,
-    );
-    if (crossingSource) {
-      nextProgression = setProgressionRhythmEvent(nextProgression, previousBarIndex, {
-        ...crossingSource,
-        durationSteps: 4,
-      });
-    }
+    nextProgression = shortenProgressionCrossBarSource(nextProgression, barIndex);
   }
 
   const beatStartStep = beatIndex * progressionStepsPerBeat;
