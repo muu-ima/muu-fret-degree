@@ -1,4 +1,4 @@
-import type { ChordProgression } from "./progression";
+import type { ChordProgression } from "./model";
 
 export type ProgressionHistory = {
   past: ChordProgression[];

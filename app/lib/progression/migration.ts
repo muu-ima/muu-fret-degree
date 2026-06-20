@@ -4,7 +4,7 @@ import type {
   ProgressionBeatEventType,
   ProgressionCell,
   ProgressionDurationSteps,
-} from "./progression/model";
+} from "./model";
 
 export type LegacyProgressionBar = {
   bar: number;

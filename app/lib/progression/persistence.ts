@@ -1,9 +1,9 @@
-import type { ChordType } from "./music";
+import type { ChordType } from "../music";
 import {
   migrateBeatRhythmToEvents,
   migrateLegacyBars,
   type LegacyProgressionBar,
-} from "./progression-migration";
+} from "./migration";
 import type {
   ProgressionBar,
   ProgressionBeat,
@@ -12,7 +12,7 @@ import type {
   ProgressionDurationSteps,
   ProgressionRhythmEvent,
   TimeSignature,
-} from "./progression/model";
+} from "./model";
 
 export const progressionStorageVersion = 8;
 

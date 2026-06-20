@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { ChordType } from "./music";
+import type { ChordType } from "../music";
 import {
   createPersistedProgressionSettings,
   decodePersistedProgressionSettings,
   parsePersistedProgressionSettings,
   progressionStorageVersion,
-} from "./progression-persistence";
+} from "./persistence";
 
 const roots = ["C", "G"];
 const chordTypes: ChordType[] = [

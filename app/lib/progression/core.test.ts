@@ -18,7 +18,7 @@ import {
   updateProgressionBeatEventType,
   updateProgressionBeatDuration,
   updateProgressionRhythmEvent,
-} from "./progression";
+} from ".";
 
 describe("progression position", () => {
   it("tracks sixteenth-note steps without changing beat positions", () => {

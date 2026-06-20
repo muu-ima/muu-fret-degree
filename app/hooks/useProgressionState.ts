@@ -5,7 +5,7 @@ import type { ChordType } from "../lib/music";
 import {
   createProgressionHistory,
   progressionHistoryReducer,
-} from "../lib/progression-history";
+} from "../lib/progression/history";
 import {
   applyProgressionBeatSubdivision,
   createDefaultProgression,
