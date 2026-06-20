@@ -14,6 +14,7 @@ export type ProgressionVirtualRhythmEvent = {
   absoluteStartStep: number;
   barIndex: number;
   event: ProgressionRhythmEvent;
+  isExplicit: boolean;
   loopIndex: number;
 };
 
@@ -55,6 +56,9 @@ export function createProgressionVirtualTimeline(
             absoluteStartStep,
             barIndex,
             event,
+            isExplicit: bar.rhythm?.some(
+              (explicitEvent) => explicitEvent.startStep === event.startStep,
+            ) ?? false,
             loopIndex,
           };
         }),
@@ -103,6 +107,7 @@ export function validateProgressionRhythmPlacement(
 
   const followingEvent = timeline.events.find(
     (event) =>
+      event.isExplicit &&
       event.absoluteStartStep > absoluteStartStep &&
       event.absoluteStartStep < absoluteStartStep + durationSteps,
   );
@@ -115,4 +120,44 @@ export function validateProgressionRhythmPlacement(
   }
 
   return { canPlace: true };
+}
+
+export function validateProgressionRhythmPlacementAtPosition(
+  timeline: ProgressionVirtualTimeline,
+  barIndex: number,
+  startStep: number,
+  durationSteps: ProgressionDurationSteps,
+): ProgressionPlacementValidation {
+  const barCount = timeline.stepsPerLoop / progressionStepsPerBar;
+  if (
+    !Number.isInteger(barIndex) ||
+    barIndex < 0 ||
+    barIndex >= barCount ||
+    !Number.isInteger(startStep) ||
+    startStep < 0 ||
+    startStep >= progressionStepsPerBar
+  ) {
+    return { canPlace: false, reason: "outside-timeline" };
+  }
+
+  const firstLoopStartStep = barIndex * progressionStepsPerBar + startStep;
+  const firstLoopValidation = validateProgressionRhythmPlacement(
+    timeline,
+    firstLoopStartStep,
+    durationSteps,
+  );
+  if (!firstLoopValidation.canPlace) {
+    return firstLoopValidation;
+  }
+
+  const secondLoopStartStep = timeline.stepsPerLoop + firstLoopStartStep;
+  const priorEventValidation = validateProgressionRhythmPlacement(
+    timeline,
+    secondLoopStartStep,
+    1,
+  );
+  return !priorEventValidation.canPlace &&
+    priorEventValidation.reason === "occupied-by-prior-event"
+    ? priorEventValidation
+    : firstLoopValidation;
 }

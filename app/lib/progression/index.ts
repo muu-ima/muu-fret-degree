@@ -69,6 +69,7 @@ export {
   progressionStepsPerBar,
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,
+  validateProgressionRhythmPlacementAtPosition,
   type ProgressionPlacementCollisionReason,
   type ProgressionPlacementValidation,
   type ProgressionVirtualRhythmEvent,

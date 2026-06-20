@@ -6,6 +6,7 @@ import {
   progressionStepsPerBar,
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,
+  validateProgressionRhythmPlacementAtPosition,
 } from "./timeline";
 
 describe("progression virtual rhythm timeline", () => {
@@ -72,7 +73,16 @@ describe("progression virtual rhythm timeline", () => {
   });
 
   it("returns a distinct reason when a new duration reaches a following event", () => {
-    const timeline = createProgressionVirtualTimeline(createDefaultProgression());
+    const initial = createDefaultProgression();
+    const progression: ChordProgression = {
+      ...initial,
+      bars: initial.bars.map((bar, index) =>
+        index === 0
+          ? { ...bar, rhythm: [{ startStep: 4, durationSteps: 4, eventType: "rest" }] }
+          : bar,
+      ),
+    };
+    const timeline = createProgressionVirtualTimeline(progression);
 
     expect(validateProgressionRhythmPlacement(timeline, 0, 6)).toMatchObject({
       canPlace: false,
@@ -81,6 +91,24 @@ describe("progression virtual rhythm timeline", () => {
     expect(validateProgressionRhythmPlacement(timeline, timeline.totalSteps, 1)).toEqual({
       canPlace: false,
       reason: "outside-timeline",
+    });
+  });
+
+  it("allows a prior duration to replace an implicit following beat", () => {
+    const timeline = createProgressionVirtualTimeline(createDefaultProgression());
+
+    expect(validateProgressionRhythmPlacement(timeline, 0, 6)).toEqual({ canPlace: true });
+  });
+
+  it("validates a real position against both virtual loop instances", () => {
+    const initial = createDefaultProgression();
+    const lastBarIndex = initial.bars.length - 1;
+    const progression = updateProgressionBeatDuration(initial, lastBarIndex, 3, 6);
+    const timeline = createProgressionVirtualTimeline(progression);
+
+    expect(validateProgressionRhythmPlacementAtPosition(timeline, 0, 0, 1)).toMatchObject({
+      canPlace: false,
+      reason: "occupied-by-prior-event",
     });
   });
 
