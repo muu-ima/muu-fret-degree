@@ -385,6 +385,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - `rhythm/boundary.ts`: 小節跨ぎ付点4分と自動Tieの整合性。
 - `rhythm/store.ts`: 明示Rhythmイベント配列の低レベル更新。
 - `rhythm/ties.ts`: Tie可否と後続Tie数の照会。
+- `rhythm/timeline.ts`: 実小節を仮想2周へ展開した絶対step占有と配置衝突理由。
 - `scheduler.ts`: schedulerへ渡すstep単位の再生要求生成。
 - `persistence.ts` / `migration.ts`: 保存値のvalidationと旧形式migration。
 - `history.ts`: Undo / Redoの純粋reducer。
@@ -392,6 +393,8 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 これらのモジュールは、再生中の時間管理や UI 更新を持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
 4/4では1拍を4step、1小節を16stepとして扱う。Full Editorは選択中の拍を`1 / e / & / a`へ展開し、任意stepのHit / Restを編集できる。schedulerは各stepの明示イベントを発音し、小節カードは拍の主記号と4stepの補助レーンを重ねて表示する。Harmonyデータへタイミング情報は戻さない。
+
+仮想タイムラインは同じ実小節列を判定時だけ2周へ展開する。先行イベントの占有範囲を優先し、占有中のstepや後続イベントへ重なる音価には純粋関数から衝突理由を返す。仮想2周目は`localStorage`、Undo / Redo履歴、Editorの編集対象へ含めない。
 
 ### `app/lib/progression/playback.ts`
 
