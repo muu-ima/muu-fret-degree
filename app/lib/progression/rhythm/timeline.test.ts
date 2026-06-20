@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createDefaultProgression, type ChordProgression } from "../model";
+import { updateProgressionBarCount } from "../structure";
 import { updateProgressionBeatDuration } from "./commands";
 import {
   createProgressionVirtualTimeline,
@@ -111,6 +112,23 @@ describe("progression virtual rhythm timeline", () => {
       reason: "occupied-by-prior-event",
     });
   });
+
+  it.each([2, 4, 8, 16])(
+    "uses the same loop-boundary calculation for a %i-bar progression",
+    (barCount) => {
+      const resized = updateProgressionBarCount(createDefaultProgression(), barCount);
+      const lastBarIndex = resized.bars.length - 1;
+      const progression = updateProgressionBeatDuration(resized, lastBarIndex, 3, 6);
+      const timeline = createProgressionVirtualTimeline(progression);
+
+      expect(timeline.stepsPerLoop).toBe(barCount * progressionStepsPerBar);
+      expect(validateProgressionRhythmPlacementAtPosition(timeline, 0, 0, 1)).toMatchObject({
+        canPlace: false,
+        reason: "occupied-by-prior-event",
+      });
+      expect(progression.bars).toHaveLength(barCount);
+    },
+  );
 
   it("does not add virtual bars to the saved progression", () => {
     const progression = createDefaultProgression();

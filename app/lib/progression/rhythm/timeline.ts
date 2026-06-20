@@ -141,25 +141,23 @@ export function validateProgressionRhythmPlacementAtPosition(
   }
 
   const firstLoopStartStep = barIndex * progressionStepsPerBar + startStep;
-  const firstLoopValidation = validateProgressionRhythmPlacement(
-    timeline,
-    firstLoopStartStep,
-    durationSteps,
-  );
-  if (!firstLoopValidation.canPlace) {
-    return firstLoopValidation;
-  }
-
   const secondLoopStartStep = timeline.stepsPerLoop + firstLoopStartStep;
   const priorEventValidation = validateProgressionRhythmPlacement(
     timeline,
     secondLoopStartStep,
     1,
   );
-  return !priorEventValidation.canPlace &&
+  if (!priorEventValidation.canPlace &&
     priorEventValidation.reason === "occupied-by-prior-event"
-    ? priorEventValidation
-    : firstLoopValidation;
+  ) {
+    return priorEventValidation;
+  }
+
+  return validateProgressionRhythmPlacement(
+    timeline,
+    firstLoopStartStep,
+    durationSteps,
+  );
 }
 
 export function getProgressionVirtualRhythmEventAtPosition(
