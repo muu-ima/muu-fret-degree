@@ -20,6 +20,7 @@ import {
   type ProgressionSubdivision,
 } from "../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
+import { EditorCombobox } from "./EditorCombobox";
 
 type ProgressionEditorProps = {
   className?: string;
@@ -458,28 +459,22 @@ export function ProgressionEditor({
 
         <div className="progressionChipSection">
           <span className="controlLabel">Chord</span>
-          <div className="progressionChipGrid progressionChordChips" role="group" aria-label="Chord">
-            {chordTypes.map((chordType) => {
-              const isSelected = selectedCell.chordTypeId === chordType.id;
-              return (
-                <button
-                  key={chordType.id}
-                  type="button"
-                  className={isSelected ? "progressionChip active" : "progressionChip"}
-                  aria-pressed={isSelected}
-                  title={chordType.name}
-                  onClick={() =>
-                    applyCellChange({
-                      ...selectedCell,
-                      chordTypeId: chordType.id,
-                    })
-                  }
-                >
-                  {formatChordTypeSymbol(chordType.id, chordTypes)}
-                </button>
-              );
-            })}
-          </div>
+          <EditorCombobox
+            ariaLabel="Chord"
+            searchPlaceholder="コードタイプを検索…"
+            value={selectedCell.chordTypeId}
+            options={chordTypes.map((chordType) => ({
+              value: chordType.id,
+              label: formatChordTypeSymbol(chordType.id, chordTypes),
+              description: chordType.name,
+            }))}
+            onValueChange={(chordTypeId) =>
+              applyCellChange({
+                ...selectedCell,
+                chordTypeId,
+              })
+            }
+          />
         </div>
       </section>
     </section>
