@@ -2,16 +2,20 @@
 
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { ChordType } from "../lib/music";
+import { migrateBeatRhythmToEvents } from "../lib/progression-migration";
 import type {
   ChordProgression,
   ProgressionBar,
   ProgressionBeat,
+  ProgressionBeatEventType,
   ProgressionCell,
+  ProgressionDurationSteps,
+  ProgressionRhythmEvent,
   TimeSignature,
 } from "../lib/progression";
 
 const storageKey = "muu-fret-degree:progression-settings";
-const storageVersion = 6;
+const storageVersion = 7;
 
 type PersistedProgressionSettings = {
   version: number;
@@ -53,7 +57,12 @@ function isProgressionCell(value: unknown, roots: string[], chordTypes: ChordTyp
   );
 }
 
-function isProgressionBar(value: unknown, roots: string[], chordTypes: ChordType[]): value is ProgressionBar {
+function isProgressionBar(
+  value: unknown,
+  roots: string[],
+  chordTypes: ChordType[],
+  allowLegacyBeatRhythm = false,
+): value is ProgressionBar {
   if (!isRecord(value)) {
     return false;
   }
@@ -62,7 +71,12 @@ function isProgressionBar(value: unknown, roots: string[], chordTypes: ChordType
     value.beats === undefined ||
     (Array.isArray(value.beats) &&
       value.beats.length === 4 &&
-      value.beats.every((beat) => isProgressionBeat(beat, roots, chordTypes)));
+      value.beats.every((beat) =>
+        isProgressionBeat(beat, roots, chordTypes, allowLegacyBeatRhythm),
+      ));
+  const hasValidRhythm =
+    value.rhythm === undefined ||
+    (Array.isArray(value.rhythm) && value.rhythm.every(isProgressionRhythmEvent));
 
   return (
     isFiniteNumber(value.bar) &&
@@ -70,24 +84,46 @@ function isProgressionBar(value: unknown, roots: string[], chordTypes: ChordType
     value.cells.length === 2 &&
     isProgressionCell(value.cells[0], roots, chordTypes) &&
     isProgressionCell(value.cells[1], roots, chordTypes) &&
-    hasValidBeats
+    hasValidBeats &&
+    hasValidRhythm
   );
 }
 
-function isProgressionBeat(value: unknown, roots: string[], chordTypes: ChordType[]): value is ProgressionBeat {
+function isProgressionBeat(
+  value: unknown,
+  roots: string[],
+  chordTypes: ChordType[],
+  allowLegacyRhythm: boolean,
+): value is ProgressionBeat {
   return (
     isRecord(value) &&
-    (value.durationSteps === undefined ||
-      value.durationSteps === 1 ||
-      value.durationSteps === 2 ||
-      value.durationSteps === 3 ||
-      value.durationSteps === 4) &&
-    (value.eventType === undefined ||
-      value.eventType === "hit" ||
-      value.eventType === "rest" ||
-      value.eventType === "tie") &&
+    (allowLegacyRhythm
+      ? isProgressionDuration(value.durationSteps) && isProgressionEventType(value.eventType)
+      : value.durationSteps === undefined && value.eventType === undefined) &&
     (value.chordOverride === undefined || isProgressionCell(value.chordOverride, roots, chordTypes))
   );
+}
+
+function isProgressionRhythmEvent(value: unknown): value is ProgressionRhythmEvent {
+  return (
+    isRecord(value) &&
+    Number.isInteger(value.startStep) &&
+    typeof value.startStep === "number" &&
+    value.startStep >= 0 &&
+    value.startStep < 16 &&
+    isProgressionDuration(value.durationSteps) &&
+    value.durationSteps !== undefined &&
+    isProgressionEventType(value.eventType) &&
+    value.eventType !== undefined
+  );
+}
+
+function isProgressionDuration(value: unknown): value is ProgressionDurationSteps | undefined {
+  return value === undefined || value === 1 || value === 2 || value === 3 || value === 4;
+}
+
+function isProgressionEventType(value: unknown): value is ProgressionBeatEventType | undefined {
+  return value === undefined || value === "hit" || value === "rest" || value === "tie";
 }
 
 function isLegacyProgressionBar(value: unknown, roots: string[], chordTypes: ChordType[]): value is LegacyProgressionBar {
@@ -163,28 +199,14 @@ export function usePersistedProgression({
       storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
         ? storedSettings.bars
         : null;
-    const versionTwoBars =
-      storedSettings.version === 2 &&
+    const compatibleBars =
+      typeof storedSettings.version === "number" &&
+      storedSettings.version >= 2 &&
+      storedSettings.version <= 6 &&
       Array.isArray(storedSettings.bars) &&
-      storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
-        ? storedSettings.bars
-        : null;
-    const versionThreeBars =
-      storedSettings.version === 3 &&
-      Array.isArray(storedSettings.bars) &&
-      storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
-        ? storedSettings.bars
-        : null;
-    const versionFourBars =
-      storedSettings.version === 4 &&
-      Array.isArray(storedSettings.bars) &&
-      storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
-        ? storedSettings.bars
-        : null;
-    const versionFiveBars =
-      storedSettings.version === 5 &&
-      Array.isArray(storedSettings.bars) &&
-      storedSettings.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
+      storedSettings.bars.every((bar) =>
+        isProgressionBar(bar, roots, chordTypes, true),
+      )
         ? storedSettings.bars
         : null;
     const legacyBars =
@@ -194,8 +216,7 @@ export function usePersistedProgression({
         ? storedSettings.bars
         : null;
 
-    const currentBars =
-      nextBars ?? versionFiveBars ?? versionFourBars ?? versionThreeBars ?? versionTwoBars;
+    const currentBars = nextBars ?? (compatibleBars ? migrateBeatRhythmToEvents(compatibleBars) : null);
 
     if (isTimeSignature(storedSettings.timeSignature) && currentBars && currentBars.length > 0) {
       const timeSignature = storedSettings.timeSignature;

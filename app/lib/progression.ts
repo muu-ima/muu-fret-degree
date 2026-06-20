@@ -13,14 +13,19 @@ export type ProgressionDurationSteps = 1 | 2 | 3 | 4;
 
 export type ProgressionBeat = {
   chordOverride?: ProgressionCell;
-  durationSteps?: ProgressionDurationSteps;
-  eventType?: ProgressionBeatEventType;
+};
+
+export type ProgressionRhythmEvent = {
+  startStep: number;
+  durationSteps: ProgressionDurationSteps;
+  eventType: ProgressionBeatEventType;
 };
 
 export type ProgressionBar = {
   bar: number;
   cells: readonly [ProgressionCell, ProgressionCell];
   beats?: readonly [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat];
+  rhythm?: readonly ProgressionRhythmEvent[];
 };
 
 export type ChordProgression = {
@@ -185,6 +190,11 @@ export function resizeProgressionBars(bars: readonly ProgressionBar[], nextLengt
           })) as [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat],
         }
       : {}),
+    ...(bars[index % bars.length].rhythm
+      ? {
+          rhythm: bars[index % bars.length].rhythm?.map((event) => ({ ...event })),
+        }
+      : {}),
   }));
 }
 
@@ -346,28 +356,11 @@ function setProgressionBeatEventType(
     return progression;
   }
 
-  const nextBeats = makeProgressionBeats(currentBar);
-  nextBeats[beatIndex] =
-    eventType === "hit"
-      ? removeBeatEventType(nextBeats[beatIndex])
-      : { ...nextBeats[beatIndex], eventType };
-  const hasBeatData = nextBeats.some(hasProgressionBeatData);
-
-  return {
-    ...progression,
-    bars: progression.bars.map((bar, index) => {
-      if (index !== barIndex) {
-        return bar;
-      }
-
-      if (hasBeatData) {
-        return { ...bar, beats: nextBeats };
-      }
-
-      const { beats: _beats, ...barWithoutBeats } = bar;
-      return barWithoutBeats;
-    }),
-  };
+  return setProgressionRhythmEvent(progression, barIndex, {
+    startStep: beatIndex * progressionStepsPerBeat,
+    durationSteps: getProgressionBeatDuration(currentBar, beatIndex),
+    eventType,
+  });
 }
 
 export function updateProgressionBeatDuration(
@@ -386,28 +379,11 @@ export function updateProgressionBeatDuration(
     return progression;
   }
 
-  const nextBeats = makeProgressionBeats(currentBar);
-  nextBeats[beatIndex] =
-    durationSteps === progressionStepsPerBeat
-      ? removeBeatDuration(nextBeats[beatIndex])
-      : { ...nextBeats[beatIndex], durationSteps };
-  const hasBeatData = nextBeats.some(hasProgressionBeatData);
-
-  return {
-    ...progression,
-    bars: progression.bars.map((bar, index) => {
-      if (index !== barIndex) {
-        return bar;
-      }
-
-      if (hasBeatData) {
-        return { ...bar, beats: nextBeats };
-      }
-
-      const { beats: _beats, ...barWithoutBeats } = bar;
-      return barWithoutBeats;
-    }),
-  };
+  return setProgressionRhythmEvent(progression, barIndex, {
+    startStep: beatIndex * progressionStepsPerBeat,
+    durationSteps,
+    eventType: getProgressionBeatEventType(currentBar, beatIndex),
+  });
 }
 
 export function canTieProgressionBeat(
@@ -454,14 +430,52 @@ export function getProgressionBeatEventType(
   bar: ProgressionBar,
   beatIndex: number,
 ): ProgressionBeatEventType {
-  return getProgressionBeat(bar, beatIndex).eventType ?? "hit";
+  return (
+    getProgressionRhythmEventAtStep(bar, beatIndex * progressionStepsPerBeat)?.eventType ??
+    "hit"
+  );
 }
 
 export function getProgressionBeatDuration(
   bar: ProgressionBar,
   beatIndex: number,
 ): ProgressionDurationSteps {
-  return getProgressionBeat(bar, beatIndex).durationSteps ?? progressionStepsPerBeat;
+  return (
+    getProgressionRhythmEventAtStep(bar, beatIndex * progressionStepsPerBeat)?.durationSteps ??
+    progressionStepsPerBeat
+  );
+}
+
+export function getProgressionRhythmEventAtStep(
+  bar: ProgressionBar,
+  startStep: number,
+): ProgressionRhythmEvent | undefined {
+  const explicitEvent = bar.rhythm?.find((event) => event.startStep === startStep);
+  if (explicitEvent) {
+    return explicitEvent;
+  }
+
+  if (startStep >= 0 && startStep < 16 && startStep % progressionStepsPerBeat === 0) {
+    return {
+      startStep,
+      durationSteps: progressionStepsPerBeat,
+      eventType: "hit",
+    };
+  }
+
+  return undefined;
+}
+
+export function getProgressionRhythmEvents(bar: ProgressionBar) {
+  const startSteps = new Set([0, 4, 8, 12]);
+  bar.rhythm?.forEach((event) => startSteps.add(event.startStep));
+
+  return [...startSteps]
+    .sort((first, second) => first - second)
+    .flatMap((startStep) => {
+      const event = getProgressionRhythmEventAtStep(bar, startStep);
+      return event ? [event] : [];
+    });
 }
 
 export function countFollowingProgressionTies(
@@ -528,22 +542,44 @@ function removeBeatChordOverride(beat: ProgressionBeat): ProgressionBeat {
   return beatWithoutChordOverride;
 }
 
-function removeBeatEventType(beat: ProgressionBeat): ProgressionBeat {
-  const { eventType: _eventType, ...beatWithoutEventType } = beat;
-  return beatWithoutEventType;
-}
-
-function removeBeatDuration(beat: ProgressionBeat): ProgressionBeat {
-  const { durationSteps: _durationSteps, ...beatWithoutDuration } = beat;
-  return beatWithoutDuration;
-}
-
 function hasProgressionBeatData(beat: ProgressionBeat) {
-  return (
-    beat.chordOverride !== undefined ||
-    beat.durationSteps !== undefined ||
-    beat.eventType !== undefined
-  );
+  return beat.chordOverride !== undefined;
+}
+
+function setProgressionRhythmEvent(
+  progression: ChordProgression,
+  barIndex: number,
+  nextEvent: ProgressionRhythmEvent,
+): ChordProgression {
+  const currentBar = progression.bars[barIndex];
+  if (!currentBar) {
+    return progression;
+  }
+
+  const isDefaultBeatEvent =
+    nextEvent.startStep % progressionStepsPerBeat === 0 &&
+    nextEvent.eventType === "hit" &&
+    nextEvent.durationSteps === progressionStepsPerBeat;
+  const nextRhythm = [
+    ...(currentBar.rhythm?.filter((event) => event.startStep !== nextEvent.startStep) ?? []),
+    ...(isDefaultBeatEvent ? [] : [nextEvent]),
+  ].sort((first, second) => first.startStep - second.startStep);
+
+  return {
+    ...progression,
+    bars: progression.bars.map((bar, index) => {
+      if (index !== barIndex) {
+        return bar;
+      }
+
+      if (nextRhythm.length > 0) {
+        return { ...bar, rhythm: nextRhythm };
+      }
+
+      const { rhythm: _rhythm, ...barWithoutRhythm } = bar;
+      return barWithoutRhythm;
+    }),
+  };
 }
 
 function getRelativeBeatLocation(

@@ -340,7 +340,9 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 - 進行の拍子と小節データを `localStorage` へ保存する。
 - 保存値が壊れている場合や、Root / Chord が現在の候補にない場合は無視する。
 - 読み込み時は既存 state の BPM を保ったまま、進行データだけ復元する。
-- v6でHit / Rest / Tieと1-4stepの音価を保存し、v1-v5の音価未指定拍は4分音符として読み込む。
+- v7ではHarmonyの拍上書きとRhythmイベントを分けて保存する。
+- v2-v6の拍内に保存されたHit / Rest / Tieと音価は、読み込み時に16分step上のRhythmイベントへ移行する。
+- 旧データの音価未指定拍は4分音符、イベント未指定拍はHitとして読み込む。
 
 ### `app/hooks/usePersistedPracticeSettings.ts`
 
@@ -374,8 +376,9 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - 経過秒数から現在の拍位置、小節番号、16分step位置を求める。
 - 進行データから、現在参照すべき小節と2拍セルを選ぶ。
 - 各拍に `chordOverride` がある場合は、2拍セルより優先して有効コードを求める。
-- 拍の`eventType`未指定をHitとして扱い、RestとTieだけを明示的に保持する。
-- 拍の`durationSteps`未指定を4分音符として扱い、1/16・1/8・付点1/8だけを明示的に保持する。
+- `beats`はHarmonyの1拍コード上書きだけを保持する。
+- `rhythm`は16分音符単位の`startStep`、`eventType`、`durationSteps`を保持する。
+- 拍頭にRhythmイベントがない場合はHitの4分音符として扱い、既定値と異なるイベントだけを明示的に保持する。
 - 小節数を変更したときに、既存パターンを複製して伸縮する。
 - 2拍セル、拍オーバーライド、Hit / Rest / Tie、音価、小節数の更新を純粋関数として提供する。
 - Hitの後ろに続くTie数を、小節跨ぎを含めて最大1ループ未満で数える。
@@ -383,7 +386,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 
 このモジュールは、再生中の時間管理や UI 更新は持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
-4/4では1拍を4step、1小節を16stepとして扱う。現行の拍schedulerは従来どおりbeat位置を使い、付点・8分・16分イベントを接続する段階でstep位置を購読する。
+4/4では1拍を4step、1小節を16stepとして扱う。現行UIと拍schedulerは互換getterを通じて拍頭のRhythmイベントを参照する。今後、任意stepの編集と発音を追加しても、Harmonyデータへタイミング情報を戻さない。
 
 ### `app/lib/progression-playback.ts`
 

@@ -7,6 +7,7 @@ import {
   getProgressionBeatDuration,
   getProgressionCellForBeat,
   getProgressionPosition,
+  getProgressionRhythmEvents,
   isProgressionBeatStart,
   progressionStepsPerBeat,
   updateProgressionBeatChord,
@@ -89,7 +90,9 @@ describe("progression beat events", () => {
     const rested = updateProgressionBeatEventType(progression, 0, 0, "rest");
 
     expect(getProgressionBeatEventType(rested.bars[0], 0)).toBe("rest");
-    expect(rested.bars[0].beats?.[0].eventType).toBe("rest");
+    expect(rested.bars[0].rhythm?.find((event) => event.startStep === 0)?.eventType).toBe(
+      "rest",
+    );
 
     const hit = updateProgressionBeatEventType(rested, 0, 0, "hit");
 
@@ -108,7 +111,7 @@ describe("progression beat events", () => {
     expect(getProgressionCellForBeat(rested.bars[0], 1)).toEqual(override);
     expect(getProgressionBeatEventType(rested.bars[0], 1)).toBe("rest");
     expect(getProgressionCellForBeat(hit.bars[0], 1)).toEqual(override);
-    expect(hit.bars[0].beats?.[1].eventType).toBeUndefined();
+    expect(hit.bars[0].rhythm).toBeUndefined();
   });
 
   it("counts consecutive ties within and across bars", () => {
@@ -154,10 +157,21 @@ describe("progression beat events", () => {
 
     const dottedEighth = updateProgressionBeatDuration(progression, 0, 0, 3);
     expect(getProgressionBeatDuration(dottedEighth.bars[0], 0)).toBe(3);
-    expect(dottedEighth.bars[0].beats?.[0].durationSteps).toBe(3);
+    expect(
+      dottedEighth.bars[0].rhythm?.find((event) => event.startStep === 0)?.durationSteps,
+    ).toBe(3);
 
     const quarter = updateProgressionBeatDuration(dottedEighth, 0, 0, 4);
     expect(getProgressionBeatDuration(quarter.bars[0], 0)).toBe(4);
-    expect(quarter.bars[0].beats).toBeUndefined();
+    expect(quarter.bars[0].rhythm).toBeUndefined();
+  });
+
+  it("exposes a complete four-beat rhythm while storing only overrides", () => {
+    const progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 1, 2);
+    const events = getProgressionRhythmEvents(progression.bars[0]);
+
+    expect(events.map((event) => event.startStep)).toEqual([0, 4, 8, 12]);
+    expect(events.map((event) => event.durationSteps)).toEqual([4, 2, 4, 4]);
+    expect(progression.bars[0].rhythm).toHaveLength(1);
   });
 });

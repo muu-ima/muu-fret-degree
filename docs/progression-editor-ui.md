@@ -27,14 +27,19 @@ type ProgressionCell = {
 
 type ProgressionBeat = {
   chordOverride?: ProgressionCell;
-  durationSteps?: 1 | 2 | 3 | 4;
-  eventType?: "hit" | "rest" | "tie";
+};
+
+type ProgressionRhythmEvent = {
+  startStep: number;
+  durationSteps: 1 | 2 | 3 | 4;
+  eventType: "hit" | "rest" | "tie";
 };
 
 type ProgressionBar = {
   bar: number;
   cells: readonly [ProgressionCell, ProgressionCell];
   beats?: readonly [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat];
+  rhythm?: readonly ProgressionRhythmEvent[];
 };
 ```
 
@@ -44,8 +49,8 @@ type ProgressionBar = {
 - Beat 3-4は `cells[1]` を継承する。
 - 1拍だけコードを変える場合は、その拍にコード上書きを持たせる。
 - 拍データがない既存進行は、4拍すべて発音する既定値として読み込む。
-- `eventType` がない拍は `hit` とし、`rest`と`tie`だけを明示的に保存する。
-- `durationSteps` がない拍は4分音符とし、短い音価だけを明示的に保存する。
+- Harmonyの拍上書きは`beats`、発音位置と音価は`rhythm`へ分けて保存する。
+- 拍頭にRhythmイベントがない場合は4分音符の`hit`とし、既定値と異なるイベントだけを明示的に保存する。
 
 現在は拍頭から始まる1/16、1/8、付点1/8、1/4と、1拍単位のHit / Rest / Tieまで実装済み。付点4分は次拍の途中まで跨ぐため、任意stepからイベントを開始できる段階で追加する。
 
@@ -317,42 +322,29 @@ type ProgressionCell = {
   bassPitchClass?: string;
 };
 
-type BeatEvent = {
-  beat: 1 | 2 | 3 | 4;
-  type: "hit" | "rest";
-  chordOverride?: {
-    root: string;
-    chordTypeId: string;
-    bassPitchClass?: string;
-  };
-  tieToNext?: boolean;
-  slurToNext?: boolean;
-};
-
 type RhythmEvent = {
   startStep: number;
   durationSteps: number;
-  type: "hit" | "rest";
-  tieToNext?: boolean;
+  eventType: "hit" | "rest" | "tie";
 };
 
 type ProgressionBar = {
   bar: number;
   cells: readonly [ProgressionCell, ProgressionCell];
-  beats?: readonly [BeatEvent, BeatEvent, BeatEvent, BeatEvent];
+  beats?: readonly [ProgressionBeat, ProgressionBeat, ProgressionBeat, ProgressionBeat];
   rhythm?: RhythmEvent[];
 };
 ```
 
-`RhythmEvent` は1小節を16分音符単位の16stepとして扱う。`durationSteps` は4分音符を`4`、8分音符を`2`、付点4分音符を`6`、付点8分音符を`3`として表現する。タイは別イベントを追加せず、前のイベントの音を次へ持続させる情報として保持する。
+`RhythmEvent` は1小節を16分音符単位の16stepとして扱う。現行の`durationSteps`は4分音符を`4`、8分音符を`2`、付点8分音符を`3`として表現する。付点4分音符の`6`は任意step配置とイベント重複規則を実装するときに型へ追加する。Tieは現段階では独立イベントとして保存し、直前のHitを再発音せず延長する。
 
 Transportの`ProgressionPosition`は累積`stepIndex`、拍内`stepInBeat`、小節内`stepInBar`を持つ。既存の拍再生を維持したまま、このstep位置を細かなリズムイベントの発火基準へ段階的に接続する。
 
 コード譜では `hit` を音価に応じたリズムスラッシュで描画し、付点はスラッシュの右側へ表示する。タイは隣接するスラッシュを弧で結ぶ。最初は1拍単位のHit / Rest / Tieを実装し、その後16分stepへ拡張して付点と細かなリズムを扱う。
 
-`beats` は既存データを読み込めるよう任意項目から始める。値がない場合は、各拍が所属する2拍セルのコードを継承し、4分音符で発音する。
+`beats` はHarmonyだけを扱う。値がない場合は、各拍が所属する2拍セルのコードを継承する。Rhythmは`rhythm`へ集約し、保存形式v2-v6の拍内リズム情報はv7読み込み時に移行する。
 
-16分音符単位の編集が必要になった段階で、`BeatEvent` の内側に subdivision を追加する。最初から16ステップを常時表示せず、まず1拍単位の操作を完成させる。
+16分音符単位の編集は`RhythmEvent.startStep`を使って段階的に追加する。最初から16ステップを常時表示せず、選択中の拍だけを4分割するなど、画面密度を保ちながら編集粒度を切り替える。
 
 ## モバイル方針
 
