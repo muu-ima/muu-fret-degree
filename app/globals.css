@@ -2288,6 +2288,12 @@ select:focus-visible,
   width: 100%;
 }
 
+.progressionHarmonyMetaFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .progressionChipGrid {
   display: grid;
   gap: 6px;
@@ -3090,6 +3096,10 @@ select:focus-visible,
   }
 
   .progressionHarmonyFields {
+    grid-template-columns: 1fr;
+  }
+
+  .progressionHarmonyMetaFields {
     grid-template-columns: 1fr;
   }
 

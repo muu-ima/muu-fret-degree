@@ -256,46 +256,51 @@ export function ProgressionEditor({
             </div>
           </div>
 
-          <div className="progressionApplySection">
-            <span className="controlLabel">Apply To</span>
-            <div className="progressionApplyTabs" role="group" aria-label="コードの適用範囲">
-              <button
-                type="button"
-                className={editScope === "cell" ? "active" : ""}
-                aria-pressed={editScope === "cell"}
-                onClick={useCellScope}
-              >
-                Beats {selectedCellIndex === 0 ? "1-2" : "3-4"}
-              </button>
-              <button
-                type="button"
-                className={editScope === "beat" ? "active" : ""}
-                aria-pressed={editScope === "beat"}
-                onClick={useBeatScope}
-              >
-                Beat {selectedBeatIndex + 1} only
-              </button>
+          <div className="progressionHarmonyMetaFields">
+            <div className="progressionApplySection">
+              <span className="controlLabel">Apply To</span>
+              <div className="progressionApplyTabs" role="group" aria-label="コードの適用範囲">
+                <button
+                  type="button"
+                  className={editScope === "cell" ? "active" : ""}
+                  aria-pressed={editScope === "cell"}
+                  onClick={useCellScope}
+                >
+                  Beats {selectedCellIndex === 0 ? "1-2" : "3-4"}
+                </button>
+                <button
+                  type="button"
+                  className={editScope === "beat" ? "active" : ""}
+                  aria-pressed={editScope === "beat"}
+                  onClick={useBeatScope}
+                >
+                  Beat {selectedBeatIndex + 1} only
+                </button>
+              </div>
+            </div>
+
+            <div className="progressionApplySection">
+              <span className="controlLabel">Beat</span>
+              <div className="progressionBeatTabs" role="tablist" aria-label="編集する拍">
+                {[0, 1, 2, 3].map((beatIndex) => {
+                  const isSelected = selectedBeatIndex === beatIndex;
+                  return (
+                    <button
+                      key={beatIndex}
+                      type="button"
+                      className={isSelected ? "active" : ""}
+                      aria-selected={isSelected}
+                      role="tab"
+                      onClick={() => selectBeat(selectedBarIndex, beatIndex)}
+                    >
+                      Beat {beatIndex + 1}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
-
-        <div className="progressionBeatTabs" role="tablist" aria-label="編集する拍">
-          {[0, 1, 2, 3].map((beatIndex) => {
-            const isSelected = selectedBeatIndex === beatIndex;
-            return (
-              <button
-                key={beatIndex}
-                type="button"
-                className={isSelected ? "active" : ""}
-                aria-selected={isSelected}
-                role="tab"
-                onClick={() => selectBeat(selectedBarIndex, beatIndex)}
-              >
-                Beat {beatIndex + 1}
-              </button>
-            );
-          })}
-        </div>
 
         <div className="progressionApplySection">
           <span className="controlLabel">Rhythm Preset</span>
