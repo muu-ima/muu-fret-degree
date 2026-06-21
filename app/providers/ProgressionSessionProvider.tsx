@@ -1,20 +1,28 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useMemo } from "react";
+import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
 import theory from "../../data/theory.json";
 import { useAudioOutput } from "../hooks/useAudioOutput";
 import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
 import { useProgressionState } from "../hooks/useProgressionState";
 import type { ChordProgression } from "../lib/progression";
+import type { ProgressionGroove } from "../lib/progression/groove";
 import type { ChordType } from "../lib/music";
 
 type ProgressionSession = ReturnType<typeof useProgressionState>;
-type ProgressionTransport = ReturnType<typeof useProgressionPlayback>;
+type ProgressionTransport = ReturnType<typeof useProgressionRuntime>;
 type SessionAudioOutput = ReturnType<typeof useAudioOutput>;
 
 const ProgressionSessionContext = createContext<ProgressionSession | null>(null);
 const ProgressionTransportContext = createContext<ProgressionTransport | null>(null);
 const SessionAudioOutputContext = createContext<SessionAudioOutput | null>(null);
+
+function useProgressionRuntime(progression: ChordProgression) {
+  const transport = useProgressionPlayback({ progression });
+  const [groove, setGroove] = useState<ProgressionGroove>("straight");
+
+  return { ...transport, groove, setGroove };
+}
 
 function ProgressionRuntimeProvider({
   children,
@@ -23,7 +31,7 @@ function ProgressionRuntimeProvider({
   children: ReactNode;
   progression: ChordProgression;
 }) {
-  const transport = useProgressionPlayback({ progression });
+  const transport = useProgressionRuntime(progression);
   const audioOutput = useAudioOutput();
   const stableAudioOutput = useMemo(
     () => audioOutput,

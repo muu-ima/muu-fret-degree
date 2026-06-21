@@ -529,6 +529,7 @@ export function PracticeWorkspace() {
     playBeat: playProgressionBeat,
     position: progressionPlayback.progressionPosition,
     progression,
+    groove: progressionPlayback.groove,
     rhythm: progressionRhythm,
   });
 
@@ -572,10 +573,12 @@ export function PracticeWorkspace() {
         isProgressionCountingIn={isProgressionCountingIn}
         isProgressionRunning={progressionPlayback.isProgressionRunning}
         rhythm={progressionRhythm}
+        groove={progressionPlayback.groove}
         onStartProgression={handleStartProgression}
         onStopProgression={handleStopProgression}
         onResetProgression={handleResetProgression}
         onRhythmChange={setProgressionRhythm}
+        onGrooveChange={progressionPlayback.setGroove}
       />
     );
   }

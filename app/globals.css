@@ -2173,6 +2173,17 @@ select:focus-visible,
   color: #fff;
 }
 
+.progressionMiniTransport button.groove {
+  min-width: 68px;
+  border-color: rgba(154, 171, 196, 0.2);
+  background: rgba(7, 10, 15, 0.34);
+}
+
+.progressionMiniTransport button.groove[aria-pressed="true"] {
+  border-color: rgba(122, 167, 255, 0.46);
+  color: #8ab4ff;
+}
+
 .progressionMiniTransport button:hover:not(:disabled) {
   border-color: rgba(122, 167, 255, 0.62);
   background: rgba(122, 167, 255, 0.2);
@@ -3217,6 +3228,14 @@ select:focus-visible,
 
   .progressionMiniTransport button span {
     display: none;
+  }
+
+  .progressionMiniTransport button.groove {
+    width: 64px;
+  }
+
+  .progressionMiniTransport button.groove span {
+    display: inline;
   }
 
   .progressionHarmonyFields {

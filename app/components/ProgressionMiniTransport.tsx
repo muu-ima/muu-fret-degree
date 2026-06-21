@@ -61,6 +61,7 @@ export function ProgressionMiniTransport() {
     playBeat: playProgressionBeat,
     position: transport.progressionPosition,
     progression,
+    groove: transport.groove,
     rhythm: "root-only",
   });
 
@@ -77,6 +78,18 @@ export function ProgressionMiniTransport() {
         {transport.isProgressionRunning ? "Playing" : "Stopped"} · {positionLabel}
       </span>
       <div role="group" aria-label="再生操作">
+        <button
+          type="button"
+          className="groove"
+          aria-label={`グルーヴ: ${transport.groove === "shuffle" ? "Shuffle" : "Straight"}`}
+          title="Straight / Shuffle"
+          aria-pressed={transport.groove === "shuffle"}
+          onClick={() =>
+            transport.setGroove((current) => current === "straight" ? "shuffle" : "straight")
+          }
+        >
+          <span>{transport.groove === "shuffle" ? "Shuffle" : "Straight"}</span>
+        </button>
         <button
           type="button"
           className="play"
