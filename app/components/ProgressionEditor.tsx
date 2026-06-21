@@ -21,6 +21,7 @@ import {
 } from "../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
 import { EditorCombobox } from "./EditorCombobox";
+import { ProgressionMiniTransport } from "./ProgressionMiniTransport";
 
 type ProgressionEditorProps = {
   className?: string;
@@ -209,6 +210,7 @@ export function ProgressionEditor({
               {selectedStepInBeat > 0 ? ` · ${["1", "e", "&", "a"][selectedStepInBeat]}` : ""}
             </strong>
           </div>
+          <ProgressionMiniTransport />
           <div className="progressionSelectionChord">
             <strong>{formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}</strong>
             <span>

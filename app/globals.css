@@ -2078,9 +2078,9 @@ select:focus-visible,
 }
 
 .progressionSelectionHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 18px;
 }
 
@@ -2115,6 +2115,71 @@ select:focus-visible,
   font-size: 1.4rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+}
+
+.progressionMiniTransport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.progressionMiniTransport > span {
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.66rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.progressionMiniTransport > span.playing {
+  color: #8ab4ff;
+}
+
+.progressionMiniTransport > div {
+  display: flex;
+  gap: 5px;
+}
+
+.progressionMiniTransport button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid #334055;
+  border-radius: 9px;
+  background: #141922;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.progressionMiniTransport button.play {
+  border-color: rgba(122, 167, 255, 0.46);
+  background: rgba(122, 167, 255, 0.16);
+  color: #fff;
+}
+
+.progressionMiniTransport button:hover:not(:disabled) {
+  border-color: rgba(122, 167, 255, 0.62);
+  background: rgba(122, 167, 255, 0.2);
+}
+
+.progressionMiniTransport button:focus-visible {
+  outline: 2px solid #8ab4ff;
+  outline-offset: 2px;
+}
+
+.progressionMiniTransport button:disabled {
+  cursor: not-allowed;
+  opacity: 0.36;
+}
+
+.progressionMiniTransport button svg {
+  width: 14px;
+  height: 14px;
 }
 
 .progressionBeatTabs {
@@ -3092,7 +3157,14 @@ select:focus-visible,
   }
 
   .progressionSelectionHeader {
+    grid-template-columns: 1fr auto;
     align-items: flex-start;
+  }
+
+  .progressionMiniTransport {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: space-between;
   }
 
   .progressionHarmonyFields {
