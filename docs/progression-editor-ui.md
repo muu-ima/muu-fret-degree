@@ -62,7 +62,7 @@ Tieは直前に有効なHitがある場合だけ選択できる。Tie元のHit�
 - メイン画面の `Quick Edit`: 選択中小節のRoot / Chordだけを変更する補助パネル。
 - メイン画面の `Progression`: 同期再生と伴奏パターンを操作するパネル。
 
-編集機能をFull Editorへ、再生機能をメイン画面へ分ける。両画面は同じ進行保存データを使用する。
+編集機能をFull Editorへ、詳細な再生設定をメイン画面へ分ける。Full Editorには編集確認用のMini Transportだけを置き、両画面は同じ進行保存データとTransportを使用する。
 
 ## 設計判断: 編集と再生を分離する
 
@@ -157,7 +157,7 @@ Practice              Full Editor
 - 複数タブや複数端末で編集内容を即時同期する。
 - 再生位置を購読するコンポーネントが増え、Context更新が性能上の問題になる。
 
-Mini Transportとコード譜のplayhead同期へ進む段階で、Full Editorから共有Transportを購読する。現段階ではPracticeを離れるとTransportを停止し、見えない再生を残さない。
+Full EditorはMini Transportから共有Transportを購読し、Root Only伴奏で編集内容を確認する。schedulerは独立コンポーネントへ隔離し、再生位置更新でEditor全体を再レンダーしない。
 
 ### トレードオフ
 

@@ -81,7 +81,7 @@
 - Quick Editは選択中小節のRoot / Chord変更に限定する。
 - TransportとAudio OutputはSessionのruntime Contextで共有する。
 - 進行schedulerとメトロノームtimerは、再生UIを持つPractice側に置く。
-- 将来は編集画面にもMini Transportと再生位置ハイライトを提供する。
+- 編集画面には共有Transportを使うMini Transportを置き、Play / Stopと現在位置だけを提供する。
 - 画面ごとにtimerや `AudioContext` を複製しない。
 
 判断理由、トレードオフ、共有ストアへの移行条件は [`docs/progression-editor-ui.md`](./progression-editor-ui.md#設計判断-編集と再生を分離する) を参照する。
@@ -333,7 +333,7 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 - `useProgressionPlayback` と `useAudioOutput` をruntime Contextとして提供する。
 - データContextとTransport Contextを分け、再生フレームでFull Editor全体を再レンダーしない。
 
-進行schedulerはPractice側に残し、Practiceのアンマウント時にTransportを停止する。Full EditorにMini Transportを追加するまでは、編集画面の背後で再生を継続しない。
+PracticeとFull Editorは同じTransportとAudio Outputを共有する。Full Editorのschedulerは`ProgressionMiniTransport`へ隔離し、再生フレームでEditor本体を再レンダーしない。Full Editorでは確認用のRoot Only伴奏だけを提供し、BPMや伴奏パターンなどの詳細設定はPractice側に残す。
 
 ### `app/hooks/usePersistedProgression.ts`
 
