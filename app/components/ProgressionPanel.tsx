@@ -2,6 +2,7 @@
 
 import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../lib/progression";
 import type { ProgressionRhythm } from "../lib/progression/playback";
+import type { ProgressionGroove } from "../lib/progression/groove";
 
 type ProgressionPanelProps = {
   currentProgressionBar?: ProgressionBar;
@@ -11,11 +12,13 @@ type ProgressionPanelProps = {
   progressionPosition: ProgressionPosition;
   isProgressionCountingIn: boolean;
   isProgressionRunning: boolean;
+  groove: ProgressionGroove;
   rhythm: ProgressionRhythm;
   onStartProgression: () => void;
   onStopProgression: () => void;
   onResetProgression: () => void;
   onRhythmChange: (rhythm: ProgressionRhythm) => void;
+  onGrooveChange: (groove: ProgressionGroove) => void;
 };
 
 export function ProgressionPanel({
@@ -26,11 +29,13 @@ export function ProgressionPanel({
   progressionPosition,
   isProgressionCountingIn,
   isProgressionRunning,
+  groove,
   rhythm,
   onStartProgression,
   onStopProgression,
   onResetProgression,
   onRhythmChange,
+  onGrooveChange,
 }: ProgressionPanelProps) {
   const currentBarNumber = currentProgressionBar?.bar ?? progressionPosition.barIndex + 1;
   const currentCellIndex = currentProgressionCellIndex ?? Math.min(Math.floor(progressionPosition.beatInBar / 2), 1);
@@ -94,6 +99,20 @@ export function ProgressionPanel({
               onClick={() => onRhythmChange(option.value)}
             >
               {option.label}
+            </button>
+          ))}
+        </div>
+        <span className="controlLabel">Groove</span>
+        <div className="progressionRhythmTabs" role="group" aria-label="進行グルーヴ">
+          {(["straight", "shuffle"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={groove === option ? "progressionRhythmTab active" : "progressionRhythmTab"}
+              aria-pressed={groove === option}
+              onClick={() => onGrooveChange(option)}
+            >
+              {option === "straight" ? "Straight" : "Shuffle"}
             </button>
           ))}
         </div>

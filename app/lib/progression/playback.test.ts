@@ -47,12 +47,14 @@ function plan(
   beatEventType?: ProgressionBeatEventType,
   followingTieBeats?: number,
   durationSteps?: ProgressionDurationSteps,
+  durationSeconds?: number,
 ) {
   return planProgressionBeat({
     beatInBar,
     beatEventType,
     bpm: 120,
     chordNotes,
+    durationSeconds,
     durationSteps,
     followingTieBeats,
     nextRoot,
@@ -135,5 +137,20 @@ describe("progression playback patterns", () => {
     const events = plan("degree-ascending", 0, undefined, "hit", 0, 1);
 
     expect(events).toEqual([{ midi: 36, startOffset: 0, duration: 0.125 }]);
+  });
+
+  it("uses a groove-adjusted gate instead of the straight step duration", () => {
+    const longEighth = plan("root-only", 0, undefined, "hit", 0, 2, 1 / 3);
+    const shortEighth = plan("root-only", 0, undefined, "hit", 0, 2, 1 / 6);
+
+    expect(longEighth[0].duration).toBeCloseTo(1 / 3);
+    expect(shortEighth[0].duration).toBeCloseTo(1 / 6);
+  });
+
+  it("keeps internal pattern notes that fit inside a groove-adjusted gate", () => {
+    const events = plan("degree-ascending", 0, undefined, "hit", 0, 2, 1 / 3);
+
+    expect(events.map((event) => event.midi)).toEqual([36, 40]);
+    expect(events[1].duration).toBeCloseTo(1 / 12);
   });
 });

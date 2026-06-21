@@ -335,6 +335,8 @@ PracticeとFull Editorで共有する進行Sessionの境界を担当する。
 
 PracticeとFull Editorは同じTransportとAudio Outputを共有する。Full Editorのschedulerは`ProgressionMiniTransport`へ隔離し、再生フレームでEditor本体を再レンダーしない。Full Editorでは確認用のRoot Only伴奏だけを提供し、BPMや伴奏パターンなどの詳細設定はPractice側に残す。
 
+Straight / Shuffleは保存Rhythmイベントを変更しないRuntime設定として共有する。論理上の1拍4stepは維持し、schedulerが各stepをStraightの`0, 1/4, 1/2, 3/4`またはShuffleの`0, 1/3, 2/3, 5/6`拍へ写して発音時刻と音価を求める。三連符の譜面入力とは分離する。
+
 ### `app/hooks/usePersistedProgression.ts`
 
 コード進行の編集内容をブラウザ保存する。

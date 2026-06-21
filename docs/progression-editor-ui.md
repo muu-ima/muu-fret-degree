@@ -117,6 +117,8 @@ Full Editorでも、編集内容と再生位置の関係を確認できるよう
 
 BPM、伴奏パターン、メトロノームなどの詳細設定はメイン画面に残す。Full Editorへ同じ再生パネルを複製せず、編集確認に必要な最小操作だけを公開する。
 
+Mini TransportではStraight / Shuffleを切り替えられる。Shuffleは保存イベントを増やさず、既存4stepの再生時刻だけを変更する。
+
 画面ごとに別のtimerや `AudioContext` を作らない。進行データ、Transport、Audio Outputはレイアウト階層の単一Sessionで共有し、メトロノームtimerと進行schedulerは利用する画面側から接続する。
 
 目標となる責務:
