@@ -172,7 +172,7 @@ Hitでは`Note Value`を選択できます。
 - `8 bars`
 - `16 bars`
 
-メイン画面の `Quick Edit` パネルでは、選択中の小節だけを編集できます。`Full Editor` を押すと専用編集画面へ移動します。Full Editor上部のMini Transportでは、編集中の進行をRoot Only伴奏でPlay / Stopできます。BPM、同期、伴奏パターンなどの詳細設定はメイン画面の `Progression` パネルで操作します。
+メイン画面の `Quick Edit` パネルでは、選択中の小節だけを編集できます。`Full Editor` を押すと専用編集画面へ移動します。Full Editor上部のMini Transportでは、編集中の進行をRoot Only伴奏でPlay / Stop / Resetできます。BPM、同期、伴奏パターンなどの詳細設定はメイン画面の `Progression` パネルで操作します。
 
 Full EditorではRoot / Chordと小節数の変更をUndo / Redoできます。
 

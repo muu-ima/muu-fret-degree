@@ -81,7 +81,7 @@
 - Quick Editは選択中小節のRoot / Chord変更に限定する。
 - TransportとAudio OutputはSessionのruntime Contextで共有する。
 - 進行schedulerとメトロノームtimerは、再生UIを持つPractice側に置く。
-- 編集画面には共有Transportを使うMini Transportを置き、Play / Stopと現在位置だけを提供する。
+- 編集画面には共有Transportを使うMini Transportを置き、Play / Stop / Resetと現在位置だけを提供する。
 - 画面ごとにtimerや `AudioContext` を複製しない。
 
 判断理由、トレードオフ、共有ストアへの移行条件は [`docs/progression-editor-ui.md`](./progression-editor-ui.md#設計判断-編集と再生を分離する) を参照する。
