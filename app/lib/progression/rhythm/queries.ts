@@ -4,6 +4,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionRhythmEvent,
+  type ProgressionRhythmPreset,
   type ProgressionSubdivision,
 } from "../model";
 
@@ -97,6 +98,15 @@ export function getProgressionBeatSubdivision(
   }));
 
   if (
+    relativeEvents.length === 1 &&
+    relativeEvents[0].startStep === 0 &&
+    relativeEvents[0].durationSteps === 4 &&
+    relativeEvents[0].eventType === "hit"
+  ) {
+    return "quarters";
+  }
+
+  if (
     relativeEvents.length === 2 &&
     relativeEvents.every(
       (event, index) =>
@@ -121,4 +131,30 @@ export function getProgressionBeatSubdivision(
   }
 
   return undefined;
+}
+
+export function getProgressionRhythmPreset(
+  bar: ProgressionBar,
+  beatIndex: number,
+): ProgressionRhythmPreset | undefined {
+  const pairStartBeat = Math.floor(beatIndex / 2) * 2;
+  const pairStartStep = pairStartBeat * progressionStepsPerBeat;
+  const pairEndStep = pairStartStep + progressionStepsPerBeat * 2;
+  const pairEvents = getProgressionRhythmEvents(bar)
+    .filter((event) => event.startStep >= pairStartStep && event.startStep < pairEndStep)
+    .map((event) => ({ ...event, startStep: event.startStep - pairStartStep }));
+
+  if (
+    pairEvents.length === 2 &&
+    pairEvents[0].startStep === 0 &&
+    pairEvents[0].durationSteps === 6 &&
+    pairEvents[0].eventType === "hit" &&
+    pairEvents[1].startStep === 6 &&
+    pairEvents[1].durationSteps === 2 &&
+    pairEvents[1].eventType === "hit"
+  ) {
+    return "dotted-quarter-eighth";
+  }
+
+  return getProgressionBeatSubdivision(bar, beatIndex);
 }

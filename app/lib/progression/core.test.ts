@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyProgressionBeatSubdivision,
+  applyProgressionRhythmPreset,
   canTieProgressionBeat,
   countFollowingProgressionTies,
   createDefaultProgression,
@@ -10,6 +11,7 @@ import {
   getProgressionCellForBeat,
   getProgressionPosition,
   getProgressionRhythmEvents,
+  getProgressionRhythmPreset,
   getProgressionSustainingEventAtStep,
   isProgressionBeatStart,
   progressionStepsPerBeat,
@@ -316,6 +318,24 @@ describe("progression beat events", () => {
     );
   });
 
+  it("recognizes the default beat and restores a preset beat to one quarter-note hit", () => {
+    const defaultProgression = createDefaultProgression();
+    expect(getProgressionBeatSubdivision(defaultProgression.bars[0], 0)).toBe("quarters");
+
+    let progression = applyProgressionBeatSubdivision(
+      defaultProgression,
+      0,
+      1,
+      "eighths",
+    );
+    progression = applyProgressionBeatSubdivision(progression, 0, 1, "quarters");
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 4, durationSteps: 4, eventType: "hit" },
+    ]);
+    expect(getProgressionBeatSubdivision(progression.bars[0], 1)).toBe("quarters");
+  });
+
   it("replaces the selected beat with four sixteenth-note hits", () => {
     let progression = applyProgressionBeatSubdivision(
       createDefaultProgression(),
@@ -332,5 +352,90 @@ describe("progression beat events", () => {
       { startStep: 3, durationSteps: 1, eventType: "hit" },
     ]);
     expect(getProgressionBeatSubdivision(progression.bars[0], 0)).toBe("sixteenths");
+  });
+
+  it("applies a dotted-quarter and eighth-note pattern to the selected two-beat pair", () => {
+    const progression = applyProgressionRhythmPreset(
+      createDefaultProgression(),
+      0,
+      1,
+      "dotted-quarter-eighth",
+    );
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 0, durationSteps: 6, eventType: "hit" },
+      { startStep: 6, durationSteps: 2, eventType: "hit" },
+    ]);
+    expect(getProgressionRhythmPreset(progression.bars[0], 0)).toBe(
+      "dotted-quarter-eighth",
+    );
+    expect(getProgressionRhythmPreset(progression.bars[0], 1)).toBe(
+      "dotted-quarter-eighth",
+    );
+    expect(
+      applyProgressionRhythmPreset(progression, 0, 0, "dotted-quarter-eighth"),
+    ).toBe(progression);
+  });
+
+  it("applies the dotted preset to beats three and four without crossing the bar", () => {
+    const progression = applyProgressionRhythmPreset(
+      createDefaultProgression(),
+      0,
+      3,
+      "dotted-quarter-eighth",
+    );
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 8, durationSteps: 6, eventType: "hit" },
+      { startStep: 14, durationSteps: 2, eventType: "hit" },
+    ]);
+    expect(getProgressionRhythmPreset(progression.bars[0], 2)).toBe(
+      "dotted-quarter-eighth",
+    );
+  });
+
+  it("shortens a prior sustaining hit before applying the dotted preset", () => {
+    const initial = createDefaultProgression();
+    let progression = {
+      ...initial,
+      bars: initial.bars.map((bar, index) =>
+        index === 0
+          ? {
+              ...bar,
+              rhythm: [{ startStep: 4, durationSteps: 6 as const, eventType: "hit" as const }],
+            }
+          : bar,
+      ),
+    };
+    progression = applyProgressionRhythmPreset(
+      progression,
+      0,
+      2,
+      "dotted-quarter-eighth",
+    );
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 8, durationSteps: 6, eventType: "hit" },
+      { startStep: 14, durationSteps: 2, eventType: "hit" },
+    ]);
+    expect(
+      getProgressionRhythmEvents(progression.bars[0]).find((event) => event.startStep === 4),
+    ).toMatchObject({ durationSteps: 4, eventType: "hit" });
+  });
+
+  it("removes a cross-bar tie when the dotted preset replaces its source", () => {
+    let progression = updateProgressionBeatDuration(createDefaultProgression(), 0, 3, 6);
+    progression = applyProgressionRhythmPreset(
+      progression,
+      0,
+      2,
+      "dotted-quarter-eighth",
+    );
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 8, durationSteps: 6, eventType: "hit" },
+      { startStep: 14, durationSteps: 2, eventType: "hit" },
+    ]);
+    expect(getProgressionBeatEventType(progression.bars[1], 0)).toBe("hit");
   });
 });

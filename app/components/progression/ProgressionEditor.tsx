@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import type { ChordType } from "../../lib/music";
 import {
-  getProgressionBeatSubdivision,
+  getProgressionRhythmPreset,
   getProgressionCellForBeat,
   type ProgressionBar,
   type ProgressionBeatEventType,
   type ProgressionCell,
   type ProgressionDurationSteps,
   type ProgressionPlacementValidation,
-  type ProgressionSubdivision,
+  type ProgressionRhythmPreset as ProgressionRhythmPresetId,
 } from "../../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
 import { ProgressionAdvancedRhythm } from "./editor/ProgressionAdvancedRhythm";
@@ -27,10 +27,10 @@ type ProgressionEditorProps = {
   roots: string[];
   chordTypes: ChordType[];
   onBarCountChange: (barCount: number) => void;
-  onBeatSubdivisionChange: (
+  onRhythmPresetApply: (
     barIndex: number,
     beatIndex: number,
-    subdivision: ProgressionSubdivision,
+    preset: ProgressionRhythmPresetId,
   ) => void;
   onBeatChordChange: (
     barIndex: number,
@@ -70,7 +70,7 @@ export function ProgressionEditor({
   roots,
   chordTypes,
   onBarCountChange,
-  onBeatSubdivisionChange,
+  onRhythmPresetApply,
   onBeatChordChange,
   onBeatDurationChange,
   onBeatEventTypeChange,
@@ -94,8 +94,8 @@ export function ProgressionEditor({
   };
 
   const selectedBar = bars[selectedBarIndex] ?? bars[0];
-  const selectedSubdivision = selectedBar
-    ? getProgressionBeatSubdivision(selectedBar, selectedBeatIndex)
+  const selectedRhythmPreset = selectedBar
+    ? getProgressionRhythmPreset(selectedBar, selectedBeatIndex)
     : undefined;
   const selectedCellIndex = Math.floor(selectedBeatIndex / 2);
   const baseCell = selectedBar?.cells[selectedCellIndex];
@@ -129,9 +129,9 @@ export function ProgressionEditor({
     }
   };
 
-  const applySubdivision = (subdivision: ProgressionSubdivision) => {
+  const applyRhythmPreset = (preset: ProgressionRhythmPresetId) => {
     setSelectedStepInBeat(0);
-    onBeatSubdivisionChange(selectedBarIndex, selectedBeatIndex, subdivision);
+    onRhythmPresetApply(selectedBarIndex, selectedBeatIndex, preset);
   };
 
   return (
@@ -172,8 +172,8 @@ export function ProgressionEditor({
           selectedCell={selectedCell}
         />
         <ProgressionRhythmPreset
-          onApply={applySubdivision}
-          selectedSubdivision={selectedSubdivision}
+          onApply={applyRhythmPreset}
+          selectedPreset={selectedRhythmPreset}
         />
         <ProgressionAdvancedRhythm
           bars={bars}
