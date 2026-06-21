@@ -25,6 +25,13 @@ export {
 } from "./harmony";
 
 export {
+  getProgressionGrooveBeatTime,
+  getProgressionGrooveDelaySeconds,
+  getProgressionGrooveDurationSeconds,
+  type ProgressionGroove,
+} from "./groove";
+
+export {
   getProgressionBeatDuration,
   getProgressionBeatEventType,
   getProgressionBeatSubdivision,
