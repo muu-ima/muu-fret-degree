@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LuChevronDown } from "react-icons/lu";
 import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
 import { type ChordType } from "../lib/music";
 import {
@@ -95,6 +96,7 @@ export function ProgressionEditor({
   const [selectedBarIndex, setSelectedBarIndex] = useState(0);
   const [selectedBeatIndex, setSelectedBeatIndex] = useState(0);
   const [selectedStepInBeat, setSelectedStepInBeat] = useState(0);
+  const [isAdvancedRhythmOpen, setIsAdvancedRhythmOpen] = useState(false);
 
   useEffect(() => {
     setSelectedBarIndex((currentIndex) => Math.min(currentIndex, Math.max(bars.length - 1, 0)));
@@ -129,6 +131,14 @@ export function ProgressionEditor({
         ? getProgressionBeatDuration(selectedBar, selectedBeatIndex)
         : 4
       : selectedRhythmEvent?.durationSteps ?? 1;
+  const selectedPositionLabel = ["1", "e", "&", "a"][selectedStepInBeat];
+  const selectedEventLabel = selectedBeatEventType
+    ? selectedBeatEventType[0].toUpperCase() + selectedBeatEventType.slice(1)
+    : "Empty";
+  const selectedDurationLabel =
+    ({ 1: "1/16", 2: "1/8", 3: "1/8 ·", 4: "1/4", 6: "1/4 ·" } as const)[
+      selectedBeatDuration
+    ];
   const canTieSelectedBeat = canTieProgressionBeat(
     bars,
     selectedBarIndex,
@@ -184,10 +194,12 @@ export function ProgressionEditor({
                 key={count}
                 type="button"
                 className={isActive ? "barCountTab active" : "barCountTab"}
+                aria-label={`${count} bars`}
                 aria-pressed={isActive}
                 onClick={() => onBarCountChange(count)}
               >
-                {count} bars
+                <span className="barCountTabNumber">{count}</span>
+                <span className="barCountTabUnit">bars</span>
               </button>
             );
           })}
@@ -306,7 +318,7 @@ export function ProgressionEditor({
           </div>
         </section>
 
-        <div className="progressionRhythmControlGrid progressionRhythmPositionGrid">
+        <div className="progressionRhythmPresetSection">
         <div className="progressionApplySection">
           <span className="controlLabel">Rhythm Preset</span>
           <div className="progressionApplyTabs progressionSubdivisionTabs" role="group" aria-label="拍の分割プリセット">
@@ -329,7 +341,27 @@ export function ProgressionEditor({
           </div>
         </div>
 
-        <div className="progressionStepSection">
+        </div>
+
+        <section className={`progressionRhythmAccordion${isAdvancedRhythmOpen ? " open" : ""}`}>
+          <button
+            type="button"
+            className="progressionRhythmAccordionTrigger"
+            aria-expanded={isAdvancedRhythmOpen}
+            aria-controls="progression-advanced-rhythm"
+            onClick={() => setIsAdvancedRhythmOpen((isOpen) => !isOpen)}
+          >
+            <span>Advanced Rhythm</span>
+            <small>
+              Position {selectedPositionLabel} · {selectedEventLabel}
+              {selectedBeatEventType === "hit" ? ` · ${selectedDurationLabel}` : ""}
+            </small>
+            <LuChevronDown aria-hidden="true" />
+          </button>
+
+          {isAdvancedRhythmOpen ? (
+            <div id="progression-advanced-rhythm" className="progressionRhythmAccordionContent">
+              <div className="progressionStepSection">
           <span className="controlLabel">Start Position</span>
           <div className="progressionStepTabs" role="tablist" aria-label="編集する開始位置">
             {[
@@ -369,8 +401,6 @@ export function ProgressionEditor({
               );
             })}
           </div>
-        </div>
-
         </div>
 
         <div className="progressionRhythmControlGrid progressionRhythmEventGrid">
@@ -488,7 +518,10 @@ export function ProgressionEditor({
           </div>
         </div>
 
-        </div>
+              </div>
+            </div>
+          ) : null}
+        </section>
 
       </section>
     </section>
