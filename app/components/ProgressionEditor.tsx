@@ -306,6 +306,7 @@ export function ProgressionEditor({
           </div>
         </section>
 
+        <div className="progressionRhythmControlGrid progressionRhythmPositionGrid">
         <div className="progressionApplySection">
           <span className="controlLabel">Rhythm Preset</span>
           <div className="progressionApplyTabs progressionSubdivisionTabs" role="group" aria-label="拍の分割プリセット">
@@ -370,6 +371,9 @@ export function ProgressionEditor({
           </div>
         </div>
 
+        </div>
+
+        <div className="progressionRhythmControlGrid progressionRhythmEventGrid">
         <div className="progressionApplySection">
           <span className="controlLabel">Beat Event</span>
           <div
@@ -482,6 +486,8 @@ export function ProgressionEditor({
               );
             })}
           </div>
+        </div>
+
         </div>
 
       </section>

@@ -2323,6 +2323,23 @@ select:focus-visible,
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.progressionRhythmControlGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.progressionRhythmPositionGrid {
+  grid-template-columns: minmax(260px, 0.48fr) minmax(0, 1.52fr);
+}
+
+.progressionRhythmEventGrid {
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+}
+
+.progressionRhythmControlGrid .progressionSubdivisionTabs {
+  width: 100%;
+}
+
 .progressionChartDuration {
   position: absolute;
   top: 3px;
@@ -3183,6 +3200,10 @@ select:focus-visible,
   }
 
   .progressionHarmonyMetaFields {
+    grid-template-columns: 1fr;
+  }
+
+  .progressionRhythmControlGrid {
     grid-template-columns: 1fr;
   }
 
