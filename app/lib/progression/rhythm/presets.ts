@@ -3,16 +3,21 @@ import {
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
 } from "../model";
+import {
+  getProgressionSixteenthStepFromTicks,
+  getProgressionTimingGridUnitsPerBeat,
+  getProgressionTimingTicks,
+  type ProgressionTimingGrid,
+} from "./timing-grid";
 
-export type ProgressionTimingGrid = "sixteenth";
 export type ProgressionSubdivision = "quarters" | "eighths" | "sixteenths";
 export type ProgressionRhythmPresetId =
   | ProgressionSubdivision
   | "dotted-quarter-eighth";
 
 export type ProgressionRhythmPresetEvent = {
-  startStep: number;
-  durationSteps: ProgressionDurationSteps;
+  startUnit: number;
+  durationUnits: number;
   eventType: ProgressionBeatEventType;
 };
 
@@ -30,7 +35,7 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
     label: "Quarter ×1",
     spanBeats: 1,
     timingGrid: "sixteenth",
-    events: [{ startStep: 0, durationSteps: 4, eventType: "hit" }],
+    events: [{ startUnit: 0, durationUnits: 4, eventType: "hit" }],
   },
   {
     id: "eighths",
@@ -38,8 +43,8 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
     spanBeats: 1,
     timingGrid: "sixteenth",
     events: [
-      { startStep: 0, durationSteps: 2, eventType: "hit" },
-      { startStep: 2, durationSteps: 2, eventType: "hit" },
+      { startUnit: 0, durationUnits: 2, eventType: "hit" },
+      { startUnit: 2, durationUnits: 2, eventType: "hit" },
     ],
   },
   {
@@ -48,10 +53,10 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
     spanBeats: 1,
     timingGrid: "sixteenth",
     events: [
-      { startStep: 0, durationSteps: 1, eventType: "hit" },
-      { startStep: 1, durationSteps: 1, eventType: "hit" },
-      { startStep: 2, durationSteps: 1, eventType: "hit" },
-      { startStep: 3, durationSteps: 1, eventType: "hit" },
+      { startUnit: 0, durationUnits: 1, eventType: "hit" },
+      { startUnit: 1, durationUnits: 1, eventType: "hit" },
+      { startUnit: 2, durationUnits: 1, eventType: "hit" },
+      { startUnit: 3, durationUnits: 1, eventType: "hit" },
     ],
   },
   {
@@ -60,8 +65,8 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
     spanBeats: 2,
     timingGrid: "sixteenth",
     events: [
-      { startStep: 0, durationSteps: 6, eventType: "hit" },
-      { startStep: 6, durationSteps: 2, eventType: "hit" },
+      { startUnit: 0, durationUnits: 6, eventType: "hit" },
+      { startUnit: 6, durationUnits: 2, eventType: "hit" },
     ],
   },
 ];
@@ -83,14 +88,61 @@ export function getProgressionRhythmPresetSpanSteps(
   return preset.spanBeats * progressionStepsPerBeat;
 }
 
-export function matchesProgressionRhythmPreset(
-  events: readonly ProgressionRhythmPresetEvent[],
+const progressionDurationSteps = new Set<ProgressionDurationSteps>([1, 2, 3, 4, 6]);
+
+export function getProgressionRhythmPresetStepEvents(
   preset: ProgressionRhythmPresetDefinition,
 ) {
-  return events.length === preset.events.length && preset.events.every((expected, index) => {
+  const events = preset.events.map((event) => {
+    const startTicks = getProgressionTimingTicks(preset.timingGrid, event.startUnit);
+    const durationTicks = getProgressionTimingTicks(preset.timingGrid, event.durationUnits);
+    const startStep = startTicks === undefined
+      ? undefined
+      : getProgressionSixteenthStepFromTicks(startTicks);
+    const durationStep = durationTicks === undefined
+      ? undefined
+      : getProgressionSixteenthStepFromTicks(durationTicks);
+
+    if (
+      startStep === undefined ||
+      durationStep === undefined ||
+      !progressionDurationSteps.has(durationStep as ProgressionDurationSteps)
+    ) {
+      return undefined;
+    }
+
+    return {
+      startStep,
+      durationSteps: durationStep as ProgressionDurationSteps,
+      eventType: event.eventType,
+    };
+  });
+
+  return events.every((event) => event !== undefined)
+    ? events
+    : undefined;
+}
+
+export function matchesProgressionRhythmPreset(
+  events: readonly {
+    startStep: number;
+    durationSteps: ProgressionDurationSteps;
+    eventType: ProgressionBeatEventType;
+  }[],
+  preset: ProgressionRhythmPresetDefinition,
+) {
+  const presetEvents = getProgressionRhythmPresetStepEvents(preset);
+  return presetEvents !== undefined &&
+    events.length === presetEvents.length && presetEvents.every((expected, index) => {
     const actual = events[index];
     return actual?.startStep === expected.startStep &&
       actual.durationSteps === expected.durationSteps &&
       actual.eventType === expected.eventType;
   });
+}
+
+export function getProgressionRhythmPresetSpanUnits(
+  preset: ProgressionRhythmPresetDefinition,
+) {
+  return preset.spanBeats * getProgressionTimingGridUnitsPerBeat(preset.timingGrid);
 }

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   getProgressionRhythmPresetDefinition,
-  getProgressionRhythmPresetSpanSteps,
+  getProgressionRhythmPresetSpanUnits,
+  getProgressionRhythmPresetStepEvents,
   progressionRhythmPresets,
+  type ProgressionRhythmPresetDefinition,
 } from "./presets";
 
 describe("progression rhythm preset catalog", () => {
@@ -17,11 +19,12 @@ describe("progression rhythm preset catalog", () => {
 
   it("keeps every event inside its preset span", () => {
     for (const preset of progressionRhythmPresets) {
-      const spanSteps = getProgressionRhythmPresetSpanSteps(preset);
+      const spanUnits = getProgressionRhythmPresetSpanUnits(preset);
       expect(preset.timingGrid).toBe("sixteenth");
       expect(preset.events.every(
-        (event) => event.startStep >= 0 && event.startStep + event.durationSteps <= spanSteps,
+        (event) => event.startUnit >= 0 && event.startUnit + event.durationUnits <= spanUnits,
       )).toBe(true);
+      expect(getProgressionRhythmPresetStepEvents(preset)).toHaveLength(preset.events.length);
     }
   });
 
@@ -29,9 +32,25 @@ describe("progression rhythm preset catalog", () => {
     expect(getProgressionRhythmPresetDefinition("dotted-quarter-eighth")).toMatchObject({
       spanBeats: 2,
       events: [
-        { startStep: 0, durationSteps: 6 },
-        { startStep: 6, durationSteps: 2 },
+        { startUnit: 0, durationUnits: 6 },
+        { startUnit: 6, durationUnits: 2 },
       ],
     });
+  });
+
+  it("does not round a triplet-grid preset into legacy sixteenth steps", () => {
+    const tripletPreset: ProgressionRhythmPresetDefinition = {
+      id: "eighths",
+      label: "Triplet draft",
+      spanBeats: 1,
+      timingGrid: "triplet",
+      events: [
+        { startUnit: 0, durationUnits: 1, eventType: "hit" },
+        { startUnit: 1, durationUnits: 1, eventType: "hit" },
+        { startUnit: 2, durationUnits: 1, eventType: "hit" },
+      ],
+    };
+
+    expect(getProgressionRhythmPresetStepEvents(tripletPreset)).toBeUndefined();
   });
 });

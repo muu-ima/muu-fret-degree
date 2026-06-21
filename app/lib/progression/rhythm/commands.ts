@@ -31,6 +31,7 @@ import {
   getProgressionRhythmPresetDefinition,
   getProgressionRhythmPresetSpanSteps,
   getProgressionRhythmPresetStartBeat,
+  getProgressionRhythmPresetStepEvents,
   type ProgressionRhythmPresetId,
   type ProgressionSubdivision,
 } from "./presets";
@@ -216,7 +217,10 @@ export function applyProgressionRhythmPreset(
 ): ChordProgression {
   const currentBar = progression.bars[barIndex];
   const preset = getProgressionRhythmPresetDefinition(presetId);
-  if (!currentBar || !preset || beatIndex < 0 || beatIndex > 3) {
+  const presetEvents = preset
+    ? getProgressionRhythmPresetStepEvents(preset)
+    : undefined;
+  if (!currentBar || !preset || !presetEvents || beatIndex < 0 || beatIndex > 3) {
     return progression;
   }
   if (getProgressionRhythmPreset(currentBar, beatIndex) === presetId) {
@@ -256,7 +260,7 @@ export function applyProgressionRhythmPreset(
     ...(updatedBar.rhythm?.filter(
       (event) => event.startStep < startStep || event.startStep >= endStep,
     ) ?? []),
-    ...preset.events.map((event) => ({
+    ...presetEvents.map((event) => ({
       ...event,
       startStep: startStep + event.startStep,
     })),

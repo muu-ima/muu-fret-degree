@@ -18,15 +18,25 @@ export {
 export {
   getProgressionRhythmPresetDefinition,
   getProgressionRhythmPresetSpanSteps,
+  getProgressionRhythmPresetSpanUnits,
   getProgressionRhythmPresetStartBeat,
+  getProgressionRhythmPresetStepEvents,
   matchesProgressionRhythmPreset,
   progressionRhythmPresets,
   type ProgressionRhythmPresetDefinition,
   type ProgressionRhythmPresetEvent,
   type ProgressionRhythmPresetId,
   type ProgressionSubdivision,
-  type ProgressionTimingGrid,
 } from "./rhythm/presets";
+
+export {
+  getProgressionSixteenthStepFromTicks,
+  getProgressionTimingBeats,
+  getProgressionTimingGridUnitsPerBeat,
+  getProgressionTimingTicks,
+  progressionTicksPerBeat,
+  type ProgressionTimingGrid,
+} from "./rhythm/timing-grid";
 
 export {
   getProgressionBeat,
