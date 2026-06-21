@@ -29,6 +29,7 @@ type PlanProgressionBeatOptions = {
   beatEventType?: ProgressionBeatEventType;
   bpm: number;
   chordNotes: ChordNote[];
+  durationSeconds?: number;
   durationSteps?: ProgressionDurationSteps;
   followingTieBeats?: number;
   nextRoot?: string;
@@ -45,13 +46,14 @@ function extendLastNoteForTies(
   durationSteps: ProgressionDurationSteps,
   followingTieBeats: number,
   bpm: number,
+  durationSeconds?: number,
 ) {
   if (events.length === 0) {
     return [];
   }
 
   const beatDuration = 60 / Math.max(1, bpm);
-  const targetDuration = (beatDuration * durationSteps) / 4;
+  const targetDuration = durationSeconds ?? (beatDuration * durationSteps) / 4;
   const eventsWithinDuration = events.filter((event) => event.startOffset < targetDuration);
 
   return eventsWithinDuration.map((event, index) => {
@@ -73,6 +75,7 @@ export function planProgressionBeat({
   beatEventType = "hit",
   bpm,
   chordNotes,
+  durationSeconds,
   durationSteps = 4,
   followingTieBeats = 0,
   nextRoot,
@@ -91,6 +94,7 @@ export function planProgressionBeat({
       durationSteps,
       followingTieBeats,
       bpm,
+      durationSeconds,
     );
   }
 
@@ -115,6 +119,7 @@ export function planProgressionBeat({
       durationSteps,
       followingTieBeats,
       bpm,
+      durationSeconds,
     );
   }
 
@@ -134,6 +139,7 @@ export function planProgressionBeat({
       durationSteps,
       followingTieBeats,
       bpm,
+      durationSeconds,
     );
   }
 
@@ -150,6 +156,7 @@ export function planProgressionBeat({
       durationSteps,
       followingTieBeats,
       bpm,
+      durationSeconds,
     );
   }
 
@@ -162,5 +169,6 @@ export function planProgressionBeat({
     durationSteps,
     followingTieBeats,
     bpm,
+    durationSeconds,
   );
 }

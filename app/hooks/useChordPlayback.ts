@@ -78,16 +78,20 @@ export function useChordPlayback({
     ({
       beatInBar,
       beatEventType,
+      durationSeconds,
       durationSteps,
       followingTieBeats,
       rhythm,
+      startDelay,
       nextRoot,
     }: {
       beatInBar: number;
       beatEventType?: ProgressionBeatEventType;
+      durationSeconds?: number;
       durationSteps?: ProgressionDurationSteps;
       followingTieBeats?: number;
       rhythm: ProgressionRhythm;
+      startDelay?: number;
       nextRoot?: string;
     }) => {
       resumeAudio();
@@ -96,6 +100,7 @@ export function useChordPlayback({
         beatEventType,
         bpm,
         chordNotes,
+        durationSeconds,
         durationSteps,
         followingTieBeats,
         nextRoot,
@@ -103,7 +108,7 @@ export function useChordPlayback({
         rhythm,
       }).forEach(
         ({ midi, startOffset, duration }) => {
-          playBassNote(midi, startOffset, duration);
+          playBassNote(midi, startOffset + (startDelay ?? 0), duration);
         },
       );
     },
