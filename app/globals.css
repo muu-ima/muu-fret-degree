@@ -3190,9 +3190,33 @@ select:focus-visible,
   }
 
   .progressionMiniTransport {
+    width: 100%;
+    min-width: 0;
     grid-column: 1 / -1;
     grid-row: 2;
     justify-content: space-between;
+    gap: 8px;
+  }
+
+  .progressionMiniTransport > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .progressionMiniTransport > div {
+    flex: 0 0 auto;
+  }
+
+  .progressionMiniTransport button {
+    width: 36px;
+    min-height: 34px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .progressionMiniTransport button span {
+    display: none;
   }
 
   .progressionHarmonyFields {
