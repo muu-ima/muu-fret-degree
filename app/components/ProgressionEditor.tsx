@@ -203,21 +203,23 @@ export function ProgressionEditor({
       />
       <section className="progressionSelectionEditor" aria-label="選択中のコードを編集">
         <div className="progressionSelectionHeader">
-          <div>
-            <span>Selected</span>
-            <strong>
-              Bar {selectedBar.bar} · Beat {selectedBeatIndex + 1}
-              {selectedStepInBeat > 0 ? ` · ${["1", "e", "&", "a"][selectedStepInBeat]}` : ""}
-            </strong>
-          </div>
-          <ProgressionMiniTransport />
-          <div className="progressionSelectionChord">
-            <strong>{formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}</strong>
-            <span>
+          <div className="progressionSelectionMeta">
+            <div>
+              <span>Selected</span>
+              <strong>
+                Bar {selectedBar.bar} · Beat {selectedBeatIndex + 1}
+                {selectedStepInBeat > 0 ? ` · ${["1", "e", "&", "a"][selectedStepInBeat]}` : ""}
+              </strong>
+            </div>
+            <span className="progressionSelectionScope">
               {editScope === "beat"
                 ? `Beat ${selectedBeatIndex + 1} override`
                 : `Editing Beats ${selectedCellIndex === 0 ? "1-2" : "3-4"}`}
             </span>
+          </div>
+          <ProgressionMiniTransport />
+          <div className="progressionSelectionChord">
+            <strong>{formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}</strong>
           </div>
         </div>
 

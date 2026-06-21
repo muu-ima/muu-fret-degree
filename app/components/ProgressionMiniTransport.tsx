@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { LuPlay, LuSquare } from "react-icons/lu";
+import { LuPlay, LuRotateCcw, LuSquare } from "react-icons/lu";
 import theory from "../../data/theory.json";
 import { useChordPlayback } from "../hooks/useChordPlayback";
 import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
@@ -100,6 +100,16 @@ export function ProgressionMiniTransport() {
         >
           <LuSquare aria-hidden="true" />
           <span>Stop</span>
+        </button>
+        <button
+          type="button"
+          aria-label="コード進行を先頭へ戻す"
+          title="Reset"
+          disabled={progression.bars.length === 0}
+          onClick={transport.resetProgression}
+        >
+          <LuRotateCcw aria-hidden="true" />
+          <span>Reset</span>
         </button>
       </div>
     </div>
