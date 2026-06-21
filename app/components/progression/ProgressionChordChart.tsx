@@ -1,7 +1,7 @@
 "use client";
 
-import type { ChordType } from "../lib/music";
-import { formatChordSymbol } from "../lib/chord-symbol";
+import type { ChordType } from "../../lib/music";
+import { formatChordSymbol } from "../../lib/chord-symbol";
 import {
   getProgressionBeatDuration,
   getProgressionBeatEventType,
@@ -10,7 +10,7 @@ import {
   getProgressionSustainingEventAtStep,
   progressionStepsPerBeat,
   type ProgressionBar,
-} from "../lib/progression";
+} from "../../lib/progression";
 
 type ProgressionChordChartProps = {
   bars: readonly ProgressionBar[];

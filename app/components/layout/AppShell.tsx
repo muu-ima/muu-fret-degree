@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
-import { LuChartNoAxesColumn, LuMusic4, LuPencil, LuSlidersHorizontal, LuTimer } from "react-icons/lu";
+import {
+  LuChartNoAxesColumn,
+  LuMusic4,
+  LuPencil,
+  LuSlidersHorizontal,
+  LuTimer,
+} from "react-icons/lu";
 
 type AppShellProps = {
   children: ReactNode;

@@ -1,6 +1,6 @@
 "use client";
 
-import { type FretRange } from "../lib/music";
+import { type FretRange } from "../../lib/music";
 
 type FretRangeTabsProps = {
   fretRanges: readonly FretRange[];

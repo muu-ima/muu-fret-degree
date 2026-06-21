@@ -2,9 +2,9 @@
 
 import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
 import theory from "../../data/theory.json";
-import { useAudioOutput } from "../hooks/useAudioOutput";
-import { useProgressionPlayback } from "../hooks/useProgressionPlayback";
-import { useProgressionState } from "../hooks/useProgressionState";
+import { useAudioOutput } from "../hooks/audio/useAudioOutput";
+import { useProgressionPlayback } from "../hooks/progression/useProgressionPlayback";
+import { useProgressionState } from "../hooks/progression/useProgressionState";
 import type { ChordProgression } from "../lib/progression";
 import type { ProgressionGroove } from "../lib/progression/groove";
 import type { ChordType } from "../lib/music";

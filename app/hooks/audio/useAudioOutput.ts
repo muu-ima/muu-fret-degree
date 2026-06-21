@@ -7,7 +7,7 @@ import {
   playBassNote as playBassAudioNote,
   playMetronomeClick as playMetronomeAudioClick,
   playPianoNote as playPianoAudioNote,
-} from "../lib/audio";
+} from "../../lib/audio";
 
 export function useAudioOutput() {
   const audioContext = useRef<AudioContext | null>(null);

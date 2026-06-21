@@ -2,21 +2,21 @@
 
 import { useMemo } from "react";
 import { LuPlay, LuRotateCcw, LuSquare } from "react-icons/lu";
-import theory from "../../data/theory.json";
-import { useChordPlayback } from "../hooks/useChordPlayback";
-import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
+import theory from "../../../data/theory.json";
+import { useChordPlayback } from "../../hooks/audio/useChordPlayback";
+import { useProgressionBeatScheduler } from "../../hooks/progression/useProgressionBeatScheduler";
 import {
   type ChordType,
   type Tuning,
   makeChordMap,
   makeChordNotes,
   makeFretNotes,
-} from "../lib/music";
+} from "../../lib/music";
 import {
   useProgressionSession,
   useProgressionTransport,
   useSessionAudioOutput,
-} from "../providers/ProgressionSessionProvider";
+} from "../../providers/ProgressionSessionProvider";
 
 export function ProgressionMiniTransport() {
   const { progression } = useProgressionSession();

@@ -7,8 +7,8 @@ import {
   type ProgressionBar,
   type ProgressionPosition,
   type ProgressionSelection,
-} from "../lib/progression";
-import { useTransport } from "./useTransport";
+} from "../../lib/progression";
+import { useTransport } from "../practice/useTransport";
 
 type UseProgressionPlaybackOptions = {
   progression: ChordProgression;

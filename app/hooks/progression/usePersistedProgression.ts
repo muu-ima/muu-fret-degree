@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { ChordType } from "../lib/music";
+import type { ChordType } from "../../lib/music";
 import {
   createPersistedProgressionSettings,
   parsePersistedProgressionSettings,
-} from "../lib/progression/persistence";
-import type { ChordProgression } from "../lib/progression/model";
+} from "../../lib/progression/persistence";
+import type { ChordProgression } from "../../lib/progression/model";
 
 const storageKey = "muu-fret-degree:progression-settings";
 

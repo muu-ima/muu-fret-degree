@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { LuArrowLeft, LuRedo2, LuUndo2 } from "react-icons/lu";
-import theory from "../../data/theory.json";
-import type { ChordType } from "../lib/music";
-import { useProgressionSession } from "../providers/ProgressionSessionProvider";
+import theory from "../../../data/theory.json";
+import type { ChordType } from "../../lib/music";
+import { useProgressionSession } from "../../providers/ProgressionSessionProvider";
 import { ProgressionEditor } from "./ProgressionEditor";
 
 export function ProgressionEditorWorkspace() {
