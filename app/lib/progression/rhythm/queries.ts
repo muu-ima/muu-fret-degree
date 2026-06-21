@@ -97,6 +97,15 @@ export function getProgressionBeatSubdivision(
   }));
 
   if (
+    relativeEvents.length === 1 &&
+    relativeEvents[0].startStep === 0 &&
+    relativeEvents[0].durationSteps === 4 &&
+    relativeEvents[0].eventType === "hit"
+  ) {
+    return "quarters";
+  }
+
+  if (
     relativeEvents.length === 2 &&
     relativeEvents.every(
       (event, index) =>

@@ -316,6 +316,24 @@ describe("progression beat events", () => {
     );
   });
 
+  it("recognizes the default beat and restores a preset beat to one quarter-note hit", () => {
+    const defaultProgression = createDefaultProgression();
+    expect(getProgressionBeatSubdivision(defaultProgression.bars[0], 0)).toBe("quarters");
+
+    let progression = applyProgressionBeatSubdivision(
+      defaultProgression,
+      0,
+      1,
+      "eighths",
+    );
+    progression = applyProgressionBeatSubdivision(progression, 0, 1, "quarters");
+
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 4, durationSteps: 4, eventType: "hit" },
+    ]);
+    expect(getProgressionBeatSubdivision(progression.bars[0], 1)).toBe("quarters");
+  });
+
   it("replaces the selected beat with four sixteenth-note hits", () => {
     let progression = applyProgressionBeatSubdivision(
       createDefaultProgression(),

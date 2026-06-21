@@ -20,6 +20,7 @@ export function ProgressionRhythmPreset({
         >
           {(
             [
+              { value: "quarters", label: "Quarter ×1" },
               { value: "eighths", label: "8ths ×2" },
               { value: "sixteenths", label: "16ths ×4" },
             ] as const

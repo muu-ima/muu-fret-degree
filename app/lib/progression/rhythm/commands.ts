@@ -216,8 +216,15 @@ export function applyProgressionBeatSubdivision(
 
   const beatStartStep = beatIndex * progressionStepsPerBeat;
   const beatEndStep = beatStartStep + progressionStepsPerBeat;
-  const stepOffsets = subdivision === "eighths" ? [0, 2] : [0, 1, 2, 3];
-  const durationSteps: ProgressionDurationSteps = subdivision === "eighths" ? 2 : 1;
+  const preset = {
+    quarters: { stepOffsets: [0], durationSteps: 4 },
+    eighths: { stepOffsets: [0, 2], durationSteps: 2 },
+    sixteenths: { stepOffsets: [0, 1, 2, 3], durationSteps: 1 },
+  } satisfies Record<
+    ProgressionSubdivision,
+    { stepOffsets: number[]; durationSteps: ProgressionDurationSteps }
+  >;
+  const { stepOffsets, durationSteps } = preset[subdivision];
   const updatedBar = nextProgression.bars[barIndex];
   const nextRhythm = [
     ...(updatedBar.rhythm?.filter(
