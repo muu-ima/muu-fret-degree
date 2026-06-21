@@ -3,6 +3,7 @@ import {
   type ChordProgression,
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
+  type ProgressionRhythmPreset,
   type ProgressionSubdivision,
 } from "../model";
 import {
@@ -10,6 +11,8 @@ import {
   getProgressionBeatEventType,
   getProgressionBeatSubdivision,
   getProgressionRhythmEventAtStep,
+  getProgressionRhythmPreset,
+  getProgressionSustainingEventAtStep,
 } from "./queries";
 import { canSetProgressionRhythmDuration } from "./collision";
 import {
@@ -235,6 +238,69 @@ export function applyProgressionBeatSubdivision(
       durationSteps,
       eventType: "hit" as const,
     })),
+  ].sort((first, second) => first.startStep - second.startStep);
+
+  return {
+    ...nextProgression,
+    bars: nextProgression.bars.map((bar, index) =>
+      index === barIndex ? { ...bar, rhythm: nextRhythm } : bar,
+    ),
+  };
+}
+
+export function applyProgressionRhythmPreset(
+  progression: ChordProgression,
+  barIndex: number,
+  beatIndex: number,
+  preset: ProgressionRhythmPreset,
+): ChordProgression {
+  if (preset !== "dotted-quarter-eighth") {
+    return applyProgressionBeatSubdivision(progression, barIndex, beatIndex, preset);
+  }
+
+  const currentBar = progression.bars[barIndex];
+  if (!currentBar || beatIndex < 0 || beatIndex > 3) {
+    return progression;
+  }
+  if (getProgressionRhythmPreset(currentBar, beatIndex) === preset) {
+    return progression;
+  }
+
+  const pairStartBeat = Math.floor(beatIndex / 2) * 2;
+  const pairStartStep = pairStartBeat * progressionStepsPerBeat;
+  const pairEndStep = pairStartStep + progressionStepsPerBeat * 2;
+  let nextProgression = progression;
+
+  if (pairStartBeat === 0) {
+    nextProgression = shortenProgressionCrossBarSource(nextProgression, barIndex);
+  } else {
+    const sustainingEvent = getProgressionSustainingEventAtStep(currentBar, pairStartStep);
+    if (sustainingEvent) {
+      nextProgression = setProgressionRhythmEvent(nextProgression, barIndex, {
+        ...sustainingEvent,
+        durationSteps: 4,
+      });
+    }
+  }
+
+  if (
+    currentBar.rhythm?.some(
+      (event) =>
+        event.startStep >= pairStartStep &&
+        event.startStep < pairEndStep &&
+        isCrossBarDottedQuarter(event),
+    )
+  ) {
+    nextProgression = removeProgressionCrossBarTie(nextProgression, barIndex);
+  }
+
+  const updatedBar = nextProgression.bars[barIndex];
+  const nextRhythm = [
+    ...(updatedBar.rhythm?.filter(
+      (event) => event.startStep < pairStartStep || event.startStep >= pairEndStep,
+    ) ?? []),
+    { startStep: pairStartStep, durationSteps: 6 as const, eventType: "hit" as const },
+    { startStep: pairStartStep + 6, durationSteps: 2 as const, eventType: "hit" as const },
   ].sort((first, second) => first.startStep - second.startStep);
 
   return {

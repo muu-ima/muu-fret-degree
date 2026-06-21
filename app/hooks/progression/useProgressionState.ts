@@ -14,7 +14,7 @@ import {
   progressionHistoryReducer,
 } from "../../lib/progression/history";
 import {
-  applyProgressionBeatSubdivision,
+  applyProgressionRhythmPreset,
   createProgressionVirtualTimeline,
   createDefaultProgression,
   removeProgressionRhythmEvent,
@@ -29,7 +29,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionCell,
   type ProgressionDurationSteps,
-  type ProgressionSubdivision,
+  type ProgressionRhythmPreset,
 } from "../../lib/progression";
 import { usePersistedProgression } from "./usePersistedProgression";
 
@@ -167,16 +167,16 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     [rhythmTimeline],
   );
 
-  const applyBeatSubdivision = useCallback(
-    (barIndex: number, beatIndex: number, subdivision: ProgressionSubdivision) => {
+  const applyRhythmPreset = useCallback(
+    (barIndex: number, beatIndex: number, preset: ProgressionRhythmPreset) => {
       dispatch({
         type: "commit",
         update: (currentProgression) =>
-          applyProgressionBeatSubdivision(
+          applyProgressionRhythmPreset(
             currentProgression,
             barIndex,
             beatIndex,
-            subdivision,
+            preset,
           ),
       });
     },
@@ -187,7 +187,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
   return {
-    applyBeatSubdivision,
+    applyRhythmPreset,
     canRedo: history.future.length > 0,
     canUndo: history.past.length > 0,
     progression,

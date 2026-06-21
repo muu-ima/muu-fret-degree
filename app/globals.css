@@ -2341,6 +2341,10 @@ select:focus-visible,
   min-height: 36px;
 }
 
+.progressionSubdivisionTabs button:last-child {
+  grid-column: 1 / -1;
+}
+
 .progressionDurationTabs {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }

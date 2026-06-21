@@ -336,7 +336,7 @@ Transportの`ProgressionPosition`は累積`stepIndex`、拍内`stepInBeat`、小
 
 現在の4step補助レーンでは、8分音符が覆う2step、付点8分音符が覆う3stepを持続線で表示する。イベント開始位置と持続位置を分け、占有中stepの通常配置はdisabledにする。音価を分割する場合は元の音価を先に短くする。
 
-Start Positionは常に`1 / e / & / a`の4コマを表示し、音価とは分離する。選択拍には入力補助として`Quarter ×1`、`8ths ×2`、`16ths ×4`のRhythmプリセットを用意する。4分プリセットは拍頭へ4stepのHit、8分プリセットは`1 / &`へ2stepのHit、16分プリセットは4位置すべてへ1stepのHitを置く。プリセットは選択拍のRhythmイベントを置き換える編集commandとして扱い、Undo / Redo対象にする。
+Start Positionは常に`1 / e / & / a`の4コマを表示し、音価とは分離する。選択拍には入力補助として`Quarter ×1`、`8ths ×2`、`16ths ×4`のRhythmプリセットを用意する。4分プリセットは拍頭へ4stepのHit、8分プリセットは`1 / &`へ2stepのHit、16分プリセットは4位置すべてへ1stepのHitを置く。`Dotted 1/4 + 1/8`は選択拍を含むBeats 1–2またはBeats 3–4へ、6stepと2stepのHitを配置する。プリセットは対象範囲のRhythmイベントを置き換える編集commandとして扱い、Undo / Redo対象にする。
 
 付点4分音符は6stepとして同じ16分グリッド上で扱う。Beat 4から小節境界を越える場合は、次小節Beat 1へTieを自動配置して再発音を抑える。最終小節から先頭小節へ戻るループ境界も同じ規則を使う。占有された次小節頭へHit / Restを直接置くことはできず、先に前小節の付点4分を4stepへ変更すると自動Tieが除去される。
 

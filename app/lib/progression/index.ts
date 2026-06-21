@@ -11,6 +11,7 @@ export {
   type ProgressionPlaybackState,
   type ProgressionPosition,
   type ProgressionRhythmEvent,
+  type ProgressionRhythmPreset,
   type ProgressionSelection,
   type ProgressionSubdivision,
   type TimeSignature,
@@ -37,6 +38,7 @@ export {
   getProgressionBeatSubdivision,
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,
+  getProgressionRhythmPreset,
   getProgressionSustainingEventAtStep,
 } from "./rhythm/queries";
 
@@ -44,6 +46,7 @@ export { canSetProgressionRhythmDuration } from "./rhythm/collision";
 
 export {
   applyProgressionBeatSubdivision,
+  applyProgressionRhythmPreset,
   removeProgressionRhythmEvent,
   updateProgressionBeatDuration,
   updateProgressionBeatEventType,

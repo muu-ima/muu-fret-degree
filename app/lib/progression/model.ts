@@ -11,6 +11,7 @@ export type ProgressionCell = {
 export type ProgressionBeatEventType = "hit" | "rest" | "tie";
 export type ProgressionDurationSteps = 1 | 2 | 3 | 4 | 6;
 export type ProgressionSubdivision = "quarters" | "eighths" | "sixteenths";
+export type ProgressionRhythmPreset = ProgressionSubdivision | "dotted-quarter-eighth";
 
 export type ProgressionBeat = {
   chordOverride?: ProgressionCell;
