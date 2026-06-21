@@ -4,9 +4,15 @@ import {
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionRhythmEvent,
-  type ProgressionRhythmPreset,
-  type ProgressionSubdivision,
 } from "../model";
+import {
+  getProgressionRhythmPresetSpanSteps,
+  getProgressionRhythmPresetStartBeat,
+  matchesProgressionRhythmPreset,
+  progressionRhythmPresets,
+  type ProgressionRhythmPresetId,
+  type ProgressionSubdivision,
+} from "./presets";
 
 export function getProgressionBeatEventType(
   bar: ProgressionBar,
@@ -87,74 +93,28 @@ export function getProgressionBeatSubdivision(
   bar: ProgressionBar,
   beatIndex: number,
 ): ProgressionSubdivision | undefined {
-  const beatStartStep = beatIndex * progressionStepsPerBeat;
-  const beatEndStep = beatStartStep + progressionStepsPerBeat;
-  const events = getProgressionRhythmEvents(bar).filter(
-    (event) => event.startStep >= beatStartStep && event.startStep < beatEndStep,
-  );
-  const relativeEvents = events.map((event) => ({
-    ...event,
-    startStep: event.startStep - beatStartStep,
-  }));
-
-  if (
-    relativeEvents.length === 1 &&
-    relativeEvents[0].startStep === 0 &&
-    relativeEvents[0].durationSteps === 4 &&
-    relativeEvents[0].eventType === "hit"
-  ) {
-    return "quarters";
-  }
-
-  if (
-    relativeEvents.length === 2 &&
-    relativeEvents.every(
-      (event, index) =>
-        event.startStep === index * 2 &&
-        event.durationSteps === 2 &&
-        event.eventType === "hit",
-    )
-  ) {
-    return "eighths";
-  }
-
-  if (
-    relativeEvents.length === 4 &&
-    relativeEvents.every(
-      (event, index) =>
-        event.startStep === index &&
-        event.durationSteps === 1 &&
-        event.eventType === "hit",
-    )
-  ) {
-    return "sixteenths";
-  }
-
-  return undefined;
+  const preset = getProgressionRhythmPreset(bar, beatIndex);
+  return preset === "quarters" || preset === "eighths" || preset === "sixteenths"
+    ? preset
+    : undefined;
 }
 
 export function getProgressionRhythmPreset(
   bar: ProgressionBar,
   beatIndex: number,
-): ProgressionRhythmPreset | undefined {
-  const pairStartBeat = Math.floor(beatIndex / 2) * 2;
-  const pairStartStep = pairStartBeat * progressionStepsPerBeat;
-  const pairEndStep = pairStartStep + progressionStepsPerBeat * 2;
-  const pairEvents = getProgressionRhythmEvents(bar)
-    .filter((event) => event.startStep >= pairStartStep && event.startStep < pairEndStep)
-    .map((event) => ({ ...event, startStep: event.startStep - pairStartStep }));
+): ProgressionRhythmPresetId | undefined {
+  const events = getProgressionRhythmEvents(bar);
+  const presetsByLargestSpan = [...progressionRhythmPresets].sort(
+    (first, second) => second.spanBeats - first.spanBeats,
+  );
 
-  if (
-    pairEvents.length === 2 &&
-    pairEvents[0].startStep === 0 &&
-    pairEvents[0].durationSteps === 6 &&
-    pairEvents[0].eventType === "hit" &&
-    pairEvents[1].startStep === 6 &&
-    pairEvents[1].durationSteps === 2 &&
-    pairEvents[1].eventType === "hit"
-  ) {
-    return "dotted-quarter-eighth";
-  }
-
-  return getProgressionBeatSubdivision(bar, beatIndex);
+  return presetsByLargestSpan.find((preset) => {
+    const startBeat = getProgressionRhythmPresetStartBeat(preset, beatIndex);
+    const startStep = startBeat * progressionStepsPerBeat;
+    const endStep = startStep + getProgressionRhythmPresetSpanSteps(preset);
+    const relativeEvents = events
+      .filter((event) => event.startStep >= startStep && event.startStep < endStep)
+      .map((event) => ({ ...event, startStep: event.startStep - startStep }));
+    return matchesProgressionRhythmPreset(relativeEvents, preset);
+  })?.id;
 }

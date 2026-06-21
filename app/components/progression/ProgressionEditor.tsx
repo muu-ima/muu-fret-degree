@@ -10,7 +10,7 @@ import {
   type ProgressionCell,
   type ProgressionDurationSteps,
   type ProgressionPlacementValidation,
-  type ProgressionRhythmPreset as ProgressionRhythmPresetId,
+  type ProgressionRhythmPresetId,
 } from "../../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
 import { ProgressionAdvancedRhythm } from "./editor/ProgressionAdvancedRhythm";

@@ -11,11 +11,22 @@ export {
   type ProgressionPlaybackState,
   type ProgressionPosition,
   type ProgressionRhythmEvent,
-  type ProgressionRhythmPreset,
   type ProgressionSelection,
-  type ProgressionSubdivision,
   type TimeSignature,
 } from "./model";
+
+export {
+  getProgressionRhythmPresetDefinition,
+  getProgressionRhythmPresetSpanSteps,
+  getProgressionRhythmPresetStartBeat,
+  matchesProgressionRhythmPreset,
+  progressionRhythmPresets,
+  type ProgressionRhythmPresetDefinition,
+  type ProgressionRhythmPresetEvent,
+  type ProgressionRhythmPresetId,
+  type ProgressionSubdivision,
+  type ProgressionTimingGrid,
+} from "./rhythm/presets";
 
 export {
   getProgressionBeat,

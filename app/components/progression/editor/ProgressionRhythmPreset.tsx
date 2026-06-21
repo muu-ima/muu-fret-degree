@@ -1,8 +1,11 @@
-import type { ProgressionRhythmPreset } from "../../../lib/progression";
+import {
+  progressionRhythmPresets,
+  type ProgressionRhythmPresetId,
+} from "../../../lib/progression";
 
 type ProgressionRhythmPresetProps = {
-  onApply: (preset: ProgressionRhythmPreset) => void;
-  selectedPreset: ProgressionRhythmPreset | undefined;
+  onApply: (preset: ProgressionRhythmPresetId) => void;
+  selectedPreset: ProgressionRhythmPresetId | undefined;
 };
 
 export function ProgressionRhythmPreset({
@@ -18,22 +21,18 @@ export function ProgressionRhythmPreset({
           role="group"
           aria-label="拍の分割プリセット"
         >
-          {(
-            [
-              { value: "quarters", label: "Quarter ×1" },
-              { value: "eighths", label: "8ths ×2" },
-              { value: "sixteenths", label: "16ths ×4" },
-              { value: "dotted-quarter-eighth", label: "Dotted 1/4 + 1/8" },
-            ] as const
-          ).map((option) => (
+          {progressionRhythmPresets.map((preset) => (
             <button
-              key={option.value}
+              key={preset.id}
               type="button"
-              className={selectedPreset === option.value ? "active" : ""}
-              aria-pressed={selectedPreset === option.value}
-              onClick={() => onApply(option.value)}
+              className={[
+                selectedPreset === preset.id ? "active" : "",
+                preset.spanBeats > 1 ? "wide" : "",
+              ].filter(Boolean).join(" ")}
+              aria-pressed={selectedPreset === preset.id}
+              onClick={() => onApply(preset.id)}
             >
-              {option.label}
+              {preset.label}
             </button>
           ))}
         </div>

@@ -382,6 +382,7 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 - `structure.ts`: 小節数変更と既存パターンの複製。
 - `timeline.ts`: BPM、拍子、経過秒数から拍・小節・16分step位置への変換。
 - `rhythm/queries.ts`: 明示イベントと既定4分音符を合成したRhythm照会。
+- `rhythm/presets.ts`: Preset ID、表示名、対象拍数、timing grid、相対イベント配置のカタログ。
 - `rhythm/commands.ts`: Hit / Rest / Tie、音価、プリセットの編集command。
 - `rhythm/collision.ts`: イベント配置と音価の衝突判定。
 - `rhythm/boundary.ts`: 小節跨ぎ付点4分と自動Tieの整合性。
@@ -395,6 +396,8 @@ DOM、React state、Web Audio API には依存させない。純粋な計算に�
 これらのモジュールは、再生中の時間管理や UI 更新を持たない。`requestAnimationFrame` や `AudioContext.currentTime` から得た値を受け取り、位置情報に変換する。
 
 4/4では1拍を4step、1小節を16stepとして扱う。Full Editorは選択中の拍を`1 / e / & / a`へ展開し、任意stepのHit / Restを編集できる。schedulerは各stepの明示イベントを発音し、小節カードは拍の主記号と4stepの補助レーンを重ねて表示する。Harmonyデータへタイミング情報は戻さない。
+
+Rhythm Presetは`rhythm/presets.ts`の純粋データを定義元とし、判定・配置command・UIが同じカタログを参照する。現在の`timingGrid`は`sixteenth`のみとし、三連符など異なる時間分割は既存4stepへ丸めず、別のgrid表現を設計してから追加する。
 
 仮想タイムラインは同じ実小節列を判定時だけ2周へ展開する。先行イベントの占有範囲を優先し、占有中のstepや後続イベントへ重なる音価には純粋関数から衝突理由を返す。仮想2周目は`localStorage`、Undo / Redo履歴、Editorの編集対象へ含めない。
 
