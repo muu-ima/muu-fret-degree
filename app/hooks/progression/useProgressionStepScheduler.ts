@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ProgressionPosition } from "../lib/progression";
+import type { ProgressionPosition } from "../../lib/progression";
 
 type UseProgressionStepSchedulerOptions = {
   isRunning: boolean;

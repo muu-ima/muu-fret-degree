@@ -1,8 +1,8 @@
 "use client";
 
-import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../lib/progression";
-import type { ProgressionRhythm } from "../lib/progression/playback";
-import type { ProgressionGroove } from "../lib/progression/groove";
+import { type ProgressionBar, type ProgressionCell, type ProgressionPosition } from "../../lib/progression";
+import type { ProgressionRhythm } from "../../lib/progression/playback";
+import type { ProgressionGroove } from "../../lib/progression/groove";
 
 type ProgressionPanelProps = {
   currentProgressionBar?: ProgressionBar;

@@ -6,7 +6,7 @@ import {
   type FretRange,
   markerFrets,
   type Tuning,
-} from "../lib/music";
+} from "../../lib/music";
 
 const nutWidth = 14;
 const leftPad = 74;

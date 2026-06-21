@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MetronomeClickKind, MetronomeTone } from "../lib/audio";
+import type { MetronomeClickKind, MetronomeTone } from "../../lib/audio";
 
 type UseMetronomeOptions = {
   bpm: number;

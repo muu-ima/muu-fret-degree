@@ -12,29 +12,29 @@ import {
   useState,
 } from "react";
 import { LuGripVertical, LuMaximize2, LuMinus, LuX } from "react-icons/lu";
-import theory from "../../data/theory.json";
+import theory from "../../../data/theory.json";
 import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
 import { ControlsPanel } from "./ControlsPanel";
 import { FretRangeTabs } from "./FretRangeTabs";
 import { MetronomePanel } from "./MetronomePanel";
 import { ProgressionPanel } from "./ProgressionPanel";
-import { ProgressionQuickEditor } from "./ProgressionQuickEditor";
-import { useBpmControl } from "../hooks/useBpmControl";
+import { ProgressionQuickEditor } from "../progression/ProgressionQuickEditor";
+import { useBpmControl } from "../../hooks/practice/useBpmControl";
 import {
   type ArpeggioPattern,
   useChordPlayback,
-} from "../hooks/useChordPlayback";
-import { useProgressionBeatScheduler } from "../hooks/useProgressionBeatScheduler";
-import { useMetronome } from "../hooks/useMetronome";
-import { usePersistedPracticeSettings } from "../hooks/usePersistedPracticeSettings";
-import { type MetronomeTone } from "../lib/audio";
-import type { ProgressionRhythm } from "../lib/progression/playback";
+} from "../../hooks/audio/useChordPlayback";
+import { useProgressionBeatScheduler } from "../../hooks/progression/useProgressionBeatScheduler";
+import { useMetronome } from "../../hooks/audio/useMetronome";
+import { usePersistedPracticeSettings } from "../../hooks/practice/usePersistedPracticeSettings";
+import { type MetronomeTone } from "../../lib/audio";
+import type { ProgressionRhythm } from "../../lib/progression/playback";
 import {
   useProgressionSession,
   useProgressionTransport,
   useSessionAudioOutput,
-} from "../providers/ProgressionSessionProvider";
+} from "../../providers/ProgressionSessionProvider";
 import {
   type ChordType,
   type FretNote,
@@ -45,7 +45,7 @@ import {
   makeChordNotes,
   makeChordMap,
   makeFretNotes,
-} from "../lib/music";
+} from "../../lib/music";
 
 type DesktopPanelKey = "controls" | "metronome" | "progression" | "edit";
 type DesktopPanelPosition = { x: number; y: number };

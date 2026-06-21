@@ -1,6 +1,6 @@
 "use client";
 
-import { degreeTone, type ChordNote } from "../lib/music";
+import { degreeTone, type ChordNote } from "../../lib/music";
 
 type ChordDegreeStripProps = {
   chordNotes: ChordNote[];

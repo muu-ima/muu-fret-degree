@@ -8,11 +8,11 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import type { ChordType } from "../lib/music";
+import type { ChordType } from "../../lib/music";
 import {
   createProgressionHistory,
   progressionHistoryReducer,
-} from "../lib/progression/history";
+} from "../../lib/progression/history";
 import {
   applyProgressionBeatSubdivision,
   createProgressionVirtualTimeline,
@@ -30,7 +30,7 @@ import {
   type ProgressionCell,
   type ProgressionDurationSteps,
   type ProgressionSubdivision,
-} from "../lib/progression";
+} from "../../lib/progression";
 import { usePersistedProgression } from "./usePersistedProgression";
 
 type UseProgressionStateOptions = {

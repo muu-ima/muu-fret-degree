@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LuArrowLeft, LuArrowRight, LuExternalLink } from "react-icons/lu";
-import type { ChordType } from "../lib/music";
-import type { ProgressionBar, ProgressionCell } from "../lib/progression";
+import type { ChordType } from "../../lib/music";
+import type { ProgressionBar, ProgressionCell } from "../../lib/progression";
 
 type ProgressionQuickEditorProps = {
   bars: readonly ProgressionBar[];

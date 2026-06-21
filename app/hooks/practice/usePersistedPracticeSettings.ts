@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { ChordOctave, ChordType, FretRange, Tuning } from "../lib/music";
-import type { ArpeggioPattern } from "./useChordPlayback";
+import type { ChordOctave, ChordType, FretRange, Tuning } from "../../lib/music";
+import type { ArpeggioPattern } from "../audio/useChordPlayback";
 
 const storageKey = "muu-fret-degree:practice-settings";
 const storageVersion = 1;

@@ -1,12 +1,12 @@
 "use client";
 
 import {
+  type KeyboardEvent,
   useEffect,
   useId,
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
 } from "react";
 import { LuCheck, LuChevronsUpDown, LuSearch } from "react-icons/lu";
 

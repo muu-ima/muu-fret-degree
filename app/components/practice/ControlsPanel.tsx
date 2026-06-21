@@ -1,7 +1,7 @@
 "use client";
 
-import { type ChordOctave, type ChordType, type Tuning } from "../lib/music";
-import type { ArpeggioPattern } from "../hooks/useChordPlayback";
+import { type ChordOctave, type ChordType, type Tuning } from "../../lib/music";
+import type { ArpeggioPattern } from "../../hooks/audio/useChordPlayback";
 
 type ControlsPanelProps = {
   className: string;

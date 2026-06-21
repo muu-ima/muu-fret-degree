@@ -6,15 +6,15 @@ import {
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionPosition,
-} from "../lib/progression/model";
-import type { ProgressionRhythm } from "../lib/progression/playback";
+} from "../../lib/progression/model";
+import type { ProgressionRhythm } from "../../lib/progression/playback";
 import {
   getProgressionGrooveDelaySeconds,
   getProgressionGrooveDurationSeconds,
   type ProgressionGroove,
-} from "../lib/progression/groove";
-import { getProgressionStepPlaybackRequest } from "../lib/progression/scheduler";
-import { createProgressionVirtualTimeline } from "../lib/progression/rhythm/timeline";
+} from "../../lib/progression/groove";
+import { getProgressionStepPlaybackRequest } from "../../lib/progression/scheduler";
+import { createProgressionVirtualTimeline } from "../../lib/progression/rhythm/timeline";
 import { useProgressionStepScheduler } from "./useProgressionStepScheduler";
 
 type UseProgressionBeatSchedulerOptions = {

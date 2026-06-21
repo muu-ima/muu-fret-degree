@@ -8,12 +8,12 @@ import {
   makeTrebleChordMidi,
   pickAscendingBassNotesForDegrees,
   pickLowestBassNoteForDegree,
-} from "../lib/music";
-import { planProgressionBeat, type ProgressionRhythm } from "../lib/progression/playback";
+} from "../../lib/music";
+import { planProgressionBeat, type ProgressionRhythm } from "../../lib/progression/playback";
 import type {
   ProgressionBeatEventType,
   ProgressionDurationSteps,
-} from "../lib/progression";
+} from "../../lib/progression";
 
 export type ArpeggioPattern = "root-only" | "chord-order" | "third-first" | "lowest-per-degree";
 

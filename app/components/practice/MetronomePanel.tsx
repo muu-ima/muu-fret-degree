@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LuMinus, LuPlay, LuPlus, LuSquare, LuTimerReset } from "react-icons/lu";
-import { type MetronomeTone } from "../lib/audio";
+import { type MetronomeTone } from "../../lib/audio";
 
 type MetronomePanelProps = {
   isPanelOpen: boolean;

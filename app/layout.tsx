@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, M_PLUS_Rounded_1c } from "next/font/google";
-import { AppShell } from "./components/AppShell";
+import { AppShell } from "./components/layout/AppShell";
 import { ProgressionSessionProvider } from "./providers/ProgressionSessionProvider";
 import "./globals.css";
 

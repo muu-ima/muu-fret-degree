@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
-import { formatChordSymbol, formatChordTypeSymbol } from "../lib/chord-symbol";
-import { type ChordType } from "../lib/music";
+import { formatChordSymbol, formatChordTypeSymbol } from "../../lib/chord-symbol";
+import { type ChordType } from "../../lib/music";
 import {
   canTieProgressionBeat,
   getProgressionBeatDuration,
@@ -19,9 +19,9 @@ import {
   type ProgressionDurationSteps,
   type ProgressionPlacementValidation,
   type ProgressionSubdivision,
-} from "../lib/progression";
+} from "../../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
-import { EditorCombobox } from "./EditorCombobox";
+import { EditorCombobox } from "../ui/EditorCombobox";
 import { ProgressionMiniTransport } from "./ProgressionMiniTransport";
 
 type ProgressionEditorProps = {
