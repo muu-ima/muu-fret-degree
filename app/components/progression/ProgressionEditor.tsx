@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
-import { formatChordSymbol, formatChordTypeSymbol } from "../../lib/chord-symbol";
 import { type ChordType } from "../../lib/music";
 import {
   canTieProgressionBeat,
@@ -21,8 +20,10 @@ import {
   type ProgressionSubdivision,
 } from "../../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
-import { EditorCombobox } from "../ui/EditorCombobox";
-import { ProgressionMiniTransport } from "./ProgressionMiniTransport";
+import { ProgressionEditorHeader } from "./editor/ProgressionEditorHeader";
+import { ProgressionHarmonyEditor } from "./editor/ProgressionHarmonyEditor";
+import { ProgressionRhythmPreset } from "./editor/ProgressionRhythmPreset";
+import { ProgressionSelectionHeader } from "./editor/ProgressionSelectionHeader";
 
 type ProgressionEditorProps = {
   className?: string;
@@ -181,30 +182,11 @@ export function ProgressionEditor({
 
   return (
     <section className={className} aria-label="コード進行編集">
-      <div className="progressionEditorHeader">
-        <div>
-          <p className="progressionLabel">Progression Edit</p>
-          <strong>{barCount}-bar loop</strong>
-        </div>
-        <div className="barCountTabs" role="tablist" aria-label="Bars">
-          {barCountOptions.map((count) => {
-            const isActive = count === barCount;
-            return (
-              <button
-                key={count}
-                type="button"
-                className={isActive ? "barCountTab active" : "barCountTab"}
-                aria-label={`${count} bars`}
-                aria-pressed={isActive}
-                onClick={() => onBarCountChange(count)}
-              >
-                <span className="barCountTabNumber">{count}</span>
-                <span className="barCountTabUnit">bars</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <ProgressionEditorHeader
+        barCount={barCount}
+        barCountOptions={barCountOptions}
+        onBarCountChange={onBarCountChange}
+      />
       <ProgressionChordChart
         bars={bars}
         chordTypes={chordTypes}
@@ -214,134 +196,33 @@ export function ProgressionEditor({
         onBeatSelect={selectBeat}
       />
       <section className="progressionSelectionEditor" aria-label="選択中のコードを編集">
-        <div className="progressionSelectionHeader">
-          <div className="progressionSelectionMeta">
-            <div>
-              <span>Selected</span>
-              <strong>
-                Bar {selectedBar.bar} · Beat {selectedBeatIndex + 1}
-                {selectedStepInBeat > 0 ? ` · ${["1", "e", "&", "a"][selectedStepInBeat]}` : ""}
-              </strong>
-            </div>
-            <span className="progressionSelectionScope">
-              {editScope === "beat"
-                ? `Beat ${selectedBeatIndex + 1} override`
-                : `Editing Beats ${selectedCellIndex === 0 ? "1-2" : "3-4"}`}
-            </span>
-            <strong className="progressionSelectionChordName">
-              {formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}
-            </strong>
-          </div>
-          <ProgressionMiniTransport />
-        </div>
+        <ProgressionSelectionHeader
+          barNumber={selectedBar.bar}
+          beatIndex={selectedBeatIndex}
+          cellIndex={selectedCellIndex}
+          chordTypes={chordTypes}
+          editScope={editScope}
+          selectedCell={selectedCell}
+          stepInBeat={selectedStepInBeat}
+        />
 
-        <section className="progressionHarmonySection" aria-label="Harmony">
-          <div className="progressionHarmonyFields">
-            <div className="progressionChipSection">
-              <span className="controlLabel">Root</span>
-              <EditorCombobox
-                ariaLabel="Root"
-                searchPlaceholder="ルートを検索…"
-                value={selectedCell.root}
-                options={roots.map((root) => ({
-                  value: root,
-                  label: root,
-                }))}
-                onValueChange={(root) => applyCellChange({ ...selectedCell, root })}
-              />
-            </div>
+        <ProgressionHarmonyEditor
+          beatIndex={selectedBeatIndex}
+          cellIndex={selectedCellIndex}
+          chordTypes={chordTypes}
+          editScope={editScope}
+          onBeatSelect={(beatIndex) => selectBeat(selectedBarIndex, beatIndex)}
+          onCellChange={applyCellChange}
+          onUseBeatScope={useBeatScope}
+          onUseCellScope={useCellScope}
+          roots={roots}
+          selectedCell={selectedCell}
+        />
 
-            <div className="progressionChipSection">
-              <span className="controlLabel">Chord</span>
-              <EditorCombobox
-                ariaLabel="Chord"
-                searchPlaceholder="コードタイプを検索…"
-                value={selectedCell.chordTypeId}
-                options={chordTypes.map((chordType) => ({
-                  value: chordType.id,
-                  label: formatChordTypeSymbol(chordType.id, chordTypes),
-                  description: chordType.name,
-                }))}
-                onValueChange={(chordTypeId) =>
-                  applyCellChange({
-                    ...selectedCell,
-                    chordTypeId,
-                  })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="progressionHarmonyMetaFields">
-            <div className="progressionApplySection">
-              <span className="controlLabel">Apply To</span>
-              <div className="progressionApplyTabs" role="group" aria-label="コードの適用範囲">
-                <button
-                  type="button"
-                  className={editScope === "cell" ? "active" : ""}
-                  aria-pressed={editScope === "cell"}
-                  onClick={useCellScope}
-                >
-                  Beats {selectedCellIndex === 0 ? "1-2" : "3-4"}
-                </button>
-                <button
-                  type="button"
-                  className={editScope === "beat" ? "active" : ""}
-                  aria-pressed={editScope === "beat"}
-                  onClick={useBeatScope}
-                >
-                  Beat {selectedBeatIndex + 1} only
-                </button>
-              </div>
-            </div>
-
-            <div className="progressionApplySection">
-              <span className="controlLabel">Beat</span>
-              <div className="progressionBeatTabs" role="tablist" aria-label="編集する拍">
-                {[0, 1, 2, 3].map((beatIndex) => {
-                  const isSelected = selectedBeatIndex === beatIndex;
-                  return (
-                    <button
-                      key={beatIndex}
-                      type="button"
-                      className={isSelected ? "active" : ""}
-                      aria-selected={isSelected}
-                      role="tab"
-                      onClick={() => selectBeat(selectedBarIndex, beatIndex)}
-                    >
-                      Beat {beatIndex + 1}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="progressionRhythmPresetSection">
-        <div className="progressionApplySection">
-          <span className="controlLabel">Rhythm Preset</span>
-          <div className="progressionApplyTabs progressionSubdivisionTabs" role="group" aria-label="拍の分割プリセット">
-            {(
-              [
-                { value: "eighths", label: "8ths ×2" },
-                { value: "sixteenths", label: "16ths ×4" },
-              ] as const
-            ).map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={selectedSubdivision === option.value ? "active" : ""}
-                aria-pressed={selectedSubdivision === option.value}
-                onClick={() => applySubdivision(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        </div>
+        <ProgressionRhythmPreset
+          onApply={applySubdivision}
+          selectedSubdivision={selectedSubdivision}
+        />
 
         <section className={`progressionRhythmAccordion${isAdvancedRhythmOpen ? " open" : ""}`}>
           <button
