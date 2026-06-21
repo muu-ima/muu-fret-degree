@@ -216,11 +216,11 @@ export function ProgressionEditor({
                 ? `Beat ${selectedBeatIndex + 1} override`
                 : `Editing Beats ${selectedCellIndex === 0 ? "1-2" : "3-4"}`}
             </span>
+            <strong className="progressionSelectionChordName">
+              {formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}
+            </strong>
           </div>
           <ProgressionMiniTransport />
-          <div className="progressionSelectionChord">
-            <strong>{formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}</strong>
-          </div>
         </div>
 
         <section className="progressionHarmonySection" aria-label="Harmony">

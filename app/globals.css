@@ -2079,7 +2079,7 @@ select:focus-visible,
 
 .progressionSelectionHeader {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
 }
@@ -2095,8 +2095,7 @@ select:focus-visible,
   gap: 3px;
 }
 
-.progressionSelectionMeta > div span,
-.progressionSelectionChord span {
+.progressionSelectionMeta > div span {
   color: var(--muted);
   font-size: 0.68rem;
   font-weight: 800;
@@ -2122,13 +2121,7 @@ select:focus-visible,
   white-space: nowrap;
 }
 
-.progressionSelectionChord {
-  display: grid;
-  justify-items: end;
-  gap: 2px;
-}
-
-.progressionSelectionChord strong {
+.progressionSelectionChordName {
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 1.4rem;
   font-variant-numeric: tabular-nums;
@@ -3193,17 +3186,13 @@ select:focus-visible,
     grid-template-columns: 1fr;
   }
 
-  .progressionSelectionChord {
-    justify-items: end;
-  }
-
   .progressionSelectionMeta {
     align-items: flex-start;
     flex-direction: column;
     gap: 5px;
   }
 
-  .progressionSelectionChord strong {
+  .progressionSelectionChordName {
     font-size: 1.18rem;
   }
 
