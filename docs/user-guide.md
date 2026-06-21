@@ -131,6 +131,8 @@ Count-inを設定してProgressionの `Play` を押すと、進行を先頭へ�
 
 `/progression` はコード進行の専用編集画面です。コード譜を見ながら、1小節を `Beats 1-2` と `Beats 3-4` の2セルに分けてRootとChordを設定します。
 
+RootとChordは検索可能なComboboxから選択します。ボタンを押して候補を開き、文字入力または上下キーで候補を絞り、Enterで確定できます。Escapeまたは外側クリックで閉じます。
+
 各Beatでは適用範囲を切り替えられます。
 
 - `Beats 1-2 / Beats 3-4`: 既存の2拍セルを編集
@@ -170,7 +172,7 @@ Hitでは`Note Value`を選択できます。
 - `8 bars`
 - `16 bars`
 
-メイン画面の `Quick Edit` パネルでは、選択中の小節だけを編集できます。`Full Editor` を押すと専用編集画面へ移動します。再生、同期、リズム伴奏はメイン画面の `Progression` パネルで操作します。
+メイン画面の `Quick Edit` パネルでは、選択中の小節だけを編集できます。`Full Editor` を押すと専用編集画面へ移動します。Full Editor上部のMini Transportでは、編集中の進行をRoot Only伴奏でPlay / Stop / Resetできます。BPM、同期、伴奏パターンなどの詳細設定はメイン画面の `Progression` パネルで操作します。
 
 Full EditorではRoot / Chordと小節数の変更をUndo / Redoできます。
 
