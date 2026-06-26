@@ -111,6 +111,7 @@ export {
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,
   validateProgressionRhythmPlacementAtPosition,
+  validateProgressionRhythmPlacementAtTickPosition,
   type ProgressionPlacementCollisionReason,
   type ProgressionPlacementValidation,
   type ProgressionVirtualTickRhythmEvent,

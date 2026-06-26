@@ -170,6 +170,31 @@ export function validateProgressionRhythmPlacementAtPosition(
   );
 }
 
+export function validateProgressionRhythmPlacementAtTickPosition(
+  timeline: ProgressionVirtualTimeline,
+  barIndex: number,
+  startTick: number,
+  durationTicks: number,
+) {
+  if (
+    !Number.isInteger(startTick) ||
+    !Number.isInteger(durationTicks) ||
+    startTick < 0 ||
+    durationTicks < 0 ||
+    startTick % progressionTicksPerStep !== 0 ||
+    durationTicks % progressionTicksPerStep !== 0
+  ) {
+    return { canPlace: false, reason: "outside-timeline" } as const;
+  }
+
+  return validateProgressionRhythmPlacementAtPosition(
+    timeline,
+    barIndex,
+    startTick / progressionTicksPerStep,
+    durationTicks / progressionTicksPerStep,
+  );
+}
+
 export function getProgressionVirtualRhythmEventAtPosition(
   timeline: ProgressionVirtualTimeline,
   barIndex: number,

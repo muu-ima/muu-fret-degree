@@ -9,6 +9,7 @@ import {
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,
   validateProgressionRhythmPlacementAtPosition,
+  validateProgressionRhythmPlacementAtTickPosition,
 } from "./timeline";
 
 describe("progression virtual rhythm timeline", () => {
@@ -152,6 +153,18 @@ describe("progression virtual rhythm timeline", () => {
       absoluteEndTick: 204,
       barIndex: 0,
       loopIndex: 1,
+    });
+  });
+
+  it("validates tick positions through the same placement rules", () => {
+    const timeline = createProgressionVirtualTimeline(createDefaultProgression());
+
+    expect(validateProgressionRhythmPlacementAtTickPosition(timeline, 0, 0, 3)).toEqual({
+      canPlace: true,
+    });
+    expect(validateProgressionRhythmPlacementAtTickPosition(timeline, 0, 1, 3)).toEqual({
+      canPlace: false,
+      reason: "outside-timeline",
     });
   });
 });
