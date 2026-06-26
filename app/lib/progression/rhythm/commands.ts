@@ -43,6 +43,10 @@ const progressionCrossBarDottedQuarterDurationSteps =
   progressionStepsPerBeat + progressionStepsPerBeat / 2;
 const progressionBarStartStep = 0;
 
+function isProgressionBeatIndex(beatIndex: number) {
+  return beatIndex >= 0 && beatIndex < progressionBeatCountPerBar;
+}
+
 export function updateProgressionBeatEventType(
   progression: ChordProgression,
   barIndex: number,
@@ -96,7 +100,7 @@ function setProgressionBeatEventType(
   eventType: ProgressionBeatEventType,
 ): ChordProgression {
   const currentBar = progression.bars[barIndex];
-  if (!currentBar || beatIndex < 0 || beatIndex >= progressionBeatCountPerBar) {
+  if (!currentBar || !isProgressionBeatIndex(beatIndex)) {
     return progression;
   }
 
@@ -120,7 +124,7 @@ export function updateProgressionBeatDuration(
   durationSteps: ProgressionDurationSteps,
 ): ChordProgression {
   const currentBar = progression.bars[barIndex];
-  if (!currentBar || beatIndex < 0 || beatIndex >= progressionBeatCountPerBar) {
+  if (!currentBar || !isProgressionBeatIndex(beatIndex)) {
     return progression;
   }
   if (getProgressionBeatDuration(currentBar, beatIndex) === durationSteps) {
@@ -229,7 +233,7 @@ export function applyProgressionRhythmPreset(
   const presetEvents = preset
     ? getProgressionRhythmPresetStepEvents(preset)
     : undefined;
-  if (!currentBar || !preset || !presetEvents || beatIndex < 0 || beatIndex > 3) {
+  if (!currentBar || !preset || !presetEvents || !isProgressionBeatIndex(beatIndex)) {
     return progression;
   }
   if (getProgressionRhythmPreset(currentBar, beatIndex) === presetId) {
