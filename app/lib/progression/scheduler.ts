@@ -10,6 +10,7 @@ import {
   getProgressionVirtualRhythmEventAtPosition,
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";
+import { progressionTicksPerStep } from "./rhythm/ticks";
 
 function getProgressionBeatEndStep(
   virtualStartStep: number,
@@ -107,4 +108,33 @@ export function getProgressionStepPlaybackRequest(
     startStep: position.stepInBar,
     stepInBeat: position.stepInBeat,
   };
+}
+
+export function getProgressionTickPlaybackRequest(
+  progression: ChordProgression,
+  tickIndex: number,
+  timeline: ProgressionVirtualTimeline = createProgressionVirtualTimeline(progression),
+) {
+  const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
+  if (
+    !Number.isInteger(tickIndex) ||
+    tickIndex < 0 ||
+    tickIndex % progressionTicksPerStep !== 0
+  ) {
+    return undefined;
+  }
+
+  const stepIndex = tickIndex / progressionTicksPerStep;
+  const beatIndex = Math.floor(stepIndex / progressionStepsPerBeat);
+  const position: ProgressionPosition = {
+    elapsedSeconds: 0,
+    beatIndex,
+    barIndex: Math.floor(beatIndex / beatsPerBar),
+    beatInBar: beatIndex % beatsPerBar,
+    stepIndex,
+    stepInBeat: stepIndex % progressionStepsPerBeat,
+    stepInBar: stepIndex % (beatsPerBar * progressionStepsPerBeat),
+  };
+
+  return getProgressionStepPlaybackRequest(progression, position, timeline);
 }

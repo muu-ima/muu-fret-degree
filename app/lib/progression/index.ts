@@ -117,3 +117,5 @@ export {
   type ProgressionVirtualRhythmEvent,
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";
+
+export { getProgressionTickPlaybackRequest } from "./scheduler";
