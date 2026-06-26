@@ -16,7 +16,8 @@ import {
 export type ProgressionSubdivision = "quarters" | "eighths" | "sixteenths";
 export type ProgressionRhythmPresetId =
   | ProgressionSubdivision
-  | "dotted-quarter-eighth";
+  | "dotted-quarter-eighth"
+  | "triplet-eighths";
 
 export type ProgressionRhythmPresetEvent = {
   startUnit: number;
@@ -70,6 +71,17 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
     events: [
       { startUnit: 0, durationUnits: 6, eventType: "hit" },
       { startUnit: 6, durationUnits: 2, eventType: "hit" },
+    ],
+  },
+  {
+    id: "triplet-eighths",
+    label: "Triplet 8ths ×3",
+    spanBeats: 1,
+    timingGrid: "triplet",
+    events: [
+      { startUnit: 0, durationUnits: 1, eventType: "hit" },
+      { startUnit: 1, durationUnits: 1, eventType: "hit" },
+      { startUnit: 2, durationUnits: 1, eventType: "hit" },
     ],
   },
 ];

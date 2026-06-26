@@ -14,17 +14,21 @@ describe("progression rhythm preset catalog", () => {
       { id: "eighths", label: "8ths ×2" },
       { id: "sixteenths", label: "16ths ×4" },
       { id: "dotted-quarter-eighth", label: "Dotted 1/4 + 1/8" },
+      { id: "triplet-eighths", label: "Triplet 8ths ×3" },
     ]);
   });
 
   it("keeps every event inside its preset span", () => {
     for (const preset of progressionRhythmPresets) {
       const spanUnits = getProgressionRhythmPresetSpanUnits(preset);
-      expect(preset.timingGrid).toBe("sixteenth");
       expect(preset.events.every(
         (event) => event.startUnit >= 0 && event.startUnit + event.durationUnits <= spanUnits,
       )).toBe(true);
-      expect(getProgressionRhythmPresetStepEvents(preset)).toHaveLength(preset.events.length);
+      if (preset.timingGrid === "sixteenth") {
+        expect(getProgressionRhythmPresetStepEvents(preset)).toHaveLength(preset.events.length);
+      } else {
+        expect(getProgressionRhythmPresetStepEvents(preset)).toBeUndefined();
+      }
     }
   });
 
@@ -34,6 +38,18 @@ describe("progression rhythm preset catalog", () => {
       events: [
         { startUnit: 0, durationUnits: 6 },
         { startUnit: 6, durationUnits: 2 },
+      ],
+    });
+  });
+
+  it("keeps triplet presets defined in the catalog without forcing legacy conversion", () => {
+    expect(getProgressionRhythmPresetDefinition("triplet-eighths")).toMatchObject({
+      spanBeats: 1,
+      timingGrid: "triplet",
+      events: [
+        { startUnit: 0, durationUnits: 1 },
+        { startUnit: 1, durationUnits: 1 },
+        { startUnit: 2, durationUnits: 1 },
       ],
     });
   });
