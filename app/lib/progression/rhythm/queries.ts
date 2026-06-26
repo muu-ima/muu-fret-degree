@@ -14,6 +14,8 @@ import {
   type ProgressionSubdivision,
 } from "./presets";
 
+const progressionStepsPerBar = progressionStepsPerBeat * 4;
+
 export function getProgressionBeatEventType(
   bar: ProgressionBar,
   beatIndex: number,
@@ -52,7 +54,11 @@ export function getProgressionRhythmEventAtStep(
     return undefined;
   }
 
-  if (startStep >= 0 && startStep < 16 && startStep % progressionStepsPerBeat === 0) {
+  if (
+    startStep >= 0 &&
+    startStep < progressionStepsPerBar &&
+    startStep % progressionStepsPerBeat === 0
+  ) {
     return {
       startStep,
       durationSteps: progressionStepsPerBeat,
@@ -64,7 +70,11 @@ export function getProgressionRhythmEventAtStep(
 }
 
 export function getProgressionRhythmEvents(bar: ProgressionBar) {
-  const startSteps = new Set([0, 4, 8, 12]);
+  const startSteps = new Set(
+    Array.from({ length: progressionStepsPerBar / progressionStepsPerBeat }, (_, index) =>
+      index * progressionStepsPerBeat,
+    ),
+  );
   bar.rhythm?.forEach((event) => startSteps.add(event.startStep));
 
   return [...startSteps]
