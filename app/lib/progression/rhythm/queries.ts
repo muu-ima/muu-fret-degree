@@ -15,6 +15,19 @@ import {
 } from "./presets";
 
 const progressionStepsPerBar = progressionStepsPerBeat * 4;
+const progressionBeatCountPerBar = progressionStepsPerBar / progressionStepsPerBeat;
+
+function isProgressionBeatAlignedStep(step: number) {
+  return step >= 0 && step < progressionStepsPerBar && step % progressionStepsPerBeat === 0;
+}
+
+function getProgressionDefaultBeatRhythmEvent(startStep: number): ProgressionRhythmEvent {
+  return {
+    startStep,
+    durationSteps: progressionStepsPerBeat,
+    eventType: "hit",
+  };
+}
 
 export function getProgressionBeatEventType(
   bar: ProgressionBar,
@@ -54,16 +67,8 @@ export function getProgressionRhythmEventAtStep(
     return undefined;
   }
 
-  if (
-    startStep >= 0 &&
-    startStep < progressionStepsPerBar &&
-    startStep % progressionStepsPerBeat === 0
-  ) {
-    return {
-      startStep,
-      durationSteps: progressionStepsPerBeat,
-      eventType: "hit",
-    };
+  if (isProgressionBeatAlignedStep(startStep)) {
+    return getProgressionDefaultBeatRhythmEvent(startStep);
   }
 
   return undefined;
@@ -71,9 +76,7 @@ export function getProgressionRhythmEventAtStep(
 
 export function getProgressionRhythmEvents(bar: ProgressionBar) {
   const startSteps = new Set(
-    Array.from({ length: progressionStepsPerBar / progressionStepsPerBeat }, (_, index) =>
-      index * progressionStepsPerBeat,
-    ),
+    Array.from({ length: progressionBeatCountPerBar }, (_, index) => index * progressionStepsPerBeat),
   );
   bar.rhythm?.forEach((event) => startSteps.add(event.startStep));
 
