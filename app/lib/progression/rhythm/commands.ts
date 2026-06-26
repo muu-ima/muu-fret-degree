@@ -36,6 +36,13 @@ import {
   type ProgressionSubdivision,
 } from "./presets";
 
+const progressionStepsPerBar = progressionStepsPerBeat * 4;
+const progressionBeatCountPerBar = progressionStepsPerBar / progressionStepsPerBeat;
+const progressionCrossBarDottedQuarterStartStep = progressionStepsPerBeat * 3;
+const progressionCrossBarDottedQuarterDurationSteps =
+  progressionStepsPerBeat + progressionStepsPerBeat / 2;
+const progressionBarStartStep = 0;
+
 export function updateProgressionBeatEventType(
   progression: ChordProgression,
   barIndex: number,
@@ -51,7 +58,7 @@ export function updateProgressionBeatEventType(
     return nextProgression;
   }
 
-  const totalBeats = progression.bars.length * 4;
+  const totalBeats = progression.bars.length * progressionBeatCountPerBar;
   for (let offset = 1; offset < totalBeats; offset += 1) {
     const nextLocation = getRelativeBeatLocation(
       nextProgression.bars,
@@ -89,7 +96,7 @@ function setProgressionBeatEventType(
   eventType: ProgressionBeatEventType,
 ): ChordProgression {
   const currentBar = progression.bars[barIndex];
-  if (!currentBar || beatIndex < 0 || beatIndex > 3) {
+  if (!currentBar || beatIndex < 0 || beatIndex >= progressionBeatCountPerBar) {
     return progression;
   }
 
@@ -113,7 +120,7 @@ export function updateProgressionBeatDuration(
   durationSteps: ProgressionDurationSteps,
 ): ChordProgression {
   const currentBar = progression.bars[barIndex];
-  if (!currentBar || beatIndex < 0 || beatIndex > 3) {
+  if (!currentBar || beatIndex < 0 || beatIndex >= progressionBeatCountPerBar) {
     return progression;
   }
   if (getProgressionBeatDuration(currentBar, beatIndex) === durationSteps) {
@@ -163,13 +170,15 @@ export function updateProgressionRhythmEvent(
   let nextProgression = progression;
   const wasCrossBarDottedQuarter = isCrossBarDottedQuarter(currentEvent);
   const willCrossBarDottedQuarter =
-    startStep === 12 && eventType === "hit" && durationSteps === 6;
+    startStep === progressionCrossBarDottedQuarterStartStep &&
+    eventType === "hit" &&
+    durationSteps === progressionCrossBarDottedQuarterDurationSteps;
 
   if (wasCrossBarDottedQuarter && !willCrossBarDottedQuarter) {
     nextProgression = removeProgressionCrossBarTie(nextProgression, barIndex);
   }
 
-  if (startStep === 0 && eventType !== "tie" && progression.bars.length > 0) {
+  if (startStep === progressionBarStartStep && eventType !== "tie" && progression.bars.length > 0) {
     nextProgression = shortenProgressionCrossBarSource(nextProgression, barIndex);
   }
 
