@@ -13,6 +13,13 @@ function normalizeNonNegative(value: number) {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
 
+function getNormalizedProgressionTimeSignature(timeSignature: TimeSignature) {
+  return {
+    beatsPerBar: normalizeNonNegative(timeSignature.beatsPerBar),
+    beatUnit: normalizeNonNegative(timeSignature.beatUnit),
+  };
+}
+
 export function secondsPerBeat(bpm: number, beatUnit = 4) {
   const normalizedBpm = normalizeNonNegative(bpm);
   const normalizedBeatUnit = normalizeNonNegative(beatUnit);
@@ -25,8 +32,9 @@ export function secondsPerBeat(bpm: number, beatUnit = 4) {
 }
 
 export function secondsPerBar(bpm: number, timeSignature: TimeSignature) {
-  return secondsPerBeat(bpm, timeSignature.beatUnit) *
-    normalizeNonNegative(timeSignature.beatsPerBar);
+  const normalizedTimeSignature = getNormalizedProgressionTimeSignature(timeSignature);
+  return secondsPerBeat(bpm, normalizedTimeSignature.beatUnit) *
+    normalizedTimeSignature.beatsPerBar;
 }
 
 export function getProgressionPosition(
@@ -35,8 +43,9 @@ export function getProgressionPosition(
   timeSignature: TimeSignature,
 ): ProgressionPosition {
   const safeElapsedSeconds = Math.max(0, elapsedSeconds);
-  const beatLength = secondsPerBeat(bpm, timeSignature.beatUnit);
-  const barLength = secondsPerBar(bpm, timeSignature);
+  const normalizedTimeSignature = getNormalizedProgressionTimeSignature(timeSignature);
+  const beatLength = secondsPerBeat(bpm, normalizedTimeSignature.beatUnit);
+  const barLength = secondsPerBar(bpm, normalizedTimeSignature);
 
   if (beatLength === 0 || barLength === 0) {
     return {
@@ -54,7 +63,7 @@ export function getProgressionPosition(
   const barIndex = Math.floor(safeElapsedSeconds / barLength);
   const stepLength = beatLength / progressionStepsPerBeat;
   const stepIndex = Math.floor(safeElapsedSeconds / stepLength);
-  const beatsPerBar = Math.max(1, Math.floor(timeSignature.beatsPerBar));
+  const beatsPerBar = Math.max(1, Math.floor(normalizedTimeSignature.beatsPerBar));
 
   return {
     elapsedSeconds: safeElapsedSeconds,
