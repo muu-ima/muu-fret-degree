@@ -2,6 +2,7 @@ import {
   progressionStepsPerBeat,
   type ProgressionBeatEventType,
   type ProgressionRhythmEvent,
+  type ProgressionPosition,
 } from "../model";
 import {
   progressionTicksPerBeat,
@@ -18,6 +19,12 @@ export type ProgressionRhythmTickEvent = {
   eventType: ProgressionBeatEventType;
 };
 
+export type ProgressionTickPosition = {
+  tickIndex: number;
+  tickInBeat: number;
+  tickInBar: number;
+};
+
 export function getProgressionRhythmTickEventFromRhythmEvent(
   event: ProgressionRhythmEvent,
 ): ProgressionRhythmTickEvent {
@@ -25,6 +32,16 @@ export function getProgressionRhythmTickEventFromRhythmEvent(
     startTick: event.startStep * progressionTicksPerStep,
     durationTicks: event.durationSteps * progressionTicksPerStep,
     eventType: event.eventType,
+  };
+}
+
+export function getProgressionTickPosition(
+  position: ProgressionPosition,
+): ProgressionTickPosition {
+  return {
+    tickIndex: position.stepIndex * progressionTicksPerStep,
+    tickInBeat: position.stepInBeat * progressionTicksPerStep,
+    tickInBar: position.stepInBar * progressionTicksPerStep,
   };
 }
 

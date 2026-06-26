@@ -10,12 +10,16 @@ import {
   getProgressionVirtualRhythmEventAtPosition,
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";
+import {
+  getProgressionTickPosition,
+  progressionTicksPerStep,
+} from "./rhythm/ticks";
 
-function getProgressionBeatEndStep(
-  virtualStartStep: number,
-  stepInBeat: number,
+function getProgressionBeatEndTick(
+  virtualStartTick: number,
+  tickInBeat: number,
 ) {
-  return virtualStartStep + (progressionStepsPerBeat - stepInBeat);
+  return virtualStartTick + (progressionStepsPerBeat * progressionTicksPerStep - tickInBeat);
 }
 
 function hasLaterEventInBeat(
@@ -51,10 +55,12 @@ function getProgressionStepPlaybackContext(
     return undefined;
   }
 
-  const beatEndStep = getProgressionBeatEndStep(
-    virtualEvent.absoluteStartStep,
-    position.stepInBeat,
+  const tickPosition = getProgressionTickPosition(position);
+  const beatEndTick = getProgressionBeatEndTick(
+    virtualEvent.absoluteStartStep * progressionTicksPerStep,
+    tickPosition.tickInBeat,
   );
+  const beatEndStep = beatEndTick / progressionTicksPerStep;
 
   return {
     beatEndStep,
