@@ -94,25 +94,32 @@ export function getCurrentProgressionSelection(
   return getProgressionPlaybackState(progression, elapsedSeconds).selection;
 }
 
-export function getProgressionPlaybackState(
+function getProgressionPlaybackSelection(
   progression: ChordProgression,
-  elapsedSeconds: number,
-): ProgressionPlaybackState {
-  const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
-
+  position: ProgressionPosition,
+): ProgressionSelection | undefined {
   if (progression.bars.length === 0) {
-    return { position };
+    return undefined;
   }
 
   const bar = progression.bars[position.barIndex % progression.bars.length];
   const cellIndex = Math.min(Math.floor(position.beatInBar / 2), bar.cells.length - 1);
 
   return {
+    bar,
+    cell: getProgressionCellForBeat(bar, position.beatInBar),
+    cellIndex,
+  };
+}
+
+export function getProgressionPlaybackState(
+  progression: ChordProgression,
+  elapsedSeconds: number,
+): ProgressionPlaybackState {
+  const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
+
+  return {
     position,
-    selection: {
-      bar,
-      cell: getProgressionCellForBeat(bar, position.beatInBar),
-      cellIndex,
-    },
+    selection: getProgressionPlaybackSelection(progression, position),
   };
 }
