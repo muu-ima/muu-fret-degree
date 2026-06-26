@@ -4,13 +4,12 @@ import {
   type ProgressionDurationSteps,
 } from "../model";
 import {
-  getProgressionSixteenthStepFromTicks,
   getProgressionTimingGridUnitsPerBeat,
-  getProgressionTimingTicks,
   type ProgressionTimingGrid,
 } from "./timing-grid";
 import {
   getProgressionRhythmTickEventFromPresetEvent,
+  getProgressionSixteenthStepFromTickEvent,
   type ProgressionRhythmTickEvent,
 } from "./ticks";
 
@@ -98,21 +97,17 @@ export function getProgressionRhythmPresetStepEvents(
   preset: ProgressionRhythmPresetDefinition,
 ) {
   const events = getProgressionRhythmPresetTickEvents(preset).map((event) => {
-    const startStep = getProgressionSixteenthStepFromTicks(event.startTick);
-    const durationStep = getProgressionSixteenthStepFromTicks(event.durationTicks);
-
+    const stepEvent = getProgressionSixteenthStepFromTickEvent(event);
     if (
-      startStep === undefined ||
-      durationStep === undefined ||
-      !progressionDurationSteps.has(durationStep as ProgressionDurationSteps)
+      stepEvent === undefined ||
+      !progressionDurationSteps.has(stepEvent.durationSteps as ProgressionDurationSteps)
     ) {
       return undefined;
     }
 
     return {
-      startStep,
-      durationSteps: durationStep as ProgressionDurationSteps,
-      eventType: event.eventType,
+      ...stepEvent,
+      durationSteps: stepEvent.durationSteps as ProgressionDurationSteps,
     };
   });
 
