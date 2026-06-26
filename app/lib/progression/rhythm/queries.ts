@@ -7,15 +7,24 @@ import {
 } from "../model";
 import {
   getProgressionRhythmPresetSpanSteps,
+  getProgressionRhythmPresetSpanTicks,
   getProgressionRhythmPresetStartBeat,
+  getProgressionRhythmPresetTickEvents,
   matchesProgressionRhythmPreset,
   progressionRhythmPresets,
+  type ProgressionRhythmPresetDefinition,
   type ProgressionRhythmPresetId,
   type ProgressionSubdivision,
 } from "./presets";
+import { progressionTicksPerBeat } from "./timing-grid";
+import type { ProgressionRhythmTickEvent } from "./ticks";
 
 const progressionStepsPerBar = progressionStepsPerBeat * 4;
 const progressionBeatCountPerBar = progressionStepsPerBar / progressionStepsPerBeat;
+
+type ProgressionBarWithTickRhythm = ProgressionBar & {
+  tickRhythm?: readonly ProgressionRhythmTickEvent[];
+};
 
 function isProgressionBeatAlignedStep(step: number) {
   return step >= 0 && step < progressionStepsPerBar && step % progressionStepsPerBeat === 0;
@@ -27,6 +36,23 @@ function getProgressionDefaultBeatRhythmEvent(startStep: number): ProgressionRhy
     durationSteps: progressionStepsPerBeat,
     eventType: "hit",
   };
+}
+
+function getProgressionBarTickRhythmEvents(bar: ProgressionBar): readonly ProgressionRhythmTickEvent[] {
+  return (bar as ProgressionBarWithTickRhythm).tickRhythm ?? [];
+}
+
+function matchesProgressionRhythmPresetTick(
+  events: readonly ProgressionRhythmTickEvent[],
+  preset: ProgressionRhythmPresetDefinition,
+) {
+  const presetEvents = getProgressionRhythmPresetTickEvents(preset);
+  return presetEvents.length === events.length && presetEvents.every((expected, index) => {
+    const actual = events[index];
+    return actual?.startTick === expected.startTick &&
+      actual.durationTicks === expected.durationTicks &&
+      actual.eventType === expected.eventType;
+  });
 }
 
 export function getProgressionBeatEventType(
@@ -117,6 +143,7 @@ export function getProgressionRhythmPreset(
   beatIndex: number,
 ): ProgressionRhythmPresetId | undefined {
   const events = getProgressionRhythmEvents(bar);
+  const tickEvents = getProgressionBarTickRhythmEvents(bar);
   const presetsByLargestSpan = [...progressionRhythmPresets].sort(
     (first, second) => second.spanBeats - first.spanBeats,
   );
@@ -128,6 +155,15 @@ export function getProgressionRhythmPreset(
     const relativeEvents = events
       .filter((event) => event.startStep >= startStep && event.startStep < endStep)
       .map((event) => ({ ...event, startStep: event.startStep - startStep }));
+    if (tickEvents.length > 0) {
+      const startTick = startBeat * progressionTicksPerBeat;
+      const endTick = startTick + getProgressionRhythmPresetSpanTicks(preset);
+      const relativeTickEvents = tickEvents
+        .filter((event) => event.startTick >= startTick && event.startTick < endTick)
+        .map((event) => ({ ...event, startTick: event.startTick - startTick }));
+      return matchesProgressionRhythmPresetTick(relativeTickEvents, preset);
+    }
+
     return matchesProgressionRhythmPreset(relativeEvents, preset);
   })?.id;
 }

@@ -438,4 +438,25 @@ describe("progression beat events", () => {
     ]);
     expect(getProgressionBeatEventType(progression.bars[1], 0)).toBe("hit");
   });
+
+  it("applies the triplet preset as tick rhythm and keeps preset detection in sync", () => {
+    const progression = applyProgressionRhythmPreset(
+      createDefaultProgression(),
+      0,
+      0,
+      "triplet-eighths",
+    );
+
+    expect(progression.bars[0]).toMatchObject({
+      tickRhythm: [
+        { startTick: 0, durationTicks: 4, eventType: "hit" },
+        { startTick: 4, durationTicks: 4, eventType: "hit" },
+        { startTick: 8, durationTicks: 4, eventType: "hit" },
+      ],
+    });
+    expect(getProgressionRhythmPreset(progression.bars[0], 0)).toBe("triplet-eighths");
+    expect(applyProgressionRhythmPreset(progression, 0, 0, "triplet-eighths")).toBe(
+      progression,
+    );
+  });
 });

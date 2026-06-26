@@ -22,8 +22,6 @@ export function ProgressionRhythmPreset({
           aria-label="拍の分割プリセット"
         >
           {progressionRhythmPresets.map((preset) => {
-            const isSupportedPreset = preset.timingGrid === "sixteenth";
-
             return (
               <button
                 key={preset.id}
@@ -32,8 +30,6 @@ export function ProgressionRhythmPreset({
                   selectedPreset === preset.id ? "active" : "",
                   preset.spanBeats > 1 ? "wide" : "",
                 ].filter(Boolean).join(" ")}
-                disabled={!isSupportedPreset}
-                title={isSupportedPreset ? undefined : "まだ保存形式が未対応です"}
                 aria-pressed={selectedPreset === preset.id}
                 onClick={() => onApply(preset.id)}
               >
