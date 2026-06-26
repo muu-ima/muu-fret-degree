@@ -3,6 +3,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionRhythmEvent,
   type ProgressionPosition,
+  type TimeSignature,
 } from "../model";
 import {
   progressionTicksPerBeat,
@@ -42,6 +43,33 @@ export function getProgressionTickPosition(
     tickIndex: position.stepIndex * progressionTicksPerStep,
     tickInBeat: position.stepInBeat * progressionTicksPerStep,
     tickInBar: position.stepInBar * progressionTicksPerStep,
+  };
+}
+
+export function getProgressionPositionFromTickIndex(
+  tickIndex: number,
+  timeSignature: TimeSignature,
+): ProgressionPosition | undefined {
+  if (
+    !Number.isInteger(tickIndex) ||
+    tickIndex < 0 ||
+    tickIndex % progressionTicksPerStep !== 0
+  ) {
+    return undefined;
+  }
+
+  const stepIndex = tickIndex / progressionTicksPerStep;
+  const beatsPerBar = Math.max(1, Math.floor(timeSignature.beatsPerBar));
+  const beatIndex = Math.floor(stepIndex / progressionStepsPerBeat);
+
+  return {
+    elapsedSeconds: 0,
+    beatIndex,
+    barIndex: Math.floor(beatIndex / beatsPerBar),
+    beatInBar: beatIndex % beatsPerBar,
+    stepIndex,
+    stepInBeat: stepIndex % progressionStepsPerBeat,
+    stepInBar: stepIndex % (beatsPerBar * progressionStepsPerBeat),
   };
 }
 

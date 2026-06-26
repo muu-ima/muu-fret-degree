@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createDefaultProgression } from "../model";
 import {
   getProgressionTickPosition,
+  getProgressionPositionFromTickIndex,
   getProgressionRhythmTickEventFromPresetEvent,
   getProgressionRhythmTickEventFromRhythmEvent,
   getProgressionSixteenthStepFromTickEvent,
@@ -71,5 +72,27 @@ describe("progression rhythm tick helpers", () => {
       tickInBeat: 6,
       tickInBar: 18,
     });
+  });
+
+  it("converts a tick index into a progression position", () => {
+    expect(
+      getProgressionPositionFromTickIndex(0, {
+        beatsPerBar: 4,
+        beatUnit: 4,
+      }),
+    ).toMatchObject({
+      beatIndex: 0,
+      barIndex: 0,
+      beatInBar: 0,
+      stepIndex: 0,
+      stepInBeat: 0,
+      stepInBar: 0,
+    });
+    expect(
+      getProgressionPositionFromTickIndex(1, {
+        beatsPerBar: 4,
+        beatUnit: 4,
+      }),
+    ).toBeUndefined();
   });
 });

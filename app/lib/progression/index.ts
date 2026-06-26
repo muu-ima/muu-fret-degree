@@ -41,6 +41,7 @@ export {
 export {
   getProgressionRhythmTickEventFromPresetEvent,
   getProgressionRhythmTickEventFromRhythmEvent,
+  getProgressionPositionFromTickIndex,
   getProgressionSixteenthStepFromTickEvent,
   progressionTicksPerStep,
   type ProgressionRhythmTickEvent,
