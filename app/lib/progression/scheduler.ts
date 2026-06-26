@@ -11,6 +11,25 @@ import {
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";
 
+function getProgressionBeatEndStep(
+  virtualStartStep: number,
+  stepInBeat: number,
+) {
+  return virtualStartStep + (progressionStepsPerBeat - stepInBeat);
+}
+
+function hasLaterEventInBeat(
+  timeline: ProgressionVirtualTimeline,
+  virtualStartStep: number,
+  beatEndStep: number,
+) {
+  return timeline.events.some(
+    (event) =>
+      event.absoluteStartStep > virtualStartStep &&
+      event.absoluteStartStep < beatEndStep,
+  );
+}
+
 export function getProgressionStepPlaybackRequest(
   progression: ChordProgression,
   position: ProgressionPosition,
@@ -37,19 +56,18 @@ export function getProgressionStepPlaybackRequest(
   const nextBarIndex = nextBeatInBar === 0
     ? (currentBarIndex + 1) % bars.length
     : currentBarIndex;
-  const beatEndStep = virtualEvent.absoluteStartStep +
-    (progressionStepsPerBeat - position.stepInBeat);
-  const hasLaterEventInBeat = timeline.events.some(
-    (event) =>
-      event.absoluteStartStep > virtualEvent.absoluteStartStep &&
-      event.absoluteStartStep < beatEndStep,
+  const beatEndStep = getProgressionBeatEndStep(virtualEvent.absoluteStartStep, position.stepInBeat);
+  const beatHasLaterEvent = hasLaterEventInBeat(
+    timeline,
+    virtualEvent.absoluteStartStep,
+    beatEndStep,
   );
 
   return {
     beatInBar: position.beatInBar,
     beatEventType: rhythmEvent.eventType,
     durationSteps: rhythmEvent.durationSteps,
-    followingTieBeats: !hasLaterEventInBeat && rhythmEvent.durationSteps <= progressionStepsPerBeat
+    followingTieBeats: !beatHasLaterEvent && rhythmEvent.durationSteps <= progressionStepsPerBeat
       ? countFollowingProgressionTies(
           progression,
           currentBarIndex,
