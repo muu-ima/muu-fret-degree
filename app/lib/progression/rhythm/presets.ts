@@ -9,6 +9,10 @@ import {
   getProgressionTimingTicks,
   type ProgressionTimingGrid,
 } from "./timing-grid";
+import {
+  getProgressionRhythmTickEventFromPresetEvent,
+  type ProgressionRhythmTickEvent,
+} from "./ticks";
 
 export type ProgressionSubdivision = "quarters" | "eighths" | "sixteenths";
 export type ProgressionRhythmPresetId =
@@ -93,15 +97,9 @@ const progressionDurationSteps = new Set<ProgressionDurationSteps>([1, 2, 3, 4, 
 export function getProgressionRhythmPresetStepEvents(
   preset: ProgressionRhythmPresetDefinition,
 ) {
-  const events = preset.events.map((event) => {
-    const startTicks = getProgressionTimingTicks(preset.timingGrid, event.startUnit);
-    const durationTicks = getProgressionTimingTicks(preset.timingGrid, event.durationUnits);
-    const startStep = startTicks === undefined
-      ? undefined
-      : getProgressionSixteenthStepFromTicks(startTicks);
-    const durationStep = durationTicks === undefined
-      ? undefined
-      : getProgressionSixteenthStepFromTicks(durationTicks);
+  const events = getProgressionRhythmPresetTickEvents(preset).map((event) => {
+    const startStep = getProgressionSixteenthStepFromTicks(event.startTick);
+    const durationStep = getProgressionSixteenthStepFromTicks(event.durationTicks);
 
     if (
       startStep === undefined ||
@@ -121,6 +119,24 @@ export function getProgressionRhythmPresetStepEvents(
   return events.every((event) => event !== undefined)
     ? events
     : undefined;
+}
+
+export function getProgressionRhythmPresetTickEvents(
+  preset: ProgressionRhythmPresetDefinition,
+): readonly ProgressionRhythmTickEvent[] {
+  return preset.events.flatMap((event) => {
+    const tickEvent = getProgressionRhythmTickEventFromPresetEvent(
+      preset.timingGrid,
+      event,
+    );
+    return tickEvent ? [tickEvent] : [];
+  });
+}
+
+export function getProgressionRhythmPresetSpanTicks(
+  preset: ProgressionRhythmPresetDefinition,
+) {
+  return preset.spanBeats * progressionTicksPerBeat;
 }
 
 export function matchesProgressionRhythmPreset(
