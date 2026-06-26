@@ -20,6 +20,18 @@ function getNormalizedProgressionTimeSignature(timeSignature: TimeSignature) {
   };
 }
 
+function createZeroProgressionPosition(elapsedSeconds: number): ProgressionPosition {
+  return {
+    elapsedSeconds,
+    beatIndex: 0,
+    barIndex: 0,
+    beatInBar: 0,
+    stepIndex: 0,
+    stepInBeat: 0,
+    stepInBar: 0,
+  };
+}
+
 export function secondsPerBeat(bpm: number, beatUnit = 4) {
   const normalizedBpm = normalizeNonNegative(bpm);
   const normalizedBeatUnit = normalizeNonNegative(beatUnit);
@@ -48,15 +60,7 @@ export function getProgressionPosition(
   const barLength = secondsPerBar(bpm, normalizedTimeSignature);
 
   if (beatLength === 0 || barLength === 0) {
-    return {
-      elapsedSeconds: safeElapsedSeconds,
-      beatIndex: 0,
-      barIndex: 0,
-      beatInBar: 0,
-      stepIndex: 0,
-      stepInBeat: 0,
-      stepInBar: 0,
-    };
+    return createZeroProgressionPosition(safeElapsedSeconds);
   }
 
   const beatIndex = Math.floor(safeElapsedSeconds / beatLength);
