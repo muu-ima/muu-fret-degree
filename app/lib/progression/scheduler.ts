@@ -30,6 +30,42 @@ function hasLaterEventInBeat(
   );
 }
 
+function getProgressionStepPlaybackContext(
+  progression: ChordProgression,
+  position: ProgressionPosition,
+  timeline: ProgressionVirtualTimeline,
+) {
+  const bars = progression.bars;
+  const currentBarIndex = position.barIndex % bars.length;
+  const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
+  const nextBeatInBar = (position.beatInBar + 1) % beatsPerBar;
+  const nextBarIndex = nextBeatInBar === 0
+    ? (currentBarIndex + 1) % bars.length
+    : currentBarIndex;
+  const virtualEvent = getProgressionVirtualRhythmEventAtPosition(
+    timeline,
+    currentBarIndex,
+    position.stepInBar,
+  );
+  if (!virtualEvent) {
+    return undefined;
+  }
+
+  const beatEndStep = getProgressionBeatEndStep(
+    virtualEvent.absoluteStartStep,
+    position.stepInBeat,
+  );
+
+  return {
+    beatEndStep,
+    currentBarIndex,
+    nextBarIndex,
+    nextBeatInBar,
+    rhythmEvent: virtualEvent.event,
+    virtualEvent,
+  };
+}
+
 export function getProgressionStepPlaybackRequest(
   progression: ChordProgression,
   position: ProgressionPosition,
@@ -40,23 +76,16 @@ export function getProgressionStepPlaybackRequest(
     return undefined;
   }
 
-  const currentBarIndex = position.barIndex % bars.length;
-  const virtualEvent = getProgressionVirtualRhythmEventAtPosition(
+  const playbackContext = getProgressionStepPlaybackContext(
+    progression,
+    position,
     timeline,
-    currentBarIndex,
-    position.stepInBar,
   );
-  if (!virtualEvent) {
+  if (!playbackContext) {
     return undefined;
   }
-  const rhythmEvent = virtualEvent.event;
-
-  const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
-  const nextBeatInBar = (position.beatInBar + 1) % beatsPerBar;
-  const nextBarIndex = nextBeatInBar === 0
-    ? (currentBarIndex + 1) % bars.length
-    : currentBarIndex;
-  const beatEndStep = getProgressionBeatEndStep(virtualEvent.absoluteStartStep, position.stepInBeat);
+  const { beatEndStep, currentBarIndex, nextBarIndex, nextBeatInBar, rhythmEvent, virtualEvent } =
+    playbackContext;
   const beatHasLaterEvent = hasLaterEventInBeat(
     timeline,
     virtualEvent.absoluteStartStep,
