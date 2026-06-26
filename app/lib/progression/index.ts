@@ -39,6 +39,14 @@ export {
 } from "./rhythm/timing-grid";
 
 export {
+  getProgressionRhythmTickEventFromPresetEvent,
+  getProgressionRhythmTickEventFromRhythmEvent,
+  getProgressionSixteenthStepFromTickEvent,
+  progressionTicksPerStep,
+  type ProgressionRhythmTickEvent,
+} from "./rhythm/ticks";
+
+export {
   getProgressionBeat,
   getProgressionCellForBeat,
   makeProgressionBeats,
