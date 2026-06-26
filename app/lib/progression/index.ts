@@ -106,12 +106,14 @@ export {
 export {
   createProgressionVirtualTimeline,
   getProgressionVirtualRhythmEventAtPosition,
+  getProgressionVirtualRhythmEventAtTickPosition,
   progressionStepsPerBar,
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,
   validateProgressionRhythmPlacementAtPosition,
   type ProgressionPlacementCollisionReason,
   type ProgressionPlacementValidation,
+  type ProgressionVirtualTickRhythmEvent,
   type ProgressionVirtualRhythmEvent,
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";

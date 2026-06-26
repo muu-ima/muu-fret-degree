@@ -4,6 +4,7 @@ import { updateProgressionBarCount } from "../structure";
 import { updateProgressionBeatDuration } from "./commands";
 import {
   createProgressionVirtualTimeline,
+  getProgressionVirtualRhythmEventAtTickPosition,
   progressionStepsPerBar,
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,
@@ -138,5 +139,19 @@ describe("progression virtual rhythm timeline", () => {
 
     expect(progression.bars).toBe(savedBars);
     expect(progression.bars).toHaveLength(4);
+  });
+
+  it("exposes the same virtual event at tick positions", () => {
+    const progression = createDefaultProgression();
+    const timeline = createProgressionVirtualTimeline(progression);
+
+    expect(
+      getProgressionVirtualRhythmEventAtTickPosition(timeline, 0, 0),
+    ).toMatchObject({
+      absoluteStartTick: 192,
+      absoluteEndTick: 204,
+      barIndex: 0,
+      loopIndex: 1,
+    });
   });
 });
