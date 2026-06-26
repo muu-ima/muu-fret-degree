@@ -187,11 +187,14 @@ export function validateProgressionRhythmPlacementAtTickPosition(
     return { canPlace: false, reason: "outside-timeline" } as const;
   }
 
+  const startStep = startTick / progressionTicksPerStep;
+  const durationSteps = (durationTicks / progressionTicksPerStep) as ProgressionDurationSteps;
+
   return validateProgressionRhythmPlacementAtPosition(
     timeline,
     barIndex,
-    startTick / progressionTicksPerStep,
-    durationTicks / progressionTicksPerStep,
+    startStep,
+    durationSteps,
   );
 }
 

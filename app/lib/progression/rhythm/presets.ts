@@ -4,6 +4,7 @@ import {
   type ProgressionDurationSteps,
 } from "../model";
 import {
+  progressionTicksPerBeat,
   getProgressionTimingGridUnitsPerBeat,
   type ProgressionTimingGrid,
 } from "./timing-grid";
