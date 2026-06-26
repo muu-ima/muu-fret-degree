@@ -23,7 +23,12 @@ describe("progression persistence", () => {
     const stored = {
       version: progressionStorageVersion,
       timeSignature,
-      bars: [{ bar: 1, cells, rhythm: [{ startStep: 2, durationSteps: 2, eventType: "hit" }] }],
+      bars: [{
+        bar: 1,
+        cells,
+        rhythm: [{ startStep: 2, durationSteps: 2, eventType: "hit" }],
+        tickRhythm: [{ startTick: 6, durationTicks: 6, eventType: "hit" }],
+      }],
     };
 
     expect(decodePersistedProgressionSettings(stored, roots, chordTypes)).toEqual({
@@ -71,7 +76,7 @@ describe("progression persistence", () => {
   it("rejects malformed JSON and unsupported versions", () => {
     expect(parsePersistedProgressionSettings("not json", roots, chordTypes)).toBeNull();
     expect(decodePersistedProgressionSettings({
-      version: 9,
+      version: 10,
       timeSignature,
       bars: [{ bar: 1, cells }],
     }, roots, chordTypes)).toBeNull();
@@ -79,9 +84,26 @@ describe("progression persistence", () => {
 
   it("writes the current storage version", () => {
     expect(createPersistedProgressionSettings(timeSignature, [{ bar: 1, cells }])).toEqual({
-      version: 8,
+      version: 9,
       timeSignature,
       bars: [{ bar: 1, cells }],
+    });
+  });
+
+  it("adds tick rhythm when saving explicit step rhythm", () => {
+    expect(createPersistedProgressionSettings(timeSignature, [{
+      bar: 1,
+      cells,
+      rhythm: [{ startStep: 2, durationSteps: 2, eventType: "hit" }],
+    }])).toEqual({
+      version: 9,
+      timeSignature,
+      bars: [{
+        bar: 1,
+        cells,
+        rhythm: [{ startStep: 2, durationSteps: 2, eventType: "hit" }],
+        tickRhythm: [{ startTick: 6, durationTicks: 6, eventType: "hit" }],
+      }],
     });
   });
 });
