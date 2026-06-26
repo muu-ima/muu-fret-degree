@@ -57,7 +57,11 @@ export function getProgressionRhythmTickEventFromPresetEvent(
 
 export function getProgressionSixteenthStepFromTickEvent(
   event: ProgressionRhythmTickEvent,
-) {
+): {
+  startStep: number;
+  durationSteps: number;
+  eventType: ProgressionBeatEventType;
+} | undefined {
   const startStep = getProgressionSixteenthStepFromTicks(event.startTick);
   const durationSteps = getProgressionSixteenthStepFromTicks(event.durationTicks);
   return startStep === undefined || durationSteps === undefined
