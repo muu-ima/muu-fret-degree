@@ -47,6 +47,36 @@ function isProgressionBeatIndex(beatIndex: number) {
   return beatIndex >= 0 && beatIndex < progressionBeatCountPerBar;
 }
 
+function applyProgressionRhythmPresetEvents(
+  progression: ChordProgression,
+  barIndex: number,
+  startStep: number,
+  endStep: number,
+  presetEvents: readonly {
+    startStep: number;
+    durationSteps: ProgressionDurationSteps;
+    eventType: ProgressionBeatEventType;
+  }[],
+) {
+  const updatedBar = progression.bars[barIndex];
+  const nextRhythm = [
+    ...(updatedBar.rhythm?.filter(
+      (event) => event.startStep < startStep || event.startStep >= endStep,
+    ) ?? []),
+    ...presetEvents.map((event) => ({
+      ...event,
+      startStep: startStep + event.startStep,
+    })),
+  ].sort((first, second) => first.startStep - second.startStep);
+
+  return {
+    ...progression,
+    bars: progression.bars.map((bar, index) =>
+      index === barIndex ? { ...bar, rhythm: nextRhythm } : bar,
+    ),
+  };
+}
+
 export function updateProgressionBeatEventType(
   progression: ChordProgression,
   barIndex: number,
@@ -268,21 +298,11 @@ export function applyProgressionRhythmPreset(
     nextProgression = removeProgressionCrossBarTie(nextProgression, barIndex);
   }
 
-  const updatedBar = nextProgression.bars[barIndex];
-  const nextRhythm = [
-    ...(updatedBar.rhythm?.filter(
-      (event) => event.startStep < startStep || event.startStep >= endStep,
-    ) ?? []),
-    ...presetEvents.map((event) => ({
-      ...event,
-      startStep: startStep + event.startStep,
-    })),
-  ].sort((first, second) => first.startStep - second.startStep);
-
-  return {
-    ...nextProgression,
-    bars: nextProgression.bars.map((bar, index) =>
-      index === barIndex ? { ...bar, rhythm: nextRhythm } : bar,
-    ),
-  };
+  return applyProgressionRhythmPresetEvents(
+    nextProgression,
+    barIndex,
+    startStep,
+    endStep,
+    presetEvents,
+  );
 }
