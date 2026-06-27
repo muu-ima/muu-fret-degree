@@ -17,7 +17,7 @@ import {
   getProgressionStepPlaybackRequest,
   getProgressionTickPlaybackRequest,
 } from "../../lib/progression/playback/scheduler";
-import { hasProgressionNonStepTickRhythm } from "../../lib/progression/rhythm/queries";
+import { hasProgressionNonStepTickRhythmAtBeat } from "../../lib/progression/rhythm/queries";
 import { createProgressionVirtualTimeline } from "../../lib/progression/rhythm/timeline";
 import { getProgressionTickIndex } from "../../lib/progression/rhythm/ticks";
 import { useProgressionStepScheduler } from "./useProgressionStepScheduler";
@@ -56,7 +56,9 @@ export function useProgressionBeatScheduler({
   const currentBar = bars.length > 0
     ? bars[position.barIndex % bars.length]
     : undefined;
-  const useTickRhythmPlayback = currentBar ? hasProgressionNonStepTickRhythm(currentBar) : false;
+  const useTickRhythmPlayback = currentBar
+    ? hasProgressionNonStepTickRhythmAtBeat(currentBar, position.beatInBar)
+    : false;
   const currentTickIndex = useMemo(
     () =>
       getProgressionTickIndex(
@@ -70,6 +72,15 @@ export function useProgressionBeatScheduler({
 
   const scheduleBeat = useCallback((stepPosition: ProgressionPosition) => {
     if (bars.length === 0) {
+      return;
+    }
+
+    const currentStepBar = bars[stepPosition.barIndex % bars.length];
+    if (!currentStepBar) {
+      return;
+    }
+
+    if (hasProgressionNonStepTickRhythmAtBeat(currentStepBar, stepPosition.beatInBar)) {
       return;
     }
 

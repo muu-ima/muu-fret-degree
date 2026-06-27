@@ -19,6 +19,7 @@ import {
 import { progressionTicksPerBeat } from "./timing-grid";
 import {
   getProgressionRhythmTickEventFromRhythmEvent,
+  progressionTicksPerStep,
   type ProgressionRhythmTickEvent,
 } from "./ticks";
 
@@ -54,11 +55,25 @@ export function getProgressionTickRhythmEvents(bar: ProgressionBar) {
   return getProgressionRhythmEvents(bar).map(getProgressionRhythmTickEventFromRhythmEvent);
 }
 
-export function hasProgressionNonStepTickRhythm(bar: ProgressionBar) {
-  return getProgressionBarTickRhythmEvents(bar).some(
+export function getProgressionTickRhythmEventsAtBeat(
+  bar: ProgressionBar,
+  beatIndex: number,
+) {
+  const startTick = beatIndex * progressionTicksPerBeat;
+  const endTick = startTick + progressionTicksPerBeat;
+  return getProgressionTickRhythmEvents(bar).filter(
+    (event) => event.startTick >= startTick && event.startTick < endTick,
+  );
+}
+
+export function hasProgressionNonStepTickRhythmAtBeat(
+  bar: ProgressionBar,
+  beatIndex: number,
+) {
+  return getProgressionTickRhythmEventsAtBeat(bar, beatIndex).some(
     (event) =>
-      event.startTick % (progressionTicksPerBeat / 4) !== 0 ||
-      event.durationTicks % (progressionTicksPerBeat / 4) !== 0,
+      event.startTick % progressionTicksPerStep !== 0 ||
+      event.durationTicks % progressionTicksPerStep !== 0,
   );
 }
 

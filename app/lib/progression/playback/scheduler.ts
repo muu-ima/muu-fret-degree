@@ -11,13 +11,8 @@ import {
   type ProgressionVirtualTimeline,
 } from "../rhythm/timeline";
 import { progressionTicksPerBeat } from "../rhythm/timing-grid";
-import {
-  progressionTicksPerStep,
-} from "../rhythm/ticks";
-import {
-  getProgressionTickRhythmEventAtTick,
-  hasProgressionNonStepTickRhythm,
-} from "../rhythm/queries";
+import { progressionTicksPerStep } from "../rhythm/ticks";
+import { getProgressionTickRhythmEventAtTick } from "../rhythm/queries";
 
 function getProgressionBeatEndStep(
   virtualStartStep: number,
@@ -135,7 +130,7 @@ export function getProgressionTickPlaybackRequest(
   const beatInBar = Math.floor(tickInBar / progressionTicksPerBeat);
   const currentBar = bars[barIndex];
 
-  if (!currentBar || !hasProgressionNonStepTickRhythm(currentBar)) {
+  if (!currentBar) {
     return undefined;
   }
 
