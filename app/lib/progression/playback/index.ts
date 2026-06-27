@@ -5,11 +5,11 @@ import {
   pickLowestBassNoteForDegree,
   pitchClassOf,
   sharpPitchClasses,
-} from "../music";
+} from "../../music";
 import type {
   ProgressionBeatEventType,
   ProgressionDurationSteps,
-} from "./model";
+} from "../model";
 
 export type ProgressionRhythm =
   | "root-only"
@@ -172,3 +172,4 @@ export function planProgressionBeat({
     durationSeconds,
   );
 }
+
