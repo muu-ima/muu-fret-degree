@@ -460,6 +460,24 @@ describe("progression beat events", () => {
     );
   });
 
+  it("clears triplet tick rhythm when a sixteenth-grid preset replaces it", () => {
+    let progression = applyProgressionRhythmPreset(
+      createDefaultProgression(),
+      0,
+      0,
+      "triplet-eighths",
+    );
+
+    progression = applyProgressionRhythmPreset(progression, 0, 0, "eighths");
+
+    expect(progression.bars[0]).not.toHaveProperty("tickRhythm");
+    expect(progression.bars[0].rhythm).toEqual([
+      { startStep: 0, durationSteps: 2, eventType: "hit" },
+      { startStep: 2, durationSteps: 2, eventType: "hit" },
+    ]);
+    expect(getProgressionRhythmPreset(progression.bars[0], 0)).toBe("eighths");
+  });
+
   it("does not overwrite a sustaining dotted quarter when triplet starts inside it", () => {
     const dottedQuarter = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 6);
 

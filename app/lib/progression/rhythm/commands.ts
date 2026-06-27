@@ -85,17 +85,22 @@ function applyProgressionRhythmPresetEvents(
 
   return {
     ...progression,
-    bars: progression.bars.map((bar, index) =>
-      index === barIndex
-        ? {
-            ...bar,
-            ...(nextRhythm.length > 0 ? { rhythm: nextRhythm } : {}),
-            ...(nextTickRhythm && nextTickRhythm.length > 0
-              ? { tickRhythm: nextTickRhythm }
-              : {}),
-          }
-        : bar,
-    ),
+    bars: progression.bars.map((bar, index) => {
+      if (index !== barIndex) {
+        return bar;
+      }
+
+      const { rhythm: _rhythm, tickRhythm: _tickRhythm, ...barWithoutRhythms } =
+        bar as ProgressionBarWithTickRhythm;
+
+      return {
+        ...barWithoutRhythms,
+        ...(nextRhythm.length > 0 ? { rhythm: nextRhythm } : {}),
+        ...(nextTickRhythm && nextTickRhythm.length > 0
+          ? { tickRhythm: nextTickRhythm }
+          : {}),
+      };
+    }),
   };
 }
 
@@ -124,15 +129,20 @@ function applyProgressionRhythmPresetTickEvents(
 
   return {
     ...progression,
-    bars: progression.bars.map((bar, index) =>
-      index === barIndex
-        ? {
-            ...bar,
-            ...(nextRhythm && nextRhythm.length > 0 ? { rhythm: nextRhythm } : {}),
-            tickRhythm: nextTickRhythm,
-          }
-        : bar,
-    ),
+    bars: progression.bars.map((bar, index) => {
+      if (index !== barIndex) {
+        return bar;
+      }
+
+      const { rhythm: _rhythm, tickRhythm: _tickRhythm, ...barWithoutRhythms } =
+        bar as ProgressionBarWithTickRhythm;
+
+      return {
+        ...barWithoutRhythms,
+        ...(nextRhythm && nextRhythm.length > 0 ? { rhythm: nextRhythm } : {}),
+        tickRhythm: nextTickRhythm,
+      };
+    }),
   };
 }
 

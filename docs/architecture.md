@@ -349,6 +349,41 @@ Straight / Shuffleは保存Rhythmイベントを変更しないRuntime設定と�
 - v2-v6の拍内に保存されたHit / Rest / Tieと音価は、読み込み時に16分step上のRhythmイベントへ移行する。
 - 旧データの音価未指定拍は4分音符、イベント未指定拍はHitとして読み込む。
 
+### DB に持つもの
+
+DB は「再利用したい音楽データの正本」を持ち、UI の一時状態や再生中の瞬間値は持たない方針にする。
+
+DB に置く候補:
+
+- ユーザー情報
+- 曲、練習課題、進行テンプレートなどの作品単位データ
+- 進行の canonical data
+  - `timeSignature`
+  - bars
+  - cells / beats / rhythm / tickRhythm
+  - 保存対象にしたい BPM や groove などの設定
+- 進行のバージョン履歴
+  - 保存時刻
+  - 作成元
+  - 変更理由やタグ
+- 演奏の記録メタデータ
+  - いつ演奏したか
+  - どの進行を再生したか
+  - BPM / groove / rhythm preset などの条件
+- 録音や書き出しの参照情報
+  - 音声ファイル
+  - MIDI ファイル
+  - 生成済みの書き出し物
+- お気に入り、タグ、検索用メタデータ
+
+DB に直接入れないもの:
+
+- 再生位置、選択中の拍、小節カードのハイライトなどの一時 UI state
+- `requestAnimationFrame` や `AudioContext` に依存する runtime state
+- 再生音そのもののバッファ
+
+音声ファイルや MIDI のような大きいバイナリは、DB ではなくファイルストレージやオブジェクトストレージに置き、DB には参照とメタデータだけを持たせる。これにより、検索・履歴・共有・再生成の入口を DB に寄せつつ、重い実体は別管理にできる。
+
 ### `app/hooks/usePersistedPracticeSettings.ts`
 
 練習設定のブラウザ保存を担当する。
