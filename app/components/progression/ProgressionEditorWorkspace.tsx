@@ -7,6 +7,7 @@ import theory from "../../../data/theory.json";
 import type { ChordType } from "../../lib/music";
 import { useProgressionSession } from "../../providers/ProgressionSessionProvider";
 import { ProgressionEditor } from "./ProgressionEditor";
+import { WorkspaceSkeleton } from "../ui/WorkspaceSkeleton";
 
 export function ProgressionEditorWorkspace() {
   const chordTypes = theory.chordTypes as ChordType[];
@@ -14,6 +15,7 @@ export function ProgressionEditorWorkspace() {
     applyRhythmPreset,
     canRedo,
     canUndo,
+    isHydrated,
     progression,
     redo,
     removeRhythmEvent,
@@ -72,7 +74,7 @@ export function ProgressionEditorWorkspace() {
     </div>
   );
 
-  return (
+  return isHydrated ? (
     <main className="progressionWorkspace">
       <header className="progressionWorkspaceHeader">
         <div>
@@ -122,5 +124,7 @@ export function ProgressionEditorWorkspace() {
         </button>
       </nav>
     </main>
+  ) : (
+    <WorkspaceSkeleton mode="progression" />
   );
 }

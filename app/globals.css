@@ -47,6 +47,18 @@ input {
   font: inherit;
 }
 
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 .app {
   min-width: 0;
   width: min(1180px, 100%);
@@ -59,6 +71,154 @@ input {
   display: grid;
   grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
+}
+
+@keyframes workspaceSkeletonShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.workspaceSkeleton {
+  display: grid;
+  gap: 18px;
+  width: min(1440px, 100%);
+  min-height: min(100vh, 980px);
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+}
+
+.workspaceSkeletonHero,
+.workspaceSkeletonHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.workspaceSkeletonText {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.workspaceSkeletonActions {
+  display: flex;
+  gap: 8px;
+}
+
+.workspaceSkeletonGrid,
+.workspaceSkeletonEditor {
+  display: grid;
+  gap: 14px;
+}
+
+.workspaceSkeletonGrid {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px) minmax(260px, 340px);
+  grid-template-areas:
+    "panel-a panel-b panel-c"
+    "board board board"
+    "footer footer footer";
+}
+
+.workspaceSkeletonEditor {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspaceSkeletonBlock {
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(122, 167, 255, 0.12), rgba(255, 255, 255, 0.04));
+  background-size: 180% 100%;
+  animation: workspaceSkeletonShimmer 1.4s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+.workspaceSkeletonBlock.eyebrow {
+  width: 120px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.workspaceSkeletonBlock.title {
+  width: 220px;
+  height: 34px;
+}
+
+.workspaceSkeletonBlock.title.wide {
+  width: min(480px, 80vw);
+}
+
+.workspaceSkeletonBlock.summary {
+  width: min(420px, 72vw);
+  height: 14px;
+  border-radius: 999px;
+}
+
+.workspaceSkeletonBlock.summary.wide {
+  width: min(560px, 78vw);
+}
+
+.workspaceSkeletonBlock.badge {
+  width: 112px;
+  height: 72px;
+  border-radius: 22px;
+}
+
+.workspaceSkeletonBlock.panel {
+  min-height: 220px;
+}
+
+.workspaceSkeletonBlock.panel.tall {
+  grid-area: panel-a;
+}
+
+.workspaceSkeletonBlock.panel.medium:nth-of-type(2) {
+  grid-area: panel-b;
+}
+
+.workspaceSkeletonBlock.panel.medium:nth-of-type(3) {
+  grid-area: panel-c;
+}
+
+.workspaceSkeletonBlock.board {
+  grid-area: board;
+  min-height: 320px;
+  border-radius: 28px;
+}
+
+.workspaceSkeletonBlock.footer {
+  grid-area: footer;
+  min-height: 96px;
+}
+
+.workspaceSkeletonBlock.action {
+  width: 92px;
+  height: 40px;
+  border-radius: 999px;
+}
+
+.workspaceSkeletonBlock.editorHeader {
+  width: min(100%, 560px);
+  height: 72px;
+}
+
+.workspaceSkeletonBlock.chart {
+  min-height: 240px;
+}
+
+.workspaceSkeletonBlock.selection {
+  min-height: 170px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspaceSkeletonBlock {
+    animation: none;
+  }
 }
 
 .appSidebar {

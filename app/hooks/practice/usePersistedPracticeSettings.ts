@@ -192,4 +192,6 @@ export function usePersistedPracticeSettings({
     values.showGuideTones,
     values.tuningId,
   ]);
+
+  return hasLoadedStoredSettings;
 }
