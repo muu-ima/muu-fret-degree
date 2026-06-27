@@ -86,7 +86,7 @@ export {
 export {
   resizeProgressionBars,
   updateProgressionBarCount,
-} from "./state/structure";
+} from "./state";
 
 export {
   createPersistedProgressionSettings,
@@ -105,7 +105,7 @@ export {
   isProgressionBeatStart,
   secondsPerBar,
   secondsPerBeat,
-} from "./state/timeline";
+} from "./state";
 
 export {
   canTieProgressionBeat,
@@ -129,4 +129,4 @@ export {
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";
 
-export { getProgressionTickPlaybackRequest } from "./playback/scheduler";
+export { getProgressionTickPlaybackRequest } from "./playback";
