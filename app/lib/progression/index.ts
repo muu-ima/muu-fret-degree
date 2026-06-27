@@ -129,4 +129,4 @@ export {
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";
 
-export { getProgressionTickPlaybackRequest } from "./scheduler";
+export { getProgressionTickPlaybackRequest } from "./playback/scheduler";

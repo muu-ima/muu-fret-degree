@@ -13,7 +13,7 @@ import {
   getProgressionGrooveDurationSeconds,
   type ProgressionGroove,
 } from "../../lib/progression/groove";
-import { getProgressionStepPlaybackRequest } from "../../lib/progression/scheduler";
+import { getProgressionStepPlaybackRequest } from "../../lib/progression/playback/scheduler";
 import { createProgressionVirtualTimeline } from "../../lib/progression/rhythm/timeline";
 import { useProgressionStepScheduler } from "./useProgressionStepScheduler";
 
