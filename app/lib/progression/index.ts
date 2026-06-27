@@ -105,7 +105,7 @@ export {
   isProgressionBeatStart,
   secondsPerBar,
   secondsPerBeat,
-} from "./timeline";
+} from "./state/timeline";
 
 export {
   canTieProgressionBeat,

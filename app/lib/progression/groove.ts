@@ -1,5 +1,5 @@
 import { progressionStepsPerBeat, type ProgressionDurationSteps } from "./model";
-import { secondsPerBeat } from "./timeline";
+import { secondsPerBeat } from "./state/timeline";
 
 export type ProgressionGroove = "straight" | "shuffle";
 
