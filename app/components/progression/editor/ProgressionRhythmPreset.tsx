@@ -15,7 +15,10 @@ export function ProgressionRhythmPreset({
   return (
     <div className="progressionRhythmPresetSection">
       <div className="progressionApplySection">
-        <span className="controlLabel">Rhythm Preset</span>
+        <span className="controlLabel">リズムプリセット</span>
+        <small className="progressionRhythmPresetHint">
+          16分系と3連系を切り替えられます
+        </small>
         <div
           className="progressionApplyTabs progressionSubdivisionTabs"
           role="group"
@@ -28,12 +31,12 @@ export function ProgressionRhythmPreset({
                 type="button"
                 className={[
                   selectedPreset === preset.id ? "active" : "",
-                  preset.spanBeats > 1 ? "wide" : "",
                 ].filter(Boolean).join(" ")}
                 aria-pressed={selectedPreset === preset.id}
                 onClick={() => onApply(preset.id)}
               >
-                {preset.label}
+                <span className="progressionPresetLabel">{preset.label}</span>
+                <span className="progressionPresetDescription">{preset.description}</span>
               </button>
             );
           })}

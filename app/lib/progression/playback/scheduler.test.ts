@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyProgressionRhythmPreset,
   createDefaultProgression,
   createProgressionVirtualTimeline,
   getProgressionPosition,
@@ -27,8 +28,13 @@ describe("progression step scheduling", () => {
     expect(getProgressionStepPlaybackRequest(progression, positionAtStep(1))).toBeUndefined();
   });
 
-  it("maps tick playback requests onto the existing step scheduler", () => {
-    const progression = createDefaultProgression(120);
+  it("maps triplet tick playback requests onto the tick scheduler", () => {
+    const progression = applyProgressionRhythmPreset(
+      createDefaultProgression(120),
+      0,
+      0,
+      "triplet-eighths",
+    );
     const timeline = createProgressionVirtualTimeline(progression);
 
     expect(validateProgressionRhythmPlacementAtTickPosition(timeline, 0, 0, 3)).toEqual({
@@ -38,6 +44,12 @@ describe("progression step scheduling", () => {
       startStep: 0,
       stepInBeat: 0,
     });
+    expect(getProgressionTickPlaybackRequest(progression, 0)?.durationSeconds).toBeCloseTo(1 / 6);
+    expect(getProgressionTickPlaybackRequest(progression, 4)).toMatchObject({
+      startStep: 1,
+      stepInBeat: 1,
+    });
+    expect(getProgressionTickPlaybackRequest(progression, 4)?.durationSeconds).toBeCloseTo(1 / 6);
   });
 
   it("returns each explicit sixteenth-note hit in one beat", () => {
@@ -134,4 +146,3 @@ describe("progression step scheduling", () => {
     )).toBeUndefined();
   });
 });
-

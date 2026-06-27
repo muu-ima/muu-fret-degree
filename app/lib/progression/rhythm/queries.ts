@@ -17,7 +17,11 @@ import {
   type ProgressionSubdivision,
 } from "./presets";
 import { progressionTicksPerBeat } from "./timing-grid";
-import type { ProgressionRhythmTickEvent } from "./ticks";
+import {
+  getProgressionRhythmTickEventFromRhythmEvent,
+  progressionTicksPerStep,
+  type ProgressionRhythmTickEvent,
+} from "./ticks";
 
 const progressionStepsPerBar = progressionStepsPerBeat * 4;
 const progressionBeatCountPerBar = progressionStepsPerBar / progressionStepsPerBeat;
@@ -40,6 +44,44 @@ function getProgressionDefaultBeatRhythmEvent(startStep: number): ProgressionRhy
 
 function getProgressionBarTickRhythmEvents(bar: ProgressionBar): readonly ProgressionRhythmTickEvent[] {
   return (bar as ProgressionBarWithTickRhythm).tickRhythm ?? [];
+}
+
+export function getProgressionTickRhythmEvents(bar: ProgressionBar) {
+  const tickRhythm = getProgressionBarTickRhythmEvents(bar);
+  if (tickRhythm.length > 0) {
+    return tickRhythm;
+  }
+
+  return getProgressionRhythmEvents(bar).map(getProgressionRhythmTickEventFromRhythmEvent);
+}
+
+export function getProgressionTickRhythmEventsAtBeat(
+  bar: ProgressionBar,
+  beatIndex: number,
+) {
+  const startTick = beatIndex * progressionTicksPerBeat;
+  const endTick = startTick + progressionTicksPerBeat;
+  return getProgressionTickRhythmEvents(bar).filter(
+    (event) => event.startTick >= startTick && event.startTick < endTick,
+  );
+}
+
+export function hasProgressionNonStepTickRhythmAtBeat(
+  bar: ProgressionBar,
+  beatIndex: number,
+) {
+  return getProgressionTickRhythmEventsAtBeat(bar, beatIndex).some(
+    (event) =>
+      event.startTick % progressionTicksPerStep !== 0 ||
+      event.durationTicks % progressionTicksPerStep !== 0,
+  );
+}
+
+export function getProgressionTickRhythmEventAtTick(
+  bar: ProgressionBar,
+  startTick: number,
+) {
+  return getProgressionTickRhythmEvents(bar).find((event) => event.startTick === startTick);
 }
 
 function matchesProgressionRhythmPresetTick(

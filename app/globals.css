@@ -1997,6 +1997,14 @@ select:focus-visible,
   color: #fff;
 }
 
+.progressionChartBeat.triplet {
+  background: linear-gradient(180deg, rgba(86, 122, 181, 0.18), rgba(17, 22, 31, 0));
+}
+
+.progressionChartBeat.triplet.selected {
+  background: linear-gradient(180deg, rgba(122, 167, 255, 0.26), rgba(122, 167, 255, 0.1));
+}
+
 .progressionChartBeat.rest:not(.selected) {
   background: rgba(151, 162, 181, 0.05);
   color: #7f8a9d;
@@ -2026,6 +2034,81 @@ select:focus-visible,
   font-size: 1.35rem;
   font-weight: 500;
   line-height: 1;
+}
+
+.progressionChartTripletLabel {
+  display: block;
+  margin-top: -1px;
+  color: #8fb4ff;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.progressionChartPulseLane {
+  position: relative;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px 2px 0;
+}
+
+.progressionChartPulseLane::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  left: 8px;
+  height: 1px;
+  background: rgba(122, 167, 255, 0.14);
+  transform: translateY(-50%);
+}
+
+.progressionChartPulse {
+  position: relative;
+  display: grid;
+  min-height: 12px;
+  place-items: center;
+  color: #5f6d87;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.progressionChartPulse.hit {
+  color: #8fb4ff;
+}
+
+.progressionChartPulse.hit::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(143, 180, 255, 0.2);
+  box-shadow: 0 0 0 1px rgba(143, 180, 255, 0.22);
+}
+
+.progressionChartPulse.rest {
+  color: #6f7b90;
+}
+
+.progressionChartPulse.rest::before {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgba(111, 123, 144, 0.42);
+  border-radius: 999px;
+}
+
+.progressionChartPulse.tie {
+  color: #9eb2da;
 }
 
 .progressionChartStepLane {
@@ -2322,6 +2405,13 @@ select:focus-visible,
   gap: 7px;
 }
 
+.progressionRhythmPresetHint {
+  color: rgba(171, 184, 209, 0.72);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
 .progressionApplyTabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2333,16 +2423,18 @@ select:focus-visible,
 }
 
 .progressionSubdivisionTabs {
-  width: min(100%, 330px);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 360px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .progressionSubdivisionTabs button {
-  min-height: 36px;
-}
-
-.progressionSubdivisionTabs button.wide {
-  grid-column: 1 / -1;
+  min-height: 48px;
+  padding: 7px 8px;
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 3px;
+  text-align: left;
 }
 
 .progressionDurationTabs {
@@ -2367,7 +2459,22 @@ select:focus-visible,
 }
 
 .progressionRhythmPresetSection {
-  width: min(100%, 330px);
+  width: min(100%, 360px);
+}
+
+.progressionPresetLabel {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.1;
+}
+
+.progressionPresetDescription {
+  display: block;
+  color: rgba(171, 184, 209, 0.72);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
 }
 
 .progressionRhythmAccordion {

@@ -10,6 +10,7 @@ import type {
   ProgressionBeatEventType,
   ProgressionDurationSteps,
 } from "../model";
+export { getProgressionTickPlaybackRequest } from "./scheduler";
 
 export type ProgressionRhythm =
   | "root-only"
@@ -172,4 +173,3 @@ export function planProgressionBeat({
     durationSeconds,
   );
 }
-

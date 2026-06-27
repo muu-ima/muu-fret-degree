@@ -10,11 +10,11 @@ import {
 describe("progression rhythm preset catalog", () => {
   it("defines the current preset order and labels in one catalog", () => {
     expect(progressionRhythmPresets.map(({ id, label }) => ({ id, label }))).toEqual([
-      { id: "quarters", label: "Quarter ×1" },
-      { id: "eighths", label: "8ths ×2" },
-      { id: "sixteenths", label: "16ths ×4" },
-      { id: "dotted-quarter-eighth", label: "Dotted 1/4 + 1/8" },
-      { id: "triplet-eighths", label: "Triplet 8ths ×3" },
+      { id: "quarters", label: "4分 ×1" },
+      { id: "eighths", label: "8分 ×2" },
+      { id: "sixteenths", label: "16分 ×4" },
+      { id: "dotted-quarter-eighth", label: "付点4分 + 8分" },
+      { id: "triplet-eighths", label: "3連8分 ×3" },
     ]);
   });
 
@@ -35,6 +35,7 @@ describe("progression rhythm preset catalog", () => {
   it("looks up a preset definition by id", () => {
     expect(getProgressionRhythmPresetDefinition("dotted-quarter-eighth")).toMatchObject({
       spanBeats: 2,
+      description: "2拍",
       events: [
         { startUnit: 0, durationUnits: 6 },
         { startUnit: 6, durationUnits: 2 },
@@ -45,6 +46,7 @@ describe("progression rhythm preset catalog", () => {
   it("keeps triplet presets defined in the catalog without forcing legacy conversion", () => {
     expect(getProgressionRhythmPresetDefinition("triplet-eighths")).toMatchObject({
       spanBeats: 1,
+      description: "1拍",
       timingGrid: "triplet",
       events: [
         { startUnit: 0, durationUnits: 1 },
