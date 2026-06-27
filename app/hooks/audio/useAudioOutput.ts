@@ -1,17 +1,21 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   type MetronomeClickKind,
   type MetronomeTone,
   playBassNote as playBassAudioNote,
   playMetronomeClick as playMetronomeAudioClick,
   playPianoNote as playPianoAudioNote,
+  preloadBassSample,
 } from "../../lib/audio";
+
+export type BassSampleStatus = "idle" | "loading" | "ready" | "failed";
 
 export function useAudioOutput() {
   const audioContext = useRef<AudioContext | null>(null);
   const masterOutput = useRef<AudioNode | null>(null);
+  const [bassSampleStatus, setBassSampleStatus] = useState<BassSampleStatus>("idle");
 
   const ensureAudioContext = useCallback(() => {
     if (!audioContext.current) {
@@ -38,7 +42,12 @@ export function useAudioOutput() {
 
   const playBassNote = useCallback(
     (midi: number, startOffset = 0, duration = 0.85) => {
-      playBassAudioNote(ensureAudioContext(), midi, startOffset, duration, ensureMasterOutput());
+      const context = ensureAudioContext();
+      setBassSampleStatus((current) => current === "ready" ? current : "loading");
+      void preloadBassSample(context)
+        .then(() => setBassSampleStatus("ready"))
+        .catch(() => setBassSampleStatus("failed"));
+      playBassAudioNote(context, midi, startOffset, duration, ensureMasterOutput());
     },
     [ensureAudioContext, ensureMasterOutput],
   );
@@ -59,10 +68,16 @@ export function useAudioOutput() {
   );
 
   const resumeAudio = useCallback(() => {
-    void ensureAudioContext().resume();
+    const context = ensureAudioContext();
+    void context.resume();
+    setBassSampleStatus((current) => current === "ready" ? current : "loading");
+    void preloadBassSample(context)
+      .then(() => setBassSampleStatus("ready"))
+      .catch(() => setBassSampleStatus("failed"));
   }, [ensureAudioContext]);
 
   return {
+    bassSampleStatus,
     playBassNote,
     playMetronomeClick,
     playPianoNote,
