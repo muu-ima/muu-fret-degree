@@ -11,6 +11,7 @@ import {
 
 export function useAudioOutput() {
   const audioContext = useRef<AudioContext | null>(null);
+  const masterOutput = useRef<AudioNode | null>(null);
 
   const ensureAudioContext = useCallback(() => {
     if (!audioContext.current) {
@@ -19,26 +20,42 @@ export function useAudioOutput() {
     return audioContext.current;
   }, []);
 
+  const ensureMasterOutput = useCallback(() => {
+    const context = ensureAudioContext();
+    if (!masterOutput.current) {
+      const compressor = context.createDynamicsCompressor();
+      compressor.threshold.setValueAtTime(-22, context.currentTime);
+      compressor.knee.setValueAtTime(18, context.currentTime);
+      compressor.ratio.setValueAtTime(3, context.currentTime);
+      compressor.attack.setValueAtTime(0.003, context.currentTime);
+      compressor.release.setValueAtTime(0.18, context.currentTime);
+      compressor.connect(context.destination);
+      masterOutput.current = compressor;
+    }
+
+    return masterOutput.current;
+  }, [ensureAudioContext]);
+
   const playBassNote = useCallback(
     (midi: number, startOffset = 0, duration = 0.85) => {
-      playBassAudioNote(ensureAudioContext(), midi, startOffset, duration);
+      playBassAudioNote(ensureAudioContext(), midi, startOffset, duration, ensureMasterOutput());
     },
-    [ensureAudioContext],
+    [ensureAudioContext, ensureMasterOutput],
   );
 
   const playMetronomeClick = useCallback(
     (kind: MetronomeClickKind, tone: MetronomeTone, volume: number) => {
       const context = ensureAudioContext();
-      playMetronomeAudioClick(context, context.currentTime, kind, tone, volume);
+      playMetronomeAudioClick(context, context.currentTime, kind, tone, volume, ensureMasterOutput());
     },
-    [ensureAudioContext],
+    [ensureAudioContext, ensureMasterOutput],
   );
 
   const playPianoNote = useCallback(
     (midi: number, startOffset = 0, duration = 1.8) => {
-      playPianoAudioNote(ensureAudioContext(), midi, startOffset, duration);
+      playPianoAudioNote(ensureAudioContext(), midi, startOffset, duration, ensureMasterOutput());
     },
-    [ensureAudioContext],
+    [ensureAudioContext, ensureMasterOutput],
   );
 
   const resumeAudio = useCallback(() => {

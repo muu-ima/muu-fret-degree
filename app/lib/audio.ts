@@ -2,6 +2,11 @@ import { frequencyFromMidi } from "./music";
 
 export type MetronomeClickKind = "accent" | "beat" | "subdivision";
 export type MetronomeTone = "classic" | "soft" | "wood";
+type AudioOutputNode = AudioNode;
+
+function connectToOutput(source: AudioNode, output: AudioOutputNode) {
+  source.connect(output);
+}
 
 const metronomeToneProfiles: Record<
   MetronomeTone,
@@ -50,6 +55,7 @@ export function playMetronomeClick(
   kind: MetronomeClickKind,
   tone: MetronomeTone,
   volume = 1,
+  output: AudioOutputNode = context.destination,
 ) {
   const oscillator = context.createOscillator();
   const gain = context.createGain();
@@ -72,7 +78,7 @@ export function playMetronomeClick(
   gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
   oscillator.connect(gain);
-  gain.connect(context.destination);
+  connectToOutput(gain, output);
   oscillator.start(startTime);
   oscillator.stop(end + 0.01);
 }
@@ -82,12 +88,14 @@ export function playBassNote(
   midi: number,
   startOffset = 0,
   duration = 0.85,
+  output: AudioOutputNode = context.destination,
 ) {
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
   const oscillator = context.createOscillator();
   const subOscillator = context.createOscillator();
+  const colorOscillator = context.createOscillator();
   const gain = context.createGain();
   const filter = context.createBiquadFilter();
   const drive = context.createWaveShaper();
@@ -97,30 +105,42 @@ export function playBassNote(
     const x = i / 128 - 1;
     curve[i] = Math.tanh(x * 2.4);
   }
+  drive.curve = curve;
+  drive.oversample = "4x";
 
   oscillator.type = "sawtooth";
   oscillator.frequency.setValueAtTime(frequency, start);
+  oscillator.detune.setValueAtTime(4, start);
+  oscillator.detune.linearRampToValueAtTime(0, start + 0.035);
   subOscillator.type = "sine";
   subOscillator.frequency.setValueAtTime(frequency / 2, start);
+  subOscillator.detune.setValueAtTime(-3, start);
+  subOscillator.detune.linearRampToValueAtTime(0, start + 0.04);
+  colorOscillator.type = "triangle";
+  colorOscillator.frequency.setValueAtTime(frequency * 1.99, start);
+  colorOscillator.detune.setValueAtTime(2, start);
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(880, start);
-  filter.frequency.exponentialRampToValueAtTime(180, end);
-  filter.Q.setValueAtTime(3.5, start);
+  filter.frequency.setValueAtTime(1080, start);
+  filter.frequency.exponentialRampToValueAtTime(220, end);
+  filter.Q.setValueAtTime(3.1, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(0.38, start + 0.025);
-  gain.gain.exponentialRampToValueAtTime(0.18, start + 0.18);
+  gain.gain.exponentialRampToValueAtTime(0.34, start + 0.018);
+  gain.gain.exponentialRampToValueAtTime(0.17, start + 0.16);
   gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
   oscillator.connect(drive);
   subOscillator.connect(drive);
+  colorOscillator.connect(drive);
   drive.connect(filter);
   filter.connect(gain);
-  gain.connect(context.destination);
+  connectToOutput(gain, output);
 
   oscillator.start(start);
   subOscillator.start(start);
+  colorOscillator.start(start);
   oscillator.stop(end + 0.05);
   subOscillator.stop(end + 0.05);
+  colorOscillator.stop(end + 0.05);
 }
 
 export function playPianoNote(
@@ -128,31 +148,35 @@ export function playPianoNote(
   midi: number,
   startOffset = 0,
   duration = 1.8,
+  destination: AudioOutputNode = context.destination,
 ) {
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
-  const output = context.createGain();
+  const mainGain = context.createGain();
   const filter = context.createBiquadFilter();
   const partials = [
-    { ratio: 1, gain: 0.34, type: "triangle" as OscillatorType },
-    { ratio: 2, gain: 0.12, type: "sine" as OscillatorType },
-    { ratio: 3, gain: 0.045, type: "sine" as OscillatorType },
+    { ratio: 1, gain: 0.3, type: "triangle" as OscillatorType, detune: -3 },
+    { ratio: 2, gain: 0.11, type: "sine" as OscillatorType, detune: 4 },
+    { ratio: 3, gain: 0.05, type: "sine" as OscillatorType, detune: -2 },
+    { ratio: 4, gain: 0.018, type: "sine" as OscillatorType, detune: 1 },
   ];
 
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(5200, start);
-  filter.frequency.exponentialRampToValueAtTime(1500, end);
-  output.gain.setValueAtTime(0.0001, start);
-  output.gain.exponentialRampToValueAtTime(0.34, start + 0.012);
-  output.gain.exponentialRampToValueAtTime(0.16, start + 0.12);
-  output.gain.exponentialRampToValueAtTime(0.0001, end);
+  filter.frequency.setValueAtTime(5600, start);
+  filter.frequency.exponentialRampToValueAtTime(1600, end);
+  filter.Q.setValueAtTime(0.9, start);
+  mainGain.gain.setValueAtTime(0.0001, start);
+  mainGain.gain.exponentialRampToValueAtTime(0.36, start + 0.016);
+  mainGain.gain.exponentialRampToValueAtTime(0.18, start + 0.15);
+  mainGain.gain.exponentialRampToValueAtTime(0.0001, end);
 
   partials.forEach((partial) => {
     const oscillator = context.createOscillator();
     const partialGain = context.createGain();
     oscillator.type = partial.type;
     oscillator.frequency.setValueAtTime(frequency * partial.ratio, start);
+    oscillator.detune.setValueAtTime(partial.detune, start);
     partialGain.gain.setValueAtTime(partial.gain, start);
     oscillator.connect(partialGain);
     partialGain.connect(filter);
@@ -160,6 +184,6 @@ export function playPianoNote(
     oscillator.stop(end + 0.05);
   });
 
-  filter.connect(output);
-  output.connect(context.destination);
+  filter.connect(mainGain);
+  connectToOutput(mainGain, destination);
 }
