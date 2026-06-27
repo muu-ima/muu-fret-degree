@@ -12,7 +12,7 @@ type BassSample = {
 const bassSampleCache = new WeakMap<AudioContext, BassSample>();
 const bassSampleDuration = 1.15;
 const bassSampleBaseFrequency = 82.4068892282175;
-const bassSampleAttack = 0.008;
+const bassSampleAttack = 0.02;
 const bassSampleDecay = 0.16;
 const bassSampleRelease = 0.28;
 
@@ -25,12 +25,6 @@ function createBassSample(context: AudioContext): BassSample {
   const length = Math.ceil(sampleRate * bassSampleDuration);
   const buffer = context.createBuffer(1, length, sampleRate);
   const channel = buffer.getChannelData(0);
-  let seed = 1337;
-
-  const noise = () => {
-    seed = (seed * 1664525 + 1013904223) >>> 0;
-    return seed / 4294967296 * 2 - 1;
-  };
 
   for (let i = 0; i < length; i += 1) {
     const time = i / sampleRate;
@@ -45,11 +39,9 @@ function createBassSample(context: AudioContext): BassSample {
     const envelope = decayLevel * releaseLevel;
     const body =
       Math.sin(2 * Math.PI * bassSampleBaseFrequency * time) * 0.78 +
-      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 2 * time) * 0.12 +
-      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 3 * time) * 0.05 +
-      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 4 * time) * 0.02;
-    const transient = Math.exp(-time / 0.02) * noise() * 0.015;
-    channel[i] = (body + transient) * envelope * 0.9;
+      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 2 * time) * 0.06 +
+      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 3 * time) * 0.02;
+    channel[i] = body * envelope * 0.9;
   }
 
   return { buffer, baseFrequency: bassSampleBaseFrequency };
@@ -155,15 +147,21 @@ export function playBassNote(
   const source = context.createBufferSource();
   const gain = context.createGain();
   const filter = context.createBiquadFilter();
+  const attack = Math.min(0.03, Math.max(0.01, duration * 0.3));
+  const release = Math.min(0.14, Math.max(0.06, duration * 0.45));
+  const sustainLevel = duration < 0.2 ? 0.09 : 0.14;
+  const releaseStart = Math.max(start + attack + 0.01, end - release);
+
   source.buffer = sample.buffer;
   source.playbackRate.setValueAtTime(frequency / sample.baseFrequency, start);
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(2600, start);
-  filter.frequency.exponentialRampToValueAtTime(1400, end);
-  filter.Q.setValueAtTime(0.5, start);
+  filter.frequency.setValueAtTime(1500, start);
+  filter.frequency.exponentialRampToValueAtTime(1100, end);
+  filter.Q.setValueAtTime(0.28, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(0.26, start + 0.012);
-  gain.gain.exponentialRampToValueAtTime(0.17, start + 0.16);
+  gain.gain.exponentialRampToValueAtTime(0.18, start + attack);
+  gain.gain.setTargetAtTime(sustainLevel, start + attack, 0.04);
+  gain.gain.linearRampToValueAtTime(0.0001, releaseStart);
   gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
   source.connect(filter);
