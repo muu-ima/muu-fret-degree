@@ -99,6 +99,11 @@ export function ProgressionChordChart({
                       <span className="progressionChartSlash" aria-hidden="true">
                         {eventType === "rest" ? "—" : eventType === "tie" ? "⌒" : "/"}
                       </span>
+                      {hasTripletPulse ? (
+                        <span className="progressionChartTripletLabel" aria-hidden="true">
+                          3連
+                        </span>
+                      ) : null}
                       {eventType === "hit" ? (
                         <span className="progressionChartDuration" aria-hidden="true">
                           {durationLabel}

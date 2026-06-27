@@ -2036,6 +2036,18 @@ select:focus-visible,
   line-height: 1;
 }
 
+.progressionChartTripletLabel {
+  display: block;
+  margin-top: -1px;
+  color: #8fb4ff;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .progressionChartPulseLane {
   position: relative;
   display: grid;
