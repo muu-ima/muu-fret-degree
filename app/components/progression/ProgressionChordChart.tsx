@@ -7,8 +7,10 @@ import {
   getProgressionBeatEventType,
   getProgressionCellForBeat,
   getProgressionRhythmEventAtStep,
+  getProgressionTickRhythmEvents,
   getProgressionSustainingEventAtStep,
   progressionStepsPerBeat,
+  progressionTicksPerBeat,
   type ProgressionBar,
 } from "../../lib/progression";
 
@@ -39,6 +41,7 @@ export function ProgressionChordChart({
       </div>
       <div className="progressionChordChartGrid">
         {bars.map((bar, barIndex) => {
+          const tickRhythmEvents = getProgressionTickRhythmEvents(bar);
           const beatSymbols = [0, 1, 2, 3].map((beatIndex) => {
             const cell = getProgressionCellForBeat(bar, beatIndex);
             return formatChordSymbol(cell.root, cell.chordTypeId, chordTypes);
@@ -63,6 +66,17 @@ export function ProgressionChordChart({
                   const cell = getProgressionCellForBeat(bar, beatIndex);
                   const eventType = getProgressionBeatEventType(bar, beatIndex);
                   const durationSteps = getProgressionBeatDuration(bar, beatIndex);
+                  const beatStartTick = beatIndex * progressionTicksPerBeat;
+                  const beatTickEvents = tickRhythmEvents.filter(
+                    (event) =>
+                      event.startTick >= beatStartTick &&
+                      event.startTick < beatStartTick + progressionTicksPerBeat,
+                  );
+                  const hasTripletPulse = beatTickEvents.some(
+                    (event) =>
+                      event.startTick % 3 !== 0 ||
+                      event.durationTicks % 3 !== 0,
+                  );
                   const durationLabel =
                     durationSteps === 1
                       ? "16"
@@ -77,7 +91,7 @@ export function ProgressionChordChart({
                     <button
                       key={beatIndex}
                       type="button"
-                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${isSelected ? " selected" : ""}`}
+                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${hasTripletPulse ? " triplet" : ""}${isSelected ? " selected" : ""}`}
                       aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : eventType === "tie" ? "Tie" : `Hit, ${durationLabel}`}`}
                       aria-pressed={isSelected}
                       onClick={() => onBeatSelect(barIndex, beatIndex)}
@@ -88,6 +102,28 @@ export function ProgressionChordChart({
                       {eventType === "hit" ? (
                         <span className="progressionChartDuration" aria-hidden="true">
                           {durationLabel}
+                        </span>
+                      ) : null}
+                      {hasTripletPulse ? (
+                        <span className="progressionChartPulseLane" aria-hidden="true">
+                          {[0, 1, 2].map((pulseIndex) => {
+                            const pulseTick = beatStartTick + pulseIndex * 4;
+                            const pulseEvent = beatTickEvents.find((event) => event.startTick === pulseTick);
+                            return (
+                              <span
+                                key={pulseIndex}
+                                className={`progressionChartPulse${pulseEvent ? ` ${pulseEvent.eventType}` : " empty"}`}
+                              >
+                                {pulseEvent
+                                  ? pulseEvent.eventType === "hit"
+                                    ? "●"
+                                    : pulseEvent.eventType === "rest"
+                                      ? "○"
+                                      : "◌"
+                                  : "·"}
+                              </span>
+                            );
+                          })}
                         </span>
                       ) : null}
                       <span className="progressionChartStepLane" aria-hidden="true">

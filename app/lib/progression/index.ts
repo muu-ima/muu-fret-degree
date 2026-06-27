@@ -69,6 +69,7 @@ export {
   getProgressionRhythmEventAtStep,
   getProgressionRhythmEvents,
   getProgressionRhythmPreset,
+  getProgressionTickRhythmEvents,
   getProgressionSustainingEventAtStep,
 } from "./rhythm/queries";
 

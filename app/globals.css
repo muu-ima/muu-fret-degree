@@ -1997,6 +1997,14 @@ select:focus-visible,
   color: #fff;
 }
 
+.progressionChartBeat.triplet {
+  background: linear-gradient(180deg, rgba(86, 122, 181, 0.14), rgba(17, 22, 31, 0));
+}
+
+.progressionChartBeat.triplet.selected {
+  background: linear-gradient(180deg, rgba(122, 167, 255, 0.22), rgba(122, 167, 255, 0.08));
+}
+
 .progressionChartBeat.rest:not(.selected) {
   background: rgba(151, 162, 181, 0.05);
   color: #7f8a9d;
@@ -2026,6 +2034,35 @@ select:focus-visible,
   font-size: 1.35rem;
   font-weight: 500;
   line-height: 1;
+}
+
+.progressionChartPulseLane {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+}
+
+.progressionChartPulse {
+  display: grid;
+  min-height: 10px;
+  place-items: center;
+  color: #5f6d87;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.54rem;
+  line-height: 1;
+}
+
+.progressionChartPulse.hit {
+  color: #8fb4ff;
+}
+
+.progressionChartPulse.rest {
+  color: #6f7b90;
+}
+
+.progressionChartPulse.tie {
+  color: #9eb2da;
 }
 
 .progressionChartStepLane {
