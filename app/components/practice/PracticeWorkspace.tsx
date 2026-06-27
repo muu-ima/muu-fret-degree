@@ -496,6 +496,7 @@ export function PracticeWorkspace() {
       chordOctaves,
     },
   });
+
   const chordMap = useMemo(
     () => makeChordMap(displayedRoot, displayedChordType, chromatic),
     [displayedRoot, displayedChordType, chromatic],
