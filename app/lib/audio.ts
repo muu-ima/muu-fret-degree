@@ -141,6 +141,29 @@ function ensureBassSample(context: AudioContext) {
   return fallbackSample;
 }
 
+export function preloadBassSample(context: AudioContext) {
+  const cached = bassSampleCache.get(context);
+  if (cached?.status === "ready" || cached?.status === "failed") {
+    return Promise.resolve(cached.sample);
+  }
+  if (cached?.status === "loading") {
+    return cached.promise;
+  }
+
+  ensureBassSample(context);
+  const loadingState = bassSampleCache.get(context);
+  return loadingState?.status === "loading"
+    ? loadingState.promise
+    : Promise.resolve(ensureBassSample(context));
+}
+
+function getReadyBassSample(context: AudioContext) {
+  const cached = bassSampleCache.get(context);
+  return cached?.status === "ready" || cached?.status === "failed"
+    ? cached.sample
+    : undefined;
+}
+
 function createPianoSample(context: AudioContext, frequency: number, duration: number) {
   const sampleRate = context.sampleRate;
   const bufferDuration = duration + 0.35;
@@ -287,10 +310,18 @@ export function playBassNote(
   duration = 0.85,
   output: AudioOutputNode = context.destination,
 ) {
+  const readySample = getReadyBassSample(context);
+  if (!readySample) {
+    void preloadBassSample(context).then(() => {
+      playBassNote(context, midi, startOffset, duration, output);
+    });
+    return;
+  }
+
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
-  const sample = ensureBassSample(context);
+  const sample = readySample;
   const playbackDuration = sample.kind === "recorded"
     ? Math.min(duration, recordedBassMaxDuration)
     : duration;

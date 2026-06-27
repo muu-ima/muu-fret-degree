@@ -90,6 +90,7 @@ export function PracticeWorkspace() {
     updateCell: handleProgressionBarCellChange,
   } = useProgressionSession();
   const {
+    bassSampleStatus,
     playBassNote,
     playMetronomeClick,
     playPianoNote,
@@ -753,6 +754,12 @@ export function PracticeWorkspace() {
         </div>
 
         <div className="fretboardCanvasStage">
+          {bassSampleStatus === "loading" ? (
+            <div className="audioSampleLoader" role="status" aria-live="polite">
+              <span className="audioSampleLoaderPulse" aria-hidden="true" />
+              <span>Loading recorded bass</span>
+            </div>
+          ) : null}
           <BassFretboard
             notes={notes}
             tuning={tuning}

@@ -36,6 +36,7 @@ function ProgressionRuntimeProvider({
   const stableAudioOutput = useMemo(
     () => audioOutput,
     [
+      audioOutput.bassSampleStatus,
       audioOutput.playBassNote,
       audioOutput.playMetronomeClick,
       audioOutput.playPianoNote,
