@@ -36,6 +36,23 @@ export function getProgressionRhythmTickEventFromRhythmEvent(
   };
 }
 
+export function getProgressionTickIndex(
+  elapsedSeconds: number,
+  bpm: number,
+  beatUnit: number,
+) {
+  const safeElapsedSeconds = Math.max(0, elapsedSeconds);
+  const safeBpm = Number.isFinite(bpm) && bpm > 0 ? bpm : 0;
+  const safeBeatUnit = Number.isFinite(beatUnit) && beatUnit > 0 ? beatUnit : 0;
+  if (safeBpm === 0 || safeBeatUnit === 0) {
+    return 0;
+  }
+
+  const secondsPerBeat = (60 / safeBpm) * (4 / safeBeatUnit);
+  const secondsPerTick = secondsPerBeat / progressionTicksPerBeat;
+  return Math.floor(safeElapsedSeconds / secondsPerTick);
+}
+
 export function getProgressionTickPosition(
   position: ProgressionPosition,
 ): ProgressionTickPosition {

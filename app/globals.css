@@ -2322,6 +2322,13 @@ select:focus-visible,
   gap: 7px;
 }
 
+.progressionRhythmPresetHint {
+  color: rgba(171, 184, 209, 0.72);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
 .progressionApplyTabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2333,16 +2340,18 @@ select:focus-visible,
 }
 
 .progressionSubdivisionTabs {
-  width: min(100%, 330px);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 360px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .progressionSubdivisionTabs button {
-  min-height: 36px;
-}
-
-.progressionSubdivisionTabs button.wide {
-  grid-column: 1 / -1;
+  min-height: 48px;
+  padding: 7px 8px;
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 3px;
+  text-align: left;
 }
 
 .progressionDurationTabs {
@@ -2367,7 +2376,22 @@ select:focus-visible,
 }
 
 .progressionRhythmPresetSection {
-  width: min(100%, 330px);
+  width: min(100%, 360px);
+}
+
+.progressionPresetLabel {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.1;
+}
+
+.progressionPresetDescription {
+  display: block;
+  color: rgba(171, 184, 209, 0.72);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
 }
 
 .progressionRhythmAccordion {

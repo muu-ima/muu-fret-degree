@@ -29,6 +29,7 @@ export type ProgressionRhythmPresetEvent = {
 export type ProgressionRhythmPresetDefinition = {
   id: ProgressionRhythmPresetId;
   label: string;
+  description: string;
   spanBeats: 1 | 2;
   timingGrid: ProgressionTimingGrid;
   events: readonly ProgressionRhythmPresetEvent[];
@@ -37,14 +38,16 @@ export type ProgressionRhythmPresetDefinition = {
 export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinition[] = [
   {
     id: "quarters",
-    label: "Quarter ×1",
+    label: "4分 ×1",
+    description: "1拍",
     spanBeats: 1,
     timingGrid: "sixteenth",
     events: [{ startUnit: 0, durationUnits: 4, eventType: "hit" }],
   },
   {
     id: "eighths",
-    label: "8ths ×2",
+    label: "8分 ×2",
+    description: "1拍",
     spanBeats: 1,
     timingGrid: "sixteenth",
     events: [
@@ -54,7 +57,8 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
   },
   {
     id: "sixteenths",
-    label: "16ths ×4",
+    label: "16分 ×4",
+    description: "1拍",
     spanBeats: 1,
     timingGrid: "sixteenth",
     events: [
@@ -66,7 +70,8 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
   },
   {
     id: "dotted-quarter-eighth",
-    label: "Dotted 1/4 + 1/8",
+    label: "付点4分 + 8分",
+    description: "2拍",
     spanBeats: 2,
     timingGrid: "sixteenth",
     events: [
@@ -76,7 +81,8 @@ export const progressionRhythmPresets: readonly ProgressionRhythmPresetDefinitio
   },
   {
     id: "triplet-eighths",
-    label: "Triplet 8ths ×3",
+    label: "3連8分 ×3",
+    description: "1拍",
     spanBeats: 1,
     timingGrid: "triplet",
     events: [

@@ -9,12 +9,15 @@ import {
   createProgressionVirtualTimeline,
   getProgressionVirtualRhythmEventAtPosition,
   type ProgressionVirtualTimeline,
-  validateProgressionRhythmPlacementAtTickPosition,
 } from "../rhythm/timeline";
+import { progressionTicksPerBeat } from "../rhythm/timing-grid";
 import {
-  getProgressionPositionFromTickIndex,
   progressionTicksPerStep,
 } from "../rhythm/ticks";
+import {
+  getProgressionTickRhythmEventAtTick,
+  hasProgressionNonStepTickRhythm,
+} from "../rhythm/queries";
 
 function getProgressionBeatEndStep(
   virtualStartStep: number,
@@ -117,22 +120,45 @@ export function getProgressionStepPlaybackRequest(
 export function getProgressionTickPlaybackRequest(
   progression: ChordProgression,
   tickIndex: number,
-  timeline: ProgressionVirtualTimeline = createProgressionVirtualTimeline(progression),
 ) {
-  const position = getProgressionPositionFromTickIndex(tickIndex, progression.timeSignature);
-  if (!position) {
+  const bars = progression.bars;
+  if (bars.length === 0 || !Number.isInteger(tickIndex) || tickIndex < 0) {
     return undefined;
   }
 
-  const tickPlacement = validateProgressionRhythmPlacementAtTickPosition(
-    timeline,
-    position.barIndex,
-    position.stepInBar * progressionTicksPerStep,
-    progressionTicksPerStep,
-  );
-  if (!tickPlacement.canPlace) {
+  const beatsPerBar = Math.max(1, Math.floor(progression.timeSignature.beatsPerBar));
+  const ticksPerBar = beatsPerBar * progressionTicksPerBeat;
+  const ticksPerLoop = bars.length * ticksPerBar;
+  const loopTickIndex = tickIndex % ticksPerLoop;
+  const barIndex = Math.floor(loopTickIndex / ticksPerBar);
+  const tickInBar = loopTickIndex % ticksPerBar;
+  const beatInBar = Math.floor(tickInBar / progressionTicksPerBeat);
+  const currentBar = bars[barIndex];
+
+  if (!currentBar || !hasProgressionNonStepTickRhythm(currentBar)) {
     return undefined;
   }
 
-  return getProgressionStepPlaybackRequest(progression, position, timeline);
+  const rhythmEvent = getProgressionTickRhythmEventAtTick(currentBar, tickInBar);
+  if (!rhythmEvent) {
+    return undefined;
+  }
+
+  const nextBeatInBar = (beatInBar + 1) % beatsPerBar;
+  const nextBarIndex = nextBeatInBar === 0
+    ? (barIndex + 1) % bars.length
+    : barIndex;
+  const secondsPerBeat = (60 / Math.max(1, progression.bpm)) * (4 / Math.max(1, progression.timeSignature.beatUnit));
+  const secondsPerTick = secondsPerBeat / progressionTicksPerBeat;
+
+  return {
+    beatInBar,
+    beatEventType: rhythmEvent.eventType,
+    durationSteps: undefined,
+    durationSeconds: rhythmEvent.durationTicks * secondsPerTick,
+    followingTieBeats: 0,
+    nextRoot: getProgressionCellForBeat(bars[nextBarIndex], nextBeatInBar).root,
+    startStep: Math.floor(tickInBar / progressionTicksPerStep),
+    stepInBeat: Math.floor((tickInBar % progressionTicksPerBeat) / progressionTicksPerStep),
+  };
 }
