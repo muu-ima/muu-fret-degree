@@ -46,7 +46,6 @@ import {
   makeChordMap,
   makeFretNotes,
 } from "../../lib/music";
-import { WorkspaceSkeleton } from "../ui/WorkspaceSkeleton";
 
 type DesktopPanelKey = "controls" | "metronome" | "progression" | "edit";
 type DesktopPanelPosition = { x: number; y: number };
@@ -466,7 +465,7 @@ export function PracticeWorkspace() {
     setChordInversion((currentInversion) => Math.min(currentInversion, chordInversions.length - 1));
   }, [chordInversions]);
 
-  const isPracticeHydrated = usePersistedPracticeSettings({
+  usePersistedPracticeSettings({
     values: {
       root,
       chordTypeId,
@@ -623,7 +622,7 @@ export function PracticeWorkspace() {
     toggleMetronome();
   }
 
-  return isPracticeHydrated ? (
+  return (
     <main className="app">
       <section className="hero">
         <div>
@@ -773,7 +772,5 @@ export function PracticeWorkspace() {
         </div>
       </section>
     </main>
-  ) : (
-    <WorkspaceSkeleton mode="practice" />
   );
 }

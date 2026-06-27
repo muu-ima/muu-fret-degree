@@ -65,6 +65,4 @@ export function usePersistedProgression({
       // Storage can fail in private browsing or when quota is exceeded.
     }
   }, [hasLoadedStoredSettings, progression.bars, progression.timeSignature]);
-
-  return hasLoadedStoredSettings;
 }

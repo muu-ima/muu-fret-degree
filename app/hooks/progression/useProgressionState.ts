@@ -61,7 +61,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     syncBpm(bpm);
   }, [bpm, syncBpm]);
 
-  const isHydrated = usePersistedProgression({
+  usePersistedProgression({
     progression,
     setProgression: hydrateProgression,
     roots,
@@ -190,7 +190,6 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     applyRhythmPreset,
     canRedo: history.future.length > 0,
     canUndo: history.past.length > 0,
-    isHydrated,
     progression,
     redo,
     removeRhythmEvent,
