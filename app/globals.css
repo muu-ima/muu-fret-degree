@@ -2341,7 +2341,7 @@ select:focus-visible,
   min-height: 36px;
 }
 
-.progressionSubdivisionTabs button:last-child {
+.progressionSubdivisionTabs button.wide {
   grid-column: 1 / -1;
 }
 

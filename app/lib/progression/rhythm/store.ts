@@ -4,6 +4,9 @@ import {
   type ProgressionRhythmEvent,
 } from "../model";
 
+const progressionDefaultBeatStartStep = 0;
+const progressionDefaultBeatDurationSteps = progressionStepsPerBeat;
+
 export function removeExplicitProgressionRhythmEvent(
   progression: ChordProgression,
   barIndex: number,
@@ -41,9 +44,9 @@ export function setProgressionRhythmEvent(
   }
 
   const isDefaultBeatEvent =
-    nextEvent.startStep % progressionStepsPerBeat === 0 &&
+    nextEvent.startStep % progressionStepsPerBeat === progressionDefaultBeatStartStep &&
     nextEvent.eventType === "hit" &&
-    nextEvent.durationSteps === progressionStepsPerBeat;
+    nextEvent.durationSteps === progressionDefaultBeatDurationSteps;
   const nextRhythm = [
     ...(currentBar.rhythm?.filter((event) => event.startStep !== nextEvent.startStep) ?? []),
     ...(isDefaultBeatEvent ? [] : [nextEvent]),

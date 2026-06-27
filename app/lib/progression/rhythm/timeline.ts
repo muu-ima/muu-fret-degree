@@ -5,6 +5,7 @@ import {
   type ProgressionRhythmEvent,
 } from "../model";
 import { getProgressionRhythmEvents } from "./queries";
+import { progressionTicksPerStep } from "./ticks";
 
 export const progressionStepsPerBar = progressionStepsPerBeat * 4;
 export const progressionVirtualLoopCount = 2;
@@ -36,6 +37,15 @@ export type ProgressionPlacementValidation =
       conflictingEvent?: ProgressionVirtualRhythmEvent;
       reason: ProgressionPlacementCollisionReason;
     };
+
+export type ProgressionVirtualTickRhythmEvent = {
+  absoluteEndTick: number;
+  absoluteStartTick: number;
+  barIndex: number;
+  event: ProgressionRhythmEvent;
+  isExplicit: boolean;
+  loopIndex: number;
+};
 
 export function createProgressionVirtualTimeline(
   progression: ChordProgression,
@@ -160,6 +170,34 @@ export function validateProgressionRhythmPlacementAtPosition(
   );
 }
 
+export function validateProgressionRhythmPlacementAtTickPosition(
+  timeline: ProgressionVirtualTimeline,
+  barIndex: number,
+  startTick: number,
+  durationTicks: number,
+) {
+  if (
+    !Number.isInteger(startTick) ||
+    !Number.isInteger(durationTicks) ||
+    startTick < 0 ||
+    durationTicks < 0 ||
+    startTick % progressionTicksPerStep !== 0 ||
+    durationTicks % progressionTicksPerStep !== 0
+  ) {
+    return { canPlace: false, reason: "outside-timeline" } as const;
+  }
+
+  const startStep = startTick / progressionTicksPerStep;
+  const durationSteps = (durationTicks / progressionTicksPerStep) as ProgressionDurationSteps;
+
+  return validateProgressionRhythmPlacementAtPosition(
+    timeline,
+    barIndex,
+    startStep,
+    durationSteps,
+  );
+}
+
 export function getProgressionVirtualRhythmEventAtPosition(
   timeline: ProgressionVirtualTimeline,
   barIndex: number,
@@ -180,4 +218,37 @@ export function getProgressionVirtualRhythmEventAtPosition(
   const absoluteStartStep =
     timeline.stepsPerLoop + barIndex * progressionStepsPerBar + startStep;
   return timeline.events.find((event) => event.absoluteStartStep === absoluteStartStep);
+}
+
+export function getProgressionVirtualRhythmEventAtTickPosition(
+  timeline: ProgressionVirtualTimeline,
+  barIndex: number,
+  startTick: number,
+): ProgressionVirtualTickRhythmEvent | undefined {
+  if (
+    !Number.isInteger(barIndex) ||
+    barIndex < 0 ||
+    !Number.isInteger(startTick) ||
+    startTick < 0 ||
+    startTick >= progressionStepsPerBar * progressionTicksPerStep
+  ) {
+    return undefined;
+  }
+
+  const startStep = startTick / progressionTicksPerStep;
+  if (!Number.isInteger(startStep)) {
+    return undefined;
+  }
+
+  const event = getProgressionVirtualRhythmEventAtPosition(timeline, barIndex, startStep);
+  return event
+    ? {
+        absoluteEndTick: event.absoluteEndStep * progressionTicksPerStep,
+        absoluteStartTick: event.absoluteStartStep * progressionTicksPerStep,
+        barIndex: event.barIndex,
+        event: event.event,
+        isExplicit: event.isExplicit,
+        loopIndex: event.loopIndex,
+      }
+    : undefined;
 }

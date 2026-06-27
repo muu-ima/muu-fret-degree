@@ -13,6 +13,25 @@ function normalizeNonNegative(value: number) {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
 
+function getNormalizedProgressionTimeSignature(timeSignature: TimeSignature) {
+  return {
+    beatsPerBar: normalizeNonNegative(timeSignature.beatsPerBar),
+    beatUnit: normalizeNonNegative(timeSignature.beatUnit),
+  };
+}
+
+function createZeroProgressionPosition(elapsedSeconds: number): ProgressionPosition {
+  return {
+    elapsedSeconds,
+    beatIndex: 0,
+    barIndex: 0,
+    beatInBar: 0,
+    stepIndex: 0,
+    stepInBeat: 0,
+    stepInBar: 0,
+  };
+}
+
 export function secondsPerBeat(bpm: number, beatUnit = 4) {
   const normalizedBpm = normalizeNonNegative(bpm);
   const normalizedBeatUnit = normalizeNonNegative(beatUnit);
@@ -25,8 +44,9 @@ export function secondsPerBeat(bpm: number, beatUnit = 4) {
 }
 
 export function secondsPerBar(bpm: number, timeSignature: TimeSignature) {
-  return secondsPerBeat(bpm, timeSignature.beatUnit) *
-    normalizeNonNegative(timeSignature.beatsPerBar);
+  const normalizedTimeSignature = getNormalizedProgressionTimeSignature(timeSignature);
+  return secondsPerBeat(bpm, normalizedTimeSignature.beatUnit) *
+    normalizedTimeSignature.beatsPerBar;
 }
 
 export function getProgressionPosition(
@@ -35,26 +55,19 @@ export function getProgressionPosition(
   timeSignature: TimeSignature,
 ): ProgressionPosition {
   const safeElapsedSeconds = Math.max(0, elapsedSeconds);
-  const beatLength = secondsPerBeat(bpm, timeSignature.beatUnit);
-  const barLength = secondsPerBar(bpm, timeSignature);
+  const normalizedTimeSignature = getNormalizedProgressionTimeSignature(timeSignature);
+  const beatLength = secondsPerBeat(bpm, normalizedTimeSignature.beatUnit);
+  const barLength = secondsPerBar(bpm, normalizedTimeSignature);
 
   if (beatLength === 0 || barLength === 0) {
-    return {
-      elapsedSeconds: safeElapsedSeconds,
-      beatIndex: 0,
-      barIndex: 0,
-      beatInBar: 0,
-      stepIndex: 0,
-      stepInBeat: 0,
-      stepInBar: 0,
-    };
+    return createZeroProgressionPosition(safeElapsedSeconds);
   }
 
   const beatIndex = Math.floor(safeElapsedSeconds / beatLength);
   const barIndex = Math.floor(safeElapsedSeconds / barLength);
   const stepLength = beatLength / progressionStepsPerBeat;
   const stepIndex = Math.floor(safeElapsedSeconds / stepLength);
-  const beatsPerBar = Math.max(1, Math.floor(timeSignature.beatsPerBar));
+  const beatsPerBar = Math.max(1, Math.floor(normalizedTimeSignature.beatsPerBar));
 
   return {
     elapsedSeconds: safeElapsedSeconds,
@@ -85,25 +98,32 @@ export function getCurrentProgressionSelection(
   return getProgressionPlaybackState(progression, elapsedSeconds).selection;
 }
 
-export function getProgressionPlaybackState(
+function getProgressionPlaybackSelection(
   progression: ChordProgression,
-  elapsedSeconds: number,
-): ProgressionPlaybackState {
-  const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
-
+  position: ProgressionPosition,
+): ProgressionSelection | undefined {
   if (progression.bars.length === 0) {
-    return { position };
+    return undefined;
   }
 
   const bar = progression.bars[position.barIndex % progression.bars.length];
   const cellIndex = Math.min(Math.floor(position.beatInBar / 2), bar.cells.length - 1);
 
   return {
+    bar,
+    cell: getProgressionCellForBeat(bar, position.beatInBar),
+    cellIndex,
+  };
+}
+
+export function getProgressionPlaybackState(
+  progression: ChordProgression,
+  elapsedSeconds: number,
+): ProgressionPlaybackState {
+  const position = getProgressionPosition(elapsedSeconds, progression.bpm, progression.timeSignature);
+
+  return {
     position,
-    selection: {
-      bar,
-      cell: getProgressionCellForBeat(bar, position.beatInBar),
-      cellIndex,
-    },
+    selection: getProgressionPlaybackSelection(progression, position),
   };
 }

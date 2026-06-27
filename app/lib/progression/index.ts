@@ -11,11 +11,41 @@ export {
   type ProgressionPlaybackState,
   type ProgressionPosition,
   type ProgressionRhythmEvent,
-  type ProgressionRhythmPreset,
   type ProgressionSelection,
-  type ProgressionSubdivision,
   type TimeSignature,
 } from "./model";
+
+export {
+  getProgressionRhythmPresetDefinition,
+  getProgressionRhythmPresetSpanSteps,
+  getProgressionRhythmPresetSpanUnits,
+  getProgressionRhythmPresetStartBeat,
+  getProgressionRhythmPresetStepEvents,
+  matchesProgressionRhythmPreset,
+  progressionRhythmPresets,
+  type ProgressionRhythmPresetDefinition,
+  type ProgressionRhythmPresetEvent,
+  type ProgressionRhythmPresetId,
+  type ProgressionSubdivision,
+} from "./rhythm/presets";
+
+export {
+  getProgressionSixteenthStepFromTicks,
+  getProgressionTimingBeats,
+  getProgressionTimingGridUnitsPerBeat,
+  getProgressionTimingTicks,
+  progressionTicksPerBeat,
+  type ProgressionTimingGrid,
+} from "./rhythm/timing-grid";
+
+export {
+  getProgressionRhythmTickEventFromPresetEvent,
+  getProgressionRhythmTickEventFromRhythmEvent,
+  getProgressionPositionFromTickIndex,
+  getProgressionSixteenthStepFromTickEvent,
+  progressionTicksPerStep,
+  type ProgressionRhythmTickEvent,
+} from "./rhythm/ticks";
 
 export {
   getProgressionBeat,
@@ -77,12 +107,17 @@ export {
 export {
   createProgressionVirtualTimeline,
   getProgressionVirtualRhythmEventAtPosition,
+  getProgressionVirtualRhythmEventAtTickPosition,
   progressionStepsPerBar,
   progressionVirtualLoopCount,
   validateProgressionRhythmPlacement,
   validateProgressionRhythmPlacementAtPosition,
+  validateProgressionRhythmPlacementAtTickPosition,
   type ProgressionPlacementCollisionReason,
   type ProgressionPlacementValidation,
+  type ProgressionVirtualTickRhythmEvent,
   type ProgressionVirtualRhythmEvent,
   type ProgressionVirtualTimeline,
 } from "./rhythm/timeline";
+
+export { getProgressionTickPlaybackRequest } from "./scheduler";

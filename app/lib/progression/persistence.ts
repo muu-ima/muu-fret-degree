@@ -13,13 +13,21 @@ import type {
   ProgressionRhythmEvent,
   TimeSignature,
 } from "./model";
+import {
+  getProgressionRhythmTickEventFromRhythmEvent,
+  type ProgressionRhythmTickEvent,
+} from "./rhythm/ticks";
 
-export const progressionStorageVersion = 8;
+type PersistedProgressionBar = ProgressionBar & {
+  tickRhythm?: readonly ProgressionRhythmTickEvent[];
+};
+
+export const progressionStorageVersion = 9;
 
 export type PersistedProgressionSettings = {
   version: number;
   timeSignature: TimeSignature;
-  bars: readonly ProgressionBar[];
+  bars: readonly PersistedProgressionBar[];
 };
 
 export type HydratedProgressionSettings = Pick<
@@ -114,6 +122,22 @@ function isProgressionRhythmEvent(value: unknown): value is ProgressionRhythmEve
   );
 }
 
+function isProgressionTickRhythmEvent(
+  value: unknown,
+): value is ProgressionRhythmTickEvent {
+  return (
+    isRecord(value) &&
+    Number.isInteger(value.startTick) &&
+    typeof value.startTick === "number" &&
+    value.startTick >= 0 &&
+    Number.isInteger(value.durationTicks) &&
+    typeof value.durationTicks === "number" &&
+    value.durationTicks > 0 &&
+    isProgressionEventType(value.eventType) &&
+    value.eventType !== undefined
+  );
+}
+
 function isProgressionDuration(value: unknown): value is ProgressionDurationSteps | undefined {
   return value === undefined || value === 1 || value === 2 || value === 3 || value === 4 || value === 6;
 }
@@ -150,6 +174,36 @@ function isTimeSignature(value: unknown): value is TimeSignature {
   );
 }
 
+function isPersistedProgressionBar(
+  value: unknown,
+  roots: string[],
+  chordTypes: ChordType[],
+  allowLegacyBeatRhythm = false,
+): value is PersistedProgressionBar {
+  if (!isProgressionBar(value, roots, chordTypes, allowLegacyBeatRhythm)) {
+    return false;
+  }
+
+  const persistedValue = value as PersistedProgressionBar;
+  return (
+    persistedValue.tickRhythm === undefined ||
+    (Array.isArray(persistedValue.tickRhythm) &&
+      persistedValue.tickRhythm.every(isProgressionTickRhythmEvent))
+  );
+}
+
+function getPersistedProgressionBar(bar: ProgressionBar): PersistedProgressionBar {
+  const persistedBar = bar as PersistedProgressionBar;
+  const tickRhythm =
+    persistedBar.tickRhythm ??
+    bar.rhythm?.map(getProgressionRhythmTickEventFromRhythmEvent);
+
+  return {
+    ...bar,
+    ...(tickRhythm && tickRhythm.length > 0 ? { tickRhythm } : {}),
+  };
+}
+
 export function decodePersistedProgressionSettings(
   value: unknown,
   roots: string[],
@@ -160,9 +214,11 @@ export function decodePersistedProgressionSettings(
   }
 
   const currentBars =
-    (value.version === progressionStorageVersion || value.version === 7) &&
+    (value.version === progressionStorageVersion ||
+      value.version === 8 ||
+      value.version === 7) &&
     Array.isArray(value.bars) &&
-    value.bars.every((bar) => isProgressionBar(bar, roots, chordTypes))
+    value.bars.every((bar) => isPersistedProgressionBar(bar, roots, chordTypes))
       ? value.bars
       : null;
   const compatibleBars =
@@ -170,7 +226,7 @@ export function decodePersistedProgressionSettings(
     value.version >= 2 &&
     value.version <= 6 &&
     Array.isArray(value.bars) &&
-    value.bars.every((bar) => isProgressionBar(bar, roots, chordTypes, true))
+    value.bars.every((bar) => isPersistedProgressionBar(bar, roots, chordTypes, true))
       ? migrateBeatRhythmToEvents(value.bars)
       : null;
   const legacyBars =
@@ -205,6 +261,6 @@ export function createPersistedProgressionSettings(
   return {
     version: progressionStorageVersion,
     timeSignature,
-    bars,
+    bars: bars.map(getPersistedProgressionBar),
   };
 }

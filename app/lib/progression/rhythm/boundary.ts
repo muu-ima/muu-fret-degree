@@ -7,10 +7,19 @@ import {
   setProgressionRhythmEvent,
 } from "./store";
 
+const progressionCrossBarDottedQuarterStartStep = 12;
+const progressionCrossBarDottedQuarterDurationSteps = 6;
+const progressionBeatStartStep = 0;
+const progressionBeatDurationSteps = 4;
+
 export function isCrossBarDottedQuarter(
   event: ProgressionRhythmEvent | undefined,
 ) {
-  return event?.startStep === 12 && event.eventType === "hit" && event.durationSteps === 6;
+  return (
+    event?.startStep === progressionCrossBarDottedQuarterStartStep &&
+    event.eventType === "hit" &&
+    event.durationSteps === progressionCrossBarDottedQuarterDurationSteps
+  );
 }
 
 export function addProgressionCrossBarTie(
@@ -23,8 +32,8 @@ export function addProgressionCrossBarTie(
 
   const nextBarIndex = (sourceBarIndex + 1) % progression.bars.length;
   return setProgressionRhythmEvent(progression, nextBarIndex, {
-    startStep: 0,
-    durationSteps: 4,
+    startStep: progressionBeatStartStep,
+    durationSteps: progressionBeatDurationSteps,
     eventType: "tie",
   });
 }
@@ -57,7 +66,7 @@ export function shortenProgressionCrossBarSource(
   return crossingSource
     ? setProgressionRhythmEvent(progression, previousBarIndex, {
         ...crossingSource,
-        durationSteps: 4,
+        durationSteps: progressionBeatDurationSteps,
       })
     : progression;
 }

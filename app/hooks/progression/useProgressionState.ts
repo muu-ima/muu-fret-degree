@@ -29,7 +29,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionCell,
   type ProgressionDurationSteps,
-  type ProgressionRhythmPreset,
+  type ProgressionRhythmPresetId,
 } from "../../lib/progression";
 import { usePersistedProgression } from "./usePersistedProgression";
 
@@ -168,7 +168,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
   );
 
   const applyRhythmPreset = useCallback(
-    (barIndex: number, beatIndex: number, preset: ProgressionRhythmPreset) => {
+    (barIndex: number, beatIndex: number, preset: ProgressionRhythmPresetId) => {
       dispatch({
         type: "commit",
         update: (currentProgression) =>

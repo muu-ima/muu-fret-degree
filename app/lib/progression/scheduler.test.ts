@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
   createDefaultProgression,
+  createProgressionVirtualTimeline,
   getProgressionPosition,
   updateProgressionBeatEventType,
   updateProgressionBeatDuration,
   updateProgressionRhythmEvent,
+  validateProgressionRhythmPlacementAtTickPosition,
 } from ".";
-import { getProgressionStepPlaybackRequest } from "./scheduler";
+import {
+  getProgressionStepPlaybackRequest,
+  getProgressionTickPlaybackRequest,
+} from "./scheduler";
 
 function positionAtStep(step: number) {
   return getProgressionPosition(step * 0.125, 120, {
@@ -20,6 +25,19 @@ describe("progression step scheduling", () => {
     const progression = createDefaultProgression(120);
 
     expect(getProgressionStepPlaybackRequest(progression, positionAtStep(1))).toBeUndefined();
+  });
+
+  it("maps tick playback requests onto the existing step scheduler", () => {
+    const progression = createDefaultProgression(120);
+    const timeline = createProgressionVirtualTimeline(progression);
+
+    expect(validateProgressionRhythmPlacementAtTickPosition(timeline, 0, 0, 3)).toEqual({
+      canPlace: true,
+    });
+    expect(getProgressionTickPlaybackRequest(progression, 0)).toMatchObject({
+      startStep: 0,
+      stepInBeat: 0,
+    });
   });
 
   it("returns each explicit sixteenth-note hit in one beat", () => {
