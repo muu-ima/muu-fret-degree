@@ -86,7 +86,7 @@ export {
 export {
   resizeProgressionBars,
   updateProgressionBarCount,
-} from "./structure";
+} from "./state/structure";
 
 export {
   createPersistedProgressionSettings,
