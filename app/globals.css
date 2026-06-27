@@ -119,19 +119,16 @@ input {
 
 .workspaceSkeletonGrid {
   grid-template-columns: minmax(0, 1fr) minmax(260px, 340px) minmax(260px, 340px);
-  grid-template-areas:
-    "panel-a panel-b panel-c"
-    "board board board"
-    "footer footer footer";
+  align-items: start;
 }
 
 .workspaceSkeletonEditor {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.workspaceSkeletonCard,
 .workspaceSkeletonStack,
 .workspaceSkeletonBoard,
-.workspaceSkeletonFooter,
 .workspaceSkeletonEditorHero,
 .workspaceSkeletonEditorMain {
   border: 1px solid rgba(154, 171, 196, 0.14);
@@ -143,17 +140,41 @@ input {
   backdrop-filter: blur(14px);
 }
 
-.workspaceSkeletonStack {
+.workspaceSkeletonCard {
   padding: 14px;
 }
 
+.workspaceSkeletonControls,
+.workspaceSkeletonMetronome,
+.workspaceSkeletonProgression {
+  min-height: 100%;
+}
+
+.workspaceSkeletonControls {
+  grid-column: 1;
+}
+
+.workspaceSkeletonMetronome {
+  grid-column: 2;
+}
+
+.workspaceSkeletonProgression {
+  grid-column: 3;
+}
+
 .workspaceSkeletonBoard {
+  grid-column: 1 / -1;
   display: grid;
   gap: 12px;
   padding: 14px;
 }
 
-.workspaceSkeletonFooter {
+.workspaceSkeletonDegreeStrip {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
   padding: 14px;
 }
 
@@ -161,10 +182,11 @@ input {
   padding: 14px;
 }
 
-.workspaceSkeletonEditorGrid {
+.workspaceSkeletonEditorShell {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(290px, 0.8fr);
   gap: 14px;
+  width: 100%;
 }
 
 .workspaceSkeletonEditorMain {
@@ -191,6 +213,201 @@ input {
 .workspaceSkeletonPanelBody {
   display: grid;
   gap: 10px;
+}
+
+.workspaceSkeletonCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.workspaceSkeletonCardHeading {
+  display: grid;
+  gap: 8px;
+}
+
+.workspaceSkeletonSplitGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.workspaceSkeletonFieldColumn {
+  display: grid;
+  gap: 10px;
+}
+
+.workspaceSkeletonFieldLabel,
+.workspaceSkeletonBlock.fieldLabel {
+  width: 88px;
+  height: 12px;
+}
+
+.workspaceSkeletonFieldSelect,
+.workspaceSkeletonBlock.fieldSelect {
+  width: 100%;
+  height: 40px;
+  border-radius: 14px;
+}
+
+.workspaceSkeletonTabGrid {
+  display: grid;
+  gap: 6px;
+}
+
+.workspaceSkeletonTabGrid.wide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.workspaceSkeletonTabGrid.narrow {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workspaceSkeletonBlock.tab {
+  height: 34px;
+  border-radius: 12px;
+}
+
+.workspaceSkeletonBlock.tab.narrow {
+  height: 36px;
+}
+
+.workspaceSkeletonBlock.tab.wide {
+  height: 32px;
+}
+
+.workspaceSkeletonBlock.tab.active {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(122, 167, 255, 0.16), rgba(255, 255, 255, 0.05));
+}
+
+.workspaceSkeletonBlock.toggleRow {
+  width: 100%;
+  height: 42px;
+  border-radius: 14px;
+}
+
+.workspaceSkeletonBlock.chipWide {
+  width: 104px;
+}
+
+.workspaceSkeletonPlaybackBlock {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.workspaceSkeletonButtonRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.workspaceSkeletonBlock.actionButton {
+  width: 104px;
+  height: 40px;
+  border-radius: 999px;
+}
+
+.workspaceSkeletonBlock.actionButton.primary {
+  width: 122px;
+}
+
+.workspaceSkeletonMetronomeReadout {
+  display: grid;
+  gap: 8px;
+}
+
+.workspaceSkeletonBlock.meterValue {
+  width: 84px;
+  height: 48px;
+  border-radius: 18px;
+}
+
+.workspaceSkeletonBlock.meterHint {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.workspaceSkeletonBeatRow {
+  display: flex;
+  gap: 8px;
+}
+
+.workspaceSkeletonBlock.beatDot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.workspaceSkeletonStepperRow {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  gap: 8px;
+}
+
+.workspaceSkeletonBlock.tempoStepButton {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.workspaceSkeletonBlock.tempoInput {
+  width: 100%;
+  height: 40px;
+  border-radius: 14px;
+}
+
+.workspaceSkeletonPresetGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.workspaceSkeletonBlock.presetTile {
+  min-height: 56px;
+  border-radius: 14px;
+}
+
+.workspaceSkeletonBlock.progressReadout {
+  width: 100%;
+  height: 72px;
+  border-radius: 18px;
+}
+
+.workspaceSkeletonBlock.degreeChip {
+  flex: 1 1 90px;
+  min-width: 90px;
+  height: 38px;
+  border-radius: 999px;
+}
+
+.workspaceSkeletonEditorToolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.workspaceSkeletonBlock.editorToolbarLabel {
+  width: 82px;
+  height: 18px;
+}
+
+.workspaceSkeletonBlock.editorToolbarActions {
+  width: 160px;
+  height: 18px;
+}
+
+.workspaceSkeletonBlock.editorSelectionLine {
+  width: 100%;
+  height: 18px;
+}
+
+.workspaceSkeletonBlock.editorSelectionLine.short {
+  width: 72%;
 }
 
 .workspaceSkeletonBoardHeader {
@@ -424,6 +641,76 @@ input {
   line-height: 1.5;
 }
 
+.progressionRouteLoadingCard {
+  gap: 18px;
+}
+
+.progressionRouteLoadingHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.progressionRouteLoadingText {
+  display: grid;
+  gap: 10px;
+}
+
+.progressionRouteLoadingText h1 {
+  margin: 0;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  line-height: 1.1;
+}
+
+.progressionRouteLoadingActions {
+  display: flex;
+  gap: 8px;
+}
+
+.progressionRouteLoadingActions span {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(122, 167, 255, 0.12), rgba(255, 255, 255, 0.04));
+  background-size: 180% 100%;
+  animation: workspaceSkeletonShimmer 1.4s ease-in-out infinite;
+}
+
+.progressionRouteLoadingLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: 16px;
+}
+
+.progressionRouteLoadingCanvas,
+.progressionRouteLoadingCardBlock {
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent),
+    rgba(17, 23, 33, 0.78);
+  border: 1px solid rgba(154, 171, 196, 0.14);
+  box-shadow: var(--glass-shadow-soft);
+  backdrop-filter: blur(14px);
+  background-size: 180% 100%;
+  animation: workspaceSkeletonShimmer 1.4s ease-in-out infinite;
+}
+
+.progressionRouteLoadingCanvas {
+  min-height: 340px;
+}
+
+.progressionRouteLoadingSide {
+  display: grid;
+  gap: 14px;
+}
+
+.progressionRouteLoadingCardBlock {
+  min-height: 120px;
+}
+
 .routeLoadingBar {
   position: relative;
   overflow: hidden;
@@ -448,6 +735,46 @@ input {
 
   .routeLoadingBar span {
     animation: none;
+  }
+
+  .progressionRouteLoadingActions span,
+  .progressionRouteLoadingCanvas,
+  .progressionRouteLoadingCardBlock {
+    animation: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .workspaceSkeletonControls,
+  .workspaceSkeletonMetronome,
+  .workspaceSkeletonProgression,
+  .workspaceSkeletonBoard,
+  .workspaceSkeletonDegreeStrip {
+    grid-column: 1 / -1;
+  }
+
+  .workspaceSkeletonEditorShell {
+    grid-template-columns: 1fr;
+  }
+
+  .progressionRouteLoadingLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .workspaceSkeletonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .workspaceSkeletonSplitGrid,
+  .workspaceSkeletonPresetGrid,
+  .workspaceSkeletonStepperRow {
+    grid-template-columns: 1fr;
+  }
+
+  .workspaceSkeletonTabGrid.wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
