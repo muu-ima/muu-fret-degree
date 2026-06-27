@@ -52,7 +52,7 @@ export function useAudioOutput() {
   );
 
   const playPianoNote = useCallback(
-    (midi: number, startOffset = 0, duration = 1.8) => {
+    (midi: number, startOffset = 0, duration = 3.2) => {
       playPianoAudioNote(ensureAudioContext(), midi, startOffset, duration, ensureMasterOutput());
     },
     [ensureAudioContext, ensureMasterOutput],

@@ -9,23 +9,21 @@ type BassSample = {
   baseFrequency: number;
 };
 
-type PianoSample = {
-  buffer: AudioBuffer;
-  baseFrequency: number;
+type PianoReverb = {
+  convolver: ConvolverNode;
+  dryGain: GainNode;
+  wetGain: GainNode;
 };
 
 const bassSampleCache = new WeakMap<AudioContext, BassSample>();
-const pianoSampleCache = new WeakMap<AudioContext, PianoSample>();
+const pianoReverbCache = new WeakMap<AudioContext, PianoReverb>();
 const bassSampleDuration = 1.15;
 const bassSampleBaseFrequency = 82.4068892282175;
 const bassSampleAttack = 0.02;
 const bassSampleDecay = 0.16;
 const bassSampleRelease = 0.28;
-const pianoSampleDuration = 2.45;
-const pianoSampleBaseFrequency = 110;
 const pianoSampleAttack = 0.012;
-const pianoSampleDecay = 0.26;
-const pianoSampleRelease = 0.7;
+const pianoReverbDuration = 1.35;
 
 function connectToOutput(source: AudioNode, output: AudioOutputNode) {
   source.connect(output);
@@ -69,46 +67,68 @@ function ensureBassSample(context: AudioContext) {
   return sample;
 }
 
-function createPianoSample(context: AudioContext): PianoSample {
+function createPianoSample(context: AudioContext, frequency: number, duration: number) {
   const sampleRate = context.sampleRate;
-  const length = Math.ceil(sampleRate * pianoSampleDuration);
+  const bufferDuration = duration + 0.35;
+  const length = Math.ceil(sampleRate * bufferDuration);
   const buffer = context.createBuffer(1, length, sampleRate);
   const channel = buffer.getChannelData(0);
 
   for (let i = 0; i < length; i += 1) {
     const time = i / sampleRate;
     const attackLevel = Math.min(1, time / pianoSampleAttack);
-    const decayLevel = time < pianoSampleAttack
-      ? attackLevel
-      : Math.exp(-(time - pianoSampleAttack) / pianoSampleDecay);
-    const releaseStart = pianoSampleDuration - pianoSampleRelease;
-    const releaseLevel = time > releaseStart
-      ? Math.exp(-(time - releaseStart) / pianoSampleRelease)
-      : 1;
-    const envelope = decayLevel * releaseLevel;
+    const bodyLevel = 0.72 * Math.exp(-time / 5.2) + 0.28 * Math.exp(-time / 1.4);
+    const envelope = attackLevel * bodyLevel;
     const strike = Math.exp(-time / 0.018);
     const body =
-      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * time) * 0.52 +
-      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 2 * time) * 0.28 +
-      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 3 * time) * 0.12 +
-      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 4 * time) * 0.05 +
-      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 5 * time) * 0.02;
+      Math.sin(2 * Math.PI * frequency * time) * 0.52 +
+      Math.sin(2 * Math.PI * frequency * 2 * time) * 0.28 +
+      Math.sin(2 * Math.PI * frequency * 3 * time) * 0.12 +
+      Math.sin(2 * Math.PI * frequency * 4 * time) * 0.05 +
+      Math.sin(2 * Math.PI * frequency * 5 * time) * 0.02;
     const brightness = 1 - Math.min(1, time / 0.22) * 0.38;
     channel[i] = body * envelope * brightness + strike * envelope * 0.018;
   }
 
-  return { buffer, baseFrequency: pianoSampleBaseFrequency };
+  return buffer;
 }
 
-function ensurePianoSample(context: AudioContext) {
-  const cached = pianoSampleCache.get(context);
+function createPianoReverb(context: AudioContext): PianoReverb {
+  const convolver = context.createConvolver();
+  const impulseLength = Math.ceil(context.sampleRate * pianoReverbDuration);
+  const impulse = context.createBuffer(2, impulseLength, context.sampleRate);
+
+  for (let channelIndex = 0; channelIndex < impulse.numberOfChannels; channelIndex += 1) {
+    const channel = impulse.getChannelData(channelIndex);
+    for (let i = 0; i < impulseLength; i += 1) {
+      const time = i / context.sampleRate;
+      const decay = Math.exp(-time / 0.24);
+      const shimmer = Math.sin(2 * Math.PI * (260 + channelIndex * 17) * time) * 0.08;
+      const tail = (Math.random() * 2 - 1) * 0.06;
+      channel[i] = (shimmer + tail) * decay;
+    }
+  }
+
+  convolver.buffer = impulse;
+
+  const dryGain = context.createGain();
+  dryGain.gain.setValueAtTime(0.84, context.currentTime);
+
+  const wetGain = context.createGain();
+  wetGain.gain.setValueAtTime(0.16, context.currentTime);
+
+  return { convolver, dryGain, wetGain };
+}
+
+function ensurePianoReverb(context: AudioContext) {
+  const cached = pianoReverbCache.get(context);
   if (cached) {
     return cached;
   }
 
-  const sample = createPianoSample(context);
-  pianoSampleCache.set(context, sample);
-  return sample;
+  const reverb = createPianoReverb(context);
+  pianoReverbCache.set(context, reverb);
+  return reverb;
 }
 
 const metronomeToneProfiles: Record<
@@ -229,37 +249,40 @@ export function playPianoNote(
   context: AudioContext,
   midi: number,
   startOffset = 0,
-  duration = 1.8,
+  duration = 3.2,
   destination: AudioOutputNode = context.destination,
 ) {
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
-  const sample = ensurePianoSample(context);
+  const reverb = ensurePianoReverb(context);
   const source = context.createBufferSource();
   const mainGain = context.createGain();
   const filter = context.createBiquadFilter();
   const attack = Math.min(0.04, Math.max(0.012, duration * 0.16));
-  const release = Math.min(0.24, Math.max(0.08, duration * 0.2));
-  const sustainLevel = duration < 0.4 ? 0.14 : 0.2;
+  const release = Math.min(0.42, Math.max(0.14, duration * 0.18));
+  const sustainLevel = duration < 0.4 ? 0.14 : 0.24;
   const releaseStart = Math.max(start + attack + 0.03, end - release);
 
-  source.buffer = sample.buffer;
-  source.playbackRate.setValueAtTime(frequency / sample.baseFrequency, start);
+  source.buffer = createPianoSample(context, frequency, duration);
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(3600, start);
-  filter.frequency.exponentialRampToValueAtTime(2100, end);
+  filter.frequency.setValueAtTime(3900, start);
+  filter.frequency.exponentialRampToValueAtTime(1900, end);
   filter.Q.setValueAtTime(0.5, start);
   mainGain.gain.setValueAtTime(0.0001, start);
-  mainGain.gain.exponentialRampToValueAtTime(0.24, start + attack);
-  mainGain.gain.setTargetAtTime(sustainLevel, start + attack, 0.08);
+  mainGain.gain.exponentialRampToValueAtTime(0.26, start + attack);
+  mainGain.gain.setTargetAtTime(sustainLevel, start + attack, 0.14);
   mainGain.gain.linearRampToValueAtTime(0.0001, releaseStart);
   mainGain.gain.exponentialRampToValueAtTime(0.0001, end);
 
   source.connect(filter);
   filter.connect(mainGain);
-  connectToOutput(mainGain, destination);
+  mainGain.connect(reverb.dryGain);
+  mainGain.connect(reverb.convolver);
+  reverb.convolver.connect(reverb.wetGain);
+  reverb.dryGain.connect(destination);
+  reverb.wetGain.connect(destination);
 
   source.start(start);
-  source.stop(end + 0.15);
+  source.stop(end + 0.35);
 }

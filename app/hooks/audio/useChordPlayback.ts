@@ -118,7 +118,7 @@ export function useChordPlayback({
   const playStack = useCallback(() => {
     resumeAudio();
     makeTrebleChordMidi(root, chordType, chordOctaveMidi, chordInversion).forEach((midi, index) => {
-      playPianoNote(midi, index * 0.012, 1.9);
+      playPianoNote(midi, index * 0.012, 1.0);
     });
   }, [chordInversion, chordOctaveMidi, chordType, playPianoNote, resumeAudio, root]);
 
