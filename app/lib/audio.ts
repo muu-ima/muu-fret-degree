@@ -4,8 +4,66 @@ export type MetronomeClickKind = "accent" | "beat" | "subdivision";
 export type MetronomeTone = "classic" | "soft" | "wood";
 type AudioOutputNode = AudioNode;
 
+type BassSample = {
+  buffer: AudioBuffer;
+  baseFrequency: number;
+};
+
+const bassSampleCache = new WeakMap<AudioContext, BassSample>();
+const bassSampleDuration = 1.15;
+const bassSampleBaseFrequency = 82.4068892282175;
+const bassSampleAttack = 0.008;
+const bassSampleDecay = 0.16;
+const bassSampleRelease = 0.28;
+
 function connectToOutput(source: AudioNode, output: AudioOutputNode) {
   source.connect(output);
+}
+
+function createBassSample(context: AudioContext): BassSample {
+  const sampleRate = context.sampleRate;
+  const length = Math.ceil(sampleRate * bassSampleDuration);
+  const buffer = context.createBuffer(1, length, sampleRate);
+  const channel = buffer.getChannelData(0);
+  let seed = 1337;
+
+  const noise = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296 * 2 - 1;
+  };
+
+  for (let i = 0; i < length; i += 1) {
+    const time = i / sampleRate;
+    const attackLevel = Math.min(1, time / bassSampleAttack);
+    const decayLevel = time < bassSampleAttack
+      ? attackLevel
+      : Math.exp(-(time - bassSampleAttack) / bassSampleDecay);
+    const releaseStart = bassSampleDuration - bassSampleRelease;
+    const releaseLevel = time > releaseStart
+      ? Math.exp(-(time - releaseStart) / bassSampleRelease)
+      : 1;
+    const envelope = decayLevel * releaseLevel;
+    const body =
+      Math.sin(2 * Math.PI * bassSampleBaseFrequency * time) * 0.78 +
+      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 2 * time) * 0.12 +
+      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 3 * time) * 0.05 +
+      Math.sin(2 * Math.PI * bassSampleBaseFrequency * 4 * time) * 0.02;
+    const transient = Math.exp(-time / 0.02) * noise() * 0.015;
+    channel[i] = (body + transient) * envelope * 0.9;
+  }
+
+  return { buffer, baseFrequency: bassSampleBaseFrequency };
+}
+
+function ensureBassSample(context: AudioContext) {
+  const cached = bassSampleCache.get(context);
+  if (cached) {
+    return cached;
+  }
+
+  const sample = createBassSample(context);
+  bassSampleCache.set(context, sample);
+  return sample;
 }
 
 const metronomeToneProfiles: Record<
@@ -93,38 +151,27 @@ export function playBassNote(
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
-  const oscillator = context.createOscillator();
-  const subOscillator = context.createOscillator();
-  const mainGain = context.createGain();
-  const subGain = context.createGain();
+  const sample = ensureBassSample(context);
+  const source = context.createBufferSource();
   const gain = context.createGain();
   const filter = context.createBiquadFilter();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(frequency, start);
-  subOscillator.type = "sine";
-  subOscillator.frequency.setValueAtTime(frequency / 2, start);
+  source.buffer = sample.buffer;
+  source.playbackRate.setValueAtTime(frequency / sample.baseFrequency, start);
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(520, start);
-  filter.frequency.exponentialRampToValueAtTime(170, end);
-  filter.Q.setValueAtTime(0.35, start);
-  mainGain.gain.setValueAtTime(0.7, start);
-  subGain.gain.setValueAtTime(0.5, start);
+  filter.frequency.setValueAtTime(2600, start);
+  filter.frequency.exponentialRampToValueAtTime(1400, end);
+  filter.Q.setValueAtTime(0.5, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(0.24, start + 0.03);
-  gain.gain.exponentialRampToValueAtTime(0.13, start + 0.22);
+  gain.gain.exponentialRampToValueAtTime(0.26, start + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.17, start + 0.16);
   gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
-  oscillator.connect(mainGain);
-  subOscillator.connect(subGain);
-  mainGain.connect(filter);
-  subGain.connect(filter);
+  source.connect(filter);
   filter.connect(gain);
   connectToOutput(gain, output);
 
-  oscillator.start(start);
-  subOscillator.start(start);
-  oscillator.stop(end + 0.05);
-  subOscillator.stop(end + 0.05);
+  source.start(start);
+  source.stop(end + 0.1);
 }
 
 export function playPianoNote(
