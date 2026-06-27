@@ -9,12 +9,23 @@ type BassSample = {
   baseFrequency: number;
 };
 
+type PianoSample = {
+  buffer: AudioBuffer;
+  baseFrequency: number;
+};
+
 const bassSampleCache = new WeakMap<AudioContext, BassSample>();
+const pianoSampleCache = new WeakMap<AudioContext, PianoSample>();
 const bassSampleDuration = 1.15;
 const bassSampleBaseFrequency = 82.4068892282175;
 const bassSampleAttack = 0.02;
 const bassSampleDecay = 0.16;
 const bassSampleRelease = 0.28;
+const pianoSampleDuration = 2.45;
+const pianoSampleBaseFrequency = 110;
+const pianoSampleAttack = 0.012;
+const pianoSampleDecay = 0.26;
+const pianoSampleRelease = 0.7;
 
 function connectToOutput(source: AudioNode, output: AudioOutputNode) {
   source.connect(output);
@@ -55,6 +66,48 @@ function ensureBassSample(context: AudioContext) {
 
   const sample = createBassSample(context);
   bassSampleCache.set(context, sample);
+  return sample;
+}
+
+function createPianoSample(context: AudioContext): PianoSample {
+  const sampleRate = context.sampleRate;
+  const length = Math.ceil(sampleRate * pianoSampleDuration);
+  const buffer = context.createBuffer(1, length, sampleRate);
+  const channel = buffer.getChannelData(0);
+
+  for (let i = 0; i < length; i += 1) {
+    const time = i / sampleRate;
+    const attackLevel = Math.min(1, time / pianoSampleAttack);
+    const decayLevel = time < pianoSampleAttack
+      ? attackLevel
+      : Math.exp(-(time - pianoSampleAttack) / pianoSampleDecay);
+    const releaseStart = pianoSampleDuration - pianoSampleRelease;
+    const releaseLevel = time > releaseStart
+      ? Math.exp(-(time - releaseStart) / pianoSampleRelease)
+      : 1;
+    const envelope = decayLevel * releaseLevel;
+    const strike = Math.exp(-time / 0.018);
+    const body =
+      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * time) * 0.52 +
+      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 2 * time) * 0.28 +
+      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 3 * time) * 0.12 +
+      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 4 * time) * 0.05 +
+      Math.sin(2 * Math.PI * pianoSampleBaseFrequency * 5 * time) * 0.02;
+    const brightness = 1 - Math.min(1, time / 0.22) * 0.38;
+    channel[i] = body * envelope * brightness + strike * envelope * 0.018;
+  }
+
+  return { buffer, baseFrequency: pianoSampleBaseFrequency };
+}
+
+function ensurePianoSample(context: AudioContext) {
+  const cached = pianoSampleCache.get(context);
+  if (cached) {
+    return cached;
+  }
+
+  const sample = createPianoSample(context);
+  pianoSampleCache.set(context, sample);
   return sample;
 }
 
@@ -182,36 +235,31 @@ export function playPianoNote(
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
+  const sample = ensurePianoSample(context);
+  const source = context.createBufferSource();
   const mainGain = context.createGain();
   const filter = context.createBiquadFilter();
-  const partials = [
-    { ratio: 1, gain: 0.26, type: "triangle" as OscillatorType, detune: -2 },
-    { ratio: 2, gain: 0.085, type: "sine" as OscillatorType, detune: 2 },
-    { ratio: 3, gain: 0.03, type: "sine" as OscillatorType, detune: -1 },
-  ];
+  const attack = Math.min(0.04, Math.max(0.012, duration * 0.16));
+  const release = Math.min(0.24, Math.max(0.08, duration * 0.2));
+  const sustainLevel = duration < 0.4 ? 0.14 : 0.2;
+  const releaseStart = Math.max(start + attack + 0.03, end - release);
 
+  source.buffer = sample.buffer;
+  source.playbackRate.setValueAtTime(frequency / sample.baseFrequency, start);
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(4200, start);
-  filter.frequency.exponentialRampToValueAtTime(1700, end);
-  filter.Q.setValueAtTime(0.6, start);
+  filter.frequency.setValueAtTime(3600, start);
+  filter.frequency.exponentialRampToValueAtTime(2100, end);
+  filter.Q.setValueAtTime(0.5, start);
   mainGain.gain.setValueAtTime(0.0001, start);
-  mainGain.gain.exponentialRampToValueAtTime(0.3, start + 0.024);
-  mainGain.gain.exponentialRampToValueAtTime(0.15, start + 0.18);
+  mainGain.gain.exponentialRampToValueAtTime(0.24, start + attack);
+  mainGain.gain.setTargetAtTime(sustainLevel, start + attack, 0.08);
+  mainGain.gain.linearRampToValueAtTime(0.0001, releaseStart);
   mainGain.gain.exponentialRampToValueAtTime(0.0001, end);
 
-  partials.forEach((partial) => {
-    const oscillator = context.createOscillator();
-    const partialGain = context.createGain();
-    oscillator.type = partial.type;
-    oscillator.frequency.setValueAtTime(frequency * partial.ratio, start);
-    oscillator.detune.setValueAtTime(partial.detune, start);
-    partialGain.gain.setValueAtTime(partial.gain, start);
-    oscillator.connect(partialGain);
-    partialGain.connect(filter);
-    oscillator.start(start);
-    oscillator.stop(end + 0.05);
-  });
-
+  source.connect(filter);
   filter.connect(mainGain);
   connectToOutput(mainGain, destination);
+
+  source.start(start);
+  source.stop(end + 0.15);
 }
