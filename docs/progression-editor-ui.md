@@ -56,6 +56,18 @@ type ProgressionBar = {
 
 Tieは直前に有効なHitがある場合だけ選択できる。Tie元のHitをRestへ変更した場合は、音のないTieを残さないため、連続する後続TieもRestへ変更する。
 
+## Timing Model
+
+この進行エディターでは、時間表現を `step` と `tick` に分けて扱う。
+
+- `step` は既存の16分ベース保存や表示に使う。
+- `tick` は 1拍を 12tick として扱う内部の細かい共通単位に使う。
+- 16分系は 3tick 刻み、3連系は 4tick 刻みで表現する。
+- 既存の `step` だけで表せる preset は従来どおり `step` で扱い、triplet 系は `tickRhythm` で保存する。
+- UI と preset 判定は、保存済みの `tickRhythm` がある場合はそれを優先する。
+
+この分離により、16分系の既存挙動を壊さずに、3連の preset を同じ editor で扱えるようにする。
+
 ## 画面の役割
 
 - `/progression`: コード譜、小節、拍、タイ、スラーを扱うFull Editor。
