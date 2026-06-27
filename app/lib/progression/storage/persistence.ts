@@ -1,4 +1,4 @@
-import type { ChordType } from "../music";
+import type { ChordType } from "../../music";
 import {
   migrateBeatRhythmToEvents,
   migrateLegacyBars,
@@ -12,11 +12,11 @@ import type {
   ProgressionDurationSteps,
   ProgressionRhythmEvent,
   TimeSignature,
-} from "./model";
+} from "../model";
 import {
   getProgressionRhythmTickEventFromRhythmEvent,
   type ProgressionRhythmTickEvent,
-} from "./rhythm/ticks";
+} from "../rhythm/ticks";
 
 type PersistedProgressionBar = ProgressionBar & {
   tickRhythm?: readonly ProgressionRhythmTickEvent[];
@@ -264,3 +264,4 @@ export function createPersistedProgressionSettings(
     bars: bars.map(getPersistedProgressionBar),
   };
 }
+

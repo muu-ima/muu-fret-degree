@@ -89,6 +89,15 @@ export {
 } from "./structure";
 
 export {
+  createPersistedProgressionSettings,
+  decodePersistedProgressionSettings,
+  parsePersistedProgressionSettings,
+  progressionStorageVersion,
+  type HydratedProgressionSettings,
+  type PersistedProgressionSettings,
+} from "./storage";
+
+export {
   getCurrentProgressionBar,
   getCurrentProgressionSelection,
   getProgressionPlaybackState,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ChordType } from "../music";
+import type { ChordType } from "../../music";
 import {
   createPersistedProgressionSettings,
   decodePersistedProgressionSettings,
@@ -107,3 +107,4 @@ describe("progression persistence", () => {
     });
   });
 });
+

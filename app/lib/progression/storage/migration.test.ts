@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ProgressionBar } from "./model";
+import type { ProgressionBar } from "../model";
 import {
   migrateBeatRhythmToEvents,
   type LegacyBeatRhythm,
@@ -65,3 +65,4 @@ describe("progression persistence migration", () => {
     expect(migrated.rhythm).toBeUndefined();
   });
 });
+
