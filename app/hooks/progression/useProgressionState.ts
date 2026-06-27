@@ -12,7 +12,7 @@ import type { ChordType } from "../../lib/music";
 import {
   createProgressionHistory,
   progressionHistoryReducer,
-} from "../../lib/progression/history";
+} from "../../lib/progression/state/history";
 import {
   applyProgressionRhythmPreset,
   createProgressionVirtualTimeline,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createDefaultProgression, type ChordProgression } from "../model";
-import { updateProgressionBarCount } from "../structure";
+import { updateProgressionBarCount } from "../state/structure";
 import { updateProgressionBeatDuration } from "./commands";
 import {
   createProgressionVirtualTimeline,

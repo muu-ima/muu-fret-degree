@@ -1,20 +1,20 @@
-import { getProgressionCellForBeat } from "./harmony";
+import { getProgressionCellForBeat } from "../harmony";
 import {
   progressionStepsPerBeat,
   type ChordProgression,
   type ProgressionPosition,
-} from "./model";
-import { countFollowingProgressionTies } from "./rhythm/ties";
+} from "../model";
+import { countFollowingProgressionTies } from "../rhythm/ties";
 import {
   createProgressionVirtualTimeline,
   getProgressionVirtualRhythmEventAtPosition,
   type ProgressionVirtualTimeline,
   validateProgressionRhythmPlacementAtTickPosition,
-} from "./rhythm/timeline";
+} from "../rhythm/timeline";
 import {
   getProgressionPositionFromTickIndex,
   progressionTicksPerStep,
-} from "./rhythm/ticks";
+} from "../rhythm/ticks";
 
 function getProgressionBeatEndStep(
   virtualStartStep: number,

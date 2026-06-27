@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { ChordNote, FretNote } from "../music";
-import type { ProgressionBeatEventType, ProgressionDurationSteps } from "./model";
+import type { ChordNote, FretNote } from "../../music";
+import type { ProgressionBeatEventType, ProgressionDurationSteps } from "../model";
 import {
   planProgressionBeat,
   type ProgressionRhythm,
-} from "./playback";
+} from "./index";
 
 const chordNotes: ChordNote[] = [
   { degree: "1", semitones: 0, note: "C" },
@@ -154,3 +154,4 @@ describe("progression playback patterns", () => {
     expect(events[1].duration).toBeCloseTo(1 / 12);
   });
 });
+

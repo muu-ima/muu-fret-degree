@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-  createProgressionHistory,
-  progressionHistoryReducer,
-} from "./history";
-import {
   createDefaultProgression,
-  getProgressionBeatEventType,
   getProgressionBeatDuration,
+  getProgressionBeatEventType,
   updateProgressionBeatDuration,
   updateProgressionBeatEventType,
   updateProgressionCell,
-} from ".";
+} from "..";
+import {
+  createProgressionHistory,
+  progressionHistoryReducer,
+} from "./history";
 
 describe("progression history", () => {
   it("undoes and redoes edits while preserving the current BPM", () => {
@@ -65,3 +65,4 @@ describe("progression history", () => {
     expect(getProgressionBeatDuration(history.present.bars[0], 0)).toBe(4);
   });
 });
+

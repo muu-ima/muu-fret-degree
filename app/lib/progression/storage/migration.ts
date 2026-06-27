@@ -4,7 +4,7 @@ import type {
   ProgressionBeatEventType,
   ProgressionCell,
   ProgressionDurationSteps,
-} from "./model";
+} from "../model";
 
 export type LegacyProgressionBar = {
   bar: number;
@@ -51,3 +51,4 @@ export function migrateLegacyBars(bars: readonly LegacyProgressionBar[]): Progre
     ],
   }));
 }
+

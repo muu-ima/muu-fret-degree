@@ -1,4 +1,4 @@
-import type { ChordProgression } from "./model";
+import type { ChordProgression } from "../model";
 
 export type ProgressionHistory = {
   past: ChordProgression[];
@@ -89,3 +89,4 @@ export function progressionHistoryReducer(
     future: state.future.slice(1),
   };
 }
+

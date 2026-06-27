@@ -7,7 +7,7 @@ import {
   updateProgressionBeatDuration,
   updateProgressionRhythmEvent,
   validateProgressionRhythmPlacementAtTickPosition,
-} from ".";
+} from "../index";
 import {
   getProgressionStepPlaybackRequest,
   getProgressionTickPlaybackRequest,
@@ -134,3 +134,4 @@ describe("progression step scheduling", () => {
     )).toBeUndefined();
   });
 });
+

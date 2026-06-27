@@ -3,8 +3,8 @@ import type {
   ProgressionBar,
   ProgressionBeat,
   ProgressionCell,
-} from "./model";
-import type { ProgressionRhythmTickEvent } from "./rhythm/ticks";
+} from "../model";
+import type { ProgressionRhythmTickEvent } from "../rhythm/ticks";
 
 type ProgressionBarWithTickRhythm = ProgressionBar & {
   tickRhythm?: readonly ProgressionRhythmTickEvent[];
@@ -58,3 +58,4 @@ export function updateProgressionBarCount(
     bars: resizeProgressionBars(progression.bars, nextBarCount),
   };
 }
+
