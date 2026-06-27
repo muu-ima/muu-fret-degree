@@ -459,4 +459,12 @@ describe("progression beat events", () => {
       progression,
     );
   });
+
+  it("does not overwrite a sustaining dotted quarter when triplet starts inside it", () => {
+    const dottedQuarter = updateProgressionBeatDuration(createDefaultProgression(), 0, 0, 6);
+
+    expect(
+      applyProgressionRhythmPreset(dottedQuarter, 0, 1, "triplet-eighths"),
+    ).toBe(dottedQuarter);
+  });
 });

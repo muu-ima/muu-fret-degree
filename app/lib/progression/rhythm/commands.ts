@@ -331,6 +331,13 @@ export function applyProgressionRhythmPreset(
   const endStep = startStep + getProgressionRhythmPresetSpanSteps(preset);
   const startTick = startBeat * progressionTicksPerBeat;
   const endTick = startTick + getProgressionRhythmPresetSpanTicks(preset);
+  if (
+    preset.timingGrid === "triplet" &&
+    startBeat > 0 &&
+    getProgressionSustainingEventAtStep(currentBar, startStep)
+  ) {
+    return progression;
+  }
   let nextProgression = progression;
   const presetEvents = getProgressionRhythmPresetStepEvents(preset);
   const presetTickEvents = getProgressionRhythmPresetTickEvents(preset);
