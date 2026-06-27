@@ -95,34 +95,29 @@ export function playBassNote(
   const frequency = frequencyFromMidi(midi);
   const oscillator = context.createOscillator();
   const subOscillator = context.createOscillator();
+  const mainGain = context.createGain();
+  const subGain = context.createGain();
   const gain = context.createGain();
   const filter = context.createBiquadFilter();
-  const drive = context.createWaveShaper();
-
-  const curve = new Float32Array(256);
-  for (let i = 0; i < curve.length; i += 1) {
-    const x = i / 128 - 1;
-    curve[i] = Math.tanh(x * 1.65);
-  }
-  drive.curve = curve;
-  drive.oversample = "2x";
-
-  oscillator.type = "triangle";
+  oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(frequency, start);
   subOscillator.type = "sine";
   subOscillator.frequency.setValueAtTime(frequency / 2, start);
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(860, start);
+  filter.frequency.setValueAtTime(520, start);
   filter.frequency.exponentialRampToValueAtTime(170, end);
-  filter.Q.setValueAtTime(1.7, start);
+  filter.Q.setValueAtTime(0.35, start);
+  mainGain.gain.setValueAtTime(0.7, start);
+  subGain.gain.setValueAtTime(0.5, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(0.3, start + 0.024);
-  gain.gain.exponentialRampToValueAtTime(0.16, start + 0.2);
+  gain.gain.exponentialRampToValueAtTime(0.24, start + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.13, start + 0.22);
   gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
-  oscillator.connect(drive);
-  subOscillator.connect(drive);
-  drive.connect(filter);
+  oscillator.connect(mainGain);
+  subOscillator.connect(subGain);
+  mainGain.connect(filter);
+  subGain.connect(filter);
   filter.connect(gain);
   connectToOutput(gain, output);
 
