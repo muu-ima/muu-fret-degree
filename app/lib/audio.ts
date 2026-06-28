@@ -8,12 +8,13 @@ type BassSample = {
   buffer: AudioBuffer;
   baseFrequency: number;
   kind: "generated" | "recorded";
+  midi: number;
 };
 
 type BassSampleState =
-  | { status: "ready"; sample: BassSample }
-  | { status: "loading"; promise: Promise<BassSample> }
-  | { status: "failed"; sample: BassSample };
+  | { status: "ready"; samples: BassSample[] }
+  | { status: "loading"; promise: Promise<BassSample[]> }
+  | { status: "failed"; samples: BassSample[] };
 
 type PianoReverb = {
   convolver: ConvolverNode;
@@ -23,9 +24,9 @@ type PianoReverb = {
 
 const bassSampleCache = new WeakMap<AudioContext, BassSampleState>();
 const pianoReverbCache = new WeakMap<AudioContext, PianoReverb>();
-const recordedBassSampleUrl = "/audio/bass-a1.wav";
 const bassSampleDuration = 1.15;
 const bassSampleBaseFrequency = 82.4068892282175;
+const bassSampleBaseMidi = 40;
 const bassSampleAttack = 0.02;
 const bassSampleDecay = 0.16;
 const bassSampleRelease = 0.28;
@@ -35,6 +36,10 @@ const recordedBassPreroll = 0.012;
 const recordedBassTargetPeak = 0.62;
 const pianoSampleAttack = 0.012;
 const pianoReverbDuration = 1.35;
+const recordedBassSampleProfiles = [
+  { url: "/audio/bass-e1.wav", midi: 28, baseFrequency: frequencyFromMidi(28) },
+  { url: "/audio/bass-a1.wav", midi: 33, baseFrequency: frequencyFromMidi(33) },
+];
 
 function connectToOutput(source: AudioNode, output: AudioOutputNode) {
   source.connect(output);
@@ -64,7 +69,7 @@ function createBassSample(context: AudioContext): BassSample {
     channel[i] = body * envelope * 0.9;
   }
 
-  return { buffer, baseFrequency: bassSampleBaseFrequency, kind: "generated" };
+  return { buffer, baseFrequency: bassSampleBaseFrequency, kind: "generated", midi: bassSampleBaseMidi };
 }
 
 function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuffer) {
@@ -107,44 +112,50 @@ function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuf
 function ensureBassSample(context: AudioContext) {
   const cached = bassSampleCache.get(context);
   if (cached?.status === "ready" || cached?.status === "failed") {
-    return cached.sample;
+    return cached.samples;
   }
 
   const fallbackSample = createBassSample(context);
   if (cached?.status === "loading") {
-    return fallbackSample;
+    return [fallbackSample];
   }
 
-  const promise = fetch(recordedBassSampleUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to load bass sample: ${response.status}`);
-      }
-      return response.arrayBuffer();
-    })
-    .then((arrayBuffer) => context.decodeAudioData(arrayBuffer))
-    .then((buffer) => {
-      const sample = {
-        buffer: prepareRecordedBassSample(context, buffer),
-        baseFrequency: bassSampleBaseFrequency,
-        kind: "recorded" as const,
-      };
-      bassSampleCache.set(context, { status: "ready", sample });
-      return sample;
+  const promise = Promise.all(
+    recordedBassSampleProfiles.map((profile) =>
+      fetch(profile.url)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to load bass sample: ${profile.url}`);
+          }
+          return response.arrayBuffer();
+        })
+        .then((arrayBuffer) => context.decodeAudioData(arrayBuffer))
+        .then((buffer) => ({
+          buffer: prepareRecordedBassSample(context, buffer),
+          baseFrequency: profile.baseFrequency,
+          kind: "recorded" as const,
+          midi: profile.midi,
+        })),
+    ),
+  )
+    .then((samples) => {
+      bassSampleCache.set(context, { status: "ready", samples });
+      return samples;
     })
     .catch(() => {
-      bassSampleCache.set(context, { status: "failed", sample: fallbackSample });
-      return fallbackSample;
+      const samples = [fallbackSample];
+      bassSampleCache.set(context, { status: "failed", samples });
+      return samples;
     });
 
   bassSampleCache.set(context, { status: "loading", promise });
-  return fallbackSample;
+  return [fallbackSample];
 }
 
 export function preloadBassSample(context: AudioContext) {
   const cached = bassSampleCache.get(context);
   if (cached?.status === "ready" || cached?.status === "failed") {
-    return Promise.resolve(cached.sample);
+    return Promise.resolve(cached.samples);
   }
   if (cached?.status === "loading") {
     return cached.promise;
@@ -160,8 +171,16 @@ export function preloadBassSample(context: AudioContext) {
 function getReadyBassSample(context: AudioContext) {
   const cached = bassSampleCache.get(context);
   return cached?.status === "ready" || cached?.status === "failed"
-    ? cached.sample
+    ? cached.samples
     : undefined;
+}
+
+function pickBassSample(samples: BassSample[], midi: number) {
+  return samples.reduce((closestSample, sample) =>
+    Math.abs(sample.midi - midi) < Math.abs(closestSample.midi - midi)
+      ? sample
+      : closestSample,
+  );
 }
 
 function createPianoSample(context: AudioContext, frequency: number, duration: number) {
@@ -310,8 +329,8 @@ export function playBassNote(
   duration = 0.85,
   output: AudioOutputNode = context.destination,
 ) {
-  const readySample = getReadyBassSample(context);
-  if (!readySample) {
+  const readySamples = getReadyBassSample(context);
+  if (!readySamples) {
     void preloadBassSample(context).then(() => {
       playBassNote(context, midi, startOffset, duration, output);
     });
@@ -321,7 +340,7 @@ export function playBassNote(
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
-  const sample = readySample;
+  const sample = pickBassSample(readySamples, midi);
   const playbackDuration = sample.kind === "recorded"
     ? Math.min(duration, recordedBassMaxDuration)
     : duration;
