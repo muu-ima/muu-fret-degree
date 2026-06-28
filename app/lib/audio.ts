@@ -39,6 +39,8 @@ const pianoReverbDuration = 1.35;
 const recordedBassSampleProfiles = [
   { url: "/audio/bass-e1.wav", midi: 28, baseFrequency: frequencyFromMidi(28), targetPeak: 0.38, tone: "low" as const },
   { url: "/audio/bass-a1.wav", midi: 33, baseFrequency: frequencyFromMidi(33), targetPeak: 0.38, tone: "default" as const },
+  { url: "/audio/bass-d2.wav", midi: 38, baseFrequency: frequencyFromMidi(38), targetPeak: 0.38, tone: "default" as const },
+  { url: "/audio/bass-g2.wav", midi: 43, baseFrequency: frequencyFromMidi(43), targetPeak: 0.38, tone: "default" as const },
 ];
 
 function connectToOutput(source: AudioNode, output: AudioOutputNode) {
