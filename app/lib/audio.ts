@@ -8,12 +8,14 @@ type BassSample = {
   buffer: AudioBuffer;
   baseFrequency: number;
   kind: "generated" | "recorded";
+  midi: number;
+  tone: "default" | "low";
 };
 
 type BassSampleState =
-  | { status: "ready"; sample: BassSample }
-  | { status: "loading"; promise: Promise<BassSample> }
-  | { status: "failed"; sample: BassSample };
+  | { status: "ready"; samples: BassSample[] }
+  | { status: "loading"; promise: Promise<BassSample[]> }
+  | { status: "failed"; samples: BassSample[] };
 
 type PianoReverb = {
   convolver: ConvolverNode;
@@ -23,18 +25,25 @@ type PianoReverb = {
 
 const bassSampleCache = new WeakMap<AudioContext, BassSampleState>();
 const pianoReverbCache = new WeakMap<AudioContext, PianoReverb>();
-const recordedBassSampleUrl = "/audio/bass-a1.wav";
 const bassSampleDuration = 1.15;
 const bassSampleBaseFrequency = 82.4068892282175;
+const bassSampleBaseMidi = 40;
 const bassSampleAttack = 0.02;
 const bassSampleDecay = 0.16;
 const bassSampleRelease = 0.28;
 const recordedBassMaxDuration = 0.9;
-const recordedBassTrimThreshold = 0.006;
+const recordedBassTrimThreshold = 0.02;
 const recordedBassPreroll = 0.012;
-const recordedBassTargetPeak = 0.62;
+const recordedBassTargetRms = 0.09;
+const recordedBassPeakLimit = 0.42;
 const pianoSampleAttack = 0.012;
 const pianoReverbDuration = 1.35;
+const recordedBassSampleProfiles = [
+  { url: "/audio/bass-e1.wav", midi: 28, baseFrequency: frequencyFromMidi(28), tone: "low" as const },
+  { url: "/audio/bass-a1-2.wav", midi: 33, baseFrequency: frequencyFromMidi(33), tone: "default" as const },
+  { url: "/audio/bass-d2.wav", midi: 38, baseFrequency: frequencyFromMidi(38), tone: "default" as const },
+  { url: "/audio/bass-g2.wav", midi: 43, baseFrequency: frequencyFromMidi(43), tone: "default" as const },
+];
 
 function connectToOutput(source: AudioNode, output: AudioOutputNode) {
   source.connect(output);
@@ -64,7 +73,13 @@ function createBassSample(context: AudioContext): BassSample {
     channel[i] = body * envelope * 0.9;
   }
 
-  return { buffer, baseFrequency: bassSampleBaseFrequency, kind: "generated" };
+  return {
+    buffer,
+    baseFrequency: bassSampleBaseFrequency,
+    kind: "generated",
+    midi: bassSampleBaseMidi,
+    tone: "default",
+  };
 }
 
 function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuffer) {
@@ -73,6 +88,8 @@ function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuf
   const frameCount = sourceBuffer.length;
   let firstAudibleFrame = -1;
   let sourcePeak = 0;
+  let activeFrameCount = 0;
+  let activeSquareSum = 0;
 
   for (let i = 0; i < frameCount; i += 1) {
     let mono = 0;
@@ -81,6 +98,10 @@ function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuf
     }
     const amplitude = Math.abs(mono / channelCount);
     sourcePeak = Math.max(sourcePeak, amplitude);
+    if (amplitude > recordedBassTrimThreshold) {
+      activeFrameCount += 1;
+      activeSquareSum += (mono / channelCount) ** 2;
+    }
     if (firstAudibleFrame < 0 && amplitude > recordedBassTrimThreshold) {
       firstAudibleFrame = i;
     }
@@ -90,7 +111,10 @@ function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuf
   const availableFrames = Math.max(1, frameCount - startFrame);
   const normalizedBuffer = context.createBuffer(1, availableFrames, sampleRate);
   const output = normalizedBuffer.getChannelData(0);
-  const gain = sourcePeak > 0 ? Math.min(20, recordedBassTargetPeak / sourcePeak) : 1;
+  const activeRms = activeFrameCount > 0 ? Math.sqrt(activeSquareSum / activeFrameCount) : 0;
+  const rmsGain = activeRms > 0 ? recordedBassTargetRms / activeRms : 1;
+  const peakGain = sourcePeak > 0 ? recordedBassPeakLimit / sourcePeak : 1;
+  const gain = Math.min(20, rmsGain, peakGain);
 
   for (let i = 0; i < availableFrames; i += 1) {
     let mono = 0;
@@ -107,44 +131,51 @@ function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuf
 function ensureBassSample(context: AudioContext) {
   const cached = bassSampleCache.get(context);
   if (cached?.status === "ready" || cached?.status === "failed") {
-    return cached.sample;
+    return cached.samples;
   }
 
   const fallbackSample = createBassSample(context);
   if (cached?.status === "loading") {
-    return fallbackSample;
+    return [fallbackSample];
   }
 
-  const promise = fetch(recordedBassSampleUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to load bass sample: ${response.status}`);
-      }
-      return response.arrayBuffer();
-    })
-    .then((arrayBuffer) => context.decodeAudioData(arrayBuffer))
-    .then((buffer) => {
-      const sample = {
-        buffer: prepareRecordedBassSample(context, buffer),
-        baseFrequency: bassSampleBaseFrequency,
-        kind: "recorded" as const,
-      };
-      bassSampleCache.set(context, { status: "ready", sample });
-      return sample;
+  const promise = Promise.all(
+    recordedBassSampleProfiles.map((profile) =>
+      fetch(profile.url)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to load bass sample: ${profile.url}`);
+          }
+          return response.arrayBuffer();
+        })
+        .then((arrayBuffer) => context.decodeAudioData(arrayBuffer))
+        .then((buffer) => ({
+          buffer: prepareRecordedBassSample(context, buffer),
+          baseFrequency: profile.baseFrequency,
+          kind: "recorded" as const,
+          midi: profile.midi,
+          tone: profile.tone,
+        })),
+    ),
+  )
+    .then((samples) => {
+      bassSampleCache.set(context, { status: "ready", samples });
+      return samples;
     })
     .catch(() => {
-      bassSampleCache.set(context, { status: "failed", sample: fallbackSample });
-      return fallbackSample;
+      const samples = [fallbackSample];
+      bassSampleCache.set(context, { status: "failed", samples });
+      return samples;
     });
 
   bassSampleCache.set(context, { status: "loading", promise });
-  return fallbackSample;
+  return [fallbackSample];
 }
 
 export function preloadBassSample(context: AudioContext) {
   const cached = bassSampleCache.get(context);
   if (cached?.status === "ready" || cached?.status === "failed") {
-    return Promise.resolve(cached.sample);
+    return Promise.resolve(cached.samples);
   }
   if (cached?.status === "loading") {
     return cached.promise;
@@ -160,8 +191,16 @@ export function preloadBassSample(context: AudioContext) {
 function getReadyBassSample(context: AudioContext) {
   const cached = bassSampleCache.get(context);
   return cached?.status === "ready" || cached?.status === "failed"
-    ? cached.sample
+    ? cached.samples
     : undefined;
+}
+
+function pickBassSample(samples: BassSample[], midi: number) {
+  return samples.reduce((closestSample, sample) =>
+    Math.abs(sample.midi - midi) < Math.abs(closestSample.midi - midi)
+      ? sample
+      : closestSample,
+  );
 }
 
 function createPianoSample(context: AudioContext, frequency: number, duration: number) {
@@ -310,8 +349,8 @@ export function playBassNote(
   duration = 0.85,
   output: AudioOutputNode = context.destination,
 ) {
-  const readySample = getReadyBassSample(context);
-  if (!readySample) {
+  const readySamples = getReadyBassSample(context);
+  if (!readySamples) {
     void preloadBassSample(context).then(() => {
       playBassNote(context, midi, startOffset, duration, output);
     });
@@ -321,30 +360,46 @@ export function playBassNote(
   const start = context.currentTime + startOffset;
   const end = start + duration;
   const frequency = frequencyFromMidi(midi);
-  const sample = readySample;
-  const playbackDuration = sample.kind === "recorded"
-    ? Math.min(duration, recordedBassMaxDuration)
+  const sample = pickBassSample(readySamples, midi);
+  const isLowRecordedSample = sample.kind === "recorded" && sample.tone === "low";
+  const targetDuration = isLowRecordedSample && duration < 0.28
+    ? Math.max(duration, 0.3)
     : duration;
+  const playbackDuration = sample.kind === "recorded"
+    ? Math.min(targetDuration, recordedBassMaxDuration)
+    : targetDuration;
   const playbackEnd = start + playbackDuration;
   const source = context.createBufferSource();
   const gain = context.createGain();
   const filter = context.createBiquadFilter();
-  const attack = Math.min(0.03, Math.max(0.01, playbackDuration * 0.3));
+  const isShortNote = playbackDuration < 0.18;
+  const attack = isShortNote
+    ? Math.min(0.008, Math.max(0.003, playbackDuration * 0.12))
+    : Math.min(0.03, Math.max(0.01, playbackDuration * 0.3));
   const release = sample.kind === "recorded"
-    ? Math.min(0.08, Math.max(0.04, playbackDuration * 0.22))
+    ? isShortNote
+      ? Math.min(0.035, Math.max(0.018, playbackDuration * 0.25))
+      : Math.min(0.08, Math.max(0.04, playbackDuration * 0.22))
     : Math.min(0.14, Math.max(0.06, playbackDuration * 0.45));
-  const sustainLevel = playbackDuration < 0.2 ? 0.09 : 0.14;
+  const peakGain = isLowRecordedSample ? (isShortNote ? 0.18 : 0.14) : (isShortNote ? 0.24 : 0.18);
+  const sustainLevel = isLowRecordedSample ? (isShortNote ? 0.15 : 0.1) : (isShortNote ? 0.2 : 0.14);
   const releaseStart = Math.max(start + attack + 0.01, playbackEnd - release);
+  const filterStart = isLowRecordedSample
+    ? isShortNote ? 1500 : 1050
+    : isShortNote ? 2400 : 1500;
+  const filterEnd = isLowRecordedSample
+    ? isShortNote ? 1050 : 820
+    : isShortNote ? 1700 : 1100;
 
   source.buffer = sample.buffer;
   source.playbackRate.setValueAtTime(frequency / sample.baseFrequency, start);
   filter.type = "lowpass";
-  filter.frequency.setValueAtTime(1500, start);
-  filter.frequency.exponentialRampToValueAtTime(1100, playbackEnd);
+  filter.frequency.setValueAtTime(filterStart, start);
+  filter.frequency.exponentialRampToValueAtTime(filterEnd, playbackEnd);
   filter.Q.setValueAtTime(0.28, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(0.18, start + attack);
-  gain.gain.setTargetAtTime(sustainLevel, start + attack, 0.04);
+  gain.gain.exponentialRampToValueAtTime(peakGain, start + attack);
+  gain.gain.setTargetAtTime(sustainLevel, start + attack, isShortNote ? 0.018 : 0.04);
   gain.gain.linearRampToValueAtTime(0.0001, releaseStart);
   gain.gain.exponentialRampToValueAtTime(0.0001, playbackEnd);
 
