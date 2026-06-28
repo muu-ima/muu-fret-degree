@@ -32,15 +32,17 @@ const bassSampleAttack = 0.02;
 const bassSampleDecay = 0.16;
 const bassSampleRelease = 0.28;
 const recordedBassMaxDuration = 0.9;
-const recordedBassTrimThreshold = 0.006;
+const recordedBassTrimThreshold = 0.02;
 const recordedBassPreroll = 0.012;
+const recordedBassTargetRms = 0.09;
+const recordedBassPeakLimit = 0.42;
 const pianoSampleAttack = 0.012;
 const pianoReverbDuration = 1.35;
 const recordedBassSampleProfiles = [
-  { url: "/audio/bass-e1.wav", midi: 28, baseFrequency: frequencyFromMidi(28), targetPeak: 0.38, tone: "low" as const },
-  { url: "/audio/bass-a1.wav", midi: 33, baseFrequency: frequencyFromMidi(33), targetPeak: 0.38, tone: "default" as const },
-  { url: "/audio/bass-d2.wav", midi: 38, baseFrequency: frequencyFromMidi(38), targetPeak: 0.38, tone: "default" as const },
-  { url: "/audio/bass-g2.wav", midi: 43, baseFrequency: frequencyFromMidi(43), targetPeak: 0.38, tone: "default" as const },
+  { url: "/audio/bass-e1.wav", midi: 28, baseFrequency: frequencyFromMidi(28), tone: "low" as const },
+  { url: "/audio/bass-a1-2.wav", midi: 33, baseFrequency: frequencyFromMidi(33), tone: "default" as const },
+  { url: "/audio/bass-d2.wav", midi: 38, baseFrequency: frequencyFromMidi(38), tone: "default" as const },
+  { url: "/audio/bass-g2.wav", midi: 43, baseFrequency: frequencyFromMidi(43), tone: "default" as const },
 ];
 
 function connectToOutput(source: AudioNode, output: AudioOutputNode) {
@@ -80,12 +82,14 @@ function createBassSample(context: AudioContext): BassSample {
   };
 }
 
-function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuffer, targetPeak: number) {
+function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuffer) {
   const sampleRate = sourceBuffer.sampleRate;
   const channelCount = sourceBuffer.numberOfChannels;
   const frameCount = sourceBuffer.length;
   let firstAudibleFrame = -1;
   let sourcePeak = 0;
+  let activeFrameCount = 0;
+  let activeSquareSum = 0;
 
   for (let i = 0; i < frameCount; i += 1) {
     let mono = 0;
@@ -94,6 +98,10 @@ function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuf
     }
     const amplitude = Math.abs(mono / channelCount);
     sourcePeak = Math.max(sourcePeak, amplitude);
+    if (amplitude > recordedBassTrimThreshold) {
+      activeFrameCount += 1;
+      activeSquareSum += (mono / channelCount) ** 2;
+    }
     if (firstAudibleFrame < 0 && amplitude > recordedBassTrimThreshold) {
       firstAudibleFrame = i;
     }
@@ -103,7 +111,10 @@ function prepareRecordedBassSample(context: AudioContext, sourceBuffer: AudioBuf
   const availableFrames = Math.max(1, frameCount - startFrame);
   const normalizedBuffer = context.createBuffer(1, availableFrames, sampleRate);
   const output = normalizedBuffer.getChannelData(0);
-  const gain = sourcePeak > 0 ? Math.min(20, targetPeak / sourcePeak) : 1;
+  const activeRms = activeFrameCount > 0 ? Math.sqrt(activeSquareSum / activeFrameCount) : 0;
+  const rmsGain = activeRms > 0 ? recordedBassTargetRms / activeRms : 1;
+  const peakGain = sourcePeak > 0 ? recordedBassPeakLimit / sourcePeak : 1;
+  const gain = Math.min(20, rmsGain, peakGain);
 
   for (let i = 0; i < availableFrames; i += 1) {
     let mono = 0;
@@ -139,7 +150,7 @@ function ensureBassSample(context: AudioContext) {
         })
         .then((arrayBuffer) => context.decodeAudioData(arrayBuffer))
         .then((buffer) => ({
-          buffer: prepareRecordedBassSample(context, buffer, profile.targetPeak),
+          buffer: prepareRecordedBassSample(context, buffer),
           baseFrequency: profile.baseFrequency,
           kind: "recorded" as const,
           midi: profile.midi,
