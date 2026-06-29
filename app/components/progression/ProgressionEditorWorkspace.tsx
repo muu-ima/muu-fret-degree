@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LuArrowLeft, LuRedo2, LuRotateCcw, LuUndo2 } from "react-icons/lu";
 import theory from "../../../data/theory.json";
 import type { ChordType } from "../../lib/music";
@@ -27,6 +27,7 @@ export function ProgressionEditorWorkspace() {
     updateRhythmEvent,
     validateRhythmPlacement,
   } = useProgressionSession();
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   useEffect(() => {
     const handleHistoryShortcut = (event: KeyboardEvent) => {
@@ -56,6 +57,28 @@ export function ProgressionEditorWorkspace() {
     return () => window.removeEventListener("keydown", handleHistoryShortcut);
   }, [redo, undo]);
 
+  useEffect(() => {
+    if (!isResetDialogOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsResetDialogOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isResetDialogOpen]);
+
+  const openResetDialog = () => setIsResetDialogOpen(true);
+  const closeResetDialog = () => setIsResetDialogOpen(false);
+  const confirmResetProgression = () => {
+    resetProgression();
+    closeResetDialog();
+  };
+
   const historyButtons = (
     <div className="progressionHistoryActions" role="group" aria-label="編集履歴">
       <button type="button" aria-label="元に戻す" title="元に戻す (Ctrl/Cmd + Z)" disabled={!canUndo} onClick={undo}>
@@ -75,7 +98,7 @@ export function ProgressionEditorWorkspace() {
         className="progressionResetButton"
         aria-label="編集をリセット"
         title="編集をリセット"
-        onClick={resetProgression}
+        onClick={openResetDialog}
       >
         <LuRotateCcw aria-hidden="true" />
         <span>Reset</span>
@@ -85,6 +108,33 @@ export function ProgressionEditorWorkspace() {
 
   return (
     <main className="progressionWorkspace">
+      {isResetDialogOpen ? (
+        <div className="progressionResetDialogBackdrop" onClick={closeResetDialog}>
+          <section
+            className="progressionResetDialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="progression-reset-title"
+            aria-describedby="progression-reset-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="eyebrow">Confirm Reset</p>
+            <h2 id="progression-reset-title">Reset Progression Edit?</h2>
+            <p id="progression-reset-description">
+              現在の Progression Edit を初期状態へ戻します。あとから Undo で元に戻せます。
+            </p>
+            <div className="progressionResetDialogActions">
+              <button type="button" onClick={closeResetDialog}>
+                Cancel
+              </button>
+              <button type="button" className="danger" onClick={confirmResetProgression}>
+                Reset
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
       <header className="progressionWorkspaceHeader">
         <div>
           <p className="eyebrow">Full Editor</p>
@@ -131,7 +181,7 @@ export function ProgressionEditorWorkspace() {
           <LuRedo2 aria-hidden="true" />
           <span>Redo</span>
         </button>
-        <button type="button" onClick={resetProgression}>
+        <button type="button" onClick={openResetDialog}>
           <LuRotateCcw aria-hidden="true" />
           <span>Reset</span>
         </button>
