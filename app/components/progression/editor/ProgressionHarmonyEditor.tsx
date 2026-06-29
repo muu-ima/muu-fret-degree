@@ -110,6 +110,9 @@ export function ProgressionHarmonyEditor({
 
         <div className="progressionApplySection">
           <span className="controlLabel">Copy To</span>
+          <small className="progressionCopyHint">
+            You can also use Shift + Left / Right.
+          </small>
           <div className="progressionCopyTabs" role="group" aria-label="現在のコードを隣の編集枠へコピー">
             <button
               type="button"
