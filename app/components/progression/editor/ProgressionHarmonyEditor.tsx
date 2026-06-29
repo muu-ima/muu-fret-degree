@@ -109,21 +109,25 @@ export function ProgressionHarmonyEditor({
         </div>
 
         <div className="progressionApplySection">
-          <span className="controlLabel">Copy Chord</span>
+          <span className="controlLabel">Copy To</span>
           <div className="progressionCopyTabs" role="group" aria-label="現在のコードを隣の編集枠へコピー">
             <button
               type="button"
               disabled={!canCopyHarmonyToPrevious}
+              aria-label="現在のコードを前の編集枠へコピー"
               onClick={() => onHarmonyCopy(-1)}
             >
-              Shift + ←
+              <span>← Previous</span>
+              <small>Shift + Left</small>
             </button>
             <button
               type="button"
               disabled={!canCopyHarmonyToNext}
+              aria-label="現在のコードを次の編集枠へコピー"
               onClick={() => onHarmonyCopy(1)}
             >
-              Shift + →
+              <span>Next →</span>
+              <small>Shift + Right</small>
             </button>
           </div>
         </div>

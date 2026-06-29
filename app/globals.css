@@ -2533,6 +2533,28 @@ select:focus-visible,
   gap: 6px;
 }
 
+.progressionCopyTabs button {
+  display: grid;
+  min-height: 48px;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.progressionCopyTabs button span {
+  line-height: 1.1;
+}
+
+.progressionCopyTabs button small {
+  color: rgba(171, 184, 209, 0.72);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
 .progressionCopyTabs button:disabled {
   cursor: not-allowed;
   opacity: 0.42;
