@@ -2484,6 +2484,7 @@ select:focus-visible,
 
 .progressionBeatTabs button,
 .progressionApplyTabs button,
+.progressionCopyTabs button,
 .progressionChip {
   min-width: 0;
   min-height: 40px;
@@ -2524,6 +2525,17 @@ select:focus-visible,
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+}
+
+.progressionCopyTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progressionCopyTabs button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
 .progressionEventTabs {
@@ -2718,7 +2730,7 @@ select:focus-visible,
 
 .progressionHarmonyMetaFields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(132px, 0.42fr);
   gap: 10px;
 }
 
@@ -2894,6 +2906,66 @@ select:focus-visible,
   padding: 28px 24px 48px;
 }
 
+.progressionResetDialogBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 8, 12, 0.68);
+  backdrop-filter: blur(12px);
+}
+
+.progressionResetDialog {
+  width: min(100%, 420px);
+  padding: 20px;
+  border: 1px solid rgba(154, 171, 196, 0.22);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    rgba(12, 17, 25, 0.96);
+  box-shadow:
+    0 26px 60px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.progressionResetDialog h2 {
+  margin: 6px 0 0;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.progressionResetDialog p:last-of-type {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.progressionResetDialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.progressionResetDialogActions button {
+  min-width: 104px;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(154, 171, 196, 0.2);
+  border-radius: 999px;
+  background: rgba(20, 26, 36, 0.94);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.progressionResetDialogActions button.danger {
+  border-color: rgba(232, 77, 91, 0.42);
+  background: rgba(232, 77, 91, 0.14);
+}
+
 .progressionWorkspaceHeader {
   display: flex;
   align-items: flex-start;
@@ -2923,6 +2995,7 @@ select:focus-visible,
 
 .progressionHistoryActions {
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 
@@ -2948,6 +3021,20 @@ select:focus-visible,
 .progressionHistoryActions svg {
   width: 17px;
   height: 17px;
+}
+
+.progressionHistoryActions .progressionResetButton {
+  display: inline-flex;
+  width: auto;
+  min-width: 0;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.progressionHistoryActions .progressionResetButton span {
+  line-height: 1;
 }
 
 .progressionEditorMobileBar {
@@ -3443,6 +3530,30 @@ select:focus-visible,
     padding: 16px 10px calc(96px + env(safe-area-inset-bottom));
   }
 
+  .progressionResetDialogBackdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .progressionResetDialog {
+    width: min(100%, 520px);
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .progressionResetDialog h2 {
+    font-size: 1.28rem;
+  }
+
+  .progressionResetDialogActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progressionResetDialogActions button {
+    width: 100%;
+  }
+
   .progressionWorkspaceHeader {
     align-items: stretch;
     flex-direction: column;
@@ -3468,7 +3579,7 @@ select:focus-visible,
     left: 8px;
     z-index: 70;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
     min-height: 68px;
     padding: 6px;

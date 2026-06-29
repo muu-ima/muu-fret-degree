@@ -103,6 +103,63 @@ export function ProgressionEditor({
   const editScope = beatOverride ? "beat" : "cell";
   const selectedCell = editScope === "beat" ? beatOverride ?? baseCell : baseCell;
 
+  const harmonySlotCount = editScope === "beat" ? bars.length * 4 : bars.length * 2;
+  const selectedHarmonySlotIndex = editScope === "beat"
+    ? selectedBarIndex * 4 + selectedBeatIndex
+    : selectedBarIndex * 2 + selectedCellIndex;
+  const canCopyHarmonyToPrevious = selectedHarmonySlotIndex > 0;
+  const canCopyHarmonyToNext = selectedHarmonySlotIndex < harmonySlotCount - 1;
+
+  const copyHarmonyToAdjacentSlot = (direction: -1 | 1) => {
+    if (!selectedCell) {
+      return;
+    }
+
+    const nextSlotIndex = selectedHarmonySlotIndex + direction;
+    if (nextSlotIndex < 0 || nextSlotIndex >= harmonySlotCount) {
+      return;
+    }
+
+    if (editScope === "beat") {
+      const nextBarIndex = Math.floor(nextSlotIndex / 4);
+      const nextBeatIndex = nextSlotIndex % 4;
+      onBeatChordChange(nextBarIndex, nextBeatIndex, selectedCell);
+      selectBeat(nextBarIndex, nextBeatIndex);
+      return;
+    }
+
+    const nextBarIndex = Math.floor(nextSlotIndex / 2);
+    const nextCellIndex = nextSlotIndex % 2;
+    onCellChange(nextBarIndex, nextCellIndex, selectedCell);
+    selectBeat(nextBarIndex, nextCellIndex * 2);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return;
+      }
+
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || target.isContentEditable)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      copyHarmonyToAdjacentSlot(event.key === "ArrowRight" ? 1 : -1);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  });
+
   if (!selectedBar || !selectedCell) {
     return null;
   }
@@ -161,11 +218,14 @@ export function ProgressionEditor({
         />
         <ProgressionHarmonyEditor
           beatIndex={selectedBeatIndex}
+          canCopyHarmonyToNext={canCopyHarmonyToNext}
+          canCopyHarmonyToPrevious={canCopyHarmonyToPrevious}
           cellIndex={selectedCellIndex}
           chordTypes={chordTypes}
           editScope={editScope}
           onBeatSelect={(beatIndex) => selectBeat(selectedBarIndex, beatIndex)}
           onCellChange={applyCellChange}
+          onHarmonyCopy={copyHarmonyToAdjacentSlot}
           onUseBeatScope={useBeatScope}
           onUseCellScope={useCellScope}
           roots={roots}

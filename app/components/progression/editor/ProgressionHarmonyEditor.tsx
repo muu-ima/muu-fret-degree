@@ -5,11 +5,14 @@ import { EditorCombobox } from "../../ui/EditorCombobox";
 
 type ProgressionHarmonyEditorProps = {
   beatIndex: number;
+  canCopyHarmonyToNext: boolean;
+  canCopyHarmonyToPrevious: boolean;
   cellIndex: number;
   chordTypes: ChordType[];
   editScope: "beat" | "cell";
   onBeatSelect: (beatIndex: number) => void;
   onCellChange: (cell: ProgressionCell) => void;
+  onHarmonyCopy: (direction: -1 | 1) => void;
   onUseBeatScope: () => void;
   onUseCellScope: () => void;
   roots: readonly string[];
@@ -18,11 +21,14 @@ type ProgressionHarmonyEditorProps = {
 
 export function ProgressionHarmonyEditor({
   beatIndex,
+  canCopyHarmonyToNext,
+  canCopyHarmonyToPrevious,
   cellIndex,
   chordTypes,
   editScope,
   onBeatSelect,
   onCellChange,
+  onHarmonyCopy,
   onUseBeatScope,
   onUseCellScope,
   roots,
@@ -53,9 +59,7 @@ export function ProgressionHarmonyEditor({
               label: formatChordTypeSymbol(chordType.id, chordTypes),
               description: chordType.name,
             }))}
-            onValueChange={(chordTypeId) =>
-              onCellChange({ ...selectedCell, chordTypeId })
-            }
+            onValueChange={(chordTypeId) => onCellChange({ ...selectedCell, chordTypeId })}
           />
         </div>
       </div>
@@ -101,6 +105,26 @@ export function ProgressionHarmonyEditor({
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        <div className="progressionApplySection">
+          <span className="controlLabel">Copy Chord</span>
+          <div className="progressionCopyTabs" role="group" aria-label="現在のコードを隣の編集枠へコピー">
+            <button
+              type="button"
+              disabled={!canCopyHarmonyToPrevious}
+              onClick={() => onHarmonyCopy(-1)}
+            >
+              Shift + ←
+            </button>
+            <button
+              type="button"
+              disabled={!canCopyHarmonyToNext}
+              onClick={() => onHarmonyCopy(1)}
+            >
+              Shift + →
+            </button>
           </div>
         </div>
       </div>

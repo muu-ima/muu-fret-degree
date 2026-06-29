@@ -183,6 +183,13 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     [],
   );
 
+  const resetProgression = useCallback(() => {
+    dispatch({
+      type: "commit",
+      update: (currentProgression) => createDefaultProgression(currentProgression.bpm),
+    });
+  }, []);
+
   const undo = useCallback(() => dispatch({ type: "undo" }), []);
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
@@ -192,6 +199,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     canUndo: history.past.length > 0,
     progression,
     redo,
+    resetProgression,
     removeRhythmEvent,
     syncBpm,
     undo,
