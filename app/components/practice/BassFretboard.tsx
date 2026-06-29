@@ -10,7 +10,7 @@ import {
 
 const nutWidth = 14;
 const leftPad = 74;
-const topPad = 54;
+const topPad = 46;
 const boardWidth = 940;
 const boardHeight = 290;
 const stringGap = boardHeight / 3;
@@ -53,13 +53,6 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
           width={boardWidth}
           height={boardHeight + 36}
           rx="6"
-        />
-        <line
-          className="fingerboardHighlight"
-          x1={leftPad + 8}
-          y1={topPad - 10}
-          x2={leftPad + boardWidth - 8}
-          y2={topPad - 10}
         />
         {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
           if (fretIndex % 2 !== 1) {
@@ -186,6 +179,12 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
               }}
             >
               <circle className="noteHalo" cx={x} cy={y} r="29" fill={color} />
+              {isRoot ? (
+                <>
+                  <circle className="rootRing rootRingOuter" cx={x} cy={y} r="31" />
+                  <circle className="rootRing rootRingInner" cx={x} cy={y} r="26" />
+                </>
+              ) : null}
               <circle cx={x} cy={y} r="22" fill={color} />
               <text className="degreeLabel" x={x} y={y + 6}>
                 {note.degree}
@@ -203,7 +202,7 @@ export function BassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFret
 
 export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: BassFretboardProps) {
   const mobileLeft = 46;
-  const mobileTop = 86;
+  const mobileTop = 76;
   const mobileWidth = 340;
   const mobileHeight = 740;
   const openStringLane = 44;
@@ -240,13 +239,6 @@ export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: Ba
           width={mobileWidth + noteRadius * 2}
           height={mobileHeight}
           rx="6"
-        />
-        <line
-          className="fingerboardHighlight"
-          x1={mobileLeft - noteRadius + 8}
-          y1={mobileTop + 8}
-          x2={mobileLeft + mobileWidth + noteRadius - 8}
-          y2={mobileTop + 8}
         />
         {Array.from({ length: visibleFretCount }, (_, fretIndex) => {
           if (fretIndex % 2 !== 1) {
@@ -375,6 +367,12 @@ export function MobileBassFretboard({ notes, tuning, fretRange, onPlayNote }: Ba
               }}
             >
               <circle className="noteHalo" cx={x} cy={y} r={noteRadius + 6} fill={color} />
+              {isRoot ? (
+                <>
+                  <circle className="rootRing rootRingOuter" cx={x} cy={y} r={noteRadius + 10} />
+                  <circle className="rootRing rootRingInner" cx={x} cy={y} r={noteRadius + 6} />
+                </>
+              ) : null}
               <circle cx={x} cy={y} r={noteRadius} fill={color} />
               <text className="degreeLabel" x={x} y={y + 6}>
                 {note.degree}
