@@ -2484,6 +2484,7 @@ select:focus-visible,
 
 .progressionBeatTabs button,
 .progressionApplyTabs button,
+.progressionCopyTabs button,
 .progressionChip {
   min-width: 0;
   min-height: 40px;
@@ -2524,6 +2525,17 @@ select:focus-visible,
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+}
+
+.progressionCopyTabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progressionCopyTabs button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
 .progressionEventTabs {
@@ -2718,7 +2730,7 @@ select:focus-visible,
 
 .progressionHarmonyMetaFields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(132px, 0.42fr);
   gap: 10px;
 }
 
