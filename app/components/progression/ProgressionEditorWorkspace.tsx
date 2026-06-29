@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { LuArrowLeft, LuRedo2, LuUndo2 } from "react-icons/lu";
+import { LuArrowLeft, LuRedo2, LuRotateCcw, LuUndo2 } from "react-icons/lu";
 import theory from "../../../data/theory.json";
 import type { ChordType } from "../../lib/music";
 import { useProgressionSession } from "../../providers/ProgressionSessionProvider";
@@ -16,6 +16,7 @@ export function ProgressionEditorWorkspace() {
     canUndo,
     progression,
     redo,
+    resetProgression,
     removeRhythmEvent,
     undo,
     updateBarCount,
@@ -69,6 +70,16 @@ export function ProgressionEditorWorkspace() {
       >
         <LuRedo2 aria-hidden="true" />
       </button>
+      <button
+        type="button"
+        className="progressionResetButton"
+        aria-label="編集をリセット"
+        title="編集をリセット"
+        onClick={resetProgression}
+      >
+        <LuRotateCcw aria-hidden="true" />
+        <span>Reset</span>
+      </button>
     </div>
   );
 
@@ -119,6 +130,10 @@ export function ProgressionEditorWorkspace() {
         <button type="button" disabled={!canRedo} onClick={redo}>
           <LuRedo2 aria-hidden="true" />
           <span>Redo</span>
+        </button>
+        <button type="button" onClick={resetProgression}>
+          <LuRotateCcw aria-hidden="true" />
+          <span>Reset</span>
         </button>
       </nav>
     </main>
