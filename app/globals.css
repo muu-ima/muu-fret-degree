@@ -1537,19 +1537,19 @@ select:focus-visible,
 }
 
 .fretNumberBadge {
-  fill: rgba(7, 10, 15, 0.42);
-  stroke: rgba(202, 216, 236, 0.14);
+  fill: rgba(7, 10, 15, 0.28);
+  stroke: rgba(202, 216, 236, 0.08);
   stroke-width: 1;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.12));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
 }
 
 .fretNumber {
-  fill: rgba(238, 244, 255, 0.78);
+  fill: rgba(238, 244, 255, 0.68);
   font-size: 12px;
   font-weight: 900;
   paint-order: stroke;
-  stroke: rgba(7, 10, 15, 0.52);
-  stroke-width: 1.6px;
+  stroke: rgba(7, 10, 15, 0.36);
+  stroke-width: 1.4px;
 }
 
 .stringName {
