@@ -1684,9 +1684,10 @@ select:focus-visible,
 .degreeLabel {
   fill: #fff;
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
   text-anchor: middle;
   pointer-events: none;
 }
@@ -1696,18 +1697,19 @@ select:focus-visible,
 }
 
 .noteName {
-  fill: rgba(248, 251, 255, 0.9);
-  font-size: 12px;
+  fill: rgba(248, 251, 255, 0.78);
+  font-size: 11px;
   font-weight: 900;
+  letter-spacing: 0.01em;
   paint-order: stroke;
   pointer-events: none;
-  stroke: rgba(12, 15, 19, 0.72);
-  stroke-width: 2.8px;
+  stroke: rgba(12, 15, 19, 0.62);
+  stroke-width: 2.4px;
 }
 
 .rootNote .noteName {
-  fill: #fff0d6;
-  stroke: rgba(38, 22, 20, 0.72);
+  fill: rgba(255, 240, 214, 0.96);
+  stroke: rgba(38, 22, 20, 0.66);
 }
 
 .degreeStrip {
