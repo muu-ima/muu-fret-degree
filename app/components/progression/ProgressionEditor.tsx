@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 import type { ChordType } from "../../lib/music";
 import {
   getProgressionRhythmPreset,
+  resolveHarmonyTargets,
   getProgressionCellForBeat,
   type ProgressionBar,
   type ProgressionBeatEventType,
   type ProgressionCell,
   type ProgressionDurationSteps,
+  type ProgressionHarmonyTarget,
   type ProgressionPlacementValidation,
   type ProgressionRhythmPresetId,
+  type ProgressionSelectionRange,
+  type ProgressionSelectionUnit,
 } from "../../lib/progression";
 import { ProgressionChordChart } from "./ProgressionChordChart";
 import { ProgressionAdvancedRhythm } from "./editor/ProgressionAdvancedRhythm";
@@ -18,14 +22,6 @@ import { ProgressionEditorHeader } from "./editor/ProgressionEditorHeader";
 import { ProgressionHarmonyEditor } from "./editor/ProgressionHarmonyEditor";
 import { ProgressionRhythmPreset } from "./editor/ProgressionRhythmPreset";
 import { ProgressionSelectionHeader } from "./editor/ProgressionSelectionHeader";
-
-type ProgressionSelectionUnit = "beat" | "cell" | "bar";
-
-type ProgressionSelectionRange = {
-  unit: ProgressionSelectionUnit;
-  startSlot: number;
-  endSlot: number;
-};
 
 type ProgressionEditorProps = {
   className?: string;
@@ -56,6 +52,10 @@ type ProgressionEditorProps = {
     eventType: ProgressionBeatEventType,
   ) => void;
   onCellChange: (barIndex: number, cellIndex: number, cell: ProgressionCell) => void;
+  onHarmonyTargetsChange: (
+    targets: readonly ProgressionHarmonyTarget[],
+    cell: ProgressionCell,
+  ) => void;
   onRhythmEventChange: (
     barIndex: number,
     startStep: number,
@@ -83,6 +83,7 @@ export function ProgressionEditor({
   onBeatDurationChange,
   onBeatEventTypeChange,
   onCellChange,
+  onHarmonyTargetsChange,
   onRhythmEventChange,
   onRhythmEventRemove,
   validateRhythmPlacement,
@@ -90,10 +91,10 @@ export function ProgressionEditor({
   const [selectedBarIndex, setSelectedBarIndex] = useState(0);
   const [selectedBeatIndex, setSelectedBeatIndex] = useState(0);
   const [selectedStepInBeat, setSelectedStepInBeat] = useState(0);
-  const [selectionUnit, setSelectionUnit] = useState<ProgressionSelectionUnit>("beat");
+  const [selectionUnit, setSelectionUnit] = useState<ProgressionSelectionUnit>("cell");
   const [selectionAnchor, setSelectionAnchor] = useState({ barIndex: 0, beatIndex: 0 });
   const [selectionRange, setSelectionRange] = useState<ProgressionSelectionRange>({
-    unit: "beat",
+    unit: "cell",
     startSlot: 0,
     endSlot: 0,
   });
@@ -229,6 +230,14 @@ export function ProgressionEditor({
   }
 
   const applyCellChange = (nextCell: ProgressionCell) => {
+    const shouldApplyRangeSelection =
+      selectionUnit !== "beat" || selectionRange.startSlot !== selectionRange.endSlot;
+
+    if (shouldApplyRangeSelection) {
+      onHarmonyTargetsChange(resolveHarmonyTargets(selectionRange, bars), nextCell);
+      return;
+    }
+
     if (editScope === "beat") {
       onBeatChordChange(selectedBarIndex, selectedBeatIndex, nextCell);
       return;

@@ -48,9 +48,14 @@ export {
 } from "./rhythm/ticks";
 
 export {
+  applyHarmonyToTargets,
   getProgressionBeat,
   getProgressionCellForBeat,
   makeProgressionBeats,
+  resolveHarmonyTargets,
+  type ProgressionHarmonyTarget,
+  type ProgressionSelectionRange,
+  type ProgressionSelectionUnit,
   updateProgressionBeatChord,
   updateProgressionCell,
 } from "./harmony";
