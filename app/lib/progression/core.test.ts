@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyHarmonyToTargets,
   applyProgressionBeatSubdivision,
   applyProgressionRhythmPreset,
   canTieProgressionBeat,
@@ -15,6 +16,7 @@ import {
   getProgressionSustainingEventAtStep,
   isProgressionBeatStart,
   progressionStepsPerBeat,
+  resolveHarmonyTargets,
   removeProgressionRhythmEvent,
   updateProgressionBeatChord,
   updateProgressionBeatEventType,
@@ -85,6 +87,57 @@ describe("progression beat overrides", () => {
     expect(getProgressionCellForBeat(restored.bars[0], 1)).toEqual(
       progression.bars[0].cells[0],
     );
+  });
+
+  it("resolves beat, cell, and bar targets for range selection", () => {
+    const progression = createDefaultProgression();
+
+    expect(resolveHarmonyTargets({ unit: "beat", startSlot: 1, endSlot: 3 }, progression.bars)).toEqual([
+      { type: "beat", barIndex: 0, beatIndex: 1 },
+      { type: "beat", barIndex: 0, beatIndex: 2 },
+      { type: "beat", barIndex: 0, beatIndex: 3 },
+    ]);
+
+    expect(resolveHarmonyTargets({ unit: "cell", startSlot: 1, endSlot: 2 }, progression.bars)).toEqual([
+      { type: "cell", barIndex: 0, cellIndex: 1 },
+      { type: "cell", barIndex: 1, cellIndex: 0 },
+    ]);
+
+    expect(resolveHarmonyTargets({ unit: "bar", startSlot: 1, endSlot: 2 }, progression.bars)).toEqual([
+      { type: "cell", barIndex: 1, cellIndex: 0 },
+      { type: "cell", barIndex: 1, cellIndex: 1 },
+      { type: "cell", barIndex: 2, cellIndex: 0 },
+      { type: "cell", barIndex: 2, cellIndex: 1 },
+    ]);
+  });
+
+  it("applies the same harmony to every resolved target", () => {
+    const progression = createDefaultProgression();
+    const nextCell = { root: "F#", chordTypeId: "7" };
+
+    const beatUpdated = applyHarmonyToTargets(
+      progression,
+      nextCell,
+      resolveHarmonyTargets({ unit: "beat", startSlot: 1, endSlot: 2 }, progression.bars),
+    );
+    expect(getProgressionCellForBeat(beatUpdated.bars[0], 1)).toEqual(nextCell);
+    expect(getProgressionCellForBeat(beatUpdated.bars[0], 2)).toEqual(nextCell);
+
+    const cellUpdated = applyHarmonyToTargets(
+      progression,
+      nextCell,
+      resolveHarmonyTargets({ unit: "cell", startSlot: 0, endSlot: 1 }, progression.bars),
+    );
+    expect(cellUpdated.bars[0].cells[0]).toEqual(nextCell);
+    expect(cellUpdated.bars[0].cells[1]).toEqual(nextCell);
+
+    const barUpdated = applyHarmonyToTargets(
+      progression,
+      nextCell,
+      resolveHarmonyTargets({ unit: "bar", startSlot: 1, endSlot: 1 }, progression.bars),
+    );
+    expect(barUpdated.bars[1].cells[0]).toEqual(nextCell);
+    expect(barUpdated.bars[1].cells[1]).toEqual(nextCell);
   });
 });
 

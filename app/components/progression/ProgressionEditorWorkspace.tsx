@@ -24,6 +24,7 @@ export function ProgressionEditorWorkspace() {
     updateBeatDuration,
     updateBeatEventType,
     updateCell,
+    updateHarmonyTargets,
     updateRhythmEvent,
     validateRhythmPlacement,
   } = useProgressionSession();
@@ -163,6 +164,7 @@ export function ProgressionEditorWorkspace() {
         onBeatDurationChange={updateBeatDuration}
         onBeatEventTypeChange={updateBeatEventType}
         onCellChange={updateCell}
+        onHarmonyTargetsChange={updateHarmonyTargets}
         onRhythmEventChange={updateRhythmEvent}
         onRhythmEventRemove={removeRhythmEvent}
         validateRhythmPlacement={validateRhythmPlacement}

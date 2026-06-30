@@ -10,6 +10,8 @@ type ProgressionHarmonyEditorProps = {
   cellIndex: number;
   chordTypes: ChordType[];
   editScope: "beat" | "cell";
+  hasLockedTargets: boolean;
+  isRangeSelectionActive: boolean;
   onBeatSelect: (beatIndex: number) => void;
   onCellChange: (cell: ProgressionCell) => void;
   onHarmonyCopy: (direction: -1 | 1) => void;
@@ -26,6 +28,8 @@ export function ProgressionHarmonyEditor({
   cellIndex,
   chordTypes,
   editScope,
+  hasLockedTargets,
+  isRangeSelectionActive,
   onBeatSelect,
   onCellChange,
   onHarmonyCopy,
@@ -34,6 +38,8 @@ export function ProgressionHarmonyEditor({
   roots,
   selectedCell,
 }: ProgressionHarmonyEditorProps) {
+  const isCopyDisabled = isRangeSelectionActive || hasLockedTargets;
+
   return (
     <section className="progressionHarmonySection" aria-label="Harmony">
       <div className="progressionHarmonyFields">
@@ -67,11 +73,21 @@ export function ProgressionHarmonyEditor({
       <div className="progressionHarmonyMetaFields">
         <div className="progressionApplySection">
           <span className="controlLabel">Apply To</span>
+          {hasLockedTargets ? (
+            <small className="progressionApplyHint">
+              ロック中は Apply To よりロック対象を優先します。
+            </small>
+          ) : isRangeSelectionActive ? (
+            <small className="progressionApplyHint">
+              範囲選択中は Apply To より選択範囲を優先します。
+            </small>
+          ) : null}
           <div className="progressionApplyTabs" role="group" aria-label="コードの適用範囲">
             <button
               type="button"
               className={editScope === "cell" ? "active" : ""}
               aria-pressed={editScope === "cell"}
+              disabled={isRangeSelectionActive || hasLockedTargets}
               onClick={onUseCellScope}
             >
               Beats {cellIndex === 0 ? "1-2" : "3-4"}
@@ -80,6 +96,7 @@ export function ProgressionHarmonyEditor({
               type="button"
               className={editScope === "beat" ? "active" : ""}
               aria-pressed={editScope === "beat"}
+              disabled={isRangeSelectionActive || hasLockedTargets}
               onClick={onUseBeatScope}
             >
               Beat {beatIndex + 1} only
@@ -111,12 +128,16 @@ export function ProgressionHarmonyEditor({
         <div className="progressionApplySection">
           <span className="controlLabel">コピー先</span>
           <small className="progressionCopyHint">
-            Shift + ← / → でも同じ操作ができます。
+            {hasLockedTargets
+              ? "ロック中は Copy Chord を使わず、ロック対象へ直接適用します。"
+              : isRangeSelectionActive
+                ? "範囲選択中は Copy Chord を使わず、選択範囲へ直接適用します。"
+                : "Shift + ← / → でも同じ操作ができます。"}
           </small>
           <div className="progressionCopyTabs" role="group" aria-label="現在のコードを隣の編集枠へコピー">
             <button
               type="button"
-              disabled={!canCopyHarmonyToPrevious}
+              disabled={isCopyDisabled || !canCopyHarmonyToPrevious}
               aria-label="現在のコードを前の編集枠へコピー"
               onClick={() => onHarmonyCopy(-1)}
             >
@@ -125,7 +146,7 @@ export function ProgressionHarmonyEditor({
             </button>
             <button
               type="button"
-              disabled={!canCopyHarmonyToNext}
+              disabled={isCopyDisabled || !canCopyHarmonyToNext}
               aria-label="現在のコードを次の編集枠へコピー"
               onClick={() => onHarmonyCopy(1)}
             >

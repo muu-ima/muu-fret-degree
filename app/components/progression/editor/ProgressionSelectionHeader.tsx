@@ -3,13 +3,28 @@ import type { ProgressionCell } from "../../../lib/progression";
 import { formatChordSymbol } from "../../../lib/chord-symbol";
 import { ProgressionMiniTransport } from "../ProgressionMiniTransport";
 
+type ProgressionSelectionUnit = "beat" | "cell" | "bar";
+type ProgressionSelectionRange = {
+  unit: ProgressionSelectionUnit;
+  startSlot: number;
+  endSlot: number;
+};
+
 type ProgressionSelectionHeaderProps = {
   barNumber: number;
   beatIndex: number;
   cellIndex: number;
   chordTypes: ChordType[];
   editScope: "beat" | "cell";
+  hasLockedTargets: boolean;
+  isRangeSelectionActive: boolean;
+  onClearSelectionRange: () => void;
+  onClearLockedTargets: () => void;
+  onLockSelectionRange: () => void;
+  onSelectionUnitChange: (unit: ProgressionSelectionUnit) => void;
   selectedCell: ProgressionCell;
+  selectionRange: ProgressionSelectionRange;
+  selectionUnit: ProgressionSelectionUnit;
   stepInBeat: number;
 };
 
@@ -19,9 +34,23 @@ export function ProgressionSelectionHeader({
   cellIndex,
   chordTypes,
   editScope,
+  hasLockedTargets,
+  isRangeSelectionActive,
+  onClearSelectionRange,
+  onClearLockedTargets,
+  onLockSelectionRange,
+  onSelectionUnitChange,
   selectedCell,
+  selectionRange,
+  selectionUnit,
   stepInBeat,
 }: ProgressionSelectionHeaderProps) {
+  const selectionCount = selectionRange.endSlot - selectionRange.startSlot + 1;
+  const selectionUnitLabel = selectionUnit === "beat"
+    ? "拍"
+    : selectionUnit === "cell"
+      ? "2拍セル"
+      : "小節";
   return (
     <div className="progressionSelectionHeader">
       <div className="progressionSelectionMeta">
@@ -37,6 +66,50 @@ export function ProgressionSelectionHeader({
             ? `Beat ${beatIndex + 1} override`
             : `Editing Beats ${cellIndex === 0 ? "1-2" : "3-4"}`}
         </span>
+        <div className="progressionRangeMeta">
+          <div className="progressionRangeMetaHeader">
+            <span>範囲選択</span>
+            <div className="progressionRangeMetaActions">
+              {isRangeSelectionActive ? (
+                <button type="button" onClick={onLockSelectionRange}>
+                  選択をロック
+                </button>
+              ) : null}
+              {hasLockedTargets ? (
+                <button type="button" onClick={onClearLockedTargets}>
+                  ロック解除
+                </button>
+              ) : null}
+              {isRangeSelectionActive ? (
+                <button type="button" onClick={onClearSelectionRange}>
+                  選択解除
+                </button>
+              ) : null}
+            </div>
+          </div>
+          <div className="progressionSelectionUnitTabs" role="group" aria-label="範囲選択の単位">
+            {[
+              { value: "beat", label: "1拍" },
+              { value: "cell", label: "2拍セル" },
+              { value: "bar", label: "小節" },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={selectionUnit === option.value ? "active" : ""}
+                aria-pressed={selectionUnit === option.value}
+                onClick={() => onSelectionUnitChange(option.value as ProgressionSelectionUnit)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <small>
+            {selectionCount} {selectionUnitLabel}を選択中
+            {isRangeSelectionActive ? " · この範囲へコード変更を適用します。" : ""}
+            {hasLockedTargets ? " · ロック中の対象を優先して適用します。" : ""}
+          </small>
+        </div>
         <strong className="progressionSelectionChordName">
           {formatChordSymbol(selectedCell.root, selectedCell.chordTypeId, chordTypes)}
         </strong>

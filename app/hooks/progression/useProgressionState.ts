@@ -14,6 +14,7 @@ import {
   progressionHistoryReducer,
 } from "../../lib/progression/state/history";
 import {
+  applyHarmonyToTargets,
   applyProgressionRhythmPreset,
   createProgressionVirtualTimeline,
   createDefaultProgression,
@@ -29,6 +30,7 @@ import {
   type ProgressionBeatEventType,
   type ProgressionCell,
   type ProgressionDurationSteps,
+  type ProgressionHarmonyTarget,
   type ProgressionRhythmPresetId,
 } from "../../lib/progression";
 import { usePersistedProgression } from "./usePersistedProgression";
@@ -90,6 +92,17 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
         type: "commit",
         update: (currentProgression) =>
           updateProgressionBeatChord(currentProgression, barIndex, beatIndex, nextCell),
+      });
+    },
+    [],
+  );
+
+  const updateHarmonyTargets = useCallback(
+    (targets: readonly ProgressionHarmonyTarget[], nextCell: ProgressionCell) => {
+      dispatch({
+        type: "commit",
+        update: (currentProgression) =>
+          applyHarmonyToTargets(currentProgression, nextCell, targets),
       });
     },
     [],
@@ -208,6 +221,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     updateBeatDuration,
     updateBeatEventType,
     updateCell,
+    updateHarmonyTargets,
     updateRhythmEvent,
     validateRhythmPlacement,
   };

@@ -5,6 +5,18 @@ import type {
   ProgressionCell,
 } from "./model";
 
+export type ProgressionSelectionUnit = "beat" | "cell" | "bar";
+
+export type ProgressionSelectionRange = {
+  unit: ProgressionSelectionUnit;
+  startSlot: number;
+  endSlot: number;
+};
+
+export type ProgressionHarmonyTarget =
+  | { type: "beat"; barIndex: number; beatIndex: number }
+  | { type: "cell"; barIndex: number; cellIndex: number };
+
 export function updateProgressionCell(
   progression: ChordProgression,
   barIndex: number,
@@ -77,6 +89,72 @@ export function updateProgressionBeatChord(
       return barWithoutBeats;
     }),
   };
+}
+
+export function resolveHarmonyTargets(
+  range: ProgressionSelectionRange,
+  bars: readonly ProgressionBar[],
+): ProgressionHarmonyTarget[] {
+  const maxSlot =
+    range.unit === "beat"
+      ? bars.length * 4 - 1
+      : range.unit === "cell"
+        ? bars.length * 2 - 1
+        : bars.length - 1;
+  const startSlot = Math.max(0, Math.min(range.startSlot, maxSlot));
+  const endSlot = Math.max(0, Math.min(range.endSlot, maxSlot));
+  const targets: ProgressionHarmonyTarget[] = [];
+
+  for (let slot = startSlot; slot <= endSlot; slot += 1) {
+    if (range.unit === "beat") {
+      targets.push({
+        type: "beat",
+        barIndex: Math.floor(slot / 4),
+        beatIndex: slot % 4,
+      });
+      continue;
+    }
+
+    if (range.unit === "cell") {
+      targets.push({
+        type: "cell",
+        barIndex: Math.floor(slot / 2),
+        cellIndex: slot % 2,
+      });
+      continue;
+    }
+
+    targets.push(
+      { type: "cell", barIndex: slot, cellIndex: 0 },
+      { type: "cell", barIndex: slot, cellIndex: 1 },
+    );
+  }
+
+  return targets;
+}
+
+export function applyHarmonyToTargets(
+  progression: ChordProgression,
+  nextCell: ProgressionCell,
+  targets: readonly ProgressionHarmonyTarget[],
+): ChordProgression {
+  return targets.reduce((currentProgression, target) => {
+    if (target.type === "beat") {
+      return updateProgressionBeatChord(
+        currentProgression,
+        target.barIndex,
+        target.beatIndex,
+        nextCell,
+      );
+    }
+
+    return updateProgressionCell(
+      currentProgression,
+      target.barIndex,
+      target.cellIndex,
+      nextCell,
+    );
+  }, progression);
 }
 
 export function getProgressionBeat(bar: ProgressionBar, beatIndex: number): ProgressionBeat {
