@@ -16,6 +16,8 @@ type ProgressionSelectionHeaderProps = {
   cellIndex: number;
   chordTypes: ChordType[];
   editScope: "beat" | "cell";
+  isRangeSelectionActive: boolean;
+  onClearSelectionRange: () => void;
   onSelectionUnitChange: (unit: ProgressionSelectionUnit) => void;
   selectedCell: ProgressionCell;
   selectionRange: ProgressionSelectionRange;
@@ -29,6 +31,8 @@ export function ProgressionSelectionHeader({
   cellIndex,
   chordTypes,
   editScope,
+  isRangeSelectionActive,
+  onClearSelectionRange,
   onSelectionUnitChange,
   selectedCell,
   selectionRange,
@@ -57,7 +61,14 @@ export function ProgressionSelectionHeader({
             : `Editing Beats ${cellIndex === 0 ? "1-2" : "3-4"}`}
         </span>
         <div className="progressionRangeMeta">
-          <span>範囲選択</span>
+          <div className="progressionRangeMetaHeader">
+            <span>範囲選択</span>
+            {isRangeSelectionActive ? (
+              <button type="button" onClick={onClearSelectionRange}>
+                選択解除
+              </button>
+            ) : null}
+          </div>
           <div className="progressionSelectionUnitTabs" role="group" aria-label="範囲選択の単位">
             {[
               { value: "beat", label: "1拍" },
@@ -77,6 +88,7 @@ export function ProgressionSelectionHeader({
           </div>
           <small>
             {selectionCount} {selectionUnitLabel}を選択中
+            {isRangeSelectionActive ? " · この範囲へコード変更を適用します。" : ""}
           </small>
         </div>
         <strong className="progressionSelectionChordName">

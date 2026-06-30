@@ -10,6 +10,7 @@ type ProgressionHarmonyEditorProps = {
   cellIndex: number;
   chordTypes: ChordType[];
   editScope: "beat" | "cell";
+  isRangeSelectionActive: boolean;
   onBeatSelect: (beatIndex: number) => void;
   onCellChange: (cell: ProgressionCell) => void;
   onHarmonyCopy: (direction: -1 | 1) => void;
@@ -26,6 +27,7 @@ export function ProgressionHarmonyEditor({
   cellIndex,
   chordTypes,
   editScope,
+  isRangeSelectionActive,
   onBeatSelect,
   onCellChange,
   onHarmonyCopy,
@@ -67,11 +69,17 @@ export function ProgressionHarmonyEditor({
       <div className="progressionHarmonyMetaFields">
         <div className="progressionApplySection">
           <span className="controlLabel">Apply To</span>
+          {isRangeSelectionActive ? (
+            <small className="progressionApplyHint">
+              範囲選択中は Apply To より選択範囲を優先します。
+            </small>
+          ) : null}
           <div className="progressionApplyTabs" role="group" aria-label="コードの適用範囲">
             <button
               type="button"
               className={editScope === "cell" ? "active" : ""}
               aria-pressed={editScope === "cell"}
+              disabled={isRangeSelectionActive}
               onClick={onUseCellScope}
             >
               Beats {cellIndex === 0 ? "1-2" : "3-4"}
@@ -80,6 +88,7 @@ export function ProgressionHarmonyEditor({
               type="button"
               className={editScope === "beat" ? "active" : ""}
               aria-pressed={editScope === "beat"}
+              disabled={isRangeSelectionActive}
               onClick={onUseBeatScope}
             >
               Beat {beatIndex + 1} only

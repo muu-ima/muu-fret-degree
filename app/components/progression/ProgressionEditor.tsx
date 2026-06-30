@@ -158,6 +158,17 @@ export function ProgressionEditor({
     });
   };
 
+  const clearSelectionRange = () => {
+    setSelectionUnit("beat");
+    const currentSlot = getSelectionSlotIndex("beat", selectedBarIndex, selectedBeatIndex);
+    setSelectionAnchor({ barIndex: selectedBarIndex, beatIndex: selectedBeatIndex });
+    setSelectionRange({
+      unit: "beat",
+      startSlot: currentSlot,
+      endSlot: currentSlot,
+    });
+  };
+
   const selectedBar = bars[selectedBarIndex] ?? bars[0];
   const selectedRhythmPreset = selectedBar
     ? getProgressionRhythmPreset(selectedBar, selectedBeatIndex)
@@ -167,6 +178,8 @@ export function ProgressionEditor({
   const beatOverride = selectedBar?.beats?.[selectedBeatIndex]?.chordOverride;
   const editScope = beatOverride ? "beat" : "cell";
   const selectedCell = editScope === "beat" ? beatOverride ?? baseCell : baseCell;
+  const isRangeSelectionActive =
+    selectionUnit !== "beat" || selectionRange.startSlot !== selectionRange.endSlot;
 
   const harmonySlotCount = editScope === "beat" ? bars.length * 4 : bars.length * 2;
   const selectedHarmonySlotIndex = editScope === "beat"
@@ -288,6 +301,8 @@ export function ProgressionEditor({
           cellIndex={selectedCellIndex}
           chordTypes={chordTypes}
           editScope={editScope}
+          isRangeSelectionActive={isRangeSelectionActive}
+          onClearSelectionRange={clearSelectionRange}
           onSelectionUnitChange={changeSelectionUnit}
           selectedCell={selectedCell}
           selectionRange={selectionRange}
@@ -301,6 +316,7 @@ export function ProgressionEditor({
           cellIndex={selectedCellIndex}
           chordTypes={chordTypes}
           editScope={editScope}
+          isRangeSelectionActive={isRangeSelectionActive}
           onBeatSelect={(beatIndex) => selectBeat(selectedBarIndex, beatIndex)}
           onCellChange={applyCellChange}
           onHarmonyCopy={copyHarmonyToAdjacentSlot}

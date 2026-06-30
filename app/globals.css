@@ -2347,11 +2347,29 @@ select:focus-visible,
   gap: 6px;
 }
 
-.progressionRangeMeta > span {
+.progressionRangeMetaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.progressionRangeMetaHeader > span {
   color: var(--muted);
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.progressionRangeMetaHeader button {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(154, 171, 196, 0.2);
+  border-radius: 999px;
+  background: rgba(20, 26, 36, 0.94);
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
 }
 
 .progressionRangeMeta small {
@@ -2359,6 +2377,13 @@ select:focus-visible,
   font-size: 0.66rem;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.progressionApplyHint {
+  color: rgba(171, 184, 209, 0.72);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .progressionSelectionUnitTabs {
