@@ -14,23 +14,48 @@ import {
   type ProgressionBar,
 } from "../../lib/progression";
 
+type ProgressionSelectionUnit = "beat" | "cell" | "bar";
+type ProgressionSelectionRange = {
+  unit: ProgressionSelectionUnit;
+  startSlot: number;
+  endSlot: number;
+};
+
 type ProgressionChordChartProps = {
   bars: readonly ProgressionBar[];
   chordTypes: ChordType[];
+  selectionRange: ProgressionSelectionRange;
+  selectionUnit: ProgressionSelectionUnit;
   selectedBarIndex: number;
   selectedBeatIndex: number;
   selectedStepInBeat: number;
-  onBeatSelect: (barIndex: number, beatIndex: number) => void;
+  onBeatSelect: (barIndex: number, beatIndex: number, extendSelection?: boolean) => void;
 };
 
 export function ProgressionChordChart({
   bars,
   chordTypes,
+  selectionRange,
+  selectionUnit,
   selectedBarIndex,
   selectedBeatIndex,
   selectedStepInBeat,
   onBeatSelect,
 }: ProgressionChordChartProps) {
+  const isBeatInSelectionRange = (barIndex: number, beatIndex: number) => {
+    const slotIndex = selectionUnit === "bar"
+      ? barIndex
+      : selectionUnit === "cell"
+        ? barIndex * 2 + Math.floor(beatIndex / 2)
+        : barIndex * 4 + beatIndex;
+
+    return (
+      selectionRange.unit === selectionUnit &&
+      slotIndex >= selectionRange.startSlot &&
+      slotIndex <= selectionRange.endSlot
+    );
+  };
+
   return (
     <section className="progressionChordChart" aria-label="コード進行譜">
       <div className="progressionChordChartHeader">
@@ -49,7 +74,9 @@ export function ProgressionChordChart({
 
           return (
             <article
-              className={barIndex === selectedBarIndex ? "progressionChartBar selected" : "progressionChartBar"}
+              className={`${barIndex === selectedBarIndex ? "progressionChartBar selected" : "progressionChartBar"}${
+                selectionUnit === "bar" && isBeatInSelectionRange(barIndex, 0) ? " rangeSelected" : ""
+              }`}
               key={bar.bar}
             >
               <span className="progressionChartBarNumber">Bar {bar.bar}</span>
@@ -63,6 +90,7 @@ export function ProgressionChordChart({
               <div className="progressionChartBeats">
                 {[0, 1, 2, 3].map((beatIndex) => {
                   const isSelected = barIndex === selectedBarIndex && beatIndex === selectedBeatIndex;
+                  const isRangeSelected = isBeatInSelectionRange(barIndex, beatIndex);
                   const cell = getProgressionCellForBeat(bar, beatIndex);
                   const eventType = getProgressionBeatEventType(bar, beatIndex);
                   const durationSteps = getProgressionBeatDuration(bar, beatIndex);
@@ -91,10 +119,10 @@ export function ProgressionChordChart({
                     <button
                       key={beatIndex}
                       type="button"
-                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${hasTripletPulse ? " triplet" : ""}${isSelected ? " selected" : ""}`}
+                      className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${hasTripletPulse ? " triplet" : ""}${isRangeSelected ? " rangeSelected" : ""}${isSelected ? " selected" : ""}`}
                       aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : eventType === "tie" ? "Tie" : `Hit, ${durationLabel}`}`}
-                      aria-pressed={isSelected}
-                      onClick={() => onBeatSelect(barIndex, beatIndex)}
+                      aria-pressed={isSelected || isRangeSelected}
+                      onClick={(event) => onBeatSelect(barIndex, beatIndex, event.shiftKey)}
                     >
                       <span className="progressionChartSlash" aria-hidden="true">
                         {eventType === "rest" ? "—" : eventType === "tie" ? "⌒" : "/"}

@@ -19,6 +19,14 @@ import { ProgressionHarmonyEditor } from "./editor/ProgressionHarmonyEditor";
 import { ProgressionRhythmPreset } from "./editor/ProgressionRhythmPreset";
 import { ProgressionSelectionHeader } from "./editor/ProgressionSelectionHeader";
 
+type ProgressionSelectionUnit = "beat" | "cell" | "bar";
+
+type ProgressionSelectionRange = {
+  unit: ProgressionSelectionUnit;
+  startSlot: number;
+  endSlot: number;
+};
+
 type ProgressionEditorProps = {
   className?: string;
   bars: readonly ProgressionBar[];
@@ -82,15 +90,71 @@ export function ProgressionEditor({
   const [selectedBarIndex, setSelectedBarIndex] = useState(0);
   const [selectedBeatIndex, setSelectedBeatIndex] = useState(0);
   const [selectedStepInBeat, setSelectedStepInBeat] = useState(0);
+  const [selectionUnit, setSelectionUnit] = useState<ProgressionSelectionUnit>("beat");
+  const [selectionAnchor, setSelectionAnchor] = useState({ barIndex: 0, beatIndex: 0 });
+  const [selectionRange, setSelectionRange] = useState<ProgressionSelectionRange>({
+    unit: "beat",
+    startSlot: 0,
+    endSlot: 0,
+  });
 
   useEffect(() => {
     setSelectedBarIndex((currentIndex) => Math.min(currentIndex, Math.max(bars.length - 1, 0)));
   }, [bars.length]);
 
-  const selectBeat = (barIndex: number, beatIndex: number) => {
+  const getSelectionSlotIndex = (
+    unit: ProgressionSelectionUnit,
+    barIndex: number,
+    beatIndex: number,
+  ) => {
+    if (unit === "bar") {
+      return barIndex;
+    }
+
+    if (unit === "cell") {
+      return barIndex * 2 + Math.floor(beatIndex / 2);
+    }
+
+    return barIndex * 4 + beatIndex;
+  };
+
+  const selectBeat = (barIndex: number, beatIndex: number, extendSelection = false) => {
     setSelectedBarIndex(barIndex);
     setSelectedBeatIndex(beatIndex);
     setSelectedStepInBeat(0);
+
+    const currentSlot = getSelectionSlotIndex(selectionUnit, barIndex, beatIndex);
+    if (extendSelection) {
+      const anchorSlot = getSelectionSlotIndex(
+        selectionUnit,
+        selectionAnchor.barIndex,
+        selectionAnchor.beatIndex,
+      );
+      setSelectionRange({
+        unit: selectionUnit,
+        startSlot: Math.min(anchorSlot, currentSlot),
+        endSlot: Math.max(anchorSlot, currentSlot),
+      });
+      return;
+    }
+
+    setSelectionAnchor({ barIndex, beatIndex });
+    setSelectionRange({
+      unit: selectionUnit,
+      startSlot: currentSlot,
+      endSlot: currentSlot,
+    });
+  };
+
+  const changeSelectionUnit = (nextUnit: ProgressionSelectionUnit) => {
+    setSelectionUnit(nextUnit);
+    const currentSlot = getSelectionSlotIndex(nextUnit, selectedBarIndex, selectedBeatIndex);
+    setSelectionAnchor({ barIndex: selectedBarIndex, beatIndex: selectedBeatIndex });
+    setSelectionRange({
+      unit: nextUnit,
+      startSlot: currentSlot,
+      endSlot: currentSlot,
+    });
   };
 
   const selectedBar = bars[selectedBarIndex] ?? bars[0];
@@ -201,6 +265,8 @@ export function ProgressionEditor({
       <ProgressionChordChart
         bars={bars}
         chordTypes={chordTypes}
+        selectionRange={selectionRange}
+        selectionUnit={selectionUnit}
         selectedBarIndex={selectedBarIndex}
         selectedBeatIndex={selectedBeatIndex}
         selectedStepInBeat={selectedStepInBeat}
@@ -213,7 +279,10 @@ export function ProgressionEditor({
           cellIndex={selectedCellIndex}
           chordTypes={chordTypes}
           editScope={editScope}
+          onSelectionUnitChange={changeSelectionUnit}
           selectedCell={selectedCell}
+          selectionRange={selectionRange}
+          selectionUnit={selectionUnit}
           stepInBeat={selectedStepInBeat}
         />
         <ProgressionHarmonyEditor

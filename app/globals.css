@@ -2043,6 +2043,12 @@ select:focus-visible,
   box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.1);
 }
 
+.progressionChartBar.rangeSelected {
+  background:
+    linear-gradient(180deg, rgba(122, 167, 255, 0.08), rgba(122, 167, 255, 0.02)),
+    rgba(17, 22, 31, 0.78);
+}
+
 .progressionChartBarNumber {
   display: block;
   margin-bottom: 7px;
@@ -2103,6 +2109,11 @@ select:focus-visible,
 .progressionChartBeat.selected {
   background: rgba(122, 167, 255, 0.14);
   color: #fff;
+}
+
+.progressionChartBeat.rangeSelected:not(.selected) {
+  background: rgba(122, 167, 255, 0.08);
+  color: #dce5f4;
 }
 
 .progressionChartBeat.triplet {
@@ -2288,6 +2299,7 @@ select:focus-visible,
 
 .progressionSelectionMeta {
   display: flex;
+  flex-wrap: wrap;
   align-items: end;
   gap: 10px;
 }
@@ -2328,6 +2340,51 @@ select:focus-visible,
   font-size: 1.4rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+}
+
+.progressionRangeMeta {
+  display: grid;
+  gap: 6px;
+}
+
+.progressionRangeMeta > span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.progressionRangeMeta small {
+  color: rgba(171, 184, 209, 0.72);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.progressionSelectionUnitTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.progressionSelectionUnitTabs button {
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #334055;
+  border-radius: 999px;
+  background: #141922;
+  color: var(--muted);
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.progressionSelectionUnitTabs button.active {
+  border-color: rgba(122, 167, 255, 0.5);
+  background: linear-gradient(135deg, rgba(122, 167, 255, 0.24), rgba(43, 125, 233, 0.14));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 255, 0.08);
 }
 
 .progressionMiniTransport {
