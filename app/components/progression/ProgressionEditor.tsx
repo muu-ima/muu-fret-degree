@@ -91,6 +91,7 @@ export function ProgressionEditor({
   const [selectedBarIndex, setSelectedBarIndex] = useState(0);
   const [selectedBeatIndex, setSelectedBeatIndex] = useState(0);
   const [selectedStepInBeat, setSelectedStepInBeat] = useState(0);
+  const [isDragSelecting, setIsDragSelecting] = useState(false);
   const [selectionUnit, setSelectionUnit] = useState<ProgressionSelectionUnit>("cell");
   const [selectionAnchor, setSelectionAnchor] = useState({ barIndex: 0, beatIndex: 0 });
   const [selectionRange, setSelectionRange] = useState<ProgressionSelectionRange>({
@@ -178,6 +179,19 @@ export function ProgressionEditor({
     setLockedTargets([]);
   };
 
+  const beginDragSelection = (barIndex: number, beatIndex: number) => {
+    setIsDragSelecting(true);
+    selectBeat(barIndex, beatIndex, false);
+  };
+
+  const extendDragSelection = (barIndex: number, beatIndex: number) => {
+    if (!isDragSelecting) {
+      return;
+    }
+
+    selectBeat(barIndex, beatIndex, true);
+  };
+
   const selectedBar = bars[selectedBarIndex] ?? bars[0];
   const selectedRhythmPreset = selectedBar
     ? getProgressionRhythmPreset(selectedBar, selectedBeatIndex)
@@ -248,6 +262,20 @@ export function ProgressionEditor({
     return () => window.removeEventListener("keydown", handleKeyDown);
   });
 
+  useEffect(() => {
+    if (!isDragSelecting) {
+      return;
+    }
+
+    const stopDragSelection = () => setIsDragSelecting(false);
+    window.addEventListener("pointerup", stopDragSelection);
+    window.addEventListener("pointercancel", stopDragSelection);
+    return () => {
+      window.removeEventListener("pointerup", stopDragSelection);
+      window.removeEventListener("pointercancel", stopDragSelection);
+    };
+  }, [isDragSelecting]);
+
   if (!selectedBar || !selectedCell) {
     return null;
   }
@@ -308,6 +336,8 @@ export function ProgressionEditor({
         selectedBarIndex={selectedBarIndex}
         selectedBeatIndex={selectedBeatIndex}
         selectedStepInBeat={selectedStepInBeat}
+        onBeatPointerDown={beginDragSelection}
+        onBeatPointerEnter={extendDragSelection}
         onBeatSelect={selectBeat}
       />
       <section className="progressionSelectionEditor" aria-label="選択中のコードを編集">
