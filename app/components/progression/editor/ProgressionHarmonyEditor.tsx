@@ -109,9 +109,9 @@ export function ProgressionHarmonyEditor({
         </div>
 
         <div className="progressionApplySection">
-          <span className="controlLabel">Copy To</span>
+          <span className="controlLabel">コピー先</span>
           <small className="progressionCopyHint">
-            You can also use Shift + Left / Right.
+            Shift + ← / → でも同じ操作ができます。
           </small>
           <div className="progressionCopyTabs" role="group" aria-label="現在のコードを隣の編集枠へコピー">
             <button
@@ -120,8 +120,8 @@ export function ProgressionHarmonyEditor({
               aria-label="現在のコードを前の編集枠へコピー"
               onClick={() => onHarmonyCopy(-1)}
             >
-              <span>← Previous</span>
-              <small>Shift + Left</small>
+              <span>← 前へコピー</span>
+              <small>Shift + ←</small>
             </button>
             <button
               type="button"
@@ -129,8 +129,8 @@ export function ProgressionHarmonyEditor({
               aria-label="現在のコードを次の編集枠へコピー"
               onClick={() => onHarmonyCopy(1)}
             >
-              <span>Next →</span>
-              <small>Shift + Right</small>
+              <span>次へコピー →</span>
+              <small>Shift + →</small>
             </button>
           </div>
         </div>
