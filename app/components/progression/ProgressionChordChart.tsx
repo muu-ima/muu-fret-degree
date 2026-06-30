@@ -26,6 +26,8 @@ type ProgressionChordChartProps = {
   bars: readonly ProgressionBar[];
   chordTypes: ChordType[];
   lockedTargets: readonly ProgressionHarmonyTarget[];
+  onBeatPointerDown: (barIndex: number, beatIndex: number) => void;
+  onBeatPointerEnter: (barIndex: number, beatIndex: number) => void;
   selectionRange: ProgressionSelectionRange;
   selectionUnit: ProgressionSelectionUnit;
   selectedBarIndex: number;
@@ -38,6 +40,8 @@ export function ProgressionChordChart({
   bars,
   chordTypes,
   lockedTargets,
+  onBeatPointerDown,
+  onBeatPointerEnter,
   selectionRange,
   selectionUnit,
   selectedBarIndex,
@@ -133,6 +137,12 @@ export function ProgressionChordChart({
                       className={`progressionChartBeat${eventType === "rest" ? " rest" : ""}${eventType === "tie" ? " tie" : ""}${hasTripletPulse ? " triplet" : ""}${isRangeSelected ? " rangeSelected" : ""}${isLocked ? " locked" : ""}${isSelected ? " selected" : ""}`}
                       aria-label={`Bar ${bar.bar}, Beat ${beatIndex + 1}, ${formatChordSymbol(cell.root, cell.chordTypeId, chordTypes)}, ${eventType === "rest" ? "Rest" : eventType === "tie" ? "Tie" : `Hit, ${durationLabel}`}`}
                       aria-pressed={isSelected || isRangeSelected}
+                      onPointerDown={(event) => {
+                        if (event.pointerType === "mouse" || event.pointerType === "pen") {
+                          onBeatPointerDown(barIndex, beatIndex);
+                        }
+                      }}
+                      onPointerEnter={() => onBeatPointerEnter(barIndex, beatIndex)}
                       onClick={(event) => onBeatSelect(barIndex, beatIndex, event.shiftKey)}
                     >
                       <span className="progressionChartSlash" aria-hidden="true">
