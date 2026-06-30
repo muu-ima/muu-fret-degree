@@ -318,6 +318,55 @@ Cmaj7
 
 ロック編集は、この最小仕様が安定した後に `lockedTargets` を追加して拡張する。まずは「複数対象へ同じコードを一度に入れられる」体験を先に成立させる。
 
+### ロック編集への拡張方針
+
+範囲選択の次段階では、現在の一時的な `selectionRange` とは別に、継続的に適用先を保持する `lockedTargets` を導入する。
+
+役割分担:
+
+- `selectionRange` は、ユーザーが今選んでいる連続範囲を表す一時UI stateとして扱う。
+- `lockedTargets` は、以後のRoot / Chord変更を同時反映する固定対象として扱う。
+- `selectionRange` は選択解除で消えるが、`lockedTargets` は明示的な解除操作まで保持する。
+- 一時選択とロック対象は概念として分け、同じ見た目に寄せすぎない。
+
+ロック時の基本操作:
+
+1. ユーザーは `selectionUnit` を選び、譜面上で複数拍 / 複数セル / 複数小節を選択する。
+2. `Lock Selection` 操作で、現在の `selectionRange` から `lockedTargets` を生成する。
+3. 以後のHarmony変更は、単独選択より `lockedTargets` を優先して適用する。
+4. `Unlock` または `選択解除` とは別の解除操作で `lockedTargets` を外す。
+
+ロック導入後の優先順位:
+
+- `lockedTargets` がある場合は、Root / Chord変更の適用先として最優先する。
+- `lockedTargets` がなく、`selectionRange` がある場合は、現在の範囲選択へ適用する。
+- どちらもない場合だけ、単独選択と `Apply To` の通常挙動へ戻る。
+
+表示方針:
+
+- `selectionRange` は薄い連続ハイライトで「今選んでいる範囲」として見せる。
+- `lockedTargets` はより強い色やバッジで「固定された適用先」として見せる。
+- `selectionRange` を `lockedTargets` 化した後も、ロック中であることを詳細エディター側と譜面側の両方で示す。
+- `Unlock` は編集ヘッダーまたは範囲選択UIの近くに置き、どこから解除するか迷わせない。
+
+ドラッグ選択の扱い:
+
+- ドラッグは新しいデータ構造ではなく、`selectionRange` を更新する入力手段として追加する。
+- 最初はクリック + Shift で範囲を確定できる状態を基準にし、ドラッグは後から同じ `selectionRange` 更新へ接続する。
+- `1拍` / `2拍セル` / `小節` ごとに、ドラッグ中にどの単位を吸着対象とするかを揃える。
+- ドラッグ選択を入れても、ロックの作成・解除は明示的な操作として残す。
+
+この段階で追加される分離:
+
+- UI state: `lockedTargets`
+- Command: `applyHarmonyToTargets(cell, lockedTargets)`
+- UI action: `lockSelectionRange(range)`, `clearLockedTargets()`
+
+Undo / Redo方針:
+
+- `Lock Selection` と `Unlock` 自体を履歴対象にするかは、初回実装前に別途決める。
+- 少なくとも、ロック中に行ったHarmony一括変更は1編集単位としてUndoできる必要がある。
+
 ### 拍入力
 
 選択した拍に対して、次を編集する。
