@@ -16,8 +16,11 @@ type ProgressionSelectionHeaderProps = {
   cellIndex: number;
   chordTypes: ChordType[];
   editScope: "beat" | "cell";
+  hasLockedTargets: boolean;
   isRangeSelectionActive: boolean;
   onClearSelectionRange: () => void;
+  onClearLockedTargets: () => void;
+  onLockSelectionRange: () => void;
   onSelectionUnitChange: (unit: ProgressionSelectionUnit) => void;
   selectedCell: ProgressionCell;
   selectionRange: ProgressionSelectionRange;
@@ -31,8 +34,11 @@ export function ProgressionSelectionHeader({
   cellIndex,
   chordTypes,
   editScope,
+  hasLockedTargets,
   isRangeSelectionActive,
   onClearSelectionRange,
+  onClearLockedTargets,
+  onLockSelectionRange,
   onSelectionUnitChange,
   selectedCell,
   selectionRange,
@@ -63,11 +69,23 @@ export function ProgressionSelectionHeader({
         <div className="progressionRangeMeta">
           <div className="progressionRangeMetaHeader">
             <span>範囲選択</span>
-            {isRangeSelectionActive ? (
-              <button type="button" onClick={onClearSelectionRange}>
-                選択解除
-              </button>
-            ) : null}
+            <div className="progressionRangeMetaActions">
+              {isRangeSelectionActive ? (
+                <button type="button" onClick={onLockSelectionRange}>
+                  選択をロック
+                </button>
+              ) : null}
+              {hasLockedTargets ? (
+                <button type="button" onClick={onClearLockedTargets}>
+                  ロック解除
+                </button>
+              ) : null}
+              {isRangeSelectionActive ? (
+                <button type="button" onClick={onClearSelectionRange}>
+                  選択解除
+                </button>
+              ) : null}
+            </div>
           </div>
           <div className="progressionSelectionUnitTabs" role="group" aria-label="範囲選択の単位">
             {[
@@ -89,6 +107,7 @@ export function ProgressionSelectionHeader({
           <small>
             {selectionCount} {selectionUnitLabel}を選択中
             {isRangeSelectionActive ? " · この範囲へコード変更を適用します。" : ""}
+            {hasLockedTargets ? " · ロック中の対象を優先して適用します。" : ""}
           </small>
         </div>
         <strong className="progressionSelectionChordName">

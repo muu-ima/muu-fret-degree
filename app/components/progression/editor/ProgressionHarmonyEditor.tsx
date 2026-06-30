@@ -10,6 +10,7 @@ type ProgressionHarmonyEditorProps = {
   cellIndex: number;
   chordTypes: ChordType[];
   editScope: "beat" | "cell";
+  hasLockedTargets: boolean;
   isRangeSelectionActive: boolean;
   onBeatSelect: (beatIndex: number) => void;
   onCellChange: (cell: ProgressionCell) => void;
@@ -27,6 +28,7 @@ export function ProgressionHarmonyEditor({
   cellIndex,
   chordTypes,
   editScope,
+  hasLockedTargets,
   isRangeSelectionActive,
   onBeatSelect,
   onCellChange,
@@ -69,7 +71,11 @@ export function ProgressionHarmonyEditor({
       <div className="progressionHarmonyMetaFields">
         <div className="progressionApplySection">
           <span className="controlLabel">Apply To</span>
-          {isRangeSelectionActive ? (
+          {hasLockedTargets ? (
+            <small className="progressionApplyHint">
+              ロック中は Apply To よりロック対象を優先します。
+            </small>
+          ) : isRangeSelectionActive ? (
             <small className="progressionApplyHint">
               範囲選択中は Apply To より選択範囲を優先します。
             </small>
@@ -79,7 +85,7 @@ export function ProgressionHarmonyEditor({
               type="button"
               className={editScope === "cell" ? "active" : ""}
               aria-pressed={editScope === "cell"}
-              disabled={isRangeSelectionActive}
+              disabled={isRangeSelectionActive || hasLockedTargets}
               onClick={onUseCellScope}
             >
               Beats {cellIndex === 0 ? "1-2" : "3-4"}
@@ -88,7 +94,7 @@ export function ProgressionHarmonyEditor({
               type="button"
               className={editScope === "beat" ? "active" : ""}
               aria-pressed={editScope === "beat"}
-              disabled={isRangeSelectionActive}
+              disabled={isRangeSelectionActive || hasLockedTargets}
               onClick={onUseBeatScope}
             >
               Beat {beatIndex + 1} only

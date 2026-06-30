@@ -2116,6 +2116,12 @@ select:focus-visible,
   color: #dce5f4;
 }
 
+.progressionChartBeat.locked:not(.selected) {
+  background: rgba(232, 77, 91, 0.1);
+  color: #ffe1e5;
+  box-shadow: inset 0 0 0 1px rgba(232, 77, 91, 0.16);
+}
+
 .progressionChartBeat.triplet {
   background: linear-gradient(180deg, rgba(86, 122, 181, 0.18), rgba(17, 22, 31, 0));
 }
@@ -2354,6 +2360,13 @@ select:focus-visible,
   gap: 10px;
 }
 
+.progressionRangeMetaActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
 .progressionRangeMetaHeader > span {
   color: var(--muted);
   font-size: 0.68rem;
@@ -2361,7 +2374,7 @@ select:focus-visible,
   text-transform: uppercase;
 }
 
-.progressionRangeMetaHeader button {
+.progressionRangeMetaActions button {
   min-height: 28px;
   padding: 0 10px;
   border: 1px solid rgba(154, 171, 196, 0.2);
@@ -2370,6 +2383,11 @@ select:focus-visible,
   color: var(--muted);
   font-size: 0.66rem;
   font-weight: 800;
+}
+
+.progressionRangeMetaActions button:first-child {
+  border-color: rgba(122, 167, 255, 0.28);
+  color: #dce5f4;
 }
 
 .progressionRangeMeta small {
