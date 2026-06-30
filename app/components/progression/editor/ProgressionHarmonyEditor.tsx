@@ -38,6 +38,8 @@ export function ProgressionHarmonyEditor({
   roots,
   selectedCell,
 }: ProgressionHarmonyEditorProps) {
+  const isCopyDisabled = isRangeSelectionActive || hasLockedTargets;
+
   return (
     <section className="progressionHarmonySection" aria-label="Harmony">
       <div className="progressionHarmonyFields">
@@ -126,12 +128,16 @@ export function ProgressionHarmonyEditor({
         <div className="progressionApplySection">
           <span className="controlLabel">コピー先</span>
           <small className="progressionCopyHint">
-            Shift + ← / → でも同じ操作ができます。
+            {hasLockedTargets
+              ? "ロック中は Copy Chord を使わず、ロック対象へ直接適用します。"
+              : isRangeSelectionActive
+                ? "範囲選択中は Copy Chord を使わず、選択範囲へ直接適用します。"
+                : "Shift + ← / → でも同じ操作ができます。"}
           </small>
           <div className="progressionCopyTabs" role="group" aria-label="現在のコードを隣の編集枠へコピー">
             <button
               type="button"
-              disabled={!canCopyHarmonyToPrevious}
+              disabled={isCopyDisabled || !canCopyHarmonyToPrevious}
               aria-label="現在のコードを前の編集枠へコピー"
               onClick={() => onHarmonyCopy(-1)}
             >
@@ -140,7 +146,7 @@ export function ProgressionHarmonyEditor({
             </button>
             <button
               type="button"
-              disabled={!canCopyHarmonyToNext}
+              disabled={isCopyDisabled || !canCopyHarmonyToNext}
               aria-label="現在のコードを次の編集枠へコピー"
               onClick={() => onHarmonyCopy(1)}
             >
