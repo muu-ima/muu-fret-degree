@@ -15,6 +15,25 @@ const keySignatureByScale: Record<string, (root: string) => string> = {
   "Natural Minor": (root) => `${root}m`,
 };
 
+const notationLayouts = {
+  default: {
+    width: 860,
+    height: 140,
+    staveX: 12,
+    staveY: 30,
+    staveWidth: 814,
+    formatWidth: 560,
+  },
+  compact: {
+    width: 620,
+    height: 118,
+    staveX: 8,
+    staveY: 20,
+    staveWidth: 560,
+    formatWidth: 350,
+  },
+};
+
 function noteParts(note: ScaleNote) {
   const match = /^([A-G])([#b]*?)$/.exec(note.note);
   const letter = match?.[1]?.toLowerCase() ?? "c";
@@ -64,30 +83,42 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
       return;
     }
 
-    container.replaceChildren();
+    const drawNotation = () => {
+      container.replaceChildren();
 
-    const renderer = new Renderer(container, Renderer.Backends.SVG);
-    renderer.resize(860, 168);
+      const layout = container.clientWidth <= 520 ? notationLayouts.compact : notationLayouts.default;
+      const renderer = new Renderer(container, Renderer.Backends.SVG);
+      renderer.resize(layout.width, layout.height);
 
-    const context = renderer.getContext();
-    context.setFont("Arial", 10);
+      const context = renderer.getContext();
+      context.setFont("Arial", 10);
 
-    const keySignature = keySignatureByScale[scaleName]?.(root);
-    const stave = new Stave(12, 40, 814);
-    stave.addClef("bass", "small");
-    if (keySignature) {
-      stave.addKeySignature(keySignature);
-    }
-    stave.setContext(context).draw();
+      const keySignature = keySignatureByScale[scaleName]?.(root);
+      const stave = new Stave(layout.staveX, layout.staveY, layout.staveWidth);
+      stave.addClef("bass", "small");
+      if (keySignature) {
+        stave.addKeySignature(keySignature);
+      }
+      stave.setContext(context).draw();
 
-    const staveNotes = notes.map((note) => makeStaveNote(note, !keySignature));
-    const voice = new Voice({ numBeats: 4, beatValue: 4 }).setMode(Voice.Mode.SOFT);
-    voice.addTickables(staveNotes);
+      const staveNotes = notes.map((note) => makeStaveNote(note, !keySignature));
+      const voice = new Voice({ numBeats: 4, beatValue: 4 }).setMode(Voice.Mode.SOFT);
+      voice.addTickables(staveNotes);
 
-    new Formatter().joinVoices([voice]).format([voice], 560);
-    voice.draw(context, stave);
+      new Formatter().joinVoices([voice]).format([voice], layout.formatWidth);
+      voice.draw(context, stave);
 
-    setLabelPositions(staveNotes.map((note) => (note.getAbsoluteX() / 860) * 100));
+      setLabelPositions(staveNotes.map((note) => (note.getAbsoluteX() / layout.width) * 100));
+    };
+
+    drawNotation();
+
+    const resizeObserver = new ResizeObserver(drawNotation);
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, [notes, root, scaleName]);
 
   return (
