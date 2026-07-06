@@ -4561,6 +4561,10 @@ select:focus-visible,
   grid-template-columns: 1fr;
 }
 
+.scaleStaffGrid.focused .scaleStaffNotation {
+  width: min(980px, 100%);
+}
+
 .scaleStaffCard {
   min-width: 0;
   margin: 0;
@@ -4591,6 +4595,10 @@ select:focus-visible,
   font-weight: 800;
 }
 
+.scaleStaffNotation {
+  width: 100%;
+}
+
 .scaleStaffVexflow {
   display: block;
   width: 100%;
@@ -4605,19 +4613,22 @@ select:focus-visible,
 }
 
 .scaleNoteList {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 3px;
+  position: relative;
+  height: 35px;
   margin: -3px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .scaleNoteList li {
+  position: absolute;
+  top: 0;
   display: grid;
-  min-width: 0;
+  width: 58px;
+  min-width: 58px;
   gap: 1px;
   text-align: center;
+  transform: translateX(-50%);
 }
 
 .scaleNoteList span,

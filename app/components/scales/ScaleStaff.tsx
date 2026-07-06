@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Accidental, Formatter, Renderer, Stave, StaveNote, Voice } from "vexflow";
 import type { ScaleNote } from "../../lib/scales";
 
@@ -56,6 +56,7 @@ function makeDegreeLabel(note: ScaleNote) {
 export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  const [labelPositions, setLabelPositions] = useState<number[]>([]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -85,6 +86,8 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
 
     new Formatter().joinVoices([voice]).format([voice], 560);
     voice.draw(context, stave);
+
+    setLabelPositions(staveNotes.map((note) => (note.getAbsoluteX() / 860) * 100));
   }, [notes, root, scaleName]);
 
   return (
@@ -93,15 +96,20 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
         <strong>{root}</strong>
         <span>{scaleName}</span>
       </figcaption>
-      <div className="scaleStaffVexflow" ref={containerRef} aria-hidden="true" />
-      <ol className="scaleNoteList" aria-label={`${root} ${scaleName} notes`}>
-        {notes.map((note, index) => (
-          <li key={`${note.degree}-${note.midi}-${index}`}>
-            <span>{note.note}</span>
-            <small>{makeDegreeLabel(note)}</small>
-          </li>
-        ))}
-      </ol>
+      <div className="scaleStaffNotation">
+        <div className="scaleStaffVexflow" ref={containerRef} aria-hidden="true" />
+        <ol className="scaleNoteList" aria-label={`${root} ${scaleName} notes`}>
+          {notes.map((note, index) => (
+            <li
+              key={`${note.degree}-${note.midi}-${index}`}
+              style={{ left: `${labelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
+            >
+              <span>{note.note}</span>
+              <small>{makeDegreeLabel(note)}</small>
+            </li>
+          ))}
+        </ol>
+      </div>
     </figure>
   );
 }
