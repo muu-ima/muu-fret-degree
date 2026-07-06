@@ -6,17 +6,27 @@ import theory from "../../../data/theory.json";
 import { makeScaleNotes, scaleDefinitions, type ScaleId } from "../../lib/scales";
 import { ScaleStaff } from "./ScaleStaff";
 
+const rootRanges = [
+  { id: "all", label: "All", roots: theory.roots },
+  { id: "c-e", label: "C-E", roots: theory.roots.slice(0, 6) },
+  { id: "f-b", label: "F-B", roots: theory.roots.slice(6) },
+] as const;
+
+type RootRangeId = (typeof rootRanges)[number]["id"];
+
 export function ScaleSheet() {
   const [scaleId, setScaleId] = useState<ScaleId>("major");
+  const [rootRangeId, setRootRangeId] = useState<RootRangeId>("all");
   const selectedScale = scaleDefinitions.find((scale) => scale.id === scaleId) ?? scaleDefinitions[0];
+  const selectedRootRange = rootRanges.find((range) => range.id === rootRangeId) ?? rootRanges[0];
 
   const rows = useMemo(
     () =>
-      theory.roots.map((root) => ({
+      selectedRootRange.roots.map((root) => ({
         root,
         notes: makeScaleNotes(root, selectedScale),
       })),
-    [selectedScale],
+    [selectedRootRange, selectedScale],
   );
 
   return (
@@ -52,10 +62,26 @@ export function ScaleSheet() {
             <p>12-Key Scale Sheet</p>
             <h2>{selectedScale.name}</h2>
           </div>
-          <span>Bass clef / one octave</span>
+          <div className="scaleSheetHeaderTools">
+            <div className="scaleRangeTabs" role="tablist" aria-label="Root range">
+              {rootRanges.map((range) => (
+                <button
+                  key={range.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={rootRangeId === range.id}
+                  className={rootRangeId === range.id ? "active" : ""}
+                  onClick={() => setRootRangeId(range.id)}
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
+            <span>Bass clef / one octave</span>
+          </div>
         </div>
 
-        <div className="scaleStaffGrid">
+        <div className={rootRangeId === "all" ? "scaleStaffGrid" : "scaleStaffGrid focused"}>
           {rows.map((row) => (
             <ScaleStaff key={row.root} root={row.root} scaleName={selectedScale.shortName} notes={row.notes} />
           ))}
