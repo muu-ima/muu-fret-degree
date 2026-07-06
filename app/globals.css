@@ -4390,7 +4390,7 @@ select:focus-visible,
 }
 
 .scalePage {
-  width: min(1120px, 100%);
+  width: min(1420px, 100%);
   margin: 0 auto;
   padding: 32px 18px 48px;
 }
@@ -4550,7 +4550,7 @@ select:focus-visible,
 .scaleStaffVexflow {
   display: block;
   width: 100%;
-  min-height: 140px;
+  min-height: 168px;
   overflow: hidden;
 }
 

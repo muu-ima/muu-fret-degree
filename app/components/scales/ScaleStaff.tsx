@@ -61,13 +61,13 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     container.replaceChildren();
 
     const renderer = new Renderer(container, Renderer.Backends.SVG);
-    renderer.resize(680, 140);
+    renderer.resize(860, 168);
 
     const context = renderer.getContext();
     context.setFont("Arial", 10);
 
     const keySignature = keySignatureByScale[scaleName]?.(root);
-    const stave = new Stave(8, 24, 646);
+    const stave = new Stave(12, 40, 814);
     stave.addClef("bass", "small").addTimeSignature("4/4");
     if (keySignature) {
       stave.addKeySignature(keySignature);
@@ -78,7 +78,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     const voice = new Voice({ numBeats: 4, beatValue: 4 }).setMode(Voice.Mode.SOFT);
     voice.addTickables(staveNotes);
 
-    new Formatter().joinVoices([voice]).format([voice], 430);
+    new Formatter().joinVoices([voice]).format([voice], 560);
     voice.draw(context, stave);
   }, [notes, root, scaleName]);
 

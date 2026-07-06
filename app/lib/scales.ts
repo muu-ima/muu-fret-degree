@@ -54,7 +54,7 @@ export function findScaleDefinition(scaleId: string) {
   return scaleDefinitions.find((scale) => scale.id === scaleId) ?? scaleDefinitions[0];
 }
 
-export function makeScaleNotes(root: string, scale: ScaleDefinition, baseMidi = 36): ScaleNote[] {
+export function makeScaleNotes(root: string, scale: ScaleDefinition, baseMidi = 48): ScaleNote[] {
   const rootMidi = baseMidi + sharpPitchClasses.indexOf(pitchClassOf(root));
 
   return scale.intervals.map((interval) => ({
