@@ -10,6 +10,11 @@ type ScaleStaffProps = {
   notes: ScaleNote[];
 };
 
+const keySignatureByScale: Record<string, (root: string) => string> = {
+  Major: (root) => root,
+  "Natural Minor": (root) => `${root}m`,
+};
+
 function noteParts(note: ScaleNote) {
   const match = /^([A-G])([#b]*?)$/.exec(note.note);
   const letter = match?.[1]?.toLowerCase() ?? "c";
@@ -22,7 +27,7 @@ function noteParts(note: ScaleNote) {
   };
 }
 
-function makeStaveNote(note: ScaleNote) {
+function makeStaveNote(note: ScaleNote, showAccidental: boolean) {
   const { accidental, key } = noteParts(note);
   const staveNote = new StaveNote({
     clef: "bass",
@@ -31,11 +36,16 @@ function makeStaveNote(note: ScaleNote) {
     stemDirection: 1,
   });
 
-  if (accidental) {
+  if (showAccidental && accidental) {
     staveNote.addModifier(new Accidental(accidental), 0);
   }
 
   return staveNote;
+}
+
+function makeDegreeLabel(note: ScaleNote, index: number, notes: ScaleNote[]) {
+  const isOctaveRoot = index === notes.length - 1 && note.degree === "1" && notes.length > 1;
+  return isOctaveRoot ? "" : note.degree;
 }
 
 export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
@@ -51,22 +61,26 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     container.replaceChildren();
 
     const renderer = new Renderer(container, Renderer.Backends.SVG);
-    renderer.resize(760, 154);
+    renderer.resize(680, 140);
 
     const context = renderer.getContext();
     context.setFont("Arial", 10);
 
-    const stave = new Stave(18, 30, 720);
-    stave.addClef("bass").addTimeSignature("4/4");
+    const keySignature = keySignatureByScale[scaleName]?.(root);
+    const stave = new Stave(8, 24, 646);
+    stave.addClef("bass", "small").addTimeSignature("4/4");
+    if (keySignature) {
+      stave.addKeySignature(keySignature);
+    }
     stave.setContext(context).draw();
 
-    const staveNotes = notes.map(makeStaveNote);
+    const staveNotes = notes.map((note) => makeStaveNote(note, !keySignature));
     const voice = new Voice({ numBeats: 4, beatValue: 4 }).setMode(Voice.Mode.SOFT);
     voice.addTickables(staveNotes);
 
-    new Formatter().joinVoices([voice]).format([voice], 585);
+    new Formatter().joinVoices([voice]).format([voice], 430);
     voice.draw(context, stave);
-  }, [notes]);
+  }, [notes, root, scaleName]);
 
   return (
     <figure className="scaleStaffCard" aria-labelledby={titleId}>
@@ -79,7 +93,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
         {notes.map((note, index) => (
           <li key={`${note.degree}-${note.midi}-${index}`}>
             <span>{note.note}</span>
-            <small>{note.degree}</small>
+            <small>{makeDegreeLabel(note, index, notes)}</small>
           </li>
         ))}
       </ol>

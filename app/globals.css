@@ -4550,7 +4550,7 @@ select:focus-visible,
 .scaleStaffVexflow {
   display: block;
   width: 100%;
-  min-height: 154px;
+  min-height: 140px;
   overflow: hidden;
 }
 
