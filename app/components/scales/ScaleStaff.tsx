@@ -46,6 +46,10 @@ function makeDegreeLabel(note: ScaleNote) {
   const degreeNumber = note.degree.replace(/^[#b]+/, "");
   const noteAccidental = noteParts(note).accidental;
 
+  if (degreeNumber === "1" || degreeNumber === "8") {
+    return degreeNumber;
+  }
+
   return `${noteAccidental}${degreeNumber}`;
 }
 
