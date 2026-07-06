@@ -76,6 +76,58 @@ Emaj7 = E G# B D#
 
 実装時は、音名表示用の enharmonic spelling と、再生用の MIDI 番号計算を分けて考える。表示は度数に従って `G#` / `Ab` を正しく綴り、再生は `C4 = 60` を基準に MIDI 番号へ変換する。
 
+## スケール譜面の拡張方針
+
+`/scales` では、12音階すべてのスケールを五線譜で確認し、ブラウザ印刷からPDFとして保存できるようにする。
+
+短期的には、`Major Scale` と `Natural Minor Scale` から始める。中期的には、練習や理論確認で使うスケールを `app/lib/scales.ts` に順次追加し、同じUIで切り替えられるようにする。
+
+追加していく候補:
+
+- Major
+- Natural Minor
+- Harmonic Minor
+- Melodic Minor
+- Major Pentatonic
+- Minor Pentatonic
+- Blues
+- Dorian
+- Phrygian
+- Lydian
+- Mixolydian
+- Aeolian
+- Locrian
+- Whole Tone
+- Diminished / Half-Whole Diminished
+- Chromatic
+
+スケール定義は、コード定義と同じように `degree` と `semitones` を持たせる。
+
+```ts
+{
+  id: "major",
+  name: "Major Scale",
+  shortName: "Major",
+  intervals: [
+    { degree: "1", semitones: 0 },
+    { degree: "2", semitones: 2 },
+    { degree: "3", semitones: 4 },
+    { degree: "4", semitones: 5 },
+    { degree: "5", semitones: 7 },
+    { degree: "6", semitones: 9 },
+    { degree: "7", semitones: 11 },
+    { degree: "1", semitones: 12 }
+  ]
+}
+```
+
+実装時の注意:
+
+- 表示上の音名は、既存の `spellIntervalNote` を使って度数から綴る。
+- MIDI番号は譜面上の音域と再生音域を分けて扱えるようにする。
+- 五線譜描画は VexFlow に寄せ、臨時記号、休符、小節線、連桁、タイ、スラーなどをあとから扱えるようにする。
+- PDF出力は、当面は `window.print()` と印刷CSSで行う。将来的にサーバー生成PDFが必要になったら、同じスケール定義を使って別出力を追加する。
+
 ## 今後のコード進行再生メモ
 
 将来的には、単一コードだけではなく、16小節または32小節分のコード進行を UI 上で入力し、BPM に合わせて現在の小節・拍を判定しながら指板表示を自動で切り替えられるようにする。

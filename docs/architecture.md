@@ -104,6 +104,42 @@
 - 2 / 4 / 8 / 16 bars を切り替えられるようにし、4 bars を基準に見通しを保つ。
 - 8 / 16 bars は編集領域内スクロールで扱う。
 
+### `app/scales/page.tsx`
+
+12キーのスケール譜面ページを担当する。
+
+- `ScaleSheet` を表示する。
+- スケール種別を切り替え、全ルートの譜面を一覧できるようにする。
+- PDF保存はブラウザ印刷に任せ、ページ側では印刷に適したレイアウトを用意する。
+- 楽譜描画はVexFlowを使い、自前SVGで音符位置や臨時記号を管理しない。
+- スケール定義の追加方針は [`docs/music-theory.md`](./music-theory.md#スケール譜面の拡張方針) にまとめる。
+
+### `app/components/scales/ScaleSheet.tsx`
+
+スケール譜面ページの状態と一覧表示を担当する。
+
+- 選択中のスケールIDを持つ。
+- `data/theory.json` の12ルートから、各キーのスケール音を作る。
+- `ScaleStaff` へ、ルート、スケール名、音列を渡す。
+- PDFボタンから `window.print()` を呼び出す。
+
+### `app/components/scales/ScaleStaff.tsx`
+
+1キー分の五線譜表示を担当する。
+
+- VexFlowのSVGレンダラーでヘ音記号の譜面を描画する。
+- 音符、臨時記号、譜表、小節内レイアウトはVexFlowに任せる。
+- 音名と度数の補助ラベルは、譜面下のHTMLリストとして表示する。
+- スケール音の計算は行わず、渡された `ScaleNote[]` を描画するだけにする。
+
+### `app/lib/scales.ts`
+
+スケール定義とスケール音生成を担当する。
+
+- スケールごとの `degree` / `semitones` を定義する。
+- ルート音とスケール定義から、譜面表示用の `ScaleNote[]` を作る。
+- 音名の綴りは `app/lib/music.ts` の `spellIntervalNote` を使う。
+
 ### `app/components/PracticeWorkspace.tsx`
 
 メインの練習・再生画面を担当する。
