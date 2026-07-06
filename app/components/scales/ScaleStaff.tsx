@@ -31,9 +31,8 @@ function makeStaveNote(note: ScaleNote, showAccidental: boolean) {
   const { accidental, key } = noteParts(note);
   const staveNote = new StaveNote({
     clef: "bass",
-    duration: "8",
+    duration: "w",
     keys: [key],
-    stemDirection: 1,
   });
 
   if (showAccidental && accidental) {
@@ -68,7 +67,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
 
     const keySignature = keySignatureByScale[scaleName]?.(root);
     const stave = new Stave(12, 40, 814);
-    stave.addClef("bass", "small").addTimeSignature("4/4");
+    stave.addClef("bass", "small");
     if (keySignature) {
       stave.addKeySignature(keySignature);
     }
