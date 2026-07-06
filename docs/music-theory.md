@@ -116,7 +116,7 @@ Emaj7 = E G# B D#
     { degree: "5", semitones: 7 },
     { degree: "6", semitones: 9 },
     { degree: "7", semitones: 11 },
-    { degree: "1", semitones: 12 }
+    { degree: "8", semitones: 12 }
   ]
 }
 ```
@@ -124,6 +124,7 @@ Emaj7 = E G# B D#
 実装時の注意:
 
 - 表示上の音名は、既存の `spellIntervalNote` を使って度数から綴る。
+- 1オクターブ上のルートは `8` として表示し、9th系を追加するときも同じ度数ラベルの延長として扱う。
 - MIDI番号は譜面上の音域と再生音域を分けて扱えるようにする。
 - 五線譜描画は VexFlow に寄せ、臨時記号、休符、小節線、連桁、タイ、スラーなどをあとから扱えるようにする。
 - PDF出力は、当面は `window.print()` と印刷CSSで行う。将来的にサーバー生成PDFが必要になったら、同じスケール定義を使って別出力を追加する。

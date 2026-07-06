@@ -26,7 +26,7 @@ export const scaleDefinitions = [
       { degree: "5", semitones: 7 },
       { degree: "6", semitones: 9 },
       { degree: "7", semitones: 11 },
-      { degree: "1", semitones: 12 },
+      { degree: "8", semitones: 12 },
     ],
   },
   {
@@ -41,7 +41,7 @@ export const scaleDefinitions = [
       { degree: "5", semitones: 7 },
       { degree: "b6", semitones: 8 },
       { degree: "b7", semitones: 10 },
-      { degree: "1", semitones: 12 },
+      { degree: "8", semitones: 12 },
     ],
   },
 ] as const satisfies readonly ScaleDefinition[];
