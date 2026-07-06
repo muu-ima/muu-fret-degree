@@ -4388,3 +4388,327 @@ select:focus-visible,
   color: var(--focus);
   font-weight: 800;
 }
+
+.scalePage {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 32px 18px 48px;
+}
+
+.scaleToolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.scaleToolbar h1 {
+  margin: 0;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.scaleToolbarControls {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+}
+
+.scaleSelectLabel {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.scaleSelectLabel select {
+  min-width: 190px;
+  padding: 11px 36px 11px 13px;
+  border: 1px solid rgba(154, 171, 196, 0.2);
+  border-radius: 8px;
+  background: rgba(14, 18, 25, 0.96);
+  color: var(--ink);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.scalePrintButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 0 14px;
+  border: 1px solid rgba(232, 77, 91, 0.44);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    #e84d5b;
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 14px 28px rgba(232, 77, 91, 0.22);
+}
+
+.scalePrintButton:hover {
+  filter: brightness(1.06);
+}
+
+.scalePrintButton svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+.scalePrintSheet {
+  padding: 22px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 28%),
+    rgba(13, 17, 24, 0.88);
+  box-shadow: var(--glass-shadow-soft);
+}
+
+.scalePrintHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(154, 171, 196, 0.18);
+}
+
+.scalePrintHeader p,
+.scalePrintHeader h2 {
+  margin: 0;
+}
+
+.scalePrintHeader p {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scalePrintHeader h2 {
+  margin-top: 4px;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.55rem;
+  letter-spacing: 0;
+}
+
+.scalePrintHeader span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.scaleStaffGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scaleStaffCard {
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(154, 171, 196, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.965);
+  color: #16181d;
+}
+
+.scaleStaffCard figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.scaleStaffCard figcaption strong {
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.scaleStaffCard figcaption span {
+  color: #5a606b;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.scaleStaffSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.staffLines line,
+.ledgerLine {
+  stroke: #15171c;
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.bassClef {
+  fill: #15171c;
+}
+
+.scaleTimeSignature {
+  fill: #15171c;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.noteHead {
+  fill: #15171c;
+}
+
+.noteStem {
+  stroke: #15171c;
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.noteAccidental {
+  fill: #15171c;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.noteLabel,
+.degreeLabel {
+  text-anchor: middle;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0;
+}
+
+.noteLabel {
+  fill: #242933;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.degreeLabel {
+  fill: #6a7280;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .scaleToolbar,
+  .scalePrintHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .scaleToolbarControls {
+    align-items: stretch;
+  }
+
+  .scaleSelectLabel {
+    flex: 1;
+  }
+
+  .scaleSelectLabel select {
+    width: 100%;
+  }
+
+  .scaleStaffGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .scalePage {
+    padding: 24px 12px 36px;
+  }
+
+  .scalePrintSheet {
+    padding: 14px;
+  }
+
+  .scaleToolbarControls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .appShell {
+    display: block;
+    min-height: auto;
+  }
+
+  .appSidebar,
+  .scaleToolbar {
+    display: none !important;
+  }
+
+  .scalePage {
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+
+  .scalePrintSheet {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .scalePrintHeader {
+    margin-bottom: 9mm;
+    padding-bottom: 4mm;
+    border-bottom-color: #bbb;
+    break-after: avoid;
+  }
+
+  .scalePrintHeader p,
+  .scalePrintHeader span {
+    color: #333;
+  }
+
+  .scaleStaffGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5mm;
+  }
+
+  .scaleStaffCard {
+    break-inside: avoid;
+    padding: 2.8mm;
+    border-color: #d0d0d0;
+    background: #fff;
+    color: #000;
+  }
+}

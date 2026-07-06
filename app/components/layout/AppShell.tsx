@@ -24,6 +24,13 @@ const navItems = [
     description: "Fretboard focus",
   },
   {
+    href: "/scales",
+    icon: LuMusic4,
+    label: "Scales",
+    shortLabel: "Scales",
+    description: "Staff notation",
+  },
+  {
     href: "/progression",
     icon: LuPencil,
     label: "Progression Edit",
@@ -163,7 +170,7 @@ export function AppShell({ children }: AppShellProps) {
           </nav>
         </div>
 
-        {pathname !== "/progression" ? <div className="sidebarSection">
+        {pathname === "/" ? <div className="sidebarSection">
           <p className="sidebarSectionLabel">Panels</p>
           <div className="sidebarTools">
             {panelItems.map((item) => {
