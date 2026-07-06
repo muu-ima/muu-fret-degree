@@ -44,7 +44,10 @@ function makeStaveNote(note: ScaleNote, showAccidental: boolean) {
 
 function makeDegreeLabel(note: ScaleNote, index: number, notes: ScaleNote[]) {
   const isOctaveRoot = index === notes.length - 1 && note.degree === "1" && notes.length > 1;
-  return isOctaveRoot ? "" : note.degree;
+  const degreeNumber = note.degree.replace(/^[#b]+/, "");
+  const noteAccidental = noteParts(note).accidental;
+
+  return isOctaveRoot ? "" : `${noteAccidental}${degreeNumber}`;
 }
 
 export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
