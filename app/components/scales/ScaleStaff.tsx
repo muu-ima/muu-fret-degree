@@ -15,19 +15,29 @@ const keySignatureByScale: Record<string, (root: string) => string> = {
   "Natural Minor": (root) => `${root}m`,
 };
 
+const naturalPitchClasses: Record<string, number> = {
+  c: 0,
+  d: 2,
+  e: 4,
+  f: 5,
+  g: 7,
+  a: 9,
+  b: 11,
+};
+
 function makeNotationLayout(containerWidth: number) {
   const width = Math.max(260, Math.floor(containerWidth));
   const isCompact = width <= 520;
   const staveX = isCompact ? 6 : 10;
   const rightInset = isCompact ? 6 : 10;
   const staveWidth = width - staveX - rightInset;
-  const signatureReserve = width <= 360 ? 108 : width <= 560 ? 132 : 168;
+  const signatureReserve = width <= 360 ? 92 : width <= 560 ? 104 : 112;
 
   return {
     width,
-    height: isCompact ? 112 : 128,
+    height: isCompact ? 104 : 118,
     staveX,
-    staveY: isCompact ? 18 : 24,
+    staveY: isCompact ? 16 : 20,
     staveWidth,
     formatWidth: Math.max(150, staveWidth - signatureReserve),
   };
@@ -37,7 +47,19 @@ function noteParts(note: ScaleNote) {
   const match = /^([A-G])([#b]*?)$/.exec(note.note);
   const letter = match?.[1]?.toLowerCase() ?? "c";
   const accidental = match?.[2] ?? "";
-  const octave = Math.floor(note.midi / 12) - 1;
+  const accidentalOffset = accidental.split("").reduce((total, mark) => {
+    if (mark === "#") {
+      return total + 1;
+    }
+
+    if (mark === "b") {
+      return total - 1;
+    }
+
+    return total;
+  }, 0);
+  const spelledPitchClass = naturalPitchClasses[letter] + accidentalOffset;
+  const octave = Math.floor((note.midi - spelledPitchClass) / 12) - 1;
 
   return {
     accidental,

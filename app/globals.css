@@ -4390,7 +4390,7 @@ select:focus-visible,
 }
 
 .scalePage {
-  width: min(1420px, 100%);
+  width: min(1360px, 100%);
   margin: 0 auto;
   padding: 32px 18px 48px;
 }
@@ -4582,7 +4582,7 @@ select:focus-visible,
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: clamp(4px, 1.4vw, 10px);
+  margin-bottom: clamp(2px, 0.8vw, 6px);
 }
 
 .scaleStaffCard figcaption strong {
@@ -4617,8 +4617,8 @@ select:focus-visible,
 
 .scaleNoteList {
   position: relative;
-  height: clamp(28px, 8vw, 35px);
-  margin: clamp(-6px, -1.1vw, -3px) 0 0;
+  height: clamp(24px, 6.5vw, 31px);
+  margin: clamp(-8px, -1.4vw, -4px) 0 0;
   padding: 0;
   list-style: none;
 }
