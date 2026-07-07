@@ -95,6 +95,10 @@ const degreeLetterSteps: Record<string, number> = {
   "bb7": 6,
   "b7": 6,
   "7": 6,
+  "8": 0,
+  "b9": 1,
+  "9": 1,
+  "#9": 1,
 };
 
 export function noteAt(chromatic: string[], midi: number) {
