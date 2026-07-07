@@ -54,8 +54,15 @@ export function findScaleDefinition(scaleId: string) {
   return scaleDefinitions.find((scale) => scale.id === scaleId) ?? scaleDefinitions[0];
 }
 
+function scaleRootMidi(root: string, baseMidi: number) {
+  const rootPitchIndex = sharpPitchClasses.indexOf(pitchClassOf(root));
+  const octaveOffset = rootPitchIndex >= sharpPitchClasses.indexOf("D#") ? -12 : 0;
+
+  return baseMidi + rootPitchIndex + octaveOffset;
+}
+
 export function makeScaleNotes(root: string, scale: ScaleDefinition, baseMidi = 48): ScaleNote[] {
-  const rootMidi = baseMidi + sharpPitchClasses.indexOf(pitchClassOf(root));
+  const rootMidi = scaleRootMidi(root, baseMidi);
 
   return scale.intervals.map((interval) => ({
     degree: interval.degree,
