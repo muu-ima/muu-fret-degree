@@ -26,6 +26,7 @@ const naturalPitchClasses: Record<string, number> = {
 };
 
 const keySignatureScale = 0.72;
+const denseKeyNoteScale = 0.92;
 
 const keySignatureAccidentalCounts: Record<string, number> = {
   C: 0,
@@ -87,6 +88,11 @@ function keySignatureNoteShift(keySignature: string | undefined, width: number) 
   return Math.min(width <= 520 ? 15 : 11, baseShift + (accidentalCount - 3) * accidentalShift);
 }
 
+function keySignatureNoteScale(keySignature: string | undefined) {
+  const accidentalCount = keySignature ? (keySignatureAccidentalCounts[keySignature] ?? 0) : 0;
+  return accidentalCount >= 4 ? denseKeyNoteScale : 1;
+}
+
 function scaleKeySignature(container: HTMLDivElement) {
   const signatureGroups = container.querySelectorAll<SVGGElement>(".vf-keysignature");
 
@@ -101,13 +107,19 @@ function scaleKeySignature(container: HTMLDivElement) {
   });
 }
 
-function shiftStaveNotes(container: HTMLDivElement, shift: number) {
-  if (shift <= 0) {
+function transformStaveNotes(container: HTMLDivElement, shift: number, scale: number) {
+  if (shift <= 0 && scale === 1) {
     return;
   }
 
   container.querySelectorAll<SVGGElement>(".vf-stavenote").forEach((group) => {
-    group.setAttribute("transform", `translate(${-shift} 0)`);
+    const box = group.getBBox();
+    const originX = box.x + box.width / 2;
+    const originY = box.y + box.height / 2;
+    group.setAttribute(
+      "transform",
+      `translate(${-shift} 0) translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`,
+    );
   });
 }
 
@@ -184,6 +196,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
 
       const keySignature = keySignatureByScale[scaleName]?.(root);
       const noteShift = keySignatureNoteShift(keySignature, layout.width);
+      const noteScale = keySignatureNoteScale(keySignature);
       const stave = new Stave(layout.staveX, layout.staveY, layout.staveWidth);
       stave.addClef("bass", "small");
       if (keySignature) {
@@ -198,7 +211,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
       new Formatter().joinVoices([voice]).format([voice], layout.formatWidth);
       voice.draw(context, stave);
       scaleKeySignature(container);
-      shiftStaveNotes(container, noteShift);
+      transformStaveNotes(container, noteShift, noteScale);
 
       setLabelPositions(staveNotes.map((note) => ((note.getAbsoluteX() - noteShift) / layout.width) * 100));
     };
