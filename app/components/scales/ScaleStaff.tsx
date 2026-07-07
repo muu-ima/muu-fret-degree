@@ -26,7 +26,6 @@ const naturalPitchClasses: Record<string, number> = {
 };
 
 const keySignatureScale = 0.72;
-const denseKeyNoteScale = 0.92;
 
 const keySignatureAccidentalCounts: Record<string, number> = {
   C: 0,
@@ -58,39 +57,42 @@ const keySignatureAccidentalCounts: Record<string, number> = {
   Abm: 7,
 };
 
-function makeNotationLayout(containerWidth: number) {
+function keySignatureAccidentalCount(keySignature: string | undefined) {
+  return keySignature ? (keySignatureAccidentalCounts[keySignature] ?? 0) : 0;
+}
+
+function makeDensityProfile(accidentalCount: number, width: number) {
+  const isCompact = width <= 520;
+  const compactReserves = [76, 84, 90, 96, 102, 108, 114, 120];
+  const defaultReserves = [88, 94, 100, 106, 112, 118, 124, 130];
+  const shifts = isCompact ? [0, 0, 0, 0, 4, 6, 8, 10] : [0, 0, 0, 0, 2, 4, 6, 8];
+  const scales = [1, 1, 1, 1, 0.96, 0.94, 0.92, 0.9];
+  const index = Math.min(Math.max(accidentalCount, 0), 7);
+
+  return {
+    noteScale: scales[index],
+    noteShift: shifts[index],
+    signatureReserve: isCompact ? compactReserves[index] : defaultReserves[index],
+  };
+}
+
+function makeNotationLayout(containerWidth: number, keySignature?: string) {
   const width = Math.max(260, Math.floor(containerWidth));
   const isCompact = width <= 520;
   const staveX = isCompact ? 6 : 10;
   const rightInset = isCompact ? 6 : 10;
   const staveWidth = width - staveX - rightInset;
-  const signatureReserve = width <= 360 ? 92 : width <= 560 ? 104 : 112;
+  const densityProfile = makeDensityProfile(keySignatureAccidentalCount(keySignature), width);
 
   return {
+    ...densityProfile,
     width,
     height: isCompact ? 104 : 118,
     staveX,
     staveY: isCompact ? 16 : 20,
     staveWidth,
-    formatWidth: Math.max(150, staveWidth - signatureReserve),
+    formatWidth: Math.max(150, staveWidth - densityProfile.signatureReserve),
   };
-}
-
-function keySignatureNoteShift(keySignature: string | undefined, width: number) {
-  const accidentalCount = keySignature ? (keySignatureAccidentalCounts[keySignature] ?? 0) : 0;
-  if (accidentalCount < 4) {
-    return 0;
-  }
-
-  const baseShift = width <= 520 ? 3 : 2;
-  const accidentalShift = width <= 520 ? 1.8 : 1.2;
-
-  return Math.min(width <= 520 ? 15 : 11, baseShift + (accidentalCount - 3) * accidentalShift);
-}
-
-function keySignatureNoteScale(keySignature: string | undefined) {
-  const accidentalCount = keySignature ? (keySignatureAccidentalCounts[keySignature] ?? 0) : 0;
-  return accidentalCount >= 4 ? denseKeyNoteScale : 1;
 }
 
 function scaleKeySignature(container: HTMLDivElement) {
@@ -187,16 +189,14 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     const drawNotation = () => {
       container.replaceChildren();
 
-      const layout = makeNotationLayout(container.getBoundingClientRect().width);
+      const keySignature = keySignatureByScale[scaleName]?.(root);
+      const layout = makeNotationLayout(container.getBoundingClientRect().width, keySignature);
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
 
       const context = renderer.getContext();
       context.setFont("Arial", 10);
 
-      const keySignature = keySignatureByScale[scaleName]?.(root);
-      const noteShift = keySignatureNoteShift(keySignature, layout.width);
-      const noteScale = keySignatureNoteScale(keySignature);
       const stave = new Stave(layout.staveX, layout.staveY, layout.staveWidth);
       stave.addClef("bass", "small");
       if (keySignature) {
@@ -211,9 +211,9 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
       new Formatter().joinVoices([voice]).format([voice], layout.formatWidth);
       voice.draw(context, stave);
       scaleKeySignature(container);
-      transformStaveNotes(container, noteShift, noteScale);
+      transformStaveNotes(container, layout.noteShift, layout.noteScale);
 
-      setLabelPositions(staveNotes.map((note) => ((note.getAbsoluteX() - noteShift) / layout.width) * 100));
+      setLabelPositions(staveNotes.map((note) => ((note.getAbsoluteX() - layout.noteShift) / layout.width) * 100));
     };
 
     drawNotation();
