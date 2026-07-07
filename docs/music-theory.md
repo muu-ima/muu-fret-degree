@@ -129,6 +129,45 @@ Emaj7 = E G# B D#
 - 五線譜描画は VexFlow に寄せ、臨時記号、休符、小節線、連桁、タイ、スラーなどをあとから扱えるようにする。
 - PDF出力は、当面は `window.print()` と印刷CSSで行う。将来的にサーバー生成PDFが必要になったら、同じスケール定義を使って別出力を追加する。
 
+### スケールとモードの選択方針
+
+スケールは単に音を順番に並べるためだけではなく、コードに対してどんな色を出したいかを選ぶための材料として扱う。コードトーンは骨格であり、スケールやモードはその骨格に乗せる明るさ、暗さ、抜け、緊張感、民族感を決める。
+
+最初の整理は Major / Minor を軸にする。
+
+- Major系: Ionian, Lydian, Mixolydian
+- Minor系: Aeolian, Dorian, Phrygian, Locrian
+
+チャーチモードは、Major Scaleの各音を主役にした見方でもあり、コードに対して親和性の高い音の並びでもある。
+
+```txt
+Key C Major:
+Cmaj7  -> C Ionian
+Dm7    -> D Dorian
+Em7    -> E Phrygian
+Fmaj7  -> F Lydian
+G7     -> G Mixolydian
+Am7    -> A Aeolian
+Bm7b5  -> B Locrian
+```
+
+ノンダイアトニックコードでは、キー内で自動的に決まるモードではなく、そのコードをどう聴かせたいかで候補を選ぶ。たとえば m7 コードなら、コードトーン `1 b3 5 b7` は Dorian / Aeolian / Phrygian のいずれにも含まれるが、出る色が変わる。
+
+```txt
+D Dorian   = D E F G A B  C  -> 暗いが6度で抜ける
+D Aeolian  = D E F G A Bb C  -> 暗く沈む
+D Phrygian = D Eb F G A Bb C -> b2で緊張感が強い
+```
+
+実装上も、将来的にはスケールを「音の集合」としてだけでなく、コードタイプに対する候補や特徴音を説明できるようにする。
+
+- `m7`: Dorian / Aeolian / Phrygian
+- `maj7`: Ionian / Lydian
+- `7`: Mixolydian / Altered / Phrygian Dominant など
+- `m7b5`: Locrian など
+
+UIでは、単にスケール名を並べるだけでなく、将来的に「このコードに対して使いやすいスケール」「特徴音」「響きの説明」を表示できる余地を残す。
+
 ## 今後のコード進行再生メモ
 
 将来的には、単一コードだけではなく、16小節または32小節分のコード進行を UI 上で入力し、BPM に合わせて現在の小節・拍を判定しながら指板表示を自動で切り替えられるようにする。
