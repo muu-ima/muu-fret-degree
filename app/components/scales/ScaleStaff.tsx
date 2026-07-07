@@ -15,30 +15,133 @@ const keySignatureByScale: Record<string, (root: string) => string> = {
   "Natural Minor": (root) => `${root}m`,
 };
 
-const notationLayouts = {
-  default: {
-    width: 860,
-    height: 140,
-    staveX: 12,
-    staveY: 30,
-    staveWidth: 814,
-    formatWidth: 560,
-  },
-  compact: {
-    width: 620,
-    height: 118,
-    staveX: 8,
-    staveY: 20,
-    staveWidth: 560,
-    formatWidth: 350,
-  },
+const naturalPitchClasses: Record<string, number> = {
+  c: 0,
+  d: 2,
+  e: 4,
+  f: 5,
+  g: 7,
+  a: 9,
+  b: 11,
 };
+
+const keySignatureScale = 0.72;
+
+const keySignatureAccidentalCounts: Record<string, number> = {
+  C: 0,
+  G: 1,
+  D: 2,
+  A: 3,
+  E: 4,
+  B: 5,
+  "F#": 6,
+  "C#": 7,
+  F: 1,
+  Bb: 2,
+  Eb: 3,
+  Ab: 4,
+  Am: 0,
+  Em: 1,
+  Bm: 2,
+  "F#m": 3,
+  "C#m": 4,
+  "G#m": 5,
+  "D#m": 6,
+  "A#m": 7,
+  Dm: 1,
+  Gm: 2,
+  Cm: 3,
+  Fm: 4,
+  Bbm: 5,
+  Ebm: 6,
+  Abm: 7,
+};
+
+function keySignatureAccidentalCount(keySignature: string | undefined) {
+  return keySignature ? (keySignatureAccidentalCounts[keySignature] ?? 0) : 0;
+}
+
+function makeDensityProfile(accidentalCount: number, width: number) {
+  const isCompact = width <= 520;
+  const compactReserves = [76, 84, 90, 96, 102, 108, 114, 120];
+  const defaultReserves = [88, 94, 100, 106, 112, 118, 124, 130];
+  const shifts = isCompact ? [0, 0, 0, 0, 4, 6, 8, 10] : [0, 0, 0, 0, 2, 4, 6, 8];
+  const scales = [1, 1, 1, 1, 0.96, 0.94, 0.92, 0.9];
+  const index = Math.min(Math.max(accidentalCount, 0), 7);
+
+  return {
+    noteScale: scales[index],
+    noteShift: shifts[index],
+    signatureReserve: isCompact ? compactReserves[index] : defaultReserves[index],
+  };
+}
+
+function makeNotationLayout(containerWidth: number, keySignature?: string) {
+  const width = Math.max(260, Math.floor(containerWidth));
+  const isCompact = width <= 520;
+  const staveX = isCompact ? 6 : 10;
+  const rightInset = isCompact ? 6 : 10;
+  const staveWidth = width - staveX - rightInset;
+  const densityProfile = makeDensityProfile(keySignatureAccidentalCount(keySignature), width);
+
+  return {
+    ...densityProfile,
+    width,
+    height: isCompact ? 104 : 118,
+    staveX,
+    staveY: isCompact ? 16 : 20,
+    staveWidth,
+    formatWidth: Math.max(150, staveWidth - densityProfile.signatureReserve),
+  };
+}
+
+function scaleKeySignature(container: HTMLDivElement) {
+  const signatureGroups = container.querySelectorAll<SVGGElement>(".vf-keysignature");
+
+  signatureGroups.forEach((group) => {
+    const box = group.getBBox();
+    const originX = box.x;
+    const originY = box.y + box.height / 2;
+    group.setAttribute(
+      "transform",
+      `translate(${originX} ${originY}) scale(${keySignatureScale}) translate(${-originX} ${-originY})`,
+    );
+  });
+}
+
+function transformStaveNotes(container: HTMLDivElement, shift: number, scale: number) {
+  if (shift <= 0 && scale === 1) {
+    return;
+  }
+
+  container.querySelectorAll<SVGGElement>(".vf-stavenote").forEach((group) => {
+    const box = group.getBBox();
+    const originX = box.x + box.width / 2;
+    const originY = box.y + box.height / 2;
+    group.setAttribute(
+      "transform",
+      `translate(${-shift} 0) translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`,
+    );
+  });
+}
 
 function noteParts(note: ScaleNote) {
   const match = /^([A-G])([#b]*?)$/.exec(note.note);
   const letter = match?.[1]?.toLowerCase() ?? "c";
   const accidental = match?.[2] ?? "";
-  const octave = Math.floor(note.midi / 12) - 1;
+  const accidentalOffset = accidental.split("").reduce((total, mark) => {
+    if (mark === "#") {
+      return total + 1;
+    }
+
+    if (mark === "b") {
+      return total - 1;
+    }
+
+    return total;
+  }, 0);
+  const spelledPitchClass = naturalPitchClasses[letter] + accidentalOffset;
+  const octave = Math.floor((note.midi - spelledPitchClass) / 12) - 1;
 
   return {
     accidental,
@@ -86,14 +189,14 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     const drawNotation = () => {
       container.replaceChildren();
 
-      const layout = container.clientWidth <= 520 ? notationLayouts.compact : notationLayouts.default;
+      const keySignature = keySignatureByScale[scaleName]?.(root);
+      const layout = makeNotationLayout(container.getBoundingClientRect().width, keySignature);
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
 
       const context = renderer.getContext();
       context.setFont("Arial", 10);
 
-      const keySignature = keySignatureByScale[scaleName]?.(root);
       const stave = new Stave(layout.staveX, layout.staveY, layout.staveWidth);
       stave.addClef("bass", "small");
       if (keySignature) {
@@ -107,8 +210,10 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
 
       new Formatter().joinVoices([voice]).format([voice], layout.formatWidth);
       voice.draw(context, stave);
+      scaleKeySignature(container);
+      transformStaveNotes(container, layout.noteShift, layout.noteScale);
 
-      setLabelPositions(staveNotes.map((note) => (note.getAbsoluteX() / layout.width) * 100));
+      setLabelPositions(staveNotes.map((note) => ((note.getAbsoluteX() - layout.noteShift) / layout.width) * 100));
     };
 
     drawNotation();
