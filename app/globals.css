@@ -4558,7 +4558,8 @@ select:focus-visible,
 }
 
 .scaleStaffGrid.focused {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, min(100%, 900px));
+  justify-content: center;
 }
 
 .scaleStaffGrid.focused .scaleStaffNotation {
@@ -4568,11 +4569,12 @@ select:focus-visible,
 .scaleStaffCard {
   min-width: 0;
   margin: 0;
-  padding: clamp(8px, 1.8vw, 12px);
+  padding: clamp(8px, 1.2vw, 12px);
   border: 1px solid rgba(154, 171, 196, 0.16);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.965);
   color: #16181d;
+  overflow: hidden;
 }
 
 .scaleStaffCard figcaption {
@@ -4597,6 +4599,7 @@ select:focus-visible,
 
 .scaleStaffNotation {
   width: 100%;
+  max-width: 100%;
 }
 
 .scaleStaffVexflow {
@@ -4624,8 +4627,8 @@ select:focus-visible,
   position: absolute;
   top: 0;
   display: grid;
-  width: clamp(34px, 7vw, 58px);
-  min-width: clamp(34px, 7vw, 58px);
+  width: clamp(24px, 6vw, 58px);
+  min-width: clamp(24px, 6vw, 58px);
   gap: 1px;
   text-align: center;
   transform: translateX(-50%);
@@ -4678,6 +4681,10 @@ select:focus-visible,
   .scaleStaffGrid {
     grid-template-columns: 1fr;
   }
+
+  .scaleStaffGrid.focused {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -4687,6 +4694,22 @@ select:focus-visible,
 
   .scalePrintSheet {
     padding: 14px;
+  }
+
+  .scaleStaffCard {
+    padding: 8px;
+  }
+
+  .scaleStaffCard figcaption {
+    margin-bottom: 4px;
+  }
+
+  .scaleStaffCard figcaption strong {
+    font-size: 1rem;
+  }
+
+  .scaleStaffCard figcaption span {
+    font-size: 0.68rem;
   }
 
   .scaleToolbarControls {

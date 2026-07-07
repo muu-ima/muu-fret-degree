@@ -15,24 +15,23 @@ const keySignatureByScale: Record<string, (root: string) => string> = {
   "Natural Minor": (root) => `${root}m`,
 };
 
-const notationLayouts = {
-  default: {
-    width: 860,
-    height: 140,
-    staveX: 12,
-    staveY: 30,
-    staveWidth: 814,
-    formatWidth: 560,
-  },
-  compact: {
-    width: 620,
-    height: 118,
-    staveX: 8,
-    staveY: 20,
-    staveWidth: 560,
-    formatWidth: 350,
-  },
-};
+function makeNotationLayout(containerWidth: number) {
+  const width = Math.max(260, Math.floor(containerWidth));
+  const isCompact = width <= 520;
+  const staveX = isCompact ? 6 : 10;
+  const rightInset = isCompact ? 6 : 10;
+  const staveWidth = width - staveX - rightInset;
+  const signatureReserve = width <= 360 ? 108 : width <= 560 ? 132 : 168;
+
+  return {
+    width,
+    height: isCompact ? 112 : 128,
+    staveX,
+    staveY: isCompact ? 18 : 24,
+    staveWidth,
+    formatWidth: Math.max(150, staveWidth - signatureReserve),
+  };
+}
 
 function noteParts(note: ScaleNote) {
   const match = /^([A-G])([#b]*?)$/.exec(note.note);
@@ -86,7 +85,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     const drawNotation = () => {
       container.replaceChildren();
 
-      const layout = container.clientWidth <= 520 ? notationLayouts.compact : notationLayouts.default;
+      const layout = makeNotationLayout(container.getBoundingClientRect().width);
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
 
