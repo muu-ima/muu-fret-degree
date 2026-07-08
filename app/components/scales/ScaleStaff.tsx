@@ -100,6 +100,7 @@ const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, 
     },
     D: {
       compact: {
+        accidentalScale: 0.9,
         signatureReserve: 48,
         staveY: 19,
       },
