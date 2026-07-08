@@ -16,3 +16,4 @@
 | Date | Scale | Key | Viewport | Adjustment | Reason |
 | --- | --- | --- | --- | --- | --- |
 | 2026-07-08 | Dorian | C | Compact | `staveY: 19`, `accidentalScale: 0.9`, `signatureReserve: 48` | 375px前後で下方向の余白を少し確保し、2つだけの臨時記号に対して右側の余白が残りすぎないようにするため。 |
+| 2026-07-08 | Dorian | C# | Compact | `staveY: 19`, `noteScale: 0.86`, `accidentalScale: 0.78`, `noteShift: 6`, `signatureReserve: 76`, `noteOffsets: { 2: 3, 6: 3 }`, `labelOffsets: { 1: -1, 2: 1, 6: 2 }` | 6つのシャープを小さく保ちつつ、1度のC#がC Dorianの1度Cに近い位置へ揃うようにする。ラベルはD#を少し左、b3のEとb7のBを少し右へ寄せてC Dorianのバランスに近づけるため。 |

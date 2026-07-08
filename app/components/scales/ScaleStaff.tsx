@@ -15,6 +15,8 @@ type ScaleStaffLayoutOverride = {
   compact?: {
     accidentalScale?: number;
     height?: number;
+    labelOffsets?: Record<number, number>;
+    noteOffsets?: Record<number, number>;
     noteScale?: number;
     noteShift?: number;
     signatureReserve?: number;
@@ -75,6 +77,24 @@ const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, 
       compact: {
         accidentalScale: 0.9,
         signatureReserve: 48,
+        staveY: 19,
+      },
+    },
+    "C#": {
+      compact: {
+        accidentalScale: 0.78,
+        labelOffsets: {
+          1: -1,
+          2: 1,
+          6: 2,
+        },
+        noteOffsets: {
+          2: 3,
+          6: 3,
+        },
+        noteScale: 0.86,
+        noteShift: 6,
+        signatureReserve: 76,
         staveY: 19,
       },
     },
@@ -143,18 +163,19 @@ function scaleKeySignature(container: HTMLDivElement) {
   });
 }
 
-function transformStaveNotes(container: HTMLDivElement, shift: number, scale: number) {
-  if (shift <= 0 && scale === 1) {
+function transformStaveNotes(container: HTMLDivElement, shift: number, scale: number, noteOffsets?: Record<number, number>) {
+  if (shift <= 0 && scale === 1 && !noteOffsets) {
     return;
   }
 
-  container.querySelectorAll<SVGGElement>(".vf-stavenote").forEach((group) => {
+  container.querySelectorAll<SVGGElement>(".vf-stavenote").forEach((group, index) => {
     const box = group.getBBox();
     const originX = box.x + box.width / 2;
     const originY = box.y + box.height / 2;
+    const xOffset = -shift + (noteOffsets?.[index] ?? 0);
     group.setAttribute(
       "transform",
-      `translate(${-shift} 0) translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`,
+      `translate(${xOffset} 0) translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`,
     );
   });
 }
@@ -252,10 +273,12 @@ export function ScaleStaff({ root, scaleId, scaleName, notes }: ScaleStaffProps)
       new Formatter().joinVoices([voice]).format([voice], layout.formatWidth);
       voice.draw(context, stave);
       scaleKeySignature(container);
-      transformStaveNotes(container, layout.noteShift, layout.noteScale);
+      transformStaveNotes(container, layout.noteShift, layout.noteScale, layout.noteOffsets);
       transformAccidentals(container, layout.accidentalScale);
 
-      setLabelPositions(staveNotes.map((note) => ((note.getAbsoluteX() - layout.noteShift) / layout.width) * 100));
+      setLabelPositions(
+        staveNotes.map((note, index) => ((note.getAbsoluteX() - layout.noteShift) / layout.width) * 100 + (layout.labelOffsets?.[index] ?? 0)),
+      );
     };
 
     drawNotation();
