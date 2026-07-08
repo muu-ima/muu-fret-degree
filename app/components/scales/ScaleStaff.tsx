@@ -96,7 +96,7 @@ function makeNotationLayout(containerWidth: number, notes: ScaleNote[], keySigna
     width,
     height: isCompact ? 124 : 132,
     staveX,
-    staveY: isCompact ? 30 : 32,
+    staveY: isCompact ? 21 : 32,
     staveWidth,
     formatWidth: Math.max(150, staveWidth - densityProfile.signatureReserve),
   };
