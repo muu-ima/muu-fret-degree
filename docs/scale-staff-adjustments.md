@@ -15,5 +15,4 @@
 
 | Date | Scale | Key | Viewport | Adjustment | Reason |
 | --- | --- | --- | --- | --- | --- |
-| 2026-07-08 | Dorian | C | Compact | `staveY: 19`, `accidentalScale: 0.9` | 375px前後で下方向の余白を少し確保し、`Eb` / `Bb` の臨時記号の圧迫感を弱めるため。 |
-
+| 2026-07-08 | Dorian | C | Compact | `staveY: 19`, `accidentalScale: 0.9`, `signatureReserve: 48` | 375px前後で下方向の余白を少し確保し、2つだけの臨時記号に対して右側の余白が残りすぎないようにするため。 |

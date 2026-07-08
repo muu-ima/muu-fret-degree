@@ -74,6 +74,7 @@ const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, 
     C: {
       compact: {
         accidentalScale: 0.9,
+        signatureReserve: 48,
         staveY: 19,
       },
     },
