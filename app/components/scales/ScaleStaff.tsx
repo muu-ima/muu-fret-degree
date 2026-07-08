@@ -87,9 +87,9 @@ function makeNotationLayout(containerWidth: number, keySignature?: string) {
   return {
     ...densityProfile,
     width,
-    height: isCompact ? 104 : 118,
+    height: isCompact ? 124 : 132,
     staveX,
-    staveY: isCompact ? 16 : 20,
+    staveY: isCompact ? 30 : 32,
     staveWidth,
     formatWidth: Math.max(150, staveWidth - densityProfile.signatureReserve),
   };
