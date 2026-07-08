@@ -89,6 +89,21 @@ export const scaleDefinitions = [
       { degree: "8", semitones: 12 },
     ],
   },
+  {
+    id: "mixolydian",
+    name: "Mixolydian Scale",
+    shortName: "Mixolydian",
+    intervals: [
+      { degree: "1", semitones: 0 },
+      { degree: "2", semitones: 2 },
+      { degree: "3", semitones: 4 },
+      { degree: "4", semitones: 5 },
+      { degree: "5", semitones: 7 },
+      { degree: "6", semitones: 9 },
+      { degree: "b7", semitones: 10 },
+      { degree: "8", semitones: 12 },
+    ],
+  },
 ] as const satisfies readonly ScaleDefinition[];
 
 export type ScaleId = (typeof scaleDefinitions)[number]["id"];
