@@ -105,6 +105,23 @@ const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, 
         staveY: 19,
       },
     },
+    Eb: {
+      compact: {
+        accidentalScale: 0.82,
+        labelOffsets: {
+          2: 1,
+          6: 1,
+        },
+        noteOffsets: {
+          2: 2,
+          6: 2,
+        },
+        noteScale: 0.9,
+        noteShift: 4,
+        signatureReserve: 68,
+        staveY: 19,
+      },
+    },
   },
 };
 
