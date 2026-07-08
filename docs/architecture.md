@@ -156,6 +156,7 @@
 - 例外補正が必要な候補は、Mixolydian / Locrian など臨時記号が多いモード、E / F / F# / Ab など上下どちらかに寄りやすいルートから優先して確認する。
 - 補正値はCSSだけに閉じ込めず、VexFlow描画前後のレイアウト計算に寄せる。HTMLラベルは描画後の音符X座標へ追従させる。
 - 将来的に補正対象が増えたら、`ScaleStaff` 内の配列ではなく `app/lib/scales.ts` か専用のレイアウト設定モジュールへ分離する。
+- 個別補正の履歴は [`docs/scale-staff-adjustments.md`](./scale-staff-adjustments.md) に1件ずつ残す。
 
 確認する幅の目安:
 
