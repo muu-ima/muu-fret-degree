@@ -4609,6 +4609,11 @@ select:focus-visible,
   overflow: hidden;
 }
 
+.scaleStaffVexflow.withoutKeySignature {
+  margin-top: -3px;
+  margin-bottom: -6px;
+}
+
 .scaleStaffVexflow svg {
   display: block;
   width: 100%;
@@ -4621,6 +4626,10 @@ select:focus-visible,
   margin: clamp(-4px, -0.8vw, -2px) 0 0;
   padding: 0;
   list-style: none;
+}
+
+.scaleStaffVexflow.withoutKeySignature + .scaleNoteList {
+  margin-top: clamp(-8px, -1.4vw, -5px);
 }
 
 .scaleNoteList li {

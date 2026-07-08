@@ -192,6 +192,8 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [labelPositions, setLabelPositions] = useState<number[]>([]);
+  const keySignature = keySignatureByScale[scaleName]?.(root);
+  const vexflowClassName = keySignature ? "scaleStaffVexflow withKeySignature" : "scaleStaffVexflow withoutKeySignature";
 
   useEffect(() => {
     const container = containerRef.current;
@@ -202,7 +204,6 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     const drawNotation = () => {
       container.replaceChildren();
 
-      const keySignature = keySignatureByScale[scaleName]?.(root);
       const layout = makeNotationLayout(container.getBoundingClientRect().width, notes, keySignature);
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
@@ -238,7 +239,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [notes, root, scaleName]);
+  }, [keySignature, notes]);
 
   return (
     <figure className="scaleStaffCard" aria-labelledby={titleId}>
@@ -247,7 +248,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
         <span>{scaleName}</span>
       </figcaption>
       <div className="scaleStaffNotation">
-        <div className="scaleStaffVexflow" ref={containerRef} aria-hidden="true" />
+        <div className={vexflowClassName} ref={containerRef} aria-hidden="true" />
         <ol className="scaleNoteList" aria-label={`${root} ${scaleName} notes`}>
           {notes.map((note, index) => (
             <li
