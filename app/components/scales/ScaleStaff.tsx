@@ -98,6 +98,12 @@ const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, 
         staveY: 19,
       },
     },
+    D: {
+      compact: {
+        signatureReserve: 48,
+        staveY: 19,
+      },
+    },
   },
 };
 
@@ -112,7 +118,7 @@ function writtenAccidentalCount(notes: ScaleNote[]) {
 function makeDensityProfile(accidentalCount: number, width: number) {
   const isCompact = width <= 520;
   const compactReserves = [76, 84, 90, 96, 102, 108, 114, 120];
-  const defaultReserves = [88, 94, 100, 106, 112, 118, 124, 130];
+  const defaultReserves = [52, 56, 60, 64, 68, 72, 76, 80];
   const shifts = isCompact ? [0, 0, 2, 4, 6, 8, 10, 12] : [0, 0, 0, 0, 2, 4, 6, 8];
   const scales = isCompact ? [0.98, 0.98, 0.96, 0.95, 0.94, 0.92, 0.9, 0.88] : [1, 1, 1, 1, 0.96, 0.94, 0.92, 0.9];
   const accidentalScales = isCompact ? [0.96, 0.96, 0.92, 0.9, 0.88, 0.86, 0.84, 0.82] : [1, 1, 1, 1, 0.96, 0.94, 0.92, 0.9];
