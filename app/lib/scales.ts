@@ -104,6 +104,21 @@ export const scaleDefinitions = [
       { degree: "8", semitones: 12 },
     ],
   },
+  {
+    id: "locrian",
+    name: "Locrian Scale",
+    shortName: "Locrian",
+    intervals: [
+      { degree: "1", semitones: 0 },
+      { degree: "b2", semitones: 1 },
+      { degree: "b3", semitones: 3 },
+      { degree: "4", semitones: 5 },
+      { degree: "b5", semitones: 6 },
+      { degree: "b6", semitones: 8 },
+      { degree: "b7", semitones: 10 },
+      { degree: "8", semitones: 12 },
+    ],
+  },
 ] as const satisfies readonly ScaleDefinition[];
 
 export type ScaleId = (typeof scaleDefinitions)[number]["id"];
