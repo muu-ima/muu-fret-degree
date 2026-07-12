@@ -120,7 +120,26 @@ export function pitchClassOf(note: string) {
     return sharpPitchClasses[flatIndex];
   }
 
-  return note;
+  const match = /^([A-G])([#b]*)$/.exec(note);
+  if (!match) {
+    return note;
+  }
+
+  const [, letter, accidentals] = match;
+  const accidentalOffset = accidentals.split("").reduce((total, accidental) => {
+    if (accidental === "#") {
+      return total + 1;
+    }
+
+    if (accidental === "b") {
+      return total - 1;
+    }
+
+    return total;
+  }, 0);
+  const pitchClassIndex = naturalPitchClass(letter) + accidentalOffset;
+
+  return sharpPitchClasses[((pitchClassIndex % sharpPitchClasses.length) + sharpPitchClasses.length) % sharpPitchClasses.length];
 }
 
 function naturalPitchClass(letter: string) {
