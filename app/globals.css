@@ -4438,6 +4438,10 @@ select:focus-visible,
   letter-spacing: 0;
 }
 
+.scaleSelectLabel.compact select {
+  min-width: 118px;
+}
+
 .scalePrintButton {
   display: inline-flex;
   align-items: center;

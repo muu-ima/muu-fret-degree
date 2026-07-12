@@ -13,6 +13,12 @@ export type ScaleNote = {
   note: string;
 };
 
+export type DiatonicModeRow = {
+  degree: string;
+  root: string;
+  scale: ScaleDefinition;
+};
+
 export const scaleDefinitions = [
   {
     id: "major",
@@ -127,6 +133,31 @@ export const defaultScaleId = "major" satisfies ScaleId;
 
 export function findScaleDefinition(scaleId: string) {
   return scaleDefinitions.find((scale) => scale.id === scaleId) ?? scaleDefinitions[0];
+}
+
+const diatonicModeScaleIds = ["major", "dorian", "phrygian", "lydian", "mixolydian", "natural-minor", "locrian"] as const satisfies readonly ScaleId[];
+
+export function modeSheetLabel(scale: ScaleDefinition) {
+  if (scale.id === "major") {
+    return "Ionian / Major";
+  }
+
+  if (scale.id === "natural-minor") {
+    return "Aeolian / Natural Minor";
+  }
+
+  return scale.shortName;
+}
+
+export function makeDiatonicModeRows(keyRoot: string): DiatonicModeRow[] {
+  const parentScale = findScaleDefinition("major");
+  const parentScaleNotes = makeScaleNotes(keyRoot, parentScale);
+
+  return diatonicModeScaleIds.map((scaleId, index) => ({
+    degree: String(index + 1),
+    root: parentScaleNotes[index].note,
+    scale: findScaleDefinition(scaleId),
+  }));
 }
 
 function scaleRootMidi(root: string, baseMidi: number) {

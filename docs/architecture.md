@@ -120,6 +120,8 @@
 
 - 選択中のスケールIDを持つ。
 - `data/theory.json` の12ルートから、各キーのスケール音を作る。
+- 表示モードとして、12キーの同一スケール一覧と、親キーに対するダイアトニック7モード一覧を切り替える。
+- ダイアトニック7モード一覧では、例: Key Dなら `D Major`, `E Dorian`, `F# Phrygian`, `G Lydian`, `A Mixolydian`, `B Aeolian`, `C# Locrian` を生成する。
 - `ScaleStaff` へ、ルート、スケール名、音列を渡す。
 - PDFボタンから `window.print()` を呼び出す。
 
