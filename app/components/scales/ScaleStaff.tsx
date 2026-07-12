@@ -72,91 +72,7 @@ const keySignatureAccidentalCounts: Record<string, number> = {
   Abm: 7,
 };
 
-const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, ScaleStaffLayoutOverride>>>> = {
-  dorian: {
-    C: {
-      compact: {
-        accidentalScale: 0.9,
-        signatureReserve: 48,
-        staveY: 19,
-      },
-    },
-    "C#": {
-      compact: {
-        accidentalScale: 0.78,
-        labelOffsets: {
-          1: -1,
-          6: 2,
-        },
-        noteOffsets: {
-          6: 3,
-        },
-        noteScale: 0.86,
-        noteShift: 6,
-        signatureReserve: 50,
-        staveY: 19,
-      },
-    },
-    D: {
-      compact: {
-        accidentalScale: 0.9,
-        signatureReserve: 48,
-        staveY: 19,
-      },
-    },
-    Eb: {
-      compact: {
-        accidentalScale: 0.78,
-        labelOffsets: {
-          2: 1,
-          6: 1,
-        },
-        noteOffsets: {
-          2: 2,
-          6: 2,
-        },
-        noteScale: 0.86,
-        noteShift: 6,
-        signatureReserve: 50,
-        staveY: 19,
-      },
-    },
-    Ab: {
-      compact: {
-        accidentalScale: 0.78,
-        labelOffsets: {
-          2: 1,
-          6: 1,
-        },
-        noteOffsets: {
-          2: 2,
-          6: 2,
-        },
-        noteScale: 0.86,
-        noteShift: 6,
-        signatureReserve: 50,
-        staveY: 19,
-      },
-    },
-    Bb: {
-      compact: {
-        accidentalScale: 0.84,
-        labelOffsets: {
-          2: 1,
-          6: 1,
-        },
-        noteOffsets: {
-          2: 2,
-          6: 2,
-        },
-        noteScale: 0.9,
-        noteShift: 4,
-        signatureReserve: 50,
-        staveY: 19,
-      },
-    },
-  },
-};
+const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, ScaleStaffLayoutOverride>>>> = {};
 
 function keySignatureAccidentalCount(keySignature: string | undefined) {
   return keySignature ? (keySignatureAccidentalCounts[keySignature] ?? 0) : 0;
@@ -220,16 +136,6 @@ function scaleKeySignature(container: HTMLDivElement) {
   });
 }
 
-function compactDorianAnchorOffset(layout: ReturnType<typeof makeNotationLayout>, keySignature?: string) {
-  const isCompact = layout.width <= 520;
-
-  if (!isCompact || keySignature) {
-    return 0;
-  }
-
-  return layout.noteShift;
-}
-
 function naturalNoteCenterOffset(note: ScaleNote, layout: ReturnType<typeof makeNotationLayout>, keySignature?: string) {
   const isCompact = layout.width <= 520;
 
@@ -241,12 +147,7 @@ function naturalNoteCenterOffset(note: ScaleNote, layout: ReturnType<typeof make
 }
 
 function noteXOffset(note: ScaleNote, index: number, layout: ReturnType<typeof makeNotationLayout>, keySignature?: string) {
-  return (
-    -layout.noteShift +
-    compactDorianAnchorOffset(layout, keySignature) +
-    (layout.noteOffsets?.[index] ?? 0) +
-    naturalNoteCenterOffset(note, layout, keySignature)
-  );
+  return -layout.noteShift + naturalNoteCenterOffset(note, layout, keySignature) + (layout.noteOffsets?.[index] ?? 0);
 }
 
 function transformStaveNotes(
