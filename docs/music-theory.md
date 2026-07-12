@@ -80,14 +80,16 @@ Emaj7 = E G# B D#
 
 `/scales` では、12音階すべてのスケールを五線譜で確認し、ブラウザ印刷からPDFとして保存できるようにする。
 
-短期的には、`Major Scale` と `Natural Minor Scale` から始める。中期的には、練習や理論確認で使うスケールを `app/lib/scales.ts` に順次追加し、同じUIで切り替えられるようにする。
+短期的には、`Major Scale` と `Aeolian Scale` から始める。Aeolian は自然短音階と同じ音列だが、このアプリではチャーチモードとしての見通しを優先して `Natural Minor` ではなく `Aeolian` と表記する。中期的には、練習や理論確認で使うスケールを `app/lib/scales.ts` に順次追加し、同じUIで切り替えられるようにする。
 
-学習用の表示として、親キーに対するダイアトニック7モードをまとめて切り替えられるようにする。たとえば Key D Major では、`D Major`, `E Dorian`, `F# Phrygian`, `G Lydian`, `A Mixolydian`, `B Aeolian / Natural Minor`, `C# Locrian` を同じシート上で確認できるようにする。
+学習用の表示として、親キーに対するダイアトニック7モードをまとめて切り替えられるようにする。たとえば Key D Major では、`D Major`, `E Dorian`, `F# Phrygian`, `G Lydian`, `A Mixolydian`, `B Aeolian`, `C# Locrian` を同じシート上で確認できるようにする。
+
+各モードは親キー内のダイアトニックコードと結びつけて表示する。Major Keyでは `I maj7`, `ii m7`, `iii m7`, `IV maj7`, `V 7`, `vi m7`, `viiø m7b5` を基本の役割として扱う。
 
 追加していく候補:
 
 - Major
-- Natural Minor
+- Aeolian
 - Harmonic Minor
 - Melodic Minor
 - Major Pentatonic
@@ -97,7 +99,6 @@ Emaj7 = E G# B D#
 - Phrygian
 - Lydian
 - Mixolydian
-- Aeolian
 - Locrian
 - Whole Tone
 - Diminished / Half-Whole Diminished

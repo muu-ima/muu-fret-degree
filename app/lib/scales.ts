@@ -14,7 +14,9 @@ export type ScaleNote = {
 };
 
 export type DiatonicModeRow = {
+  chordQuality: string;
   degree: string;
+  roman: string;
   root: string;
   scale: ScaleDefinition;
 };
@@ -37,8 +39,8 @@ export const scaleDefinitions = [
   },
   {
     id: "natural-minor",
-    name: "Natural Minor Scale",
-    shortName: "Natural Minor",
+    name: "Aeolian Scale",
+    shortName: "Aeolian",
     intervals: [
       { degree: "1", semitones: 0 },
       { degree: "2", semitones: 2 },
@@ -136,6 +138,15 @@ export function findScaleDefinition(scaleId: string) {
 }
 
 const diatonicModeScaleIds = ["major", "dorian", "phrygian", "lydian", "mixolydian", "natural-minor", "locrian"] as const satisfies readonly ScaleId[];
+const diatonicModeRoles = [
+  { chordQuality: "maj7", degree: "1", roman: "I" },
+  { chordQuality: "m7", degree: "2", roman: "ii" },
+  { chordQuality: "m7", degree: "3", roman: "iii" },
+  { chordQuality: "maj7", degree: "4", roman: "IV" },
+  { chordQuality: "7", degree: "5", roman: "V" },
+  { chordQuality: "m7", degree: "6", roman: "vi" },
+  { chordQuality: "m7b5", degree: "7", roman: "viiø" },
+] as const;
 
 export function modeSheetLabel(scale: ScaleDefinition) {
   if (scale.id === "major") {
@@ -143,7 +154,7 @@ export function modeSheetLabel(scale: ScaleDefinition) {
   }
 
   if (scale.id === "natural-minor") {
-    return "Aeolian / Natural Minor";
+    return "Aeolian";
   }
 
   return scale.shortName;
@@ -154,7 +165,9 @@ export function makeDiatonicModeRows(keyRoot: string): DiatonicModeRow[] {
   const parentScaleNotes = makeScaleNotes(keyRoot, parentScale);
 
   return diatonicModeScaleIds.map((scaleId, index) => ({
-    degree: String(index + 1),
+    chordQuality: diatonicModeRoles[index].chordQuality,
+    degree: diatonicModeRoles[index].degree,
+    roman: diatonicModeRoles[index].roman,
     root: parentScaleNotes[index].note,
     scale: findScaleDefinition(scaleId),
   }));
