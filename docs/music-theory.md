@@ -89,17 +89,17 @@ Emaj7 = E G# B D#
 追加していく候補:
 
 - Major
+- Dorian
+- Phrygian
+- Lydian
+- Mixolydian
 - Aeolian
+- Locrian
 - Harmonic Minor
 - Melodic Minor
 - Major Pentatonic
 - Minor Pentatonic
 - Blues
-- Dorian
-- Phrygian
-- Lydian
-- Mixolydian
-- Locrian
 - Whole Tone
 - Diminished / Half-Whole Diminished
 - Chromatic
