@@ -83,7 +83,7 @@ export function ScaleSheet() {
 
         <div className={rootRangeId === "all" ? "scaleStaffGrid" : "scaleStaffGrid focused"}>
           {rows.map((row) => (
-            <ScaleStaff key={row.root} root={row.root} scaleName={selectedScale.shortName} notes={row.notes} />
+            <ScaleStaff key={row.root} root={row.root} scaleId={selectedScale.id} scaleName={selectedScale.shortName} notes={row.notes} />
           ))}
         </div>
       </section>

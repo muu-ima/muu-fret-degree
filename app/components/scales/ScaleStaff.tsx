@@ -2,12 +2,26 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Accidental, Formatter, Renderer, Stave, StaveNote, Voice } from "vexflow";
-import type { ScaleNote } from "../../lib/scales";
+import type { ScaleId, ScaleNote } from "../../lib/scales";
 
 type ScaleStaffProps = {
   root: string;
+  scaleId: ScaleId;
   scaleName: string;
   notes: ScaleNote[];
+};
+
+type ScaleStaffLayoutOverride = {
+  compact?: {
+    accidentalScale?: number;
+    height?: number;
+    labelOffsets?: Record<number, number>;
+    noteOffsets?: Record<number, number>;
+    noteScale?: number;
+    noteShift?: number;
+    signatureReserve?: number;
+    staveY?: number;
+  };
 };
 
 const keySignatureByScale: Record<string, (root: string) => string> = {
@@ -26,6 +40,7 @@ const naturalPitchClasses: Record<string, number> = {
 };
 
 const keySignatureScale = 0.72;
+const compactNaturalNoteCenterOffset = 3;
 
 const keySignatureAccidentalCounts: Record<string, number> = {
   C: 0,
@@ -57,6 +72,8 @@ const keySignatureAccidentalCounts: Record<string, number> = {
   Abm: 7,
 };
 
+const scaleStaffLayoutOverrides: Partial<Record<ScaleId, Partial<Record<string, ScaleStaffLayoutOverride>>>> = {};
+
 function keySignatureAccidentalCount(keySignature: string | undefined) {
   return keySignature ? (keySignatureAccidentalCounts[keySignature] ?? 0) : 0;
 }
@@ -68,7 +85,7 @@ function writtenAccidentalCount(notes: ScaleNote[]) {
 function makeDensityProfile(accidentalCount: number, width: number) {
   const isCompact = width <= 520;
   const compactReserves = [76, 84, 90, 96, 102, 108, 114, 120];
-  const defaultReserves = [88, 94, 100, 106, 112, 118, 124, 130];
+  const defaultReserves = [52, 56, 60, 64, 68, 72, 76, 80];
   const shifts = isCompact ? [0, 0, 2, 4, 6, 8, 10, 12] : [0, 0, 0, 0, 2, 4, 6, 8];
   const scales = isCompact ? [0.98, 0.98, 0.96, 0.95, 0.94, 0.92, 0.9, 0.88] : [1, 1, 1, 1, 0.96, 0.94, 0.92, 0.9];
   const accidentalScales = isCompact ? [0.96, 0.96, 0.92, 0.9, 0.88, 0.86, 0.84, 0.82] : [1, 1, 1, 1, 0.96, 0.94, 0.92, 0.9];
@@ -82,7 +99,7 @@ function makeDensityProfile(accidentalCount: number, width: number) {
   };
 }
 
-function makeNotationLayout(containerWidth: number, notes: ScaleNote[], keySignature?: string) {
+function makeNotationLayout(containerWidth: number, root: string, scaleId: ScaleId, notes: ScaleNote[], keySignature?: string) {
   const width = Math.max(260, Math.floor(containerWidth));
   const isCompact = width <= 520;
   const staveX = isCompact ? 6 : 10;
@@ -90,15 +107,18 @@ function makeNotationLayout(containerWidth: number, notes: ScaleNote[], keySigna
   const staveWidth = width - staveX - rightInset;
   const accidentalCount = keySignature ? keySignatureAccidentalCount(keySignature) : writtenAccidentalCount(notes);
   const densityProfile = makeDensityProfile(accidentalCount, width);
+  const compactOverride = isCompact ? scaleStaffLayoutOverrides[scaleId]?.[root]?.compact : undefined;
+  const signatureReserve = compactOverride?.signatureReserve ?? densityProfile.signatureReserve;
 
   return {
     ...densityProfile,
+    ...compactOverride,
     width,
-    height: isCompact ? 124 : 132,
+    height: compactOverride?.height ?? (isCompact ? 124 : 132),
     staveX,
-    staveY: isCompact ? 21 : 32,
+    staveY: compactOverride?.staveY ?? (isCompact ? 21 : 32),
     staveWidth,
-    formatWidth: Math.max(150, staveWidth - densityProfile.signatureReserve),
+    formatWidth: Math.max(150, staveWidth - signatureReserve),
   };
 }
 
@@ -116,18 +136,38 @@ function scaleKeySignature(container: HTMLDivElement) {
   });
 }
 
-function transformStaveNotes(container: HTMLDivElement, shift: number, scale: number) {
-  if (shift <= 0 && scale === 1) {
+function naturalNoteCenterOffset(note: ScaleNote, layout: ReturnType<typeof makeNotationLayout>, keySignature?: string) {
+  const isCompact = layout.width <= 520;
+
+  if (!isCompact || keySignature || noteParts(note).accidental) {
+    return 0;
+  }
+
+  return compactNaturalNoteCenterOffset;
+}
+
+function noteXOffset(note: ScaleNote, index: number, layout: ReturnType<typeof makeNotationLayout>, keySignature?: string) {
+  return -layout.noteShift + naturalNoteCenterOffset(note, layout, keySignature) + (layout.noteOffsets?.[index] ?? 0);
+}
+
+function transformStaveNotes(
+  container: HTMLDivElement,
+  notes: ScaleNote[],
+  layout: ReturnType<typeof makeNotationLayout>,
+  keySignature?: string,
+) {
+  if (layout.noteShift <= 0 && layout.noteScale === 1 && !layout.noteOffsets && layout.width > 520) {
     return;
   }
 
-  container.querySelectorAll<SVGGElement>(".vf-stavenote").forEach((group) => {
+  container.querySelectorAll<SVGGElement>(".vf-stavenote").forEach((group, index) => {
     const box = group.getBBox();
     const originX = box.x + box.width / 2;
     const originY = box.y + box.height / 2;
+    const xOffset = noteXOffset(notes[index], index, layout, keySignature);
     group.setAttribute(
       "transform",
-      `translate(${-shift} 0) translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`,
+      `translate(${xOffset} 0) translate(${originX} ${originY}) scale(${layout.noteScale}) translate(${-originX} ${-originY})`,
     );
   });
 }
@@ -188,7 +228,7 @@ function makeDegreeLabel(note: ScaleNote) {
   return note.degree;
 }
 
-export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
+export function ScaleStaff({ root, scaleId, scaleName, notes }: ScaleStaffProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [labelPositions, setLabelPositions] = useState<number[]>([]);
@@ -204,7 +244,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     const drawNotation = () => {
       container.replaceChildren();
 
-      const layout = makeNotationLayout(container.getBoundingClientRect().width, notes, keySignature);
+      const layout = makeNotationLayout(container.getBoundingClientRect().width, root, scaleId, notes, keySignature);
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
 
@@ -225,10 +265,12 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
       new Formatter().joinVoices([voice]).format([voice], layout.formatWidth);
       voice.draw(context, stave);
       scaleKeySignature(container);
-      transformStaveNotes(container, layout.noteShift, layout.noteScale);
+      transformStaveNotes(container, notes, layout, keySignature);
       transformAccidentals(container, layout.accidentalScale);
 
-      setLabelPositions(staveNotes.map((note) => ((note.getAbsoluteX() - layout.noteShift) / layout.width) * 100));
+      setLabelPositions(
+        staveNotes.map((note, index) => ((note.getAbsoluteX() + noteXOffset(notes[index], index, layout, keySignature)) / layout.width) * 100 + (layout.labelOffsets?.[index] ?? 0)),
+      );
     };
 
     drawNotation();
@@ -239,7 +281,7 @@ export function ScaleStaff({ root, scaleName, notes }: ScaleStaffProps) {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [keySignature, notes]);
+  }, [keySignature, notes, root, scaleId]);
 
   return (
     <figure className="scaleStaffCard" aria-labelledby={titleId}>
