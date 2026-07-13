@@ -123,6 +123,7 @@
 - 表示モードとして、12キーの同一スケール一覧と、親キーに対するダイアトニック7モード一覧を切り替える。
 - ダイアトニック7モード一覧では、例: Key Dなら `D Major`, `E Dorian`, `F# Phrygian`, `G Lydian`, `A Mixolydian`, `B Aeolian`, `C# Locrian` を生成する。
 - Key Modesのカードには、`I C / Ionian maj7`, `ii D / Dorian m7` のように、親キー内でのローマ数字、ルート、モード名、コード品質を添える。
+- Key Modesの五線譜には、各モード単体の臨時記号ではなく、親キーのMajor調号を入れる。
 - `ScaleStaff` へ、ルート、スケール名、音列を渡す。
 - PDFボタンから `window.print()` を呼び出す。
 

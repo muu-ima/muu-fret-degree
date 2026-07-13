@@ -88,6 +88,8 @@ Emaj7 = E G# B D#
 
 Key Modesのカードでは、左側に `I C`, `ii D` のような親キー内での位置とルート、右側に `Ionian maj7`, `Dorian m7` のようなモード名とコード品質を表示する。
 
+Key Modesの五線譜は、各モードごとに臨時記号を並べるのではなく、親キーのMajor調号を使う。たとえば Key D Major の `E Dorian` は、Eを中心に見せつつ、調号はD Majorの `F# / C#` を共有する。
+
 追加していく候補:
 
 - Major

@@ -6,6 +6,7 @@ import type { ScaleId, ScaleNote } from "../../lib/scales";
 
 type ScaleStaffProps = {
   heading?: string;
+  keySignature?: string;
   meta?: string;
   root: string;
   scaleId: ScaleId;
@@ -230,11 +231,11 @@ function makeDegreeLabel(note: ScaleNote) {
   return note.degree;
 }
 
-export function ScaleStaff({ heading, meta, root, scaleId, scaleName, notes }: ScaleStaffProps) {
+export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, root, scaleId, scaleName, notes }: ScaleStaffProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [labelPositions, setLabelPositions] = useState<number[]>([]);
-  const keySignature = keySignatureByScale[scaleName]?.(root);
+  const keySignature = keySignatureOverride ?? keySignatureByScale[scaleName]?.(root);
   const vexflowClassName = keySignature ? "scaleStaffVexflow withKeySignature" : "scaleStaffVexflow withoutKeySignature";
 
   useEffect(() => {

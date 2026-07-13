@@ -16,6 +16,7 @@ type RootRangeId = (typeof rootRanges)[number]["id"];
 type ScaleSheetMode = "scale" | "key-modes";
 type ScaleSheetRow = {
   heading?: string;
+  keySignature?: string;
   meta?: string;
   root: string;
   scaleId: ScaleId;
@@ -37,6 +38,7 @@ export function ScaleSheet() {
       if (isKeyModeSheet) {
         return makeDiatonicModeRows(keyRoot).map((row) => ({
           heading: `${row.roman} ${row.root}`,
+          keySignature: keyRoot,
           meta: row.chordQuality,
           root: row.root,
           scaleId: row.scale.id as ScaleId,
@@ -136,6 +138,7 @@ export function ScaleSheet() {
             <ScaleStaff
               key={`${row.root}-${row.scaleId}`}
               heading={row.heading}
+              keySignature={row.keySignature}
               meta={row.meta}
               root={row.root}
               scaleId={row.scaleId}
