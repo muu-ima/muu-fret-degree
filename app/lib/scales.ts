@@ -150,7 +150,7 @@ const diatonicModeRoles = [
 
 export function modeSheetLabel(scale: ScaleDefinition) {
   if (scale.id === "major") {
-    return "Ionian / Major";
+    return "Ionian";
   }
 
   if (scale.id === "natural-minor") {

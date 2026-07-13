@@ -86,6 +86,8 @@ Emaj7 = E G# B D#
 
 各モードは親キー内のダイアトニックコードと結びつけて表示する。Major Keyでは `I maj7`, `ii m7`, `iii m7`, `IV maj7`, `V 7`, `vi m7`, `viiø m7b5` を基本の役割として扱う。
 
+Key Modesのカードでは、左側に `I C`, `ii D` のような親キー内での位置とルート、右側に `Ionian maj7`, `Dorian m7` のようなモード名とコード品質を表示する。
+
 追加していく候補:
 
 - Major

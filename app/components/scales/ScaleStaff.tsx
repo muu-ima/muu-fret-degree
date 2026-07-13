@@ -5,6 +5,7 @@ import { Accidental, Formatter, Renderer, Stave, StaveNote, Voice } from "vexflo
 import type { ScaleId, ScaleNote } from "../../lib/scales";
 
 type ScaleStaffProps = {
+  heading?: string;
   meta?: string;
   root: string;
   scaleId: ScaleId;
@@ -229,7 +230,7 @@ function makeDegreeLabel(note: ScaleNote) {
   return note.degree;
 }
 
-export function ScaleStaff({ meta, root, scaleId, scaleName, notes }: ScaleStaffProps) {
+export function ScaleStaff({ heading, meta, root, scaleId, scaleName, notes }: ScaleStaffProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [labelPositions, setLabelPositions] = useState<number[]>([]);
@@ -287,10 +288,10 @@ export function ScaleStaff({ meta, root, scaleId, scaleName, notes }: ScaleStaff
   return (
     <figure className="scaleStaffCard" aria-labelledby={titleId}>
       <figcaption id={titleId}>
-        <strong>{root}</strong>
+        <strong>{heading ?? root}</strong>
         <span>
-          {meta && <small>{meta}</small>}
           {scaleName}
+          {meta && <small>{meta}</small>}
         </span>
       </figcaption>
       <div className="scaleStaffNotation">
