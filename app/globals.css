@@ -4438,6 +4438,10 @@ select:focus-visible,
   letter-spacing: 0;
 }
 
+.scaleSelectLabel.compact select {
+  min-width: 118px;
+}
+
 .scalePrintButton {
   display: inline-flex;
   align-items: center;
@@ -4592,9 +4596,21 @@ select:focus-visible,
 }
 
 .scaleStaffCard figcaption span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
   color: #5a606b;
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.scaleStaffCard figcaption small {
+  color: #284b83;
+  font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
 .scaleStaffNotation {

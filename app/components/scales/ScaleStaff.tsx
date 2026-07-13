@@ -5,6 +5,9 @@ import { Accidental, Formatter, Renderer, Stave, StaveNote, Voice } from "vexflo
 import type { ScaleId, ScaleNote } from "../../lib/scales";
 
 type ScaleStaffProps = {
+  heading?: string;
+  keySignature?: string;
+  meta?: string;
   root: string;
   scaleId: ScaleId;
   scaleName: string;
@@ -26,7 +29,7 @@ type ScaleStaffLayoutOverride = {
 
 const keySignatureByScale: Record<string, (root: string) => string> = {
   Major: (root) => root,
-  "Natural Minor": (root) => `${root}m`,
+  Aeolian: (root) => `${root}m`,
 };
 
 const naturalPitchClasses: Record<string, number> = {
@@ -228,11 +231,11 @@ function makeDegreeLabel(note: ScaleNote) {
   return note.degree;
 }
 
-export function ScaleStaff({ root, scaleId, scaleName, notes }: ScaleStaffProps) {
+export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, root, scaleId, scaleName, notes }: ScaleStaffProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [labelPositions, setLabelPositions] = useState<number[]>([]);
-  const keySignature = keySignatureByScale[scaleName]?.(root);
+  const keySignature = keySignatureOverride ?? keySignatureByScale[scaleName]?.(root);
   const vexflowClassName = keySignature ? "scaleStaffVexflow withKeySignature" : "scaleStaffVexflow withoutKeySignature";
 
   useEffect(() => {
@@ -286,8 +289,11 @@ export function ScaleStaff({ root, scaleId, scaleName, notes }: ScaleStaffProps)
   return (
     <figure className="scaleStaffCard" aria-labelledby={titleId}>
       <figcaption id={titleId}>
-        <strong>{root}</strong>
-        <span>{scaleName}</span>
+        <strong>{heading ?? root}</strong>
+        <span>
+          {scaleName}
+          {meta && <small>{meta}</small>}
+        </span>
       </figcaption>
       <div className="scaleStaffNotation">
         <div className={vexflowClassName} ref={containerRef} aria-hidden="true" />
