@@ -147,6 +147,7 @@ const diatonicModeRoles = [
   { chordQuality: "m7", degree: "6", roman: "vi" },
   { chordQuality: "m7b5", degree: "7", roman: "viiø" },
 ] as const;
+const bassScaleFloorMidi = 40;
 
 export function modeSheetLabel(scale: ScaleDefinition) {
   if (scale.id === "major") {
@@ -176,8 +177,9 @@ export function makeDiatonicModeRows(keyRoot: string): DiatonicModeRow[] {
 function scaleRootMidi(root: string, baseMidi: number) {
   const rootPitchIndex = sharpPitchClasses.indexOf(pitchClassOf(root));
   const octaveOffset = rootPitchIndex >= sharpPitchClasses.indexOf("D#") ? -12 : 0;
+  const rootMidi = baseMidi + rootPitchIndex + octaveOffset;
 
-  return baseMidi + rootPitchIndex + octaveOffset;
+  return rootMidi < bassScaleFloorMidi ? rootMidi + 12 : rootMidi;
 }
 
 export function makeScaleNotes(root: string, scale: ScaleDefinition, baseMidi = 48): ScaleNote[] {
