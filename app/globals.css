@@ -4618,6 +4618,14 @@ select:focus-visible,
   max-width: 100%;
 }
 
+.scaleStaffPrintNotation {
+  position: absolute;
+  width: 620px;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
 .scaleStaffVexflow {
   display: block;
   width: 100%;
@@ -4796,8 +4804,8 @@ select:focus-visible,
   }
 
   .scaleStaffGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 5mm;
+    grid-template-columns: 1fr;
+    gap: 4mm;
   }
 
   .scaleStaffGrid.focused {
@@ -4810,5 +4818,18 @@ select:focus-visible,
     border-color: #d0d0d0;
     background: #fff;
     color: #000;
+  }
+
+  .scaleStaffScreenNotation {
+    display: none;
+  }
+
+  .scaleStaffPrintNotation {
+    position: static;
+    width: 620px;
+    max-width: 100%;
+    height: auto;
+    overflow: visible;
+    visibility: visible;
   }
 }

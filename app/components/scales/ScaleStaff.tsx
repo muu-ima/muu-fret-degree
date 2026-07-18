@@ -109,9 +109,8 @@ function makeNotationLayout(
   scaleId: ScaleId,
   notes: ScaleNote[],
   keySignature?: string,
-  forceDesktopLayout = false,
 ) {
-  const width = forceDesktopLayout ? printNotationWidth : Math.max(260, Math.floor(containerWidth));
+  const width = Math.max(260, Math.floor(containerWidth));
   const isCompact = width <= 520;
   const staveX = isCompact ? 6 : 10;
   const rightInset = isCompact ? 6 : 10;
@@ -240,31 +239,29 @@ function makeDegreeLabel(note: ScaleNote) {
 }
 
 export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, root, scaleId, scaleName, notes }: ScaleStaffProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const screenContainerRef = useRef<HTMLDivElement>(null);
+  const printContainerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  const [labelPositions, setLabelPositions] = useState<number[]>([]);
+  const [screenLabelPositions, setScreenLabelPositions] = useState<number[]>([]);
+  const [printLabelPositions, setPrintLabelPositions] = useState<number[]>([]);
   const keySignature = keySignatureOverride ?? keySignatureByScale[scaleName]?.(root);
   const vexflowClassName = keySignature ? "scaleStaffVexflow withKeySignature" : "scaleStaffVexflow withoutKeySignature";
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
+    const screenContainer = screenContainerRef.current;
+    const printContainer = printContainerRef.current;
+    if (!screenContainer || !printContainer) {
       return;
     }
 
-    const printMediaQuery = window.matchMedia("print");
-
-    const drawNotation = (forceDesktopLayout = printMediaQuery.matches) => {
+    const drawNotation = (
+      container: HTMLDivElement,
+      setPositions: (positions: number[]) => void,
+      layoutWidth = container.getBoundingClientRect().width,
+    ) => {
       container.replaceChildren();
 
-      const layout = makeNotationLayout(
-        container.getBoundingClientRect().width,
-        root,
-        scaleId,
-        notes,
-        keySignature,
-        forceDesktopLayout,
-      );
+      const layout = makeNotationLayout(layoutWidth, root, scaleId, notes, keySignature);
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
 
@@ -288,28 +285,19 @@ export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, 
       transformStaveNotes(container, notes, layout, keySignature);
       transformAccidentals(container, layout.accidentalScale);
 
-      setLabelPositions(
+      setPositions(
         staveNotes.map((note, index) => ((note.getAbsoluteX() + noteXOffset(notes[index], index, layout, keySignature)) / layout.width) * 100 + (layout.labelOffsets?.[index] ?? 0)),
       );
     };
 
-    drawNotation();
+    drawNotation(screenContainer, setScreenLabelPositions);
+    drawNotation(printContainer, setPrintLabelPositions, printNotationWidth);
 
-    const resizeObserver = new ResizeObserver(() => drawNotation());
-    resizeObserver.observe(container);
-    const drawPrintNotation = () => drawNotation(true);
-    const drawScreenNotation = () => drawNotation(false);
-    const handlePrintMediaChange = (event: MediaQueryListEvent) => drawNotation(event.matches);
-
-    window.addEventListener("beforeprint", drawPrintNotation);
-    window.addEventListener("afterprint", drawScreenNotation);
-    printMediaQuery.addEventListener("change", handlePrintMediaChange);
+    const resizeObserver = new ResizeObserver(() => drawNotation(screenContainer, setScreenLabelPositions));
+    resizeObserver.observe(screenContainer);
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("beforeprint", drawPrintNotation);
-      window.removeEventListener("afterprint", drawScreenNotation);
-      printMediaQuery.removeEventListener("change", handlePrintMediaChange);
     };
   }, [keySignature, notes, root, scaleId]);
 
@@ -322,13 +310,27 @@ export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, 
           {meta && <small>{meta}</small>}
         </span>
       </figcaption>
-      <div className="scaleStaffNotation">
-        <div className={vexflowClassName} ref={containerRef} aria-hidden="true" />
+      <div className="scaleStaffNotation scaleStaffScreenNotation">
+        <div className={vexflowClassName} ref={screenContainerRef} aria-hidden="true" />
         <ol className="scaleNoteList" aria-label={`${root} ${scaleName} notes`}>
           {notes.map((note, index) => (
             <li
               key={`${note.degree}-${note.midi}-${index}`}
-              style={{ left: `${labelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
+              style={{ left: `${screenLabelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
+            >
+              <span>{note.note}</span>
+              <small>{makeDegreeLabel(note)}</small>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div className="scaleStaffNotation scaleStaffPrintNotation" aria-hidden="true">
+        <div className={vexflowClassName} ref={printContainerRef} />
+        <ol className="scaleNoteList">
+          {notes.map((note, index) => (
+            <li
+              key={`${note.degree}-${note.midi}-${index}`}
+              style={{ left: `${printLabelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
             >
               <span>{note.note}</span>
               <small>{makeDegreeLabel(note)}</small>
