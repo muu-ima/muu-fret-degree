@@ -44,6 +44,7 @@ const naturalPitchClasses: Record<string, number> = {
 
 const keySignatureScale = 0.72;
 const compactNaturalNoteCenterOffset = 3;
+const printNotationWidth = 620;
 
 const keySignatureAccidentalCounts: Record<string, number> = {
   C: 0,
@@ -102,8 +103,15 @@ function makeDensityProfile(accidentalCount: number, width: number) {
   };
 }
 
-function makeNotationLayout(containerWidth: number, root: string, scaleId: ScaleId, notes: ScaleNote[], keySignature?: string) {
-  const width = Math.max(260, Math.floor(containerWidth));
+function makeNotationLayout(
+  containerWidth: number,
+  root: string,
+  scaleId: ScaleId,
+  notes: ScaleNote[],
+  keySignature?: string,
+  forceDesktopLayout = false,
+) {
+  const width = forceDesktopLayout ? printNotationWidth : Math.max(260, Math.floor(containerWidth));
   const isCompact = width <= 520;
   const staveX = isCompact ? 6 : 10;
   const rightInset = isCompact ? 6 : 10;
@@ -244,10 +252,19 @@ export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, 
       return;
     }
 
-    const drawNotation = () => {
+    const printMediaQuery = window.matchMedia("print");
+
+    const drawNotation = (forceDesktopLayout = printMediaQuery.matches) => {
       container.replaceChildren();
 
-      const layout = makeNotationLayout(container.getBoundingClientRect().width, root, scaleId, notes, keySignature);
+      const layout = makeNotationLayout(
+        container.getBoundingClientRect().width,
+        root,
+        scaleId,
+        notes,
+        keySignature,
+        forceDesktopLayout,
+      );
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
 
@@ -278,11 +295,21 @@ export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, 
 
     drawNotation();
 
-    const resizeObserver = new ResizeObserver(drawNotation);
+    const resizeObserver = new ResizeObserver(() => drawNotation());
     resizeObserver.observe(container);
+    const drawPrintNotation = () => drawNotation(true);
+    const drawScreenNotation = () => drawNotation(false);
+    const handlePrintMediaChange = (event: MediaQueryListEvent) => drawNotation(event.matches);
+
+    window.addEventListener("beforeprint", drawPrintNotation);
+    window.addEventListener("afterprint", drawScreenNotation);
+    printMediaQuery.addEventListener("change", handlePrintMediaChange);
 
     return () => {
       resizeObserver.disconnect();
+      window.removeEventListener("beforeprint", drawPrintNotation);
+      window.removeEventListener("afterprint", drawScreenNotation);
+      printMediaQuery.removeEventListener("change", handlePrintMediaChange);
     };
   }, [keySignature, notes, root, scaleId]);
 
