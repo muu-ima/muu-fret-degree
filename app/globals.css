@@ -4570,6 +4570,10 @@ select:focus-visible,
   width: min(860px, 100%);
 }
 
+.scaleStaffGrid.focused .scaleStaffNotation:has(.scaleNoteList.twoOctaves) {
+  width: min(980px, 100%);
+}
+
 .scaleStaffCard {
   min-width: 0;
   margin: 0;
@@ -4620,7 +4624,7 @@ select:focus-visible,
 
 .scaleStaffPrintNotation {
   position: absolute;
-  width: 620px;
+  width: 700px;
   height: 0;
   overflow: hidden;
   visibility: hidden;
@@ -4855,7 +4859,7 @@ select:focus-visible,
 
   .scaleStaffPrintNotation {
     position: static;
-    width: 620px;
+    width: 700px;
     max-width: 100%;
     height: auto;
     overflow: visible;

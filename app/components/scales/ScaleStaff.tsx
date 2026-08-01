@@ -48,7 +48,7 @@ const naturalPitchClasses: Record<string, number> = {
 
 const keySignatureScale = 0.72;
 const compactNaturalNoteCenterOffset = 3;
-const printNotationWidth = 620;
+const printNotationWidth = 700;
 
 const keySignatureAccidentalCounts: Record<string, number> = {
   C: 0,
@@ -116,13 +116,14 @@ function makeNotationLayout(
 ) {
   const width = Math.max(260, Math.floor(containerWidth));
   const isCompact = width <= 520;
-  const staveX = isCompact ? 6 : 10;
-  const rightInset = isCompact ? 6 : 10;
+  const isTwoOctaves = notes.length > 8;
+  const staveX = isTwoOctaves ? (isCompact ? 1 : 2) : isCompact ? 6 : 10;
+  const rightInset = isTwoOctaves ? (isCompact ? 1 : 2) : isCompact ? 6 : 10;
   const staveWidth = width - staveX - rightInset;
   const accidentalCount = keySignature ? keySignatureAccidentalCount(keySignature) : writtenAccidentalCount(notes);
   const densityProfile = makeDensityProfile(accidentalCount, width);
   const compactOverride = isCompact ? scaleStaffLayoutOverrides[scaleId]?.[root]?.compact : undefined;
-  const signatureReserve = compactOverride?.signatureReserve ?? densityProfile.signatureReserve;
+  const signatureReserve = compactOverride?.signatureReserve ?? Math.max(36, densityProfile.signatureReserve - (isTwoOctaves ? 20 : 0));
 
   return {
     ...densityProfile,
