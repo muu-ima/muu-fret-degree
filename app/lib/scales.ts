@@ -129,6 +129,46 @@ export const scaleDefinitions = [
       { degree: "8", semitones: 12 },
     ],
   },
+  {
+    id: "major-pentatonic",
+    name: "Major Pentatonic Scale",
+    shortName: "Major Pentatonic",
+    intervals: [
+      { degree: "1", semitones: 0 },
+      { degree: "2", semitones: 2 },
+      { degree: "3", semitones: 4 },
+      { degree: "5", semitones: 7 },
+      { degree: "6", semitones: 9 },
+      { degree: "8", semitones: 12 },
+    ],
+  },
+  {
+    id: "minor-pentatonic",
+    name: "Minor Pentatonic Scale",
+    shortName: "Minor Pentatonic",
+    intervals: [
+      { degree: "1", semitones: 0 },
+      { degree: "b3", semitones: 3 },
+      { degree: "4", semitones: 5 },
+      { degree: "5", semitones: 7 },
+      { degree: "b7", semitones: 10 },
+      { degree: "8", semitones: 12 },
+    ],
+  },
+  {
+    id: "blues",
+    name: "Blues Scale",
+    shortName: "Blues",
+    intervals: [
+      { degree: "1", semitones: 0 },
+      { degree: "b3", semitones: 3 },
+      { degree: "4", semitones: 5 },
+      { degree: "b5", semitones: 6 },
+      { degree: "5", semitones: 7 },
+      { degree: "b7", semitones: 10 },
+      { degree: "8", semitones: 12 },
+    ],
+  },
 ] as const satisfies readonly ScaleDefinition[];
 
 export type ScaleId = (typeof scaleDefinitions)[number]["id"];
