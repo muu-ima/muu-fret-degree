@@ -142,6 +142,9 @@ export const scaleFingerings: Partial<Record<ScaleId, Partial<Record<string, Sca
   dorian: {
     D: ["1", "1", "2", "4", "1", "1", "2", "4", "1", "2", "4", "1", "1", "2", "4"],
   },
+  phrygian: {
+    E: ["0", "1", "4", "0", "1", "2", "4", "1", "2", "4", "1", "3", "4", "2", "4"],
+  },
 };
 
 export function findScaleDefinition(scaleId: string) {
