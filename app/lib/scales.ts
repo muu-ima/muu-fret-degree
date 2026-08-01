@@ -135,7 +135,11 @@ export type ScaleId = (typeof scaleDefinitions)[number]["id"];
 
 export const defaultScaleId = "major" satisfies ScaleId;
 
-export const scaleFingerings: Partial<Record<ScaleId, Partial<Record<string, ScaleFingering>>>> = {};
+export const scaleFingerings: Partial<Record<ScaleId, Partial<Record<string, ScaleFingering>>>> = {
+  major: {
+    C: ["1", "1", "3", "4", "1", "1", "3", "4", "1", "3", "4", "1", "1", "3", "4"],
+  },
+};
 
 export function findScaleDefinition(scaleId: string) {
   return scaleDefinitions.find((scale) => scale.id === scaleId) ?? scaleDefinitions[0];
