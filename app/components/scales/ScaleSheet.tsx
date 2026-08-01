@@ -20,7 +20,6 @@ const rootRanges = [
   { id: "c-e", label: "C-E", roots: theory.roots.slice(0, 6) },
   { id: "f-b", label: "F-B", roots: theory.roots.slice(6) },
 ] as const;
-const fingeringRoots = ["C", "D", "E", "F", "G", "A", "B"] as const;
 
 type RootRangeId = (typeof rootRanges)[number]["id"];
 type ScaleSheetMode = "scale" | "key-modes";
@@ -50,12 +49,15 @@ export function ScaleSheet() {
   const rows = useMemo<ScaleSheetRow[]>(
     () => {
       if (isFingeringSheet) {
-        return fingeringRoots.map((root) => ({
-          root,
-          scaleId: selectedScale.id,
-          scaleName: selectedScale.shortName,
-          notes: makeTwoOctaveScaleNotes(root, selectedScale),
-          fingering: findScaleFingering(selectedScale.id, root),
+        return makeDiatonicModeRows(keyRoot).map((row) => ({
+          heading: `${row.roman} ${row.root}`,
+          keySignature: keyRoot,
+          meta: row.chordQuality,
+          root: row.root,
+          scaleId: row.scale.id as ScaleId,
+          scaleName: modeSheetLabel(row.scale),
+          notes: makeTwoOctaveScaleNotes(row.root, row.scale),
+          fingering: findScaleFingering(row.scale.id as ScaleId, row.root),
         }));
       }
 
@@ -83,8 +85,8 @@ export function ScaleSheet() {
     [isFingeringSheet, isKeyModeSheet, keyRoot, selectedRootRange, selectedScale],
   );
 
-  const sheetTitle = isKeyModeSheet && !isFingeringSheet ? `Diatonic Modes in Key ${keyRoot}` : selectedScale.name;
-  const sheetLabel = isFingeringSheet ? "Finger Number Scale Sheet" : isKeyModeSheet ? "Key Mode Sheet" : "12-Key Scale Sheet";
+  const sheetTitle = isFingeringSheet || isKeyModeSheet ? `Diatonic Modes in Key ${keyRoot}` : selectedScale.name;
+  const sheetLabel = isFingeringSheet ? "Mode Fingering Sheet" : isKeyModeSheet ? "Key Mode Sheet" : "12-Key Scale Sheet";
   const gridClassName = isFingeringSheet || isKeyModeSheet || rootRangeId !== "all" ? "scaleStaffGrid focused" : "scaleStaffGrid";
 
   return (
@@ -92,7 +94,7 @@ export function ScaleSheet() {
       <header className="scaleToolbar">
         <div>
           <p className="panelEyebrow">Notation</p>
-          <h1>{isFingeringSheet ? "Finger Number Scale Sheet" : isKeyModeSheet ? "Key Mode Scale Sheet" : "12-Key Scale Sheet"}</h1>
+          <h1>{isFingeringSheet ? "Mode Fingering Sheet" : isKeyModeSheet ? "Key Mode Scale Sheet" : "12-Key Scale Sheet"}</h1>
         </div>
 
         <div className="scaleToolbarControls">
@@ -105,8 +107,8 @@ export function ScaleSheet() {
           </label>
 
           <label className="scaleSelectLabel">
-            <span>{isKeyModeSheet ? "Key" : "Scale"}</span>
-            {isKeyModeSheet ? (
+            <span>{isKeyModeSheet || isFingeringSheet ? "Key" : "Scale"}</span>
+            {isKeyModeSheet || isFingeringSheet ? (
               <select value={keyRoot} onChange={(event) => setKeyRoot(event.target.value)}>
                 {theory.roots.map((root) => (
                   <option key={root} value={root}>
@@ -163,7 +165,7 @@ export function ScaleSheet() {
                 ))}
               </div>
             )}
-            <span>{isFingeringSheet ? "C D E F G A B / two octaves / finger numbers" : "Bass clef / one octave"}</span>
+            <span>{isFingeringSheet ? `${keyRoot} key modes / two octaves / finger numbers` : "Bass clef / one octave"}</span>
           </div>
         </div>
 
