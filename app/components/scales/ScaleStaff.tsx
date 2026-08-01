@@ -2,9 +2,11 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Accidental, Formatter, Renderer, Stave, StaveNote, Voice } from "vexflow";
-import type { ScaleId, ScaleNote } from "../../lib/scales";
+import type { ScaleFingering, ScaleId, ScaleNote } from "../../lib/scales";
 
 type ScaleStaffProps = {
+  annotationMode?: ScaleAnnotationMode;
+  fingering?: ScaleFingering;
   heading?: string;
   keySignature?: string;
   meta?: string;
@@ -13,6 +15,8 @@ type ScaleStaffProps = {
   scaleName: string;
   notes: ScaleNote[];
 };
+
+type ScaleAnnotationMode = "degree" | "fingering";
 
 type ScaleStaffLayoutOverride = {
   compact?: {
@@ -238,7 +242,45 @@ function makeDegreeLabel(note: ScaleNote) {
   return note.degree;
 }
 
-export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, root, scaleId, scaleName, notes }: ScaleStaffProps) {
+function scaleNoteListClassName(annotationMode: ScaleAnnotationMode, notes: ScaleNote[]) {
+  const classNames = ["scaleNoteList"];
+
+  if (annotationMode === "fingering") {
+    classNames.push("fingering");
+  }
+
+  if (notes.length > 8) {
+    classNames.push("twoOctaves");
+  }
+
+  return classNames.join(" ");
+}
+
+function renderScaleAnnotation(note: ScaleNote, index: number, annotationMode: ScaleAnnotationMode, fingering?: ScaleFingering) {
+  if (annotationMode === "fingering") {
+    const fingerNumber = fingering?.[index] ?? "";
+
+    return (
+      <small className="scaleFingerNumber" aria-label={`Finger number for ${note.note}`}>
+        {fingerNumber}
+      </small>
+    );
+  }
+
+  return <small>{makeDegreeLabel(note)}</small>;
+}
+
+export function ScaleStaff({
+  annotationMode = "degree",
+  fingering,
+  heading,
+  keySignature: keySignatureOverride,
+  meta,
+  root,
+  scaleId,
+  scaleName,
+  notes,
+}: ScaleStaffProps) {
   const screenContainerRef = useRef<HTMLDivElement>(null);
   const printContainerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -312,28 +354,28 @@ export function ScaleStaff({ heading, keySignature: keySignatureOverride, meta, 
       </figcaption>
       <div className="scaleStaffNotation scaleStaffScreenNotation">
         <div className={vexflowClassName} ref={screenContainerRef} aria-hidden="true" />
-        <ol className="scaleNoteList" aria-label={`${root} ${scaleName} notes`}>
+        <ol className={scaleNoteListClassName(annotationMode, notes)} aria-label={`${root} ${scaleName} notes`}>
           {notes.map((note, index) => (
             <li
               key={`${note.degree}-${note.midi}-${index}`}
               style={{ left: `${screenLabelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
             >
               <span>{note.note}</span>
-              <small>{makeDegreeLabel(note)}</small>
+              {renderScaleAnnotation(note, index, annotationMode, fingering)}
             </li>
           ))}
         </ol>
       </div>
       <div className="scaleStaffNotation scaleStaffPrintNotation" aria-hidden="true">
         <div className={vexflowClassName} ref={printContainerRef} />
-        <ol className="scaleNoteList">
+        <ol className={scaleNoteListClassName(annotationMode, notes)}>
           {notes.map((note, index) => (
             <li
               key={`${note.degree}-${note.midi}-${index}`}
               style={{ left: `${printLabelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
             >
               <span>{note.note}</span>
-              <small>{makeDegreeLabel(note)}</small>
+              {renderScaleAnnotation(note, index, annotationMode, fingering)}
             </li>
           ))}
         </ol>

@@ -3,7 +3,16 @@
 import { useMemo, useState } from "react";
 import { LuPrinter } from "react-icons/lu";
 import theory from "../../../data/theory.json";
-import { makeDiatonicModeRows, makeScaleNotes, modeSheetLabel, scaleDefinitions, type ScaleId } from "../../lib/scales";
+import {
+  findScaleFingering,
+  makeDiatonicModeRows,
+  makeScaleNotes,
+  makeTwoOctaveScaleNotes,
+  modeSheetLabel,
+  scaleDefinitions,
+  type ScaleFingering,
+  type ScaleId,
+} from "../../lib/scales";
 import { ScaleStaff } from "./ScaleStaff";
 
 const rootRanges = [
@@ -11,9 +20,11 @@ const rootRanges = [
   { id: "c-e", label: "C-E", roots: theory.roots.slice(0, 6) },
   { id: "f-b", label: "F-B", roots: theory.roots.slice(6) },
 ] as const;
+const fingeringRoots = ["C", "D", "E", "F", "G", "A", "B"] as const;
 
 type RootRangeId = (typeof rootRanges)[number]["id"];
 type ScaleSheetMode = "scale" | "key-modes";
+type ScaleAnnotationMode = "degree" | "fingering";
 type ScaleSheetRow = {
   heading?: string;
   keySignature?: string;
@@ -22,19 +33,32 @@ type ScaleSheetRow = {
   scaleId: ScaleId;
   scaleName: string;
   notes: ReturnType<typeof makeScaleNotes>;
+  fingering?: ScaleFingering;
 };
 
 export function ScaleSheet() {
   const [sheetMode, setSheetMode] = useState<ScaleSheetMode>("scale");
+  const [annotationMode, setAnnotationMode] = useState<ScaleAnnotationMode>("degree");
   const [scaleId, setScaleId] = useState<ScaleId>("major");
   const [keyRoot, setKeyRoot] = useState<string>("C");
   const [rootRangeId, setRootRangeId] = useState<RootRangeId>("all");
   const selectedScale = scaleDefinitions.find((scale) => scale.id === scaleId) ?? scaleDefinitions[0];
   const selectedRootRange = rootRanges.find((range) => range.id === rootRangeId) ?? rootRanges[0];
   const isKeyModeSheet = sheetMode === "key-modes";
+  const isFingeringSheet = annotationMode === "fingering";
 
   const rows = useMemo<ScaleSheetRow[]>(
     () => {
+      if (isFingeringSheet) {
+        return fingeringRoots.map((root) => ({
+          root,
+          scaleId: selectedScale.id,
+          scaleName: selectedScale.shortName,
+          notes: makeTwoOctaveScaleNotes(root, selectedScale),
+          fingering: findScaleFingering(selectedScale.id, root),
+        }));
+      }
+
       if (isKeyModeSheet) {
         return makeDiatonicModeRows(keyRoot).map((row) => ({
           heading: `${row.roman} ${row.root}`,
@@ -44,6 +68,7 @@ export function ScaleSheet() {
           scaleId: row.scale.id as ScaleId,
           scaleName: modeSheetLabel(row.scale),
           notes: makeScaleNotes(row.root, row.scale),
+          fingering: findScaleFingering(row.scale.id as ScaleId, row.root),
         }));
       }
 
@@ -52,21 +77,22 @@ export function ScaleSheet() {
         scaleId: selectedScale.id,
         scaleName: selectedScale.shortName,
         notes: makeScaleNotes(root, selectedScale),
+        fingering: findScaleFingering(selectedScale.id, root),
       }));
     },
-    [isKeyModeSheet, keyRoot, selectedRootRange, selectedScale],
+    [isFingeringSheet, isKeyModeSheet, keyRoot, selectedRootRange, selectedScale],
   );
 
-  const sheetTitle = isKeyModeSheet ? `Diatonic Modes in Key ${keyRoot}` : selectedScale.name;
-  const sheetLabel = isKeyModeSheet ? "Key Mode Sheet" : "12-Key Scale Sheet";
-  const gridClassName = isKeyModeSheet || rootRangeId !== "all" ? "scaleStaffGrid focused" : "scaleStaffGrid";
+  const sheetTitle = isKeyModeSheet && !isFingeringSheet ? `Diatonic Modes in Key ${keyRoot}` : selectedScale.name;
+  const sheetLabel = isFingeringSheet ? "Finger Number Scale Sheet" : isKeyModeSheet ? "Key Mode Sheet" : "12-Key Scale Sheet";
+  const gridClassName = isFingeringSheet || isKeyModeSheet || rootRangeId !== "all" ? "scaleStaffGrid focused" : "scaleStaffGrid";
 
   return (
     <main className="scalePage">
       <header className="scaleToolbar">
         <div>
           <p className="panelEyebrow">Notation</p>
-          <h1>{isKeyModeSheet ? "Key Mode Scale Sheet" : "12-Key Scale Sheet"}</h1>
+          <h1>{isFingeringSheet ? "Finger Number Scale Sheet" : isKeyModeSheet ? "Key Mode Scale Sheet" : "12-Key Scale Sheet"}</h1>
         </div>
 
         <div className="scaleToolbarControls">
@@ -99,6 +125,14 @@ export function ScaleSheet() {
             )}
           </label>
 
+          <label className="scaleSelectLabel compact">
+            <span>Mark</span>
+            <select value={annotationMode} onChange={(event) => setAnnotationMode(event.target.value as ScaleAnnotationMode)}>
+              <option value="degree">Degree</option>
+              <option value="fingering">Finger #</option>
+            </select>
+          </label>
+
           <button className="scalePrintButton" type="button" onClick={() => window.print()} title="Print or save as PDF">
             <LuPrinter aria-hidden="true" />
             <span>PDF</span>
@@ -113,7 +147,7 @@ export function ScaleSheet() {
             <h2>{sheetTitle}</h2>
           </div>
           <div className="scaleSheetHeaderTools">
-            {!isKeyModeSheet && (
+            {!isKeyModeSheet && !isFingeringSheet && (
               <div className="scaleRangeTabs" role="tablist" aria-label="Root range">
                 {rootRanges.map((range) => (
                   <button
@@ -129,7 +163,7 @@ export function ScaleSheet() {
                 ))}
               </div>
             )}
-            <span>Bass clef / one octave</span>
+            <span>{isFingeringSheet ? "C D E F G A B / two octaves / finger numbers" : "Bass clef / one octave"}</span>
           </div>
         </div>
 
@@ -144,6 +178,8 @@ export function ScaleSheet() {
               scaleId={row.scaleId}
               scaleName={row.scaleName}
               notes={row.notes}
+              annotationMode={annotationMode}
+              fingering={row.fingering}
             />
           ))}
         </div>

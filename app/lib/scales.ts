@@ -13,6 +13,8 @@ export type ScaleNote = {
   note: string;
 };
 
+export type ScaleFingering = readonly string[];
+
 export type DiatonicModeRow = {
   chordQuality: string;
   degree: string;
@@ -133,8 +135,14 @@ export type ScaleId = (typeof scaleDefinitions)[number]["id"];
 
 export const defaultScaleId = "major" satisfies ScaleId;
 
+export const scaleFingerings: Partial<Record<ScaleId, Partial<Record<string, ScaleFingering>>>> = {};
+
 export function findScaleDefinition(scaleId: string) {
   return scaleDefinitions.find((scale) => scale.id === scaleId) ?? scaleDefinitions[0];
+}
+
+export function findScaleFingering(scaleId: ScaleId, root: string) {
+  return scaleFingerings[scaleId]?.[root] ?? scaleFingerings[scaleId]?.default;
 }
 
 const diatonicModeScaleIds = ["major", "dorian", "phrygian", "lydian", "mixolydian", "natural-minor", "locrian"] as const satisfies readonly ScaleId[];
@@ -190,4 +198,26 @@ export function makeScaleNotes(root: string, scale: ScaleDefinition, baseMidi = 
     midi: rootMidi + interval.semitones,
     note: spellIntervalNote(root, interval),
   }));
+}
+
+function makeExtendedScaleDegree(degree: string) {
+  const normalizedDegree = degree.replace("b", "").replace("#", "");
+  const degreeNumber = Number(normalizedDegree);
+
+  if (!Number.isFinite(degreeNumber)) {
+    return degree;
+  }
+
+  return degree.replace(normalizedDegree, String(degreeNumber + 7));
+}
+
+export function makeTwoOctaveScaleNotes(root: string, scale: ScaleDefinition, baseMidi = 48): ScaleNote[] {
+  const firstOctaveNotes = makeScaleNotes(root, scale, baseMidi);
+  const secondOctaveNotes = firstOctaveNotes.slice(1).map((note) => ({
+    degree: makeExtendedScaleDegree(note.degree),
+    midi: note.midi + 12,
+    note: note.note,
+  }));
+
+  return [...firstOctaveNotes, ...secondOctaveNotes];
 }

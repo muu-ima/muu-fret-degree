@@ -4687,6 +4687,35 @@ select:focus-visible,
   font-weight: 800;
 }
 
+.scaleNoteList.fingering {
+  height: clamp(30px, 7vw, 36px);
+}
+
+.scaleNoteList.fingering li {
+  justify-items: center;
+}
+
+.scaleNoteList.twoOctaves li {
+  width: clamp(22px, 4vw, 42px);
+  min-width: clamp(22px, 4vw, 42px);
+}
+
+.scaleFingerNumber {
+  display: inline-grid;
+  place-items: center;
+  width: clamp(18px, 4.8vw, 24px);
+  height: clamp(18px, 4.8vw, 24px);
+  border: 1.5px solid #6a7280;
+  border-radius: 999px;
+  color: #242933;
+  line-height: 1;
+}
+
+.scaleNoteList.twoOctaves .scaleFingerNumber {
+  width: clamp(16px, 3.6vw, 22px);
+  height: clamp(16px, 3.6vw, 22px);
+}
+
 @media (max-width: 900px) {
   .scaleToolbar,
   .scalePrintHeader {
