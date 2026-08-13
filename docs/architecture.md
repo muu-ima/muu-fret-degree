@@ -88,6 +88,24 @@
 
 判断理由、トレードオフ、共有ストアへの移行条件は [`docs/progression-editor-ui.md`](./progression-editor-ui.md#設計判断-編集と再生を分離する) を参照する。
 
+### Progression Editorの実装境界
+
+`/progression` の編集機能は、画面、編集パネル、状態hook、純粋な進行ロジックを分けて扱う。
+
+- `app/components/progression/ProgressionEditorWorkspace.tsx`: `/progression` ページのワークスペースを担当する。Sessionから進行データ、Undo / Redo、Reset、更新commandを受け取り、ページヘッダーやモバイル操作バーを組み立てる。
+- `app/components/progression/ProgressionEditor.tsx`: Full Editor内の大枠を担当する。小節チャートと選択中編集パネルを並べ、selection hook と harmony editing hook の結果を子コンポーネントへ渡す。
+- `app/components/progression/ProgressionChordChart.tsx`: コード譜形式の小節グリッド表示と、拍・stepの選択入口を担当する。
+- `app/components/progression/editor/`: Full Editorの下部編集UIを置く。`ProgressionSelectionPanel` が選択中エリアの構成をまとめ、`ProgressionSelectionHeader`、`ProgressionHarmonyEditor`、`ProgressionRhythmPreset`、`ProgressionAdvancedRhythm` などの小さなUI部品へ分ける。
+- `app/hooks/progression/useProgressionEditorSelection.ts`: 選択中の小節、拍、step、範囲選択、ドラッグ選択、ロック済み選択範囲を担当する。
+- `app/hooks/progression/useProgressionHarmonyEditing.ts`: 選択中コードの解決、2拍セル / 1拍上書きの切り替え、範囲・ロック対象へのコード適用、隣接スロットへのコピーを担当する。
+- `app/hooks/progression/useProgressionRhythmEditing.ts`: Advanced Rhythmで使う選択中イベント、音価、配置可否、イベント種別変更、音価変更を担当する。
+- `app/hooks/progression/useProgressionState.ts`: canonicalな進行データ、更新command、Undo / Redo履歴を担当する。
+- `app/lib/progression/`: Reactに依存しない進行モデル、harmony、rhythm、playback、persistence、historyの純粋ロジックを置く。
+
+新しい編集機能を追加する時は、まず `app/lib/progression/` にReact非依存のルールを置けるか確認する。UI固有の選択状態やキーボード操作は `app/hooks/progression/`、表示だけの分割は `app/components/progression/editor/` に置く。
+
+`ProgressionEditor.tsx` には、複雑な配列操作、選択範囲の解決、リズム配置判定、保存形式の変換を戻さない。ここが再び大きくなった場合は、hook または editor 配下のパネルへ逃がす。
+
 ### `app/page.tsx`
 
 ホームの練習ページを担当する。

@@ -192,6 +192,20 @@ Full EditorはMini Transportから共有Transportを購読し、Root Only伴奏�
 
 全小節を同時に編集せず、一覧と詳細編集の役割を分離する。
 
+### 実装上の分離方針
+
+Progression Editorは、画面のまとまりと編集ロジックを混ぜすぎない。短期的には次の境界を保つ。
+
+- `ProgressionEditorWorkspace` はページ単位の操作、Undo / Redo、Reset、Practiceへの導線を担当する。
+- `ProgressionEditor` は小節チャートと選択中編集パネルの接続だけを担当する。
+- `ProgressionSelectionPanel` は選択中エリアの構成を担当し、Harmony、Rhythm Preset、Advanced Rhythmを束ねる。
+- `useProgressionEditorSelection` は「どこを編集しているか」を担当する。
+- `useProgressionHarmonyEditing` は「選択中コードをどう適用・コピーするか」を担当する。
+- `useProgressionRhythmEditing` は「選択中リズムイベントをどう表示・更新するか」を担当する。
+- `app/lib/progression/` はReactに依存しない進行データ操作を担当する。
+
+責務分離を進める時は、まず `ProgressionEditor` と `ProgressionAdvancedRhythm` にロジックが戻っていないか確認する。描画上の都合で必要なラベルやUI状態は component 側に置き、進行データの解決や更新commandの分岐は hook または `app/lib/progression/` に置く。
+
 ### 小節グリッド
 
 小節を2列のカードで表示する。カード内にはコード名だけでなく、4拍のリズムスラッシュも表示する。
