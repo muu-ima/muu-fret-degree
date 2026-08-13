@@ -3,13 +3,24 @@
 import { useEffect, useRef } from "react";
 import { Barline, Beam, Formatter, GhostNote, Renderer, Stave, StaveNote, Tuplet, Voice } from "vexflow";
 
-const notationHeight = 456;
-const staveTopPositions = [42, 178, 314];
+const notationHeight = 580;
+const staveTopPositions = [52, 242, 432];
 const measuresPerRow = 2;
+const printNotationWidth = 960;
+const printRowInset = 44;
+const mobileNotationHeight = 1020;
+const mobileStaveTopPositions = [52, 212, 372, 532, 692, 852];
+const compactSignatureScale = 0.72;
+const compactTupletNumberSize = 6.5;
+const compactNoteStartOffset = 22;
+const compactSignatureOffset = {
+  key: -12,
+  time: -34,
+};
 const tripletNotesPerMeasure = 12;
 const metronomeMarkerOffset = {
   x: 6,
-  y: 9,
+  y: 7,
 };
 const continuationMarkerOffset = {
   x: 8,
@@ -71,6 +82,20 @@ function makeStave(x: number, y: number, width: number, options?: { end?: boolea
 
 function makeTripletGroups(notes: StaveNote[]) {
   return Array.from({ length: notes.length / 3 }, (_, index) => notes.slice(index * 3, index * 3 + 3));
+}
+
+function scaleTrainingSignatures(container: HTMLDivElement) {
+  container.querySelectorAll<SVGGElement>(".vf-keysignature, .vf-timesignature").forEach((group) => {
+    const box = group.getBBox();
+    const originX = box.x;
+    const originY = box.y + box.height / 2;
+    const xOffset = group.classList.contains("vf-timesignature") ? compactSignatureOffset.time : compactSignatureOffset.key;
+
+    group.setAttribute(
+      "transform",
+      `translate(${xOffset} 0) translate(${originX} ${originY}) scale(${compactSignatureScale}) translate(${-originX} ${-originY})`,
+    );
+  });
 }
 
 function markTripletPulseNotes(container: HTMLDivElement, stave: Stave, notes: StaveNote[]) {
@@ -152,50 +177,77 @@ function makeMeasureSpecs() {
 }
 
 export function EMajorTripletStudy() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const screenContainerRef = useRef<HTMLDivElement>(null);
+  const printContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
+    const screenContainer = screenContainerRef.current;
+    const printContainer = printContainerRef.current;
+    if (!screenContainer || !printContainer) {
       return;
     }
 
-    const drawNotation = () => {
+    const drawNotation = (container: HTMLDivElement, options?: { print?: boolean }) => {
       container.replaceChildren();
 
-      const width = Math.max(620, Math.floor(container.getBoundingClientRect().width));
+      const containerWidth = Math.floor(container.getBoundingClientRect().width);
+      const isPrintLayout = options?.print ?? false;
+      const isCompact = !isPrintLayout && containerWidth < 560;
+      const width = isPrintLayout ? printNotationWidth : Math.max(isCompact ? 300 : 620, containerWidth);
+      const currentNotationHeight = isCompact ? mobileNotationHeight : notationHeight;
+      const currentStaveTopPositions = isCompact ? mobileStaveTopPositions : staveTopPositions;
       const renderer = new Renderer(container, Renderer.Backends.SVG);
-      renderer.resize(width, notationHeight);
+      renderer.resize(width, currentNotationHeight);
 
       const context = renderer.getContext();
       context.setFont("Arial", 10);
 
       const measureSpecs = makeMeasureSpecs();
-      const rowWidth = width - 24;
+      const rowWidth = width - (isPrintLayout ? printRowInset : 24);
       const firstMeasureWidth = Math.floor(rowWidth * 0.53);
       const secondMeasureWidth = rowWidth - firstMeasureWidth;
-      const staves = staveTopPositions.flatMap((y, rowIndex) => {
-        const firstMeasureIndex = rowIndex * measuresPerRow;
-        const secondMeasureIndex = firstMeasureIndex + 1;
-        return [
-          makeStave(10, y, firstMeasureWidth, {
-            keySignature: true,
-            timeSignature: rowIndex === 0,
-          }),
-          makeStave(10 + firstMeasureWidth, y, secondMeasureWidth, {
-            end: secondMeasureIndex === measureSpecs.length - 1,
-          }),
-        ];
-      });
+      const staves = isCompact
+        ? currentStaveTopPositions.map((y, index) =>
+            makeStave(10, y, rowWidth, {
+              end: index === measureSpecs.length - 1,
+              keySignature: true,
+              timeSignature: index === 0,
+            }),
+          )
+        : currentStaveTopPositions.flatMap((y, rowIndex) => {
+            const firstMeasureIndex = rowIndex * measuresPerRow;
+            const secondMeasureIndex = firstMeasureIndex + 1;
+            return [
+              makeStave(10, y, firstMeasureWidth, {
+                keySignature: true,
+                timeSignature: rowIndex === 0,
+              }),
+              makeStave(10 + firstMeasureWidth, y, secondMeasureWidth, {
+                end: secondMeasureIndex === measureSpecs.length - 1,
+              }),
+            ];
+          });
 
       staves.forEach((stave) => stave.setContext(context).draw());
+      if (isCompact) {
+        staves.forEach((stave) => {
+          stave.setNoteStartX(stave.getNoteStartX() - compactNoteStartOffset);
+        });
+        scaleTrainingSignatures(container);
+      }
 
       const drawTripletMeasure = (stave: Stave, measure: MeasureSpec) => {
         const tripletNotes = makeTripletNotes(measure.tripletKeys);
         const continuationNote = measure.continuation ? new GhostNote("4") : undefined;
-        const triplets = makeTripletGroups(tripletNotes).map(
-          (notes) => new Tuplet(notes, { numNotes: 3, notesOccupied: 2, bracketed: false }),
-        );
+        const triplets = makeTripletGroups(tripletNotes).map((notes) => {
+          const tuplet = new Tuplet(notes, { numNotes: 3, notesOccupied: 2, bracketed: false });
+
+          if (isCompact) {
+            tuplet.setFontSize(compactTupletNumberSize);
+          }
+
+          return tuplet;
+        });
         const voice = new Voice({ numBeats: 4, beatValue: 4 }).addTickables(
           continuationNote ? [...tripletNotes, continuationNote] : tripletNotes,
         );
@@ -219,10 +271,14 @@ export function EMajorTripletStudy() {
       });
     };
 
-    drawNotation();
+    const drawScreenNotation = () => drawNotation(screenContainer);
+    const drawPrintNotation = () => drawNotation(printContainer, { print: true });
 
-    const resizeObserver = new ResizeObserver(drawNotation);
-    resizeObserver.observe(container);
+    drawScreenNotation();
+    drawPrintNotation();
+
+    const resizeObserver = new ResizeObserver(drawScreenNotation);
+    resizeObserver.observe(screenContainer);
 
     return () => {
       resizeObserver.disconnect();
@@ -235,7 +291,12 @@ export function EMajorTripletStudy() {
         <strong>E Major</strong>
         <span>2-octave wave to low E, then restart / triplets / 4-4</span>
       </figcaption>
-      <div className="trainingNotation" ref={containerRef} aria-label="E major two octave ascending and descending triplet notation" />
+      <div
+        className="trainingNotation trainingScreenNotation"
+        ref={screenContainerRef}
+        aria-label="E major two octave ascending and descending triplet notation"
+      />
+      <div className="trainingNotation trainingPrintNotation" ref={printContainerRef} aria-hidden="true" />
     </figure>
   );
 }

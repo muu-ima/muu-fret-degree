@@ -201,6 +201,7 @@ Full EditorではRoot / Chordと小節数の変更をUndo / Redoできます。
 ## Training
 
 `/training` では、特定のスケールやリズムに絞った練習譜面を表示します。
+`PDF` ボタンからブラウザ印刷を開き、PDFとして保存できます。
 
 ### E Major Triplets
 
