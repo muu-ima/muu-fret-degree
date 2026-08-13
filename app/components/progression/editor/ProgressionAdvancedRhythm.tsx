@@ -1,16 +1,12 @@
 import { useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
 import {
-  canTieProgressionBeat,
-  getProgressionBeatDuration,
-  getProgressionBeatEventType,
-  getProgressionRhythmEventAtStep,
-  progressionStepsPerBeat,
   type ProgressionBar,
   type ProgressionBeatEventType,
   type ProgressionDurationSteps,
   type ProgressionPlacementValidation,
 } from "../../../lib/progression";
+import { useProgressionRhythmEditing } from "../../../hooks/progression/useProgressionRhythmEditing";
 import { ProgressionDurationControls } from "./ProgressionDurationControls";
 import { ProgressionEventControls } from "./ProgressionEventControls";
 import { ProgressionStepSelector } from "./ProgressionStepSelector";
@@ -64,50 +60,31 @@ export function ProgressionAdvancedRhythm({
   validateRhythmPlacement,
 }: ProgressionAdvancedRhythmProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const selectedStartStep = selectedBeatIndex * progressionStepsPerBeat + selectedStepInBeat;
-  const selectedRhythmEvent = getProgressionRhythmEventAtStep(selectedBar, selectedStartStep);
-  const selectedEventType =
-    selectedStepInBeat === 0
-      ? getProgressionBeatEventType(selectedBar, selectedBeatIndex)
-      : selectedRhythmEvent?.eventType;
-  const selectedDuration =
-    selectedStepInBeat === 0
-      ? getProgressionBeatDuration(selectedBar, selectedBeatIndex)
-      : selectedRhythmEvent?.durationSteps ?? 1;
-  const selectedEventLabel = selectedEventType
-    ? selectedEventType[0].toUpperCase() + selectedEventType.slice(1)
-    : "Empty";
+  const {
+    canTie,
+    changeDuration,
+    changeEventType,
+    placementValidation,
+    selectedDuration,
+    selectedEventLabel,
+    selectedEventType,
+    validateDuration,
+  } = useProgressionRhythmEditing({
+    bars,
+    onBeatDurationChange,
+    onBeatEventTypeChange,
+    onRhythmEventChange,
+    onRhythmEventRemove,
+    selectedBar,
+    selectedBarIndex,
+    selectedBeatIndex,
+    selectedStepInBeat,
+    validateRhythmPlacement,
+  });
   const selectedDurationLabel = progressionDurationOptions.find(
     (option) => option.steps === selectedDuration,
   )?.label;
-  const placementValidation = validateRhythmPlacement(
-    selectedBarIndex,
-    selectedStartStep,
-    selectedDuration,
-  );
-
-  const changeEventType = (eventType: ProgressionBeatEventType | "empty") => {
-    if (eventType === "empty") {
-      onRhythmEventRemove(selectedBarIndex, selectedStartStep);
-    } else if (selectedStepInBeat === 0) {
-      onBeatEventTypeChange(selectedBarIndex, selectedBeatIndex, eventType);
-    } else {
-      onRhythmEventChange(
-        selectedBarIndex,
-        selectedStartStep,
-        eventType,
-        selectedRhythmEvent?.durationSteps ?? 1,
-      );
-    }
-  };
-
-  const changeDuration = (durationSteps: ProgressionDurationSteps) => {
-    if (selectedStepInBeat === 0) {
-      onBeatDurationChange(selectedBarIndex, selectedBeatIndex, durationSteps);
-    } else {
-      onRhythmEventChange(selectedBarIndex, selectedStartStep, "hit", durationSteps);
-    }
-  };
+  const selectedStepLabel = progressionStepOptions[selectedStepInBeat].label;
 
   return (
     <section className={`progressionRhythmAccordion${isOpen ? " open" : ""}`}>
@@ -120,7 +97,7 @@ export function ProgressionAdvancedRhythm({
       >
         <span>Advanced Rhythm</span>
         <small>
-          Position {progressionStepOptions[selectedStepInBeat].label} · {selectedEventLabel}
+          Position {selectedStepLabel} · {selectedEventLabel}
           {selectedEventType === "hit" ? ` · ${selectedDurationLabel}` : ""}
         </small>
         <LuChevronDown aria-hidden="true" />
@@ -136,7 +113,7 @@ export function ProgressionAdvancedRhythm({
           />
           <div className="progressionRhythmControlGrid progressionRhythmEventGrid">
             <ProgressionEventControls
-              canTie={canTieProgressionBeat(bars, selectedBarIndex, selectedBeatIndex)}
+              canTie={canTie}
               onChange={changeEventType}
               placementValidation={placementValidation}
               selectedEventType={selectedEventType}
@@ -146,9 +123,7 @@ export function ProgressionAdvancedRhythm({
               onChange={changeDuration}
               selectedDuration={selectedDuration}
               selectedEventType={selectedEventType}
-              validate={(durationSteps) =>
-                validateRhythmPlacement(selectedBarIndex, selectedStartStep, durationSteps)
-              }
+              validate={validateDuration}
             />
           </div>
         </div>
