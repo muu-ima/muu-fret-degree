@@ -6,6 +6,14 @@ import { Barline, Beam, Formatter, GhostNote, Renderer, Stave, StaveNote, Tuplet
 const notationHeight = 456;
 const staveTopPositions = [42, 178, 314];
 const measuresPerRow = 2;
+const mobileNotationHeight = 1020;
+const mobileStaveTopPositions = [52, 212, 372, 532, 692, 852];
+const compactSignatureScale = 0.72;
+const compactNoteStartOffset = 30;
+const compactSignatureOffset = {
+  key: -4,
+  time: -24,
+};
 const tripletNotesPerMeasure = 12;
 const metronomeMarkerOffset = {
   x: 6,
@@ -71,6 +79,20 @@ function makeStave(x: number, y: number, width: number, options?: { end?: boolea
 
 function makeTripletGroups(notes: StaveNote[]) {
   return Array.from({ length: notes.length / 3 }, (_, index) => notes.slice(index * 3, index * 3 + 3));
+}
+
+function scaleTrainingSignatures(container: HTMLDivElement) {
+  container.querySelectorAll<SVGGElement>(".vf-keysignature, .vf-timesignature").forEach((group) => {
+    const box = group.getBBox();
+    const originX = box.x;
+    const originY = box.y + box.height / 2;
+    const xOffset = group.classList.contains("vf-timesignature") ? compactSignatureOffset.time : compactSignatureOffset.key;
+
+    group.setAttribute(
+      "transform",
+      `translate(${xOffset} 0) translate(${originX} ${originY}) scale(${compactSignatureScale}) translate(${-originX} ${-originY})`,
+    );
+  });
 }
 
 function markTripletPulseNotes(container: HTMLDivElement, stave: Stave, notes: StaveNote[]) {
@@ -163,9 +185,13 @@ export function EMajorTripletStudy() {
     const drawNotation = () => {
       container.replaceChildren();
 
-      const width = Math.max(620, Math.floor(container.getBoundingClientRect().width));
+      const containerWidth = Math.floor(container.getBoundingClientRect().width);
+      const isCompact = containerWidth < 560;
+      const width = Math.max(isCompact ? 300 : 620, containerWidth);
+      const currentNotationHeight = isCompact ? mobileNotationHeight : notationHeight;
+      const currentStaveTopPositions = isCompact ? mobileStaveTopPositions : staveTopPositions;
       const renderer = new Renderer(container, Renderer.Backends.SVG);
-      renderer.resize(width, notationHeight);
+      renderer.resize(width, currentNotationHeight);
 
       const context = renderer.getContext();
       context.setFont("Arial", 10);
@@ -174,21 +200,35 @@ export function EMajorTripletStudy() {
       const rowWidth = width - 24;
       const firstMeasureWidth = Math.floor(rowWidth * 0.53);
       const secondMeasureWidth = rowWidth - firstMeasureWidth;
-      const staves = staveTopPositions.flatMap((y, rowIndex) => {
-        const firstMeasureIndex = rowIndex * measuresPerRow;
-        const secondMeasureIndex = firstMeasureIndex + 1;
-        return [
-          makeStave(10, y, firstMeasureWidth, {
-            keySignature: true,
-            timeSignature: rowIndex === 0,
-          }),
-          makeStave(10 + firstMeasureWidth, y, secondMeasureWidth, {
-            end: secondMeasureIndex === measureSpecs.length - 1,
-          }),
-        ];
-      });
+      const staves = isCompact
+        ? currentStaveTopPositions.map((y, index) =>
+            makeStave(10, y, rowWidth, {
+              end: index === measureSpecs.length - 1,
+              keySignature: true,
+              timeSignature: index === 0,
+            }),
+          )
+        : currentStaveTopPositions.flatMap((y, rowIndex) => {
+            const firstMeasureIndex = rowIndex * measuresPerRow;
+            const secondMeasureIndex = firstMeasureIndex + 1;
+            return [
+              makeStave(10, y, firstMeasureWidth, {
+                keySignature: true,
+                timeSignature: rowIndex === 0,
+              }),
+              makeStave(10 + firstMeasureWidth, y, secondMeasureWidth, {
+                end: secondMeasureIndex === measureSpecs.length - 1,
+              }),
+            ];
+          });
 
       staves.forEach((stave) => stave.setContext(context).draw());
+      if (isCompact) {
+        staves.forEach((stave) => {
+          stave.setNoteStartX(stave.getNoteStartX() - compactNoteStartOffset);
+        });
+        scaleTrainingSignatures(container);
+      }
 
       const drawTripletMeasure = (stave: Stave, measure: MeasureSpec) => {
         const tripletNotes = makeTripletNotes(measure.tripletKeys);
