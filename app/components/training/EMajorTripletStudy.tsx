@@ -9,10 +9,11 @@ const measuresPerRow = 2;
 const mobileNotationHeight = 1020;
 const mobileStaveTopPositions = [52, 212, 372, 532, 692, 852];
 const compactSignatureScale = 0.72;
-const compactNoteStartOffset = 30;
+const compactTupletNumberSize = 6.5;
+const compactNoteStartOffset = 22;
 const compactSignatureOffset = {
-  key: -4,
-  time: -24,
+  key: -12,
+  time: -34,
 };
 const tripletNotesPerMeasure = 12;
 const metronomeMarkerOffset = {
@@ -233,9 +234,15 @@ export function EMajorTripletStudy() {
       const drawTripletMeasure = (stave: Stave, measure: MeasureSpec) => {
         const tripletNotes = makeTripletNotes(measure.tripletKeys);
         const continuationNote = measure.continuation ? new GhostNote("4") : undefined;
-        const triplets = makeTripletGroups(tripletNotes).map(
-          (notes) => new Tuplet(notes, { numNotes: 3, notesOccupied: 2, bracketed: false }),
-        );
+        const triplets = makeTripletGroups(tripletNotes).map((notes) => {
+          const tuplet = new Tuplet(notes, { numNotes: 3, notesOccupied: 2, bracketed: false });
+
+          if (isCompact) {
+            tuplet.setFontSize(compactTupletNumberSize);
+          }
+
+          return tuplet;
+        });
         const voice = new Voice({ numBeats: 4, beatValue: 4 }).addTickables(
           continuationNote ? [...tripletNotes, continuationNote] : tripletNotes,
         );
