@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Barline, Beam, Formatter, Renderer, Stave, StaveNote, Tuplet, Voice } from "vexflow";
+import { Barline, Beam, Formatter, GhostNote, Renderer, Stave, StaveNote, Tuplet, Voice } from "vexflow";
 
-const notationHeight = 320;
-const staveTopPositions = [42, 178];
+const notationHeight = 456;
+const staveTopPositions = [42, 178, 314];
 const measuresPerRow = 2;
 const tripletNotesPerMeasure = 12;
 const metronomeMarkerOffset = {
@@ -30,6 +30,11 @@ const eMajorTwoOctaveNotes = [
   "e/4",
 ];
 
+type MeasureSpec = {
+  continuation?: boolean;
+  tripletKeys: string[];
+};
+
 function makeTripletNotes(keys: string[]) {
   return keys.map(
     (key) =>
@@ -54,7 +59,7 @@ function makeStave(x: number, y: number, width: number, options?: { end?: boolea
   }
 
   if (options?.end) {
-    stave.setEndBarType(Barline.type.END);
+    stave.setEndBarType(Barline.type.REPEAT_END);
   }
 
   return stave;
@@ -86,6 +91,20 @@ function markTripletTailNotes(container: HTMLDivElement, stave: Stave, notes: St
   });
 }
 
+function markContinuation(container: HTMLDivElement, stave: Stave, note: GhostNote) {
+  const svg = container.querySelector("svg");
+  if (!svg) {
+    return;
+  }
+
+  const marker = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  marker.setAttribute("class", "trainingContinuationMarker");
+  marker.setAttribute("x", String(note.getAbsoluteX() + 8));
+  marker.setAttribute("y", String(stave.getYForLine(2)));
+  marker.textContent = "〜";
+  svg.appendChild(marker);
+}
+
 function makeLoopingWaveNotes(noteCount: number) {
   const notes: string[] = [];
   let noteIndex = 0;
@@ -104,6 +123,27 @@ function makeLoopingWaveNotes(noteCount: number) {
   }
 
   return notes;
+}
+
+function makeMeasureSpecs() {
+  const movementNotes = makeLoopingWaveNotes(tripletNotesPerMeasure * 6);
+  const specs: MeasureSpec[] = Array.from({ length: 4 }, (_, index) => {
+    const start = index * tripletNotesPerMeasure;
+    return { tripletKeys: movementNotes.slice(start, start + tripletNotesPerMeasure) };
+  });
+  const restartMeasure = movementNotes.slice(tripletNotesPerMeasure * 4, tripletNotesPerMeasure * 5);
+  const continuationMeasure = movementNotes.slice(tripletNotesPerMeasure * 5, tripletNotesPerMeasure * 5 + 9);
+
+  return [
+    ...specs,
+    {
+      tripletKeys: restartMeasure,
+    },
+    {
+      continuation: true,
+      tripletKeys: continuationMeasure,
+    },
+  ];
 }
 
 export function EMajorTripletStudy() {
@@ -125,33 +165,35 @@ export function EMajorTripletStudy() {
       const context = renderer.getContext();
       context.setFont("Arial", 10);
 
+      const measureSpecs = makeMeasureSpecs();
       const rowWidth = width - 24;
       const firstMeasureWidth = Math.floor(rowWidth * 0.53);
       const secondMeasureWidth = rowWidth - firstMeasureWidth;
       const staves = staveTopPositions.flatMap((y, rowIndex) => {
         const firstMeasureIndex = rowIndex * measuresPerRow;
         const secondMeasureIndex = firstMeasureIndex + 1;
-
         return [
           makeStave(10, y, firstMeasureWidth, {
             keySignature: true,
             timeSignature: rowIndex === 0,
           }),
           makeStave(10 + firstMeasureWidth, y, secondMeasureWidth, {
-            end: secondMeasureIndex === staveTopPositions.length * measuresPerRow - 1,
+            end: secondMeasureIndex === measureSpecs.length - 1,
           }),
         ];
       });
 
       staves.forEach((stave) => stave.setContext(context).draw());
-      const loopNotes = makeLoopingWaveNotes(staves.length * tripletNotesPerMeasure);
 
-      const drawTripletMeasure = (stave: Stave, tripletKeys: string[]) => {
-        const tripletNotes = makeTripletNotes(tripletKeys);
+      const drawTripletMeasure = (stave: Stave, measure: MeasureSpec) => {
+        const tripletNotes = makeTripletNotes(measure.tripletKeys);
+        const continuationNote = measure.continuation ? new GhostNote("4") : undefined;
         const triplets = makeTripletGroups(tripletNotes).map(
           (notes) => new Tuplet(notes, { numNotes: 3, notesOccupied: 2, bracketed: false }),
         );
-        const voice = new Voice({ numBeats: 4, beatValue: 4 }).addTickables(tripletNotes);
+        const voice = new Voice({ numBeats: 4, beatValue: 4 }).addTickables(
+          continuationNote ? [...tripletNotes, continuationNote] : tripletNotes,
+        );
         const beams = makeTripletGroups(tripletNotes).map((notes) => new Beam(notes));
 
         new Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -162,11 +204,13 @@ export function EMajorTripletStudy() {
         });
 
         markTripletTailNotes(container, stave, tripletNotes);
+        if (continuationNote) {
+          markContinuation(container, stave, continuationNote);
+        }
       };
 
       staves.forEach((stave, index) => {
-        const start = index * tripletNotesPerMeasure;
-        drawTripletMeasure(stave, loopNotes.slice(start, start + tripletNotesPerMeasure));
+        drawTripletMeasure(stave, measureSpecs[index]);
       });
     };
 
@@ -184,7 +228,7 @@ export function EMajorTripletStudy() {
     <figure className="trainingNotationCard">
       <figcaption>
         <strong>E Major</strong>
-        <span>2-octave wave / triplets / 4-4</span>
+        <span>2-octave wave to low E, then restart / triplets / 4-4</span>
       </figcaption>
       <div className="trainingNotation" ref={containerRef} aria-label="E major two octave ascending and descending triplet notation" />
     </figure>

@@ -4773,6 +4773,14 @@ select:focus-visible,
   text-anchor: middle;
 }
 
+.trainingContinuationMarker {
+  fill: #242933;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
 @media (max-width: 900px) {
   .scaleToolbar,
   .scalePrintHeader {

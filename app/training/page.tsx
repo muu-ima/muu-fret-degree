@@ -22,7 +22,7 @@ export default function TrainingPage() {
             <h2>E Major Triplets</h2>
           </div>
           <div className="scaleSheetHeaderTools">
-            <span>2-octave wave / 4-4</span>
+            <span>2-octave wave to low E, then restart / 4-4</span>
           </div>
         </div>
 
