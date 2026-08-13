@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EMajorTripletStudy } from "../components/training/EMajorTripletStudy";
+import { TrainingPrintButton } from "../components/training/TrainingPrintButton";
 
 export const metadata: Metadata = {
   title: "Training | Bass Chord Degree Fretboard",
@@ -12,6 +13,10 @@ export default function TrainingPage() {
         <div>
           <p className="panelEyebrow">Training</p>
           <h1>Training</h1>
+        </div>
+
+        <div className="scaleToolbarControls">
+          <TrainingPrintButton />
         </div>
       </header>
 

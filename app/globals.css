@@ -4769,6 +4769,14 @@ select:focus-visible,
   height: auto;
 }
 
+.trainingPrintNotation {
+  position: absolute;
+  width: 960px;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
 .trainingMetronomeMarker {
   fill: #284b83;
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
@@ -4926,6 +4934,39 @@ select:focus-visible,
     border-color: #d0d0d0;
     background: #fff;
     color: #000;
+  }
+
+  .trainingNotationCard {
+    break-inside: avoid;
+    padding: 3mm;
+    border-color: #d0d0d0;
+    background: #fff;
+    color: #000;
+  }
+
+  .trainingNotationCard figcaption span {
+    color: #333;
+  }
+
+  .trainingNotation {
+    overflow: visible;
+  }
+
+  .trainingNotation svg {
+    max-width: 100%;
+  }
+
+  .trainingScreenNotation {
+    display: none;
+  }
+
+  .trainingPrintNotation {
+    position: static;
+    width: 960px;
+    max-width: 100%;
+    height: auto;
+    overflow: visible;
+    visibility: visible;
   }
 
   .scaleStaffScreenNotation {

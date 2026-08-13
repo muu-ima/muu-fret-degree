@@ -6,6 +6,8 @@ import { Barline, Beam, Formatter, GhostNote, Renderer, Stave, StaveNote, Tuplet
 const notationHeight = 580;
 const staveTopPositions = [52, 242, 432];
 const measuresPerRow = 2;
+const printNotationWidth = 960;
+const printRowInset = 44;
 const mobileNotationHeight = 1020;
 const mobileStaveTopPositions = [52, 212, 372, 532, 692, 852];
 const compactSignatureScale = 0.72;
@@ -175,20 +177,23 @@ function makeMeasureSpecs() {
 }
 
 export function EMajorTripletStudy() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const screenContainerRef = useRef<HTMLDivElement>(null);
+  const printContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
+    const screenContainer = screenContainerRef.current;
+    const printContainer = printContainerRef.current;
+    if (!screenContainer || !printContainer) {
       return;
     }
 
-    const drawNotation = () => {
+    const drawNotation = (container: HTMLDivElement, options?: { print?: boolean }) => {
       container.replaceChildren();
 
       const containerWidth = Math.floor(container.getBoundingClientRect().width);
-      const isCompact = containerWidth < 560;
-      const width = Math.max(isCompact ? 300 : 620, containerWidth);
+      const isPrintLayout = options?.print ?? false;
+      const isCompact = !isPrintLayout && containerWidth < 560;
+      const width = isPrintLayout ? printNotationWidth : Math.max(isCompact ? 300 : 620, containerWidth);
       const currentNotationHeight = isCompact ? mobileNotationHeight : notationHeight;
       const currentStaveTopPositions = isCompact ? mobileStaveTopPositions : staveTopPositions;
       const renderer = new Renderer(container, Renderer.Backends.SVG);
@@ -198,7 +203,7 @@ export function EMajorTripletStudy() {
       context.setFont("Arial", 10);
 
       const measureSpecs = makeMeasureSpecs();
-      const rowWidth = width - 24;
+      const rowWidth = width - (isPrintLayout ? printRowInset : 24);
       const firstMeasureWidth = Math.floor(rowWidth * 0.53);
       const secondMeasureWidth = rowWidth - firstMeasureWidth;
       const staves = isCompact
@@ -266,10 +271,14 @@ export function EMajorTripletStudy() {
       });
     };
 
-    drawNotation();
+    const drawScreenNotation = () => drawNotation(screenContainer);
+    const drawPrintNotation = () => drawNotation(printContainer, { print: true });
 
-    const resizeObserver = new ResizeObserver(drawNotation);
-    resizeObserver.observe(container);
+    drawScreenNotation();
+    drawPrintNotation();
+
+    const resizeObserver = new ResizeObserver(drawScreenNotation);
+    resizeObserver.observe(screenContainer);
 
     return () => {
       resizeObserver.disconnect();
@@ -282,7 +291,12 @@ export function EMajorTripletStudy() {
         <strong>E Major</strong>
         <span>2-octave wave to low E, then restart / triplets / 4-4</span>
       </figcaption>
-      <div className="trainingNotation" ref={containerRef} aria-label="E major two octave ascending and descending triplet notation" />
+      <div
+        className="trainingNotation trainingScreenNotation"
+        ref={screenContainerRef}
+        aria-label="E major two octave ascending and descending triplet notation"
+      />
+      <div className="trainingNotation trainingPrintNotation" ref={printContainerRef} aria-hidden="true" />
     </figure>
   );
 }
