@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import { Barline, Beam, Formatter, GhostNote, Renderer, Stave, StaveNote, Tuplet, Voice } from "vexflow";
 
-const notationHeight = 456;
-const staveTopPositions = [42, 178, 314];
+const notationHeight = 580;
+const staveTopPositions = [52, 242, 432];
 const measuresPerRow = 2;
 const mobileNotationHeight = 1020;
 const mobileStaveTopPositions = [52, 212, 372, 532, 692, 852];
@@ -18,7 +18,7 @@ const compactSignatureOffset = {
 const tripletNotesPerMeasure = 12;
 const metronomeMarkerOffset = {
   x: 6,
-  y: 9,
+  y: 7,
 };
 const continuationMarkerOffset = {
   x: 8,
