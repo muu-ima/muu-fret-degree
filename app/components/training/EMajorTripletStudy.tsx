@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 import { Barline, Beam, Formatter, Renderer, Stave, StaveNote, Tuplet, Voice } from "vexflow";
 
-const notationHeight = 524;
-const staveTopPositions = [26, 148, 270, 392];
+const notationHeight = 320;
+const staveTopPositions = [42, 178];
+const measuresPerRow = 2;
 const tripletNotesPerMeasure = 12;
 
 const eMajorTwoOctaveNotes = [
@@ -36,10 +37,13 @@ function makeTripletNotes(keys: string[]) {
   );
 }
 
-function makeStave(y: number, width: number, options?: { end?: boolean; timeSignature?: boolean }) {
-  const stave = new Stave(10, y, width);
-  stave.addClef("bass", "small");
-  stave.addKeySignature("E");
+function makeStave(x: number, y: number, width: number, options?: { end?: boolean; keySignature?: boolean; timeSignature?: boolean }) {
+  const stave = new Stave(x, y, width);
+
+  if (options?.keySignature) {
+    stave.addClef("bass", "small");
+    stave.addKeySignature("E");
+  }
 
   if (options?.timeSignature) {
     stave.addTimeSignature("4/4");
@@ -95,10 +99,23 @@ export function EMajorTripletStudy() {
       const context = renderer.getContext();
       context.setFont("Arial", 10);
 
-      const staveWidth = width - 24;
-      const staves = staveTopPositions.map((y, index) =>
-        makeStave(y, staveWidth, { end: index === staveTopPositions.length - 1, timeSignature: index === 0 }),
-      );
+      const rowWidth = width - 24;
+      const firstMeasureWidth = Math.floor(rowWidth * 0.53);
+      const secondMeasureWidth = rowWidth - firstMeasureWidth;
+      const staves = staveTopPositions.flatMap((y, rowIndex) => {
+        const firstMeasureIndex = rowIndex * measuresPerRow;
+        const secondMeasureIndex = firstMeasureIndex + 1;
+
+        return [
+          makeStave(10, y, firstMeasureWidth, {
+            keySignature: true,
+            timeSignature: rowIndex === 0,
+          }),
+          makeStave(10 + firstMeasureWidth, y, secondMeasureWidth, {
+            end: secondMeasureIndex === staveTopPositions.length * measuresPerRow - 1,
+          }),
+        ];
+      });
 
       staves.forEach((stave) => stave.setContext(context).draw());
       const loopNotes = makeLoopingWaveNotes(staves.length * tripletNotesPerMeasure);
