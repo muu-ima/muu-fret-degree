@@ -3424,6 +3424,10 @@ select:focus-visible,
 }
 
 @media (max-width: 700px) {
+  :root {
+    --mobile-bottom-nav-space: calc(118px + env(safe-area-inset-bottom));
+  }
+
   body {
     background:
       radial-gradient(circle at top left, rgba(122, 167, 255, 0.12), transparent 34%),
@@ -3573,7 +3577,7 @@ select:focus-visible,
   }
 
   .shellContent {
-    padding-bottom: 0;
+    padding-bottom: var(--mobile-bottom-nav-space);
   }
 
   .hero {
@@ -4816,7 +4820,7 @@ select:focus-visible,
 
 @media (max-width: 560px) {
   .scalePage {
-    padding: 24px 12px 112px;
+    padding: 24px 12px var(--mobile-bottom-nav-space, 136px);
   }
 
   .scalePrintSheet {
@@ -4841,7 +4845,17 @@ select:focus-visible,
 
   .scaleToolbarControls {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 1fr;
+  }
+
+  .scalePrintButton {
+    width: 100%;
+  }
+
+  .scaleSelectLabel select,
+  .scaleSelectLabel.compact select {
+    min-width: 0;
+    width: 100%;
   }
 }
 
