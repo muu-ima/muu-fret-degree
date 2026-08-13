@@ -4753,6 +4753,91 @@ select:focus-visible,
   visibility: hidden;
 }
 
+.scaleStaffMobilePreviewButton {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.scaleStaffMobilePreviewButton:focus-visible {
+  outline: 2px solid #4f8cff;
+  outline-offset: 4px;
+}
+
+.scaleStaffModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(3, 7, 18, 0.78);
+}
+
+.scaleStaffModal {
+  width: min(760px, 100%);
+  max-height: min(760px, calc(100dvh - 36px));
+  padding: 14px;
+  border: 1px solid rgba(154, 171, 196, 0.24);
+  border-radius: 12px;
+  background: #f8f8f8;
+  color: #16181d;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  overflow: auto;
+}
+
+.scaleStaffModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.scaleStaffModalHeader p {
+  margin: 0 0 2px;
+  color: #5a606b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.scaleStaffModalHeader h2 {
+  margin: 0;
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.scaleStaffModalHeader button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(45, 57, 78, 0.2);
+  border-radius: 8px;
+  background: #fff;
+  color: #242933;
+  font-weight: 900;
+}
+
+.scaleStaffModalScroller {
+  max-width: 100%;
+}
+
+.scaleStaffModalNotation {
+  width: 100%;
+  max-width: 100%;
+}
+
+.scaleStaffModalNotation + .scaleStaffModalNotation {
+  margin-top: 10px;
+}
+
 .scaleStaffVexflow {
   display: block;
   width: 100%;
@@ -4970,6 +5055,19 @@ select:focus-visible,
     font-size: 0.68rem;
   }
 
+  .scaleStaffCard:has(.scaleStaffMobilePreviewButton) .scaleStaffSingleScreenNotation {
+    display: none;
+  }
+
+  .scaleStaffCard:has(.scaleStaffMobilePreviewButton) .scaleStaffMobilePreviewButton {
+    display: block;
+  }
+
+  .scaleStaffMobilePreviewNotation .scaleNoteList li {
+    width: clamp(28px, 7vw, 40px);
+    min-width: clamp(28px, 7vw, 40px);
+  }
+
   .scaleToolbarControls {
     display: grid;
     grid-template-columns: 1fr;
@@ -5090,6 +5188,11 @@ select:focus-visible,
 
   .scaleStaffScreenNotation {
     display: none;
+  }
+
+  .scaleStaffModalBackdrop,
+  .scaleStaffMobilePreviewButton {
+    display: none !important;
   }
 
   .scaleStaffPrintNotation {

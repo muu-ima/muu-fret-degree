@@ -18,6 +18,22 @@ type ScaleStaffProps = {
 
 type ScaleAnnotationMode = "degree" | "fingering";
 
+type ScaleNotationSystemProps = {
+  annotationMode: ScaleAnnotationMode;
+  ariaLabel?: string;
+  className: string;
+  fingering?: ScaleFingering;
+  formatReserveOffset?: number;
+  keySignature?: string;
+  labelIndexOffset?: number;
+  labelPositionOffset?: number;
+  layoutWidth?: number;
+  notes: ScaleNote[];
+  root: string;
+  scaleId: ScaleId;
+  scaleName: string;
+};
+
 type ScaleStaffLayoutOverride = {
   compact?: {
     accidentalScale?: number;
@@ -113,6 +129,7 @@ function makeNotationLayout(
   scaleId: ScaleId,
   notes: ScaleNote[],
   keySignature?: string,
+  formatReserveOffset = 0,
 ) {
   const width = Math.max(260, Math.floor(containerWidth));
   const isCompact = width <= 520;
@@ -123,7 +140,8 @@ function makeNotationLayout(
   const accidentalCount = keySignature ? keySignatureAccidentalCount(keySignature) : writtenAccidentalCount(notes);
   const densityProfile = makeDensityProfile(accidentalCount, width);
   const compactOverride = isCompact ? scaleStaffLayoutOverrides[scaleId]?.[root]?.compact : undefined;
-  const signatureReserve = compactOverride?.signatureReserve ?? Math.max(36, densityProfile.signatureReserve - (isTwoOctaves ? 20 : 0));
+  const signatureReserve =
+    compactOverride?.signatureReserve ?? Math.max(36, densityProfile.signatureReserve - (isTwoOctaves ? 20 : 0) - formatReserveOffset);
 
   return {
     ...densityProfile,
@@ -271,40 +289,35 @@ function renderScaleAnnotation(note: ScaleNote, index: number, annotationMode: S
   return <small>{makeDegreeLabel(note)}</small>;
 }
 
-export function ScaleStaff({
-  annotationMode = "degree",
+function ScaleNotationSystem({
+  annotationMode,
+  ariaLabel,
+  className,
   fingering,
-  heading,
-  keySignature: keySignatureOverride,
-  meta,
+  formatReserveOffset = 0,
+  keySignature,
+  labelIndexOffset = 0,
+  labelPositionOffset = 0,
+  layoutWidth,
+  notes,
   root,
   scaleId,
   scaleName,
-  notes,
-}: ScaleStaffProps) {
-  const screenContainerRef = useRef<HTMLDivElement>(null);
-  const printContainerRef = useRef<HTMLDivElement>(null);
-  const titleId = useId();
-  const [screenLabelPositions, setScreenLabelPositions] = useState<number[]>([]);
-  const [printLabelPositions, setPrintLabelPositions] = useState<number[]>([]);
-  const keySignature = keySignatureOverride ?? keySignatureByScale[scaleName]?.(root);
+}: ScaleNotationSystemProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [labelPositions, setLabelPositions] = useState<number[]>([]);
   const vexflowClassName = keySignature ? "scaleStaffVexflow withKeySignature" : "scaleStaffVexflow withoutKeySignature";
 
   useEffect(() => {
-    const screenContainer = screenContainerRef.current;
-    const printContainer = printContainerRef.current;
-    if (!screenContainer || !printContainer) {
+    const container = containerRef.current;
+    if (!container) {
       return;
     }
 
-    const drawNotation = (
-      container: HTMLDivElement,
-      setPositions: (positions: number[]) => void,
-      layoutWidth = container.getBoundingClientRect().width,
-    ) => {
+    const drawNotation = (width = layoutWidth ?? container.getBoundingClientRect().width) => {
       container.replaceChildren();
 
-      const layout = makeNotationLayout(layoutWidth, root, scaleId, notes, keySignature);
+      const layout = makeNotationLayout(width, root, scaleId, notes, keySignature, formatReserveOffset);
       const renderer = new Renderer(container, Renderer.Backends.SVG);
       renderer.resize(layout.width, layout.height);
 
@@ -328,21 +341,101 @@ export function ScaleStaff({
       transformStaveNotes(container, notes, layout, keySignature);
       transformAccidentals(container, layout.accidentalScale);
 
-      setPositions(
-        staveNotes.map((note, index) => ((note.getAbsoluteX() + noteXOffset(notes[index], index, layout, keySignature)) / layout.width) * 100 + (layout.labelOffsets?.[index] ?? 0)),
+      setLabelPositions(
+        staveNotes.map(
+          (note, index) =>
+            ((note.getAbsoluteX() + noteXOffset(notes[index], index, layout, keySignature)) / layout.width) * 100 +
+            (layout.labelOffsets?.[index] ?? 0) +
+            labelPositionOffset,
+        ),
       );
     };
 
-    drawNotation(screenContainer, setScreenLabelPositions);
-    drawNotation(printContainer, setPrintLabelPositions, printNotationWidth);
+    drawNotation();
 
-    const resizeObserver = new ResizeObserver(() => drawNotation(screenContainer, setScreenLabelPositions));
-    resizeObserver.observe(screenContainer);
+    if (layoutWidth) {
+      return;
+    }
+
+    const resizeObserver = new ResizeObserver(() => drawNotation());
+    resizeObserver.observe(container);
 
     return () => {
       resizeObserver.disconnect();
     };
-  }, [keySignature, notes, root, scaleId]);
+  }, [formatReserveOffset, keySignature, labelPositionOffset, layoutWidth, notes, root, scaleId]);
+
+  return (
+    <div className={`scaleStaffNotation ${className}`}>
+      <div className={vexflowClassName} ref={containerRef} aria-hidden="true" />
+      <ol className={scaleNoteListClassName(annotationMode, notes)} aria-label={ariaLabel ?? `${root} ${scaleName} notes`}>
+        {notes.map((note, index) => {
+          const annotationIndex = labelIndexOffset + index;
+
+          return (
+            <li
+              key={`${note.degree}-${note.midi}-${annotationIndex}`}
+              style={{ left: `${labelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
+            >
+              <span>{note.note}</span>
+              {renderScaleAnnotation(note, annotationIndex, annotationMode, fingering)}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+function firstOctaveNotes(notes: ScaleNote[]) {
+  return notes.length > 8 ? notes.slice(0, 8) : notes;
+}
+
+function twoOctaveModalSystems(notes: ScaleNote[]) {
+  return notes.length > 8
+    ? [
+        { labelIndexOffset: 0, notes: notes.slice(0, 8) },
+        { labelIndexOffset: 7, notes: notes.slice(7) },
+      ]
+    : [{ labelIndexOffset: 0, notes }];
+}
+
+export function ScaleStaff({
+  annotationMode = "degree",
+  fingering,
+  heading,
+  keySignature: keySignatureOverride,
+  meta,
+  root,
+  scaleId,
+  scaleName,
+  notes,
+}: ScaleStaffProps) {
+  const titleId = useId();
+  const modalId = useId();
+  const modalTitleId = useId();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const keySignature = keySignatureOverride ?? keySignatureByScale[scaleName]?.(root);
+  const isTwoOctaves = notes.length > 8;
+  const mobilePreviewNotes = firstOctaveNotes(notes);
+  const modalSystems = twoOctaveModalSystems(notes);
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsModalOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isModalOpen]);
 
   return (
     <figure className="scaleStaffCard" aria-labelledby={titleId}>
@@ -353,34 +446,89 @@ export function ScaleStaff({
           {meta && <small>{meta}</small>}
         </span>
       </figcaption>
-      <div className="scaleStaffNotation scaleStaffScreenNotation">
-        <div className={vexflowClassName} ref={screenContainerRef} aria-hidden="true" />
-        <ol className={scaleNoteListClassName(annotationMode, notes)} aria-label={`${root} ${scaleName} notes`}>
-          {notes.map((note, index) => (
-            <li
-              key={`${note.degree}-${note.midi}-${index}`}
-              style={{ left: `${screenLabelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
-            >
-              <span>{note.note}</span>
-              {renderScaleAnnotation(note, index, annotationMode, fingering)}
-            </li>
-          ))}
-        </ol>
-      </div>
-      <div className="scaleStaffNotation scaleStaffPrintNotation" aria-hidden="true">
-        <div className={vexflowClassName} ref={printContainerRef} />
-        <ol className={scaleNoteListClassName(annotationMode, notes)}>
-          {notes.map((note, index) => (
-            <li
-              key={`${note.degree}-${note.midi}-${index}`}
-              style={{ left: `${printLabelPositions[index] ?? ((index + 0.5) / notes.length) * 100}%` }}
-            >
-              <span>{note.note}</span>
-              {renderScaleAnnotation(note, index, annotationMode, fingering)}
-            </li>
-          ))}
-        </ol>
-      </div>
+      {isTwoOctaves && (
+        <button
+          className="scaleStaffMobilePreviewButton scaleStaffScreenNotation"
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={isModalOpen}
+          aria-controls={isModalOpen ? modalId : undefined}
+        >
+          <ScaleNotationSystem
+            annotationMode={annotationMode}
+            className="scaleStaffMobilePreviewNotation"
+            fingering={fingering}
+            keySignature={keySignature}
+            labelPositionOffset={3.4}
+            notes={mobilePreviewNotes}
+            root={root}
+            scaleId={scaleId}
+            scaleName={scaleName}
+          />
+        </button>
+      )}
+      <ScaleNotationSystem
+        annotationMode={annotationMode}
+        className="scaleStaffScreenNotation scaleStaffSingleScreenNotation"
+        fingering={fingering}
+        keySignature={keySignature}
+        notes={notes}
+        root={root}
+        scaleId={scaleId}
+        scaleName={scaleName}
+      />
+      <ScaleNotationSystem
+        annotationMode={annotationMode}
+        className="scaleStaffPrintNotation"
+        fingering={fingering}
+        keySignature={keySignature}
+        layoutWidth={printNotationWidth}
+        notes={notes}
+        root={root}
+        scaleId={scaleId}
+        scaleName={scaleName}
+      />
+      {isModalOpen && (
+        <div className="scaleStaffModalBackdrop" role="presentation" onClick={() => setIsModalOpen(false)}>
+          <div
+            id={modalId}
+            className="scaleStaffModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={modalTitleId}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="scaleStaffModalHeader">
+              <div>
+                <p>{scaleName}</p>
+                <h2 id={modalTitleId}>{heading ?? root}</h2>
+              </div>
+              <button type="button" onClick={() => setIsModalOpen(false)} aria-label="Close two octave notation">
+                Close
+              </button>
+            </header>
+            <div className="scaleStaffModalScroller">
+              {modalSystems.map((system, systemIndex) => (
+                <ScaleNotationSystem
+                  key={`${system.notes[0]?.midi ?? systemIndex}-${systemIndex}`}
+                  annotationMode={annotationMode}
+                  ariaLabel={`${root} ${scaleName} octave ${systemIndex + 1} notes`}
+                  className="scaleStaffModalNotation"
+                  fingering={fingering}
+                  formatReserveOffset={34}
+                  keySignature={keySignature}
+                  labelIndexOffset={system.labelIndexOffset}
+                  notes={system.notes}
+                  root={root}
+                  scaleId={scaleId}
+                  scaleName={scaleName}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </figure>
   );
 }

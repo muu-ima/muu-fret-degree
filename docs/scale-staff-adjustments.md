@@ -20,6 +20,9 @@
 - Dorianなど調号を使わず臨時記号を直接表示するスケールも、Majorと同じ共通密度ルールを使う。
 - 調号なしスケールでは、臨時記号が付かない音符だけが左に詰まって見えやすい。Compact表示では音符本体とラベルを同じ量だけ右へ寄せ、臨時記号付き音符の視覚的な重心に近づける。
 - 下の音名・度数ラベルは、VexFlowが出した音符のX位置を基準に`%`で追従させる。音符だけ、またはラベルだけを単独で動かさない。
+- 2オクターブ譜面は、モバイル一覧では1段に15音を詰めず、1オクターブ分だけをカードに表示する。2オクターブ全体はタップ後のモーダルで2段に分けて確認する。
+- モーダル内の2段譜面は、カード一覧よりも譜面右側の余白を使う。調号のための左側予約幅を少し減らし、8音の並びが左へ固まりすぎないようにする。
+- モバイル一覧の1オクターブプレビューでは、VexFlowの音符の見た目に対して音名・指番号が左へ残る場合があるため、ラベルだけを小さく右へ補正してよい。
 - 個別offsetは最後の例外処理に限定する。対象は、臨時記号の衝突、見切れ、明らかな視覚ズレが残るキーだけにする。
 - ただし、A♭ Locrianのようにカード内の余白、音符間隔、臨時記号の重心が自然に見える配置は、完成形として個別補正に残してよい。
 - 完成形として残す個別補正は、他キーへ無理に一般化しない。似たスケールの参考値にはしてよいが、共通ルールを壊してまで横展開しない。
@@ -47,3 +50,6 @@
 | 2026-07-12 | Dorian | All | Compact | Remove Dorian-specific compact overrides; keep only shared density rules | Dorianだけを個別に詰めるとMajor Scaleとの差が大きくなり、スケールを切り替えた時の違和感が増えるため。 |
 | 2026-07-12 | Accidentals | Natural notes | Compact | `compactNaturalNoteCenterOffset: 3` for notes without written accidentals in no-key-signature scales | 人間の視覚では臨時記号込みの塊で音を読むため、臨時記号なしの音符を少し右へ寄せて、左詰まりに見える状態を軽減するため。 |
 | 2026-07-12 | Locrian | Ab / Bb | Compact | Keep as visual reference candidates | A♭ Locrianは`♭♭`を含んでも見切れず完成度が高い。B♭ Locrianは音符ヘッド間隔が自然で、臨時記号を付ける前提の共通配置の参考にしやすいため。 |
+| 2026-08-13 | Two-octave fingering | All | Mobile | Show 1-octave preview on cards; open 2 octaves as 2 modal systems; keep desktop/print as one system | 375px幅で15音を1段に並べると音符、調号、指番号が詰まるため。一覧は確認用、モーダルは練習用として役割を分ける。 |
+| 2026-08-13 | Modal systems | All | Mobile | Increase modal note format width with `formatReserveOffset: 34` | 2段モーダルで音符列が左寄りになり、譜面右側に余白が残ったため。 |
+| 2026-08-13 | Mobile preview labels | All | Mobile | Add `labelPositionOffset: 3.4` to 1-octave preview labels | モバイル一覧で音名・指番号が音符ヘッドより左に見え、譜面側との対応が読みづらかったため。 |
