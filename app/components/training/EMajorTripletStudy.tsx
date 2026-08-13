@@ -7,6 +7,10 @@ const notationHeight = 320;
 const staveTopPositions = [42, 178];
 const measuresPerRow = 2;
 const tripletNotesPerMeasure = 12;
+const metronomeMarkerOffset = {
+  x: 6,
+  y: 5,
+};
 
 const eMajorTwoOctaveNotes = [
   "e/2",
@@ -58,6 +62,28 @@ function makeStave(x: number, y: number, width: number, options?: { end?: boolea
 
 function makeTripletGroups(notes: StaveNote[]) {
   return Array.from({ length: notes.length / 3 }, (_, index) => notes.slice(index * 3, index * 3 + 3));
+}
+
+function markTripletTailNotes(container: HTMLDivElement, stave: Stave, notes: StaveNote[]) {
+  const svg = container.querySelector("svg");
+  if (!svg) {
+    return;
+  }
+
+  const markerY = stave.getYForBottomText(1) + metronomeMarkerOffset.y;
+
+  notes.forEach((note, index) => {
+    if ((index + 1) % 3 !== 0) {
+      return;
+    }
+
+    const marker = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    marker.setAttribute("class", "trainingMetronomeMarker");
+    marker.setAttribute("x", String(note.getAbsoluteX() + metronomeMarkerOffset.x));
+    marker.setAttribute("y", String(markerY));
+    marker.textContent = "メ";
+    svg.appendChild(marker);
+  });
 }
 
 function makeLoopingWaveNotes(noteCount: number) {
@@ -134,6 +160,8 @@ export function EMajorTripletStudy() {
         [...beams, ...triplets].forEach((notationElement) => {
           notationElement.setContext(context).draw();
         });
+
+        markTripletTailNotes(container, stave, tripletNotes);
       };
 
       staves.forEach((stave, index) => {

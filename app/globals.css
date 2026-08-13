@@ -4765,6 +4765,14 @@ select:focus-visible,
   height: auto;
 }
 
+.trainingMetronomeMarker {
+  fill: #284b83;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
 @media (max-width: 900px) {
   .scaleToolbar,
   .scalePrintHeader {
