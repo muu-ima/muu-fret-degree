@@ -2317,13 +2317,19 @@ select:focus-visible,
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
+  padding: 12px;
+  border: 1px solid rgba(154, 171, 196, 0.12);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(122, 167, 255, 0.055), transparent 38%),
+    rgba(7, 10, 15, 0.2);
 }
 
 .progressionSelectionMeta {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto minmax(180px, 1fr) auto;
   align-items: end;
-  gap: 10px;
+  gap: 12px;
 }
 
 .progressionSelectionMeta > div {
@@ -2359,14 +2365,21 @@ select:focus-visible,
 
 .progressionSelectionChordName {
   font-family: var(--font-code), ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+  justify-self: end;
+  line-height: 1;
 }
 
 .progressionRangeMeta {
   display: grid;
-  gap: 6px;
+  min-width: min(100%, 330px);
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid rgba(154, 171, 196, 0.1);
+  border-radius: 12px;
+  background: rgba(7, 10, 15, 0.24);
 }
 
 .progressionRangeMetaHeader {
@@ -2436,7 +2449,11 @@ select:focus-visible,
 .progressionSelectionUnitTabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid rgba(154, 171, 196, 0.1);
+  border-radius: 999px;
+  background: rgba(4, 7, 11, 0.26);
 }
 
 .progressionSelectionUnitTabs button {
@@ -3928,12 +3945,13 @@ select:focus-visible,
   }
 
   .progressionSelectionMeta {
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    flex-direction: column;
     gap: 5px;
   }
 
   .progressionSelectionChordName {
+    justify-self: start;
     font-size: 1.18rem;
   }
 
