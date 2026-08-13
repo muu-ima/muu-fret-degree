@@ -9,7 +9,11 @@ const measuresPerRow = 2;
 const tripletNotesPerMeasure = 12;
 const metronomeMarkerOffset = {
   x: 6,
-  y: 5,
+  y: 9,
+};
+const continuationMarkerOffset = {
+  x: 8,
+  y: 8,
 };
 
 const eMajorTwoOctaveNotes = [
@@ -59,7 +63,7 @@ function makeStave(x: number, y: number, width: number, options?: { end?: boolea
   }
 
   if (options?.end) {
-    stave.setEndBarType(Barline.type.REPEAT_END);
+    stave.setEndBarType(Barline.type.END);
   }
 
   return stave;
@@ -69,7 +73,7 @@ function makeTripletGroups(notes: StaveNote[]) {
   return Array.from({ length: notes.length / 3 }, (_, index) => notes.slice(index * 3, index * 3 + 3));
 }
 
-function markTripletTailNotes(container: HTMLDivElement, stave: Stave, notes: StaveNote[]) {
+function markTripletPulseNotes(container: HTMLDivElement, stave: Stave, notes: StaveNote[]) {
   const svg = container.querySelector("svg");
   if (!svg) {
     return;
@@ -78,7 +82,8 @@ function markTripletTailNotes(container: HTMLDivElement, stave: Stave, notes: St
   const markerY = stave.getYForBottomText(1) + metronomeMarkerOffset.y;
 
   notes.forEach((note, index) => {
-    if ((index + 1) % 3 !== 0) {
+    const positionInTriplet = index % 3;
+    if (positionInTriplet === 1) {
       return;
     }
 
@@ -86,7 +91,7 @@ function markTripletTailNotes(container: HTMLDivElement, stave: Stave, notes: St
     marker.setAttribute("class", "trainingMetronomeMarker");
     marker.setAttribute("x", String(note.getAbsoluteX() + metronomeMarkerOffset.x));
     marker.setAttribute("y", String(markerY));
-    marker.textContent = "メ";
+    marker.textContent = positionInTriplet === 0 ? "足" : "メ";
     svg.appendChild(marker);
   });
 }
@@ -99,8 +104,8 @@ function markContinuation(container: HTMLDivElement, stave: Stave, note: GhostNo
 
   const marker = document.createElementNS("http://www.w3.org/2000/svg", "text");
   marker.setAttribute("class", "trainingContinuationMarker");
-  marker.setAttribute("x", String(note.getAbsoluteX() + 8));
-  marker.setAttribute("y", String(stave.getYForLine(2)));
+  marker.setAttribute("x", String(note.getAbsoluteX() + continuationMarkerOffset.x));
+  marker.setAttribute("y", String(stave.getYForLine(2) + continuationMarkerOffset.y));
   marker.textContent = "〜";
   svg.appendChild(marker);
 }
@@ -203,7 +208,7 @@ export function EMajorTripletStudy() {
           notationElement.setContext(context).draw();
         });
 
-        markTripletTailNotes(container, stave, tripletNotes);
+        markTripletPulseNotes(container, stave, tripletNotes);
         if (continuationNote) {
           markContinuation(container, stave, continuationNote);
         }
