@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 import {
   LuChartNoAxesColumn,
+  LuDumbbell,
   LuMusic4,
   LuPencil,
   LuSlidersHorizontal,
@@ -29,6 +30,13 @@ const navItems = [
     label: "Scales",
     shortLabel: "Scales",
     description: "Staff notation",
+  },
+  {
+    href: "/training",
+    icon: LuDumbbell,
+    label: "Training",
+    shortLabel: "Training",
+    description: "Focused drills",
   },
   {
     href: "/progression",
