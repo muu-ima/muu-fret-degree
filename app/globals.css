@@ -4720,6 +4720,51 @@ select:focus-visible,
   height: clamp(16px, 3.6vw, 22px);
 }
 
+.trainingNotationCard {
+  min-width: 0;
+  margin: 0;
+  padding: clamp(12px, 1.4vw, 16px);
+  border: 1px solid rgba(154, 171, 196, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.965);
+  color: #16181d;
+  overflow: hidden;
+}
+
+.trainingNotationCard figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.trainingNotationCard figcaption strong {
+  font-family: var(--font-title), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.trainingNotationCard figcaption span {
+  color: #5a606b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.trainingNotation {
+  display: block;
+  width: 100%;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.trainingNotation svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 @media (max-width: 900px) {
   .scaleToolbar,
   .scalePrintHeader {

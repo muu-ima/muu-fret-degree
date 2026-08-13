@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { EMajorTripletStudy } from "../components/training/EMajorTripletStudy";
 
 export const metadata: Metadata = {
   title: "Training | Bass Chord Degree Fretboard",
@@ -17,13 +18,15 @@ export default function TrainingPage() {
       <section className="scalePrintSheet" aria-label="Training">
         <div className="scalePrintHeader">
           <div>
-            <p>Practice Builder</p>
-            <h2>Training</h2>
+            <p>Scale Drill</p>
+            <h2>E Major Triplets</h2>
           </div>
           <div className="scaleSheetHeaderTools">
-            <span>Ready for focused drills</span>
+            <span>2-octave wave / 4-4</span>
           </div>
         </div>
+
+        <EMajorTripletStudy />
       </section>
     </main>
   );
