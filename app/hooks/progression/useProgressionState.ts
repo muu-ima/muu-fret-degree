@@ -14,25 +14,11 @@ import {
   progressionHistoryReducer,
 } from "../../lib/progression/state/history";
 import {
-  applyHarmonyToTargets,
-  applyProgressionRhythmPreset,
   createProgressionVirtualTimeline,
   createDefaultProgression,
-  removeProgressionRhythmEvent,
-  updateProgressionBarCount,
-  updateProgressionBeatChord,
-  updateProgressionBeatDuration,
-  updateProgressionBeatEventType,
-  updateProgressionCell,
-  updateProgressionRhythmEvent,
-  validateProgressionRhythmPlacementAtPosition,
   type ChordProgression,
-  type ProgressionBeatEventType,
-  type ProgressionCell,
-  type ProgressionDurationSteps,
-  type ProgressionHarmonyTarget,
-  type ProgressionRhythmPresetId,
 } from "../../lib/progression";
+import { useProgressionCommands } from "./useProgressionCommands";
 import { usePersistedProgression } from "./usePersistedProgression";
 
 type UseProgressionStateOptions = {
@@ -69,132 +55,7 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
     roots,
     chordTypes,
   });
-
-  const updateCell = useCallback((barIndex: number, cellIndex: number, nextCell: ProgressionCell) => {
-    dispatch({
-      type: "commit",
-      update: (currentProgression) =>
-        updateProgressionCell(currentProgression, barIndex, cellIndex, nextCell),
-    });
-  }, []);
-
-  const updateBarCount = useCallback((nextBarCount: number) => {
-    dispatch({
-      type: "commit",
-      update: (currentProgression) =>
-        updateProgressionBarCount(currentProgression, nextBarCount),
-    });
-  }, []);
-
-  const updateBeatChord = useCallback(
-    (barIndex: number, beatIndex: number, nextCell: ProgressionCell | undefined) => {
-      dispatch({
-        type: "commit",
-        update: (currentProgression) =>
-          updateProgressionBeatChord(currentProgression, barIndex, beatIndex, nextCell),
-      });
-    },
-    [],
-  );
-
-  const updateHarmonyTargets = useCallback(
-    (targets: readonly ProgressionHarmonyTarget[], nextCell: ProgressionCell) => {
-      dispatch({
-        type: "commit",
-        update: (currentProgression) =>
-          applyHarmonyToTargets(currentProgression, nextCell, targets),
-      });
-    },
-    [],
-  );
-
-  const updateBeatEventType = useCallback(
-    (barIndex: number, beatIndex: number, eventType: ProgressionBeatEventType) => {
-      dispatch({
-        type: "commit",
-        update: (currentProgression) =>
-          updateProgressionBeatEventType(currentProgression, barIndex, beatIndex, eventType),
-      });
-    },
-    [],
-  );
-
-  const updateBeatDuration = useCallback(
-    (barIndex: number, beatIndex: number, durationSteps: ProgressionDurationSteps) => {
-      dispatch({
-        type: "commit",
-        update: (currentProgression) =>
-          updateProgressionBeatDuration(
-            currentProgression,
-            barIndex,
-            beatIndex,
-            durationSteps,
-          ),
-      });
-    },
-    [],
-  );
-
-  const updateRhythmEvent = useCallback(
-    (
-      barIndex: number,
-      startStep: number,
-      eventType: ProgressionBeatEventType,
-      durationSteps: ProgressionDurationSteps,
-    ) => {
-      dispatch({
-        type: "commit",
-        update: (currentProgression) =>
-          updateProgressionRhythmEvent(
-            currentProgression,
-            barIndex,
-            startStep,
-            eventType,
-            durationSteps,
-          ),
-      });
-    },
-    [],
-  );
-
-  const removeRhythmEvent = useCallback((barIndex: number, startStep: number) => {
-    dispatch({
-      type: "commit",
-      update: (currentProgression) =>
-        removeProgressionRhythmEvent(currentProgression, barIndex, startStep),
-    });
-  }, []);
-
-  const validateRhythmPlacement = useCallback(
-    (
-      barIndex: number,
-      startStep: number,
-      durationSteps: ProgressionDurationSteps,
-    ) =>
-      validateProgressionRhythmPlacementAtPosition(
-        rhythmTimeline,
-        barIndex,
-        startStep,
-        durationSteps,
-      ),
-    [rhythmTimeline],
-  );
-
-  const applyRhythmPreset = useCallback(
-    (barIndex: number, beatIndex: number, preset: ProgressionRhythmPresetId) => {
-      dispatch({
-        type: "commit",
-        update: (currentProgression) =>
-          applyProgressionRhythmPreset(
-            currentProgression,
-            barIndex,
-            beatIndex,
-            preset,
-          ),
-      });
-    },
-    [],
-  );
+  const commands = useProgressionCommands({ dispatch, rhythmTimeline });
 
   const resetProgression = useCallback(() => {
     dispatch({
@@ -207,22 +68,22 @@ export function useProgressionState({ bpm = 120, roots, chordTypes }: UseProgres
   const redo = useCallback(() => dispatch({ type: "redo" }), []);
 
   return {
-    applyRhythmPreset,
+    applyRhythmPreset: commands.applyRhythmPreset,
     canRedo: history.future.length > 0,
     canUndo: history.past.length > 0,
     progression,
     redo,
     resetProgression,
-    removeRhythmEvent,
+    removeRhythmEvent: commands.removeRhythmEvent,
     syncBpm,
     undo,
-    updateBarCount,
-    updateBeatChord,
-    updateBeatDuration,
-    updateBeatEventType,
-    updateCell,
-    updateHarmonyTargets,
-    updateRhythmEvent,
-    validateRhythmPlacement,
+    updateBarCount: commands.updateBarCount,
+    updateBeatChord: commands.updateBeatChord,
+    updateBeatDuration: commands.updateBeatDuration,
+    updateBeatEventType: commands.updateBeatEventType,
+    updateCell: commands.updateCell,
+    updateHarmonyTargets: commands.updateHarmonyTargets,
+    updateRhythmEvent: commands.updateRhythmEvent,
+    validateRhythmPlacement: commands.validateRhythmPlacement,
   };
 }
