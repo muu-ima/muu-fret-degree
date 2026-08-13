@@ -2,7 +2,6 @@
 
 import type { ChordType } from "../../lib/music";
 import {
-  getProgressionRhythmPreset,
   type ProgressionBar,
   type ProgressionBeatEventType,
   type ProgressionCell,
@@ -14,11 +13,8 @@ import {
 import { useProgressionHarmonyEditing } from "../../hooks/progression/useProgressionHarmonyEditing";
 import { useProgressionEditorSelection } from "../../hooks/progression/useProgressionEditorSelection";
 import { ProgressionChordChart } from "./ProgressionChordChart";
-import { ProgressionAdvancedRhythm } from "./editor/ProgressionAdvancedRhythm";
 import { ProgressionEditorHeader } from "./editor/ProgressionEditorHeader";
-import { ProgressionHarmonyEditor } from "./editor/ProgressionHarmonyEditor";
-import { ProgressionRhythmPreset } from "./editor/ProgressionRhythmPreset";
-import { ProgressionSelectionHeader } from "./editor/ProgressionSelectionHeader";
+import { ProgressionSelectionPanel } from "./editor/ProgressionSelectionPanel";
 
 type ProgressionEditorProps = {
   className?: string;
@@ -128,18 +124,9 @@ export function ProgressionEditor({
     selectionUnit,
   });
 
-  const selectedRhythmPreset = selectedBar
-    ? getProgressionRhythmPreset(selectedBar, selectedBeatIndex)
-    : undefined;
-
   if (!selectedBar || !selectedCell) {
     return null;
   }
-
-  const applyRhythmPreset = (preset: ProgressionRhythmPresetId) => {
-    setSelectedStepInBeat(0);
-    onRhythmPresetApply(selectedBarIndex, selectedBeatIndex, preset);
-  };
 
   return (
     <section className={className} aria-label="コード進行編集">
@@ -161,59 +148,40 @@ export function ProgressionEditor({
         onBeatPointerEnter={extendDragSelection}
         onBeatSelect={selectBeat}
       />
-      <section className="progressionSelectionEditor" aria-label="選択中のコードを編集">
-        <ProgressionSelectionHeader
-          barNumber={selectedBar.bar}
-          beatIndex={selectedBeatIndex}
-          cellIndex={selectedCellIndex}
-          chordTypes={chordTypes}
-          editScope={editScope}
-          hasLockedTargets={hasLockedTargets}
-          isRangeSelectionActive={isRangeSelectionActive}
-          onClearSelectionRange={clearSelectionRange}
-          onClearLockedTargets={clearLockedTargets}
-          onLockSelectionRange={lockSelectionRange}
-          onSelectionUnitChange={changeSelectionUnit}
-          selectedCell={selectedCell}
-          selectionRange={selectionRange}
-          selectionUnit={selectionUnit}
-          stepInBeat={selectedStepInBeat}
-        />
-        <ProgressionHarmonyEditor
-          beatIndex={selectedBeatIndex}
-          canCopyHarmonyToNext={canCopyHarmonyToNext}
-          canCopyHarmonyToPrevious={canCopyHarmonyToPrevious}
-          cellIndex={selectedCellIndex}
-          chordTypes={chordTypes}
-          editScope={editScope}
-          hasLockedTargets={hasLockedTargets}
-          isRangeSelectionActive={isRangeSelectionActive}
-          onBeatSelect={(beatIndex) => selectBeat(selectedBarIndex, beatIndex)}
-          onCellChange={applyCellChange}
-          onHarmonyCopy={copyHarmonyToAdjacentSlot}
-          onUseBeatScope={useBeatScope}
-          onUseCellScope={useCellScope}
-          roots={roots}
-          selectedCell={selectedCell}
-        />
-        <ProgressionRhythmPreset
-          onApply={applyRhythmPreset}
-          selectedPreset={selectedRhythmPreset}
-        />
-        <ProgressionAdvancedRhythm
-          bars={bars}
-          onBeatDurationChange={onBeatDurationChange}
-          onBeatEventTypeChange={onBeatEventTypeChange}
-          onRhythmEventChange={onRhythmEventChange}
-          onRhythmEventRemove={onRhythmEventRemove}
-          onStepChange={setSelectedStepInBeat}
-          selectedBar={selectedBar}
-          selectedBarIndex={selectedBarIndex}
-          selectedBeatIndex={selectedBeatIndex}
-          selectedStepInBeat={selectedStepInBeat}
-          validateRhythmPlacement={validateRhythmPlacement}
-        />
-      </section>
+      <ProgressionSelectionPanel
+        bars={bars}
+        beatIndex={selectedBeatIndex}
+        canCopyHarmonyToNext={canCopyHarmonyToNext}
+        canCopyHarmonyToPrevious={canCopyHarmonyToPrevious}
+        cellIndex={selectedCellIndex}
+        chordTypes={chordTypes}
+        editScope={editScope}
+        hasLockedTargets={hasLockedTargets}
+        isRangeSelectionActive={isRangeSelectionActive}
+        onBeatDurationChange={onBeatDurationChange}
+        onBeatEventTypeChange={onBeatEventTypeChange}
+        onCellChange={applyCellChange}
+        onClearLockedTargets={clearLockedTargets}
+        onClearSelectionRange={clearSelectionRange}
+        onHarmonyCopy={copyHarmonyToAdjacentSlot}
+        onLockSelectionRange={lockSelectionRange}
+        onRhythmEventChange={onRhythmEventChange}
+        onRhythmEventRemove={onRhythmEventRemove}
+        onRhythmPresetApply={onRhythmPresetApply}
+        onSelectedBeatChange={(beatIndex) => selectBeat(selectedBarIndex, beatIndex)}
+        onSelectionUnitChange={changeSelectionUnit}
+        onStepChange={setSelectedStepInBeat}
+        onUseBeatScope={useBeatScope}
+        onUseCellScope={useCellScope}
+        roots={roots}
+        selectedBar={selectedBar}
+        selectedBarIndex={selectedBarIndex}
+        selectedCell={selectedCell}
+        selectedStepInBeat={selectedStepInBeat}
+        selectionRange={selectionRange}
+        selectionUnit={selectionUnit}
+        validateRhythmPlacement={validateRhythmPlacement}
+      />
     </section>
   );
 }
