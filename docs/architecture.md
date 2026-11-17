@@ -143,6 +143,17 @@
 - ページ側はTrainingの枠、見出し、説明ラベルだけを持ち、譜面描画の細かい値は各ドリルコンポーネントへ閉じる。
 - PDF保存はScalesと同じくブラウザ印刷に任せ、ページ側では`window.print()`を呼ぶボタンだけを持つ。
 
+### リズムトレーニングの責務分離
+
+- `app/components/training/RhythmTraining.tsx`: フックと表示コンポーネントを接続し、見出しとエラー表示を組み立てる。
+- `app/hooks/training/useRhythmTraining.ts`: BPM・アクセント・リズム選択・切り替え小節数を管理し、開始・停止、AudioContext、音の予約再生、表示位置の同期、アンマウント時の後始末を担当する。再生中の設定変更の制約もこのフックで守る。
+- `app/lib/rhythm-training.ts`: 選択したリズムと小節数から再生位置を求める純粋な計算を担当する。Reactや音声出力には依存しない。
+- `app/components/training/RhythmTrainingSettings.tsx`: リズム選択と切り替え小節数の入力を表示し、変更をcallbackで通知する。
+- `app/components/training/RhythmTrainingPlayer.tsx`: BPM・アクセント・再生操作と、現在のリズム・小節・拍・再生順を表示する。音声を直接生成しない。
+- `app/components/training/RhythmTraining.module.css`: この練習メニュー専用の配置、選択状態、狭い画面と印刷時の表示を管理する。
+
+広い画面では練習設定と再生操作を左右に配置し、狭い画面では縦に並べる。リズムと小節数は停止中に変更し、BPMとアクセントは再生中も変更できる。選択状態と再生位置は別々に表示し、1種類以上の選択、停止・再開、ページ移動時の音声停止という既存の動作を維持する。
+
 ### `app/components/training/EMajorTripletStudy.tsx`
 
 E Major Triplets の譜面描画を担当する。
