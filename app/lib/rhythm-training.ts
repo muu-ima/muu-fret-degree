@@ -5,9 +5,18 @@ export const rhythmTrainingPatterns = [
   { label: "8分音符", pulses: 2 },
 ] as const;
 
-export function getRhythmTrainingBeat(absoluteBeat: number) {
-  const beatInLoop = absoluteBeat % 32;
-  const patternIndex = Math.floor(beatInLoop / 8);
+export type RhythmTrainingPulse = typeof rhythmTrainingPatterns[number]["pulses"];
+
+export function getRhythmTrainingBeat(
+  absoluteBeat: number,
+  selectedPulses: readonly RhythmTrainingPulse[] = rhythmTrainingPatterns.map((pattern) => pattern.pulses),
+) {
+  const selectedIndices = rhythmTrainingPatterns.flatMap((pattern, index) =>
+    selectedPulses.includes(pattern.pulses) ? [index] : [],
+  );
+  if (selectedIndices.length === 0) throw new Error("Select at least one training rhythm.");
+  const beatInLoop = absoluteBeat % (selectedIndices.length * 8);
+  const patternIndex = selectedIndices[Math.floor(beatInLoop / 8)];
   return {
     patternIndex,
     pattern: rhythmTrainingPatterns[patternIndex],

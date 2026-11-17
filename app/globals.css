@@ -5241,6 +5241,20 @@ select:focus-visible,
   border-radius: 8px;
   background: rgba(154, 171, 196, 0.1);
 }
+.rhythmTrainingSelection { min-width: 0; margin: 0; padding: 0; border: 0; }
+.rhythmTrainingSelection legend { padding: 0; font-weight: 700; }
+.rhythmTrainingSelection > p { margin: 8px 0 14px; font-size: 0.85rem; }
+.rhythmTrainingPatterns li.selected { border-color: rgba(89, 201, 172, 0.4); }
+.rhythmTrainingPatterns li label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.rhythmTrainingPatterns li label span { grid-column: 1 / -1; }
+.rhythmTrainingPatterns input { accent-color: #239b7d; }
+.rhythmTrainingPatterns label:has(input:disabled) { cursor: default; }
 .rhythmTrainingPatterns li.active {
   border-color: #59c9ac;
   background: rgba(89, 201, 172, 0.16);

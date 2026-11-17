@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { LuPlay, LuSquare } from "react-icons/lu";
 import { playMetronomeClick } from "../../lib/audio";
 import { getMetronomeClickKind } from "../../lib/metronome-click";
-import { getRhythmTrainingBeat, rhythmTrainingPatterns } from "../../lib/rhythm-training";
+import { getRhythmTrainingBeat, rhythmTrainingPatterns, type RhythmTrainingPulse } from "../../lib/rhythm-training";
 
 type Position = ReturnType<typeof getRhythmTrainingBeat>;
 type Session = {
@@ -29,6 +29,18 @@ export function RhythmTraining() {
   const [isRunning, setIsRunning] = useState(false);
   const [position, setPosition] = useState<Position>(getRhythmTrainingBeat(0));
   const [error, setError] = useState("");
+  const [selectedPulses, setSelectedPulses] = useState<RhythmTrainingPulse[]>(
+    () => rhythmTrainingPatterns.map((pattern) => pattern.pulses),
+  );
+  const selectedPatterns = rhythmTrainingPatterns.filter((pattern) => selectedPulses.includes(pattern.pulses));
+
+  function togglePattern(pulses: RhythmTrainingPulse) {
+    if (sessionRef.current) return;
+    setSelectedPulses((current) => {
+      if (!current.includes(pulses)) return [...current, pulses];
+      return current.length > 1 ? current.filter((value) => value !== pulses) : current;
+    });
+  }
 
   useEffect(() => () => {
     if (sessionRef.current) dispose(sessionRef.current);
@@ -48,7 +60,7 @@ export function RhythmTraining() {
     if (sessionRef.current) dispose(sessionRef.current);
     sessionRef.current = null;
     setIsRunning(false);
-    setPosition(getRhythmTrainingBeat(0));
+    setPosition(getRhythmTrainingBeat(0, selectedPulses));
   }
 
   async function start() {
@@ -60,6 +72,7 @@ export function RhythmTraining() {
       const context = new AudioContext();
       session = { context };
       sessionRef.current = session;
+      setPosition(getRhythmTrainingBeat(0, selectedPulses));
       setIsRunning(true);
       await context.resume();
       if (sessionRef.current !== session) return;
@@ -74,7 +87,7 @@ export function RhythmTraining() {
         if (sessionRef.current !== activeSession) return;
         if (nextBeatTime < context.currentTime) nextBeatTime = context.currentTime + 0.05;
         while (nextBeatTime < context.currentTime + 0.1) {
-          const current = getRhythmTrainingBeat(absoluteBeat);
+          const current = getRhythmTrainingBeat(absoluteBeat, selectedPulses);
           const beatDuration = 60 / bpmRef.current;
           for (let pulse = 0; pulse < current.pattern.pulses; pulse += 1) {
             playMetronomeClick(
@@ -114,7 +127,7 @@ export function RhythmTraining() {
       <div>
         <p className="panelEyebrow">Rhythm Training</p>
         <h2 id="rhythm-training-title">リズム聴き比べ</h2>
-        <p>4/4拍子・各2小節。5連符 → 16分音符 → 三連符 → 8分音符を繰り返します。</p>
+        <p>4/4拍子・各2小節。{selectedPatterns.map((pattern) => pattern.label).join(" → ")}を繰り返します。</p>
       </div>
       <div className="rhythmTrainingControls">
         <label className="metronomeBpmInput">
@@ -144,17 +157,30 @@ export function RhythmTraining() {
           }} />
         拍の頭にアクセントを付ける（オフですべての音が均等）
       </label>
-      <ol className="rhythmTrainingPatterns" aria-label="再生順">
-        {rhythmTrainingPatterns.map((pattern, index) => (
-          <li key={pattern.pulses} className={isRunning && position.patternIndex === index ? "active" : undefined}
-            aria-current={isRunning && position.patternIndex === index ? "step" : undefined}>
-            <strong>{pattern.label}</strong>
-            <span>1拍に{pattern.pulses}音 · 2小節</span>
-          </li>
-        ))}
-      </ol>
+      <fieldset className="rhythmTrainingSelection" aria-describedby="rhythm-selection-help">
+        <legend>練習するリズム</legend>
+        <p id="rhythm-selection-help">1種類なら単独ループ、複数なら表示順に再生します。最低1種類を選択してください。変更は停止中にできます。</p>
+        <ol className="rhythmTrainingPatterns" aria-label="リズムの選択と再生順">
+          {rhythmTrainingPatterns.map((pattern, index) => {
+            const selected = selectedPulses.includes(pattern.pulses);
+            const active = isRunning && position.patternIndex === index;
+            return (
+              <li key={pattern.pulses} className={active ? "active" : selected ? "selected" : undefined}
+                aria-current={active ? "step" : undefined}>
+                <label>
+                  <input type="checkbox" checked={selected}
+                    disabled={isRunning || (selected && selectedPulses.length === 1)}
+                    onChange={() => togglePattern(pattern.pulses)} />
+                  <strong>{pattern.label}</strong>
+                  <span>1拍に{pattern.pulses}音 · 2小節</span>
+                </label>
+              </li>
+            );
+          })}
+        </ol>
+      </fieldset>
       <div className="rhythmTrainingPosition">
-        <strong>{isRunning ? `${position.pattern.label} · ${position.measure} / 2 小節 · ${position.beat}拍目` : "5連符からスタート"}</strong>
+        <strong>{isRunning ? `${position.pattern.label} · ${position.measure} / 2 小節 · ${position.beat}拍目` : `${selectedPatterns[0].label}からスタート`}</strong>
         <div className="beatIndicator" aria-hidden="true">
           {[1, 2, 3, 4].map((beat) => <span key={beat} className={isRunning && position.beat === beat ? "active" : undefined} />)}
         </div>
