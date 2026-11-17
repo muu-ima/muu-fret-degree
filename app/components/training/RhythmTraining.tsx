@@ -5,8 +5,8 @@ import { RhythmTrainingSettings } from "./RhythmTrainingSettings";
 import { RhythmTrainingPlayer } from "./RhythmTrainingPlayer";
 import styles from "./RhythmTraining.module.css";
 
-export function RhythmTraining() {
-  const training = useRhythmTraining();
+export function RhythmTraining({ isActive = true }: { isActive?: boolean }) {
+  const training = useRhythmTraining(isActive);
 
   return (
     <section className={styles.training} aria-labelledby="rhythm-training-title">

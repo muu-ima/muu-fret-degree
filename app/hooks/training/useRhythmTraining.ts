@@ -23,7 +23,7 @@ function dispose(session: Session) {
   if (session.context.state !== "closed") void session.context.close().catch(() => {});
 }
 
-export function useRhythmTraining() {
+export function useRhythmTraining(isActive = true) {
   const [bpm, setBpm] = useState(80);
   const [bpmInput, setBpmInput] = useState("80");
   const bpmRef = useRef(bpm);
@@ -52,6 +52,14 @@ export function useRhythmTraining() {
     sessionRef.current = null;
   }, []);
 
+  // Keep practice settings when switching tabs, but never play in a hidden panel.
+  useEffect(() => {
+    if (isActive) return;
+    if (sessionRef.current) dispose(sessionRef.current);
+    sessionRef.current = null;
+    setIsRunning(false);
+  }, [isActive]);
+
   function commitBpm(value: string) {
     const parsed = Number(value);
     const next = value.trim() && Number.isFinite(parsed)
@@ -69,7 +77,7 @@ export function useRhythmTraining() {
   }
 
   async function start() {
-    if (sessionRef.current) return;
+    if (!isActive || sessionRef.current) return;
     setError("");
     commitBpm(bpmInput);
     let session: Session | undefined;

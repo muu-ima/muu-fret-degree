@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { RhythmTraining } from "../components/training/RhythmTraining";
+import { TrainingTabs } from "../components/training/TrainingTabs";
 import { EMajorTripletStudy } from "../components/training/EMajorTripletStudy";
-import { TrainingPrintButton } from "../components/training/TrainingPrintButton";
 
 export const metadata: Metadata = {
   title: "Training | Bass Chord Degree Fretboard",
@@ -15,27 +14,23 @@ export default function TrainingPage() {
           <p className="panelEyebrow">Training</p>
           <h1>Training</h1>
         </div>
-
-        <div className="scaleToolbarControls">
-          <TrainingPrintButton />
-        </div>
       </header>
 
-      <RhythmTraining />
-
-      <section className="scalePrintSheet" aria-label="Training">
-        <div className="scalePrintHeader">
-          <div>
-            <p>Scale Drill</p>
-            <h2>E Major Triplets</h2>
+      <TrainingTabs scaleDrill={
+        <section className="scalePrintSheet" aria-label="スケールドリル">
+          <div className="scalePrintHeader">
+            <div>
+              <p>Scale Drill</p>
+              <h2>E Major Triplets</h2>
+            </div>
+            <div className="scaleSheetHeaderTools">
+              <span>2-octave wave to low E, then restart / 4-4</span>
+            </div>
           </div>
-          <div className="scaleSheetHeaderTools">
-            <span>2-octave wave to low E, then restart / 4-4</span>
-          </div>
-        </div>
 
-        <EMajorTripletStudy />
-      </section>
+          <EMajorTripletStudy />
+        </section>
+      } />
     </main>
   );
 }
