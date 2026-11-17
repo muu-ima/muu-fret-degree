@@ -39,3 +39,36 @@ describe("rhythm selection", () => {
     expect(() => getRhythmTrainingBeat(0, [])).toThrow("Select at least one training rhythm.");
   });
 });
+
+describe("rhythm switching measure count", () => {
+  it.each([1, 2, 4, 8] as const)("switches selected rhythms every %i measures and loops", (measures) => {
+    const beatsPerPattern = measures * 4;
+    const positions = Array.from({ length: beatsPerPattern * 4 }, (_, beat) =>
+      getRhythmTrainingBeat(beat, [3, 4], measures),
+    );
+    for (let section = 0; section < 4; section += 1) {
+      const block = positions.slice(section * beatsPerPattern, (section + 1) * beatsPerPattern);
+      expect(block.map((position) => position.pattern.pulses)).toEqual(
+        Array(beatsPerPattern).fill(section % 2 === 0 ? 4 : 3),
+      );
+      expect(block[0].measure).toBe(1);
+      expect(block[0].beat).toBe(1);
+      expect(block.at(-1)?.measure).toBe(measures);
+      expect(block.at(-1)?.beat).toBe(4);
+      block.forEach((position, index) => {
+        expect(position.measure).toBe(Math.floor(index / 4) + 1);
+        expect(position.beat).toBe(index % 4 + 1);
+      });
+    }
+  });
+
+  it.each([1, 2, 4, 8] as const)("wraps a single rhythm after %i measures", (measures) => {
+    const last = getRhythmTrainingBeat(measures * 4 - 1, [5], measures);
+    const next = getRhythmTrainingBeat(measures * 4, [5], measures);
+    expect(last.measure).toBe(measures);
+    expect(last.beat).toBe(4);
+    expect(next.pattern.pulses).toBe(5);
+    expect(next.measure).toBe(1);
+    expect(next.beat).toBe(1);
+  });
+});
