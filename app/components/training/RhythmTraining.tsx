@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { LuPlay, LuSquare } from "react-icons/lu";
 import { playMetronomeClick } from "../../lib/audio";
+import { getMetronomeClickKind } from "../../lib/metronome-click";
 import { getRhythmTrainingBeat, rhythmTrainingPatterns } from "../../lib/rhythm-training";
 
 type Position = ReturnType<typeof getRhythmTrainingBeat>;
@@ -79,9 +80,7 @@ export function RhythmTraining() {
             playMetronomeClick(
               context,
               nextBeatTime + pulse * beatDuration / current.pattern.pulses,
-              accentEnabledRef.current
-                ? pulse === 0 ? (current.beat === 1 ? "accent" : "beat") : "subdivision"
-                : "subdivision",
+              getMetronomeClickKind(accentEnabledRef.current, current.beat - 1, pulse),
               "wood",
               0.7,
             );

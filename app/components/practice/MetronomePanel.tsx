@@ -377,7 +377,7 @@ export function MetronomePanel({
             checked={accentFirstBeat}
             onChange={(event) => onAccentFirstBeatChange(event.target.checked)}
           />
-          1拍目をアクセント
+          拍の頭にアクセントを付ける（オフですべての音が均等）
         </label>
 
         <label className="metronomeVolume">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getMetronomeClickKind } from "../../lib/metronome-click";
 import type { MetronomeClickKind, MetronomeTone } from "../../lib/audio";
 
 type UseMetronomeOptions = {
@@ -33,6 +34,7 @@ export function useMetronome({
   const metronomeTimer = useRef<number | null>(null);
   const metronomePulse = useRef(0);
   const onCountInCompleteRef = useRef(onCountInComplete);
+  const accentEnabledRef = useRef(accentFirstBeat);
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
   const [runCycle, setRunCycle] = useState(0);
   const [currentBeat, setCurrentBeat] = useState(1);
@@ -41,6 +43,11 @@ export function useMetronome({
   const [countInBeatsRemaining, setCountInBeatsRemaining] = useState(0);
 
   onCountInCompleteRef.current = onCountInComplete;
+
+  // Updating the sound must not restart the timer or reset the count-in.
+  useEffect(() => {
+    accentEnabledRef.current = accentFirstBeat;
+  }, [accentFirstBeat]);
 
   const clearMetronomeTimer = useCallback(() => {
     if (metronomeTimer.current !== null) {
@@ -90,12 +97,7 @@ export function useMetronome({
       const pulseInMeasure = playbackPulse % (beatsPerMeasure * pulsesPerBeat);
       const beat = Math.floor(pulseInMeasure / pulsesPerBeat);
       const pulse = pulseInMeasure % pulsesPerBeat;
-      const clickKind: MetronomeClickKind =
-        pulse === 0
-          ? accentFirstBeat && beat === 0
-            ? "accent"
-            : "beat"
-          : "subdivision";
+      const clickKind = getMetronomeClickKind(accentEnabledRef.current, beat, pulse);
       resumeAudio();
       playClick(clickKind, metronomeTone, metronomeVolume);
       if (countInPulses > 0 && absolutePulse === countInPulses) {
@@ -123,7 +125,6 @@ export function useMetronome({
 
     return clearMetronomeTimer;
   }, [
-    accentFirstBeat,
     beatsPerMeasure,
     bpm,
     clearMetronomeTimer,
