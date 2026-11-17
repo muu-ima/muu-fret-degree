@@ -5204,3 +5204,51 @@ select:focus-visible,
     visibility: visible;
   }
 }
+
+
+.rhythmTraining {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid rgba(154, 171, 196, 0.24);
+  border-radius: 12px;
+  background: rgba(154, 171, 196, 0.06);
+}
+
+.rhythmTraining h2 { margin: 4px 0 10px; }
+.rhythmTraining p { margin-bottom: 0; line-height: 1.7; }
+.rhythmTrainingControls, .rhythmTrainingPosition {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.rhythmTrainingControls > span { font-size: 0.8rem; opacity: 0.7; }
+.rhythmTrainingPatterns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rhythmTrainingPatterns li {
+  display: grid;
+  gap: 8px;
+  padding: 16px 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: rgba(154, 171, 196, 0.1);
+}
+.rhythmTrainingPatterns li.active {
+  border-color: #59c9ac;
+  background: rgba(89, 201, 172, 0.16);
+}
+.rhythmTrainingPatterns span { font-size: 0.78rem; }
+@media (max-width: 600px) {
+  .rhythmTrainingPatterns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media print {
+  .rhythmTraining { display: none; }
+}

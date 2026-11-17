@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { RhythmTraining } from "../components/training/RhythmTraining";
 import { EMajorTripletStudy } from "../components/training/EMajorTripletStudy";
 import { TrainingPrintButton } from "../components/training/TrainingPrintButton";
 
@@ -19,6 +20,8 @@ export default function TrainingPage() {
           <TrainingPrintButton />
         </div>
       </header>
+
+      <RhythmTraining />
 
       <section className="scalePrintSheet" aria-label="Training">
         <div className="scalePrintHeader">
