@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { getTrainingDialTapValue } from "../../lib/training-dial";
 import styles from "./TrainingDial.module.css";
 
 type Props = {
@@ -16,7 +17,7 @@ type Props = {
 export function TrainingDial({ label, unit, value, min, max, disabled = false, onChange }: Props) {
   const id = useId();
   const [draft, setDraft] = useState(String(value));
-  const drag = useRef<{ pointer: number; y: number; value: number } | null>(null);
+  const drag = useRef<{ pointer: number; x: number; y: number; value: number; moved: boolean } | null>(null);
   const angle = -135 + (value - min) / (max - min) * 270;
 
   useEffect(() => setDraft(String(value)), [value]);
@@ -49,15 +50,26 @@ export function TrainingDial({ label, unit, value, min, max, disabled = false, o
             event.preventDefault();
             event.currentTarget.focus();
             event.currentTarget.setPointerCapture(event.pointerId);
-            drag.current = { pointer: event.pointerId, y: event.clientY, value };
+            drag.current = { pointer: event.pointerId, x: event.clientX, y: event.clientY, value, moved: false };
           }}
           onPointerMove={(event) => {
             const start = drag.current;
             if (!start || start.pointer !== event.pointerId) return;
-            change(start.value + Math.round((start.y - event.clientY) / 3));
+            if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) start.moved = true;
+            if (start.moved) change(start.value + Math.round((start.y - event.clientY) / 3));
           }}
           onPointerUp={(event) => {
-            if (drag.current?.pointer !== event.pointerId) return;
+            const start = drag.current;
+            if (!start || start.pointer !== event.pointerId) return;
+            if (!start.moved && Math.hypot(event.clientX - start.x, event.clientY - start.y) <= 5) {
+              const bounds = event.currentTarget.getBoundingClientRect();
+              const next = getTrainingDialTapValue(
+                (event.clientX - bounds.left - bounds.width / 2) / (bounds.width / 2),
+                (event.clientY - bounds.top - bounds.height / 2) / (bounds.height / 2),
+                min, max,
+              );
+              if (next !== null) change(next);
+            }
             drag.current = null;
             event.currentTarget.releasePointerCapture(event.pointerId);
           }}
@@ -90,7 +102,7 @@ export function TrainingDial({ label, unit, value, min, max, disabled = false, o
           </div>
         </div>
       </div>
-      <small id={`${id}-help`} className={styles.help}>{min}–{max} · 上下ドラッグ / 矢印キーで1刻み</small>
+      <small id={`${id}-help`} className={styles.help}>{min}–{max} · タップで位置指定 / 上下ドラッグ・矢印キーで1刻み</small>
     </div>
   );
 }
