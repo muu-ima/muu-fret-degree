@@ -60,13 +60,31 @@
 .player > .help { margin-top: 8px; }
 .accent { display: flex; align-items: center; gap: 10px; margin: 20px 0; font-size: 0.85rem; cursor: pointer; }
 .accent small { display: block; margin-top: 4px; color: var(--muted); font-size: 0.75rem; }
-.readout { display: grid; gap: 8px; padding: 18px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass-bg-soft); }
+.readout { display: grid; gap: 16px; padding: 20px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass-bg-soft); }
+.readout[data-running="true"] { border-color: rgba(89, 201, 172, 0.5); }
+.readoutHeading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .status { color: var(--muted); font-size: 0.72rem; }
-.currentPattern { font-size: 1.5rem; }
-.measureReadout { color: var(--muted); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
-.beats { display: flex; gap: 8px; margin-top: 8px; }
-.beats span { display: grid; place-items: center; flex: 1; height: 30px; border-radius: 6px; background: rgba(154, 171, 196, 0.1); color: var(--muted); font-size: 0.75rem; }
-.beats .currentBeat { background: #59c9ac; color: #0d2922; font-weight: 800; }
+.readout[data-running="true"] .status { color: #8ae3cb; }
+.subdivision { color: var(--muted); font-size: 0.75rem; }
+.currentPattern { font-size: clamp(1.7rem, 3vw, 2.3rem); line-height: 1.2; }
+.positionSummary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.positionSummary > div { display: grid; gap: 4px; }
+.positionSummary > div > span { color: var(--muted); font-size: 0.75rem; }
+.positionSummary strong { font-size: 2rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.positionSummary small { color: var(--muted); font-size: 0.95rem; font-weight: 400; }
+.measureProgress { display: grid; grid-template-columns: repeat(auto-fit, minmax(48px, 1fr)); gap: 8px; }
+.progressMeasure { padding: 6px; border: 1px solid var(--line); border-radius: 6px; }
+.progressMeasure > span { display: block; margin-bottom: 6px; color: var(--muted); font-size: 0.65rem; font-variant-numeric: tabular-nums; }
+.progressMeasure > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+.progressMeasure i { height: 8px; border-radius: 2px; background: var(--line); }
+.progressMeasure[data-current="true"] { border-color: #59c9ac; }
+.progressMeasure[data-current="true"] > span { color: #8ae3cb; }
+.progressMeasure i[data-passed="true"] { background: rgba(89, 201, 172, 0.4); }
+.progressMeasure i[data-current="true"] { background: #8ae3cb; outline: 1px solid #8ae3cb; outline-offset: 1px; }
+.upNext { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 10px; padding-top: 14px; border-top: 1px solid var(--glass-border); }
+.upNext > span { color: var(--muted); font-size: 0.75rem; }
+.upNext strong { font-size: 0.9rem; }
+.upNext small { grid-column: 1 / -1; color: var(--muted); font-size: 0.72rem; line-height: 1.6; }
 .sequence { margin-top: 16px; }
 .sequence ol { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 8px 0 0; list-style: none; }
 .sequence li { padding: 4px 8px; border: 1px solid var(--line); border-radius: 5px; color: var(--muted); font-size: 0.72rem; }

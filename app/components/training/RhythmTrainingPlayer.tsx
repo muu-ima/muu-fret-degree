@@ -1,5 +1,6 @@
 import { LuPlay, LuSquare } from "react-icons/lu";
 import type { RhythmTrainingController } from "../../hooks/training/useRhythmTraining";
+import { RhythmTrainingReadout } from "./RhythmTrainingReadout";
 import styles from "./RhythmTraining.module.css";
 
 type Props = Pick<RhythmTrainingController,
@@ -40,18 +41,12 @@ export function RhythmTrainingPlayer({
         <input type="checkbox" checked={accentEnabled} onChange={(event) => onAccentChange(event.target.checked)} />
         <span>拍の頭にアクセント<small>オフですべての音が均等</small></span>
       </label>
-      <div className={styles.readout}>
-        <span className={styles.status}>{isRunning ? "再生中" : "待機中"}</span>
-        <strong className={styles.currentPattern}>{isRunning ? position.pattern.label : selectedPatterns[0].label}</strong>
-        <span className={styles.measureReadout}>
-          {isRunning ? `${position.measure} / ${measuresPerPattern} 小節 · ${position.beat}拍目` : `各${measuresPerPattern}小節でループ`}
-        </span>
-        <div className={styles.beats} aria-hidden="true">
-          {[1, 2, 3, 4].map((beat) => (
-            <span key={beat} className={isRunning && position.beat === beat ? styles.currentBeat : undefined}>{beat}</span>
-          ))}
-        </div>
-      </div>
+      <RhythmTrainingReadout
+        selectedPatterns={selectedPatterns}
+        measuresPerPattern={measuresPerPattern}
+        position={position}
+        isRunning={isRunning}
+      />
       <div className={styles.sequence}>
         <span className={styles.status}>再生順</span>
         <ol>
