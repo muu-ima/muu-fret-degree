@@ -2,9 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LuMinus, LuPlay, LuPlus, LuSquare, LuTimerReset } from "react-icons/lu";
+import { MetronomeMixer } from "./MetronomeMixer";
+import type { MetronomeMix, MetronomeMixerChannel } from "../../lib/metronome-mixer";
 import { type MetronomeTone } from "../../lib/audio";
 
 type MetronomePanelProps = {
+  mixerEnabled: boolean;
+  mix: MetronomeMix;
+  onMixerEnabledChange: (enabled: boolean) => void;
+  onMixChange: (channel: MetronomeMixerChannel, volume: number) => void;
   isPanelOpen: boolean;
   bpm: number;
   bpmInput: string;
@@ -65,6 +71,7 @@ const tempoPresets = [
 ];
 
 export function MetronomePanel({
+  mixerEnabled, mix, onMixerEnabledChange, onMixChange,
   isPanelOpen,
   bpm,
   bpmInput,
@@ -188,14 +195,14 @@ export function MetronomePanel({
         </div>
       </div>
 
-      <div
+      {!mixerEnabled && <div
         className={isCountingIn ? "pulsePosition countingIn" : "pulsePosition"}
         aria-label={`拍内パルス ${currentPulse} / ${pulsesPerBeat}`}
       >
         {Array.from({ length: pulsesPerBeat }, (_, index) => (
           <span className={isRunning && index + 1 === currentPulse ? "active" : undefined} key={`pulse-${index + 1}`} />
         ))}
-      </div>
+      </div>}
 
       <div className="metronomeTempoControls">
         <button
@@ -282,6 +289,16 @@ export function MetronomePanel({
 
       <div className="metronomeSettings">
         <div className="metronomeSettingGroup">
+          <span className="controlLabel">再生モード <small>切り替えは停止中</small></span>
+          <div className="toneTabs" role="group" aria-label="メトロノーム再生モード">
+            <button type="button" className={!mixerEnabled ? "toneTab active" : "toneTab"}
+              aria-pressed={!mixerEnabled} disabled={isRunning} onClick={() => onMixerEnabledChange(false)}>通常</button>
+            <button type="button" className={mixerEnabled ? "toneTab active" : "toneTab"}
+              aria-pressed={mixerEnabled} disabled={isRunning} onClick={() => onMixerEnabledChange(true)}>ミキサー</button>
+          </div>
+        </div>
+        {mixerEnabled && <MetronomeMixer mix={mix} onChange={onMixChange} />}
+        <div className="metronomeSettingGroup">
           <span className="controlLabel">Count-in</span>
           <div className="countInTabs" role="group" aria-label="カウントイン">
             {countInOptions.map((option) => (
@@ -317,13 +334,14 @@ export function MetronomePanel({
         </div>
 
         <div className="metronomeSettingGroup">
-          <span className="controlLabel">Pulse</span>
+          <span className="controlLabel">Pulse {mixerEnabled && <small>通常モード用</small>}</span>
           <div className="pulseTabs" role="group" aria-label="パルス">
             {pulseOptions.map((option) => (
               <button
                 type="button"
                 className={option.value === pulsesPerBeat ? "pulseTab active" : "pulseTab"}
                 aria-pressed={option.value === pulsesPerBeat}
+                disabled={mixerEnabled}
                 key={option.value}
                 onClick={() => onPulsesPerBeatChange(option.value)}
               >
@@ -336,7 +354,7 @@ export function MetronomePanel({
         <div className="metronomeSettingGroup">
           <span className="controlLabel">
             Swing
-            <small>8th pulse only</small>
+            <small>{mixerEnabled ? "ミキサーはStraight固定" : "8th pulse only"}</small>
           </span>
           <div className="swingTabs" role="group" aria-label="スウィング">
             {swingOptions.map((option) => (
@@ -344,7 +362,7 @@ export function MetronomePanel({
                 type="button"
                 className={option.value === swingRatio ? "swingTab active" : "swingTab"}
                 aria-pressed={option.value === swingRatio}
-                disabled={pulsesPerBeat !== 2}
+                disabled={mixerEnabled || pulsesPerBeat !== 2}
                 key={option.value}
                 onClick={() => onSwingRatioChange(option.value)}
               >
@@ -371,14 +389,14 @@ export function MetronomePanel({
           </div>
         </div>
 
-        <label className="toggle">
+        {!mixerEnabled && <label className="toggle">
           <input
             type="checkbox"
             checked={accentFirstBeat}
             onChange={(event) => onAccentFirstBeatChange(event.target.checked)}
           />
           拍の頭にアクセントを付ける（オフですべての音が均等）
-        </label>
+        </label>}
 
         <label className="metronomeVolume">
           <span>

@@ -1,10 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getMetronomeMixClicks, mixerStepsPerBeat, type MetronomeMix } from "../../lib/metronome-mixer";
 import { getMetronomeClickKind } from "../../lib/metronome-click";
 import type { MetronomeClickKind, MetronomeTone } from "../../lib/audio";
 
 type UseMetronomeOptions = {
+  mixerEnabled: boolean;
+  mix: MetronomeMix;
   bpm: number;
   beatsPerMeasure: number;
   pulsesPerBeat: number;
@@ -19,6 +22,7 @@ type UseMetronomeOptions = {
 };
 
 export function useMetronome({
+  mixerEnabled, mix,
   bpm,
   beatsPerMeasure,
   pulsesPerBeat,
@@ -35,6 +39,7 @@ export function useMetronome({
   const metronomePulse = useRef(0);
   const onCountInCompleteRef = useRef(onCountInComplete);
   const accentEnabledRef = useRef(accentFirstBeat);
+  const soundRef = useRef({ mix, metronomeTone, metronomeVolume });
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
   const [runCycle, setRunCycle] = useState(0);
   const [currentBeat, setCurrentBeat] = useState(1);
@@ -48,6 +53,10 @@ export function useMetronome({
   useEffect(() => {
     accentEnabledRef.current = accentFirstBeat;
   }, [accentFirstBeat]);
+
+  useEffect(() => {
+    soundRef.current = { mix, metronomeTone, metronomeVolume };
+  }, [mix, metronomeTone, metronomeVolume]);
 
   const clearMetronomeTimer = useCallback(() => {
     if (metronomeTimer.current !== null) {
@@ -85,21 +94,33 @@ export function useMetronome({
     }
 
     const beatMs = (60 / bpm) * 1000;
-    const pulseMs = beatMs / pulsesPerBeat;
+    const stepsPerBeat = mixerEnabled ? mixerStepsPerBeat : pulsesPerBeat;
+    const pulseMs = beatMs / stepsPerBeat;
     const countInBeats = countInMeasures * beatsPerMeasure;
-    const countInPulses = countInBeats * pulsesPerBeat;
+    const countInPulses = countInBeats * stepsPerBeat;
     metronomePulse.current = 0;
 
     const tick = () => {
       const absolutePulse = metronomePulse.current;
       const isCountInPulse = absolutePulse < countInPulses;
       const playbackPulse = isCountInPulse ? absolutePulse : absolutePulse - countInPulses;
-      const pulseInMeasure = playbackPulse % (beatsPerMeasure * pulsesPerBeat);
-      const beat = Math.floor(pulseInMeasure / pulsesPerBeat);
-      const pulse = pulseInMeasure % pulsesPerBeat;
-      const clickKind = getMetronomeClickKind(accentEnabledRef.current, beat, pulse);
+      const pulseInMeasure = playbackPulse % (beatsPerMeasure * stepsPerBeat);
+      const beat = Math.floor(pulseInMeasure / stepsPerBeat);
+      const pulse = pulseInMeasure % stepsPerBeat;
+      const sound = soundRef.current;
       resumeAudio();
-      playClick(clickKind, metronomeTone, metronomeVolume);
+      if (mixerEnabled) {
+        // Count-in remains audible even when all mixer channels are muted.
+        const clicks = isCountInPulse
+          ? pulse === 0 ? [{ kind: "beat" as const, volume: 1 }] : []
+          : getMetronomeMixClicks(beat, pulse, sound.mix);
+        for (const click of clicks) {
+          if (sound.metronomeVolume > 0) playClick(click.kind, sound.metronomeTone, click.volume * sound.metronomeVolume);
+        }
+      } else {
+        const clickKind = getMetronomeClickKind(accentEnabledRef.current, beat, pulse);
+        playClick(clickKind, sound.metronomeTone, sound.metronomeVolume);
+      }
       if (countInPulses > 0 && absolutePulse === countInPulses) {
         onCountInCompleteRef.current?.();
       }
@@ -107,13 +128,13 @@ export function useMetronome({
       setCurrentPulse(pulse + 1);
       setIsCountingIn(isCountInPulse);
       if (pulse === 0) {
-        const elapsedCountInBeats = Math.floor(absolutePulse / pulsesPerBeat);
+        const elapsedCountInBeats = Math.floor(absolutePulse / stepsPerBeat);
         setCountInBeatsRemaining(isCountInPulse ? countInBeats - elapsedCountInBeats : 0);
       }
       metronomePulse.current += 1;
 
       const nextPulseMs =
-        pulsesPerBeat === 2 && swingRatio > 0
+        !mixerEnabled && pulsesPerBeat === 2 && swingRatio > 0
           ? pulse === 0
             ? beatMs * swingRatio
             : beatMs * (1 - swingRatio)
@@ -130,8 +151,7 @@ export function useMetronome({
     clearMetronomeTimer,
     countInMeasures,
     isMetronomeRunning,
-    metronomeTone,
-    metronomeVolume,
+    mixerEnabled,
     playClick,
     pulsesPerBeat,
     resumeAudio,

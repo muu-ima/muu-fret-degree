@@ -17,6 +17,7 @@ import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
 import { ControlsPanel } from "./ControlsPanel";
 import { FretRangeTabs } from "./FretRangeTabs";
+import { defaultMetronomeMix, type MetronomeMix } from "../../lib/metronome-mixer";
 import { MetronomePanel } from "./MetronomePanel";
 import { ProgressionPanel } from "./ProgressionPanel";
 import { ProgressionQuickEditor } from "../progression/ProgressionQuickEditor";
@@ -76,6 +77,8 @@ export function PracticeWorkspace() {
   const [metronomeTone, setMetronomeTone] = useState<MetronomeTone>("soft");
   const [accentFirstBeat, setAccentFirstBeat] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.7);
+  const [mixerEnabled, setMixerEnabled] = useState(false);
+  const [metronomeMix, setMetronomeMix] = useState<MetronomeMix>(defaultMetronomeMix);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(bottomSheetHeightBounds.default);
   const [desktopPanelPositions, setDesktopPanelPositions] = useState<
     Partial<Record<DesktopPanelKey, DesktopPanelPosition>>
@@ -125,6 +128,8 @@ export function PracticeWorkspace() {
     metronomeTone,
     accentFirstBeat,
     metronomeVolume,
+    mixerEnabled,
+    mix: metronomeMix,
     playClick: playMetronomeClick,
     resumeAudio,
     onCountInComplete: handleProgressionCountInComplete,
@@ -671,6 +676,10 @@ export function PracticeWorkspace() {
         {renderDrawerHeader("metronome", "Metronome", `${bpm} BPM · ${beatsPerMeasure}/4`)}
         <div className="shellMetronome">
           <MetronomePanel
+            mixerEnabled={mixerEnabled}
+            mix={metronomeMix}
+            onMixerEnabledChange={(enabled) => { if (!isMetronomeRunning) setMixerEnabled(enabled); }}
+            onMixChange={(channel, volume) => setMetronomeMix((current) => ({ ...current, [channel]: volume }))}
             isPanelOpen={isMetronomeOpen}
             bpm={bpm}
             bpmInput={bpmInput}

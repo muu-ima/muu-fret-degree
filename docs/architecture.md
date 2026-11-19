@@ -399,6 +399,17 @@ AudioContextと音源出力を担当する。
 
 AudioContextを直接所有しないため、将来Sessionの音声出力と同じContextを共有できる。
 
+#### ノートミキシング（第1段階）
+
+BOSS DB-90の[公式仕様](https://www.boss.info/jp/products/db-90/)にある4種類のリズムとアクセントの独立音量を参考に、通常／ミキサーモードを設ける。今回はノートミキシングのみを対象とし、メモリー、コーチ、ドラムパターン、外部入力、実機風の外装は今後の別段階とする。
+
+- `app/lib/metronome-mixer.ts`: 1拍12分割の共通グリッドで4分・8分・16分・三連の発音と音量を決める純粋関数。各リズムは拍頭を含み、重なった通常音は合算して1に制限する。小節頭のアクセントは別イベントとして加える。
+- `app/components/practice/MetronomeMixer.tsx`: 各チャンネルの音量スライダーを表示し、変更をcallbackで通知する。縦スライダーのスタイルは専用CSSに閉じる。
+- `PracticeWorkspace`: モードとチャンネル音量を所有する。モードは停止中のみ変更可能。
+- `useMetronome`: 通常モードでは従来のPulseとSwingを使用し、ミキサーでは12分割のStraightグリッドを使う。音量・音色はrefから読み、変更でtimerを再起動しない。カウントインではミックス音量によらず四分音符を鳴らし、終了callbackを従来どおり1回呼ぶ。
+
+Trainingの順次切り替え再生は変更しない。ミキサーは既存の共有音声出力を使用し、音声クロックへの予約再生の移行はこの段階に含めない。
+
 #### メトロノームとTrainingの共通アクセント設定
 
 通常のメトロノームとTrainingの「リズム聴き比べ」は、`app/lib/metronome-click.ts` の `getMetronomeClickKind` でクリックの種類を共通に決める。
