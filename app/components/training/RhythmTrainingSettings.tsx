@@ -1,10 +1,11 @@
 import { useId } from "react";
 import {
   rhythmTrainingPatterns,
-  rhythmTrainingMeasureOptions,
+  rhythmTrainingMeasureRange,
   type RhythmTrainingMeasures,
   type RhythmTrainingPulse,
 } from "../../lib/rhythm-training";
+import { TrainingDial } from "./TrainingDial";
 import styles from "./RhythmTraining.module.css";
 
 type Props = {
@@ -45,19 +46,9 @@ export function RhythmTrainingSettings({
           })}
         </ol>
       </fieldset>
-      <fieldset className={styles.fieldset}>
-        <legend>切り替え小節数</legend>
-        <div className={styles.measureOptions}>
-          {rhythmTrainingMeasureOptions.map((measures) => (
-            <label key={measures} className={styles.measureOption}>
-              <input type="radio" name={`${id}-measures`} value={measures}
-                checked={measuresPerPattern === measures} disabled={isRunning}
-                onChange={() => onMeasuresChange(measures)} />
-              <span>{measures}<small>小節</small></span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <TrainingDial label="切り替え小節数" unit="小節" value={measuresPerPattern}
+        min={rhythmTrainingMeasureRange.min} max={rhythmTrainingMeasureRange.max}
+        disabled={isRunning} onChange={onMeasuresChange} />
       <p className={styles.help}>
         {isRunning ? "リズムと小節数を変えるには、再生を停止してください。" : "最低1種類を選択してください。リズムと小節数は停止中に変更できます。"}
       </p>

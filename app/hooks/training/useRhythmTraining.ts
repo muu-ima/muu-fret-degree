@@ -5,6 +5,7 @@ import { playMetronomeClick } from "../../lib/audio";
 import { getMetronomeClickKind } from "../../lib/metronome-click";
 import {
   getRhythmTrainingBeat,
+  normalizeRhythmTrainingMeasures,
   rhythmTrainingPatterns,
   type RhythmTrainingPulse,
   type RhythmTrainingMeasures,
@@ -136,7 +137,7 @@ export function useRhythmTraining(isActive = true) {
   }
 
   function changeMeasures(measures: RhythmTrainingMeasures) {
-    if (!sessionRef.current) setMeasuresPerPattern(measures);
+    if (!sessionRef.current) setMeasuresPerPattern(normalizeRhythmTrainingMeasures(measures, measuresPerPattern));
   }
 
   function changeAccent(enabled: boolean) {
@@ -145,7 +146,7 @@ export function useRhythmTraining(isActive = true) {
   }
 
   return {
-    bpmInput, setBpmInput, commitBpm,
+    bpm, commitBpm,
     accentEnabled, changeAccent,
     selectedPulses, selectedPatterns, togglePattern,
     measuresPerPattern, changeMeasures,

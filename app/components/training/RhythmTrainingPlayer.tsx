@@ -1,42 +1,32 @@
 import { LuPlay, LuSquare } from "react-icons/lu";
 import type { RhythmTrainingController } from "../../hooks/training/useRhythmTraining";
 import { RhythmTrainingReadout } from "./RhythmTrainingReadout";
+import { TrainingDial } from "./TrainingDial";
 import styles from "./RhythmTraining.module.css";
 
 type Props = Pick<RhythmTrainingController,
-  "bpmInput" | "accentEnabled" | "selectedPatterns" | "measuresPerPattern" | "position" | "isRunning"
+  "bpm" | "accentEnabled" | "selectedPatterns" | "measuresPerPattern" | "position" | "isRunning"
 > & {
-  onBpmInputChange: (value: string) => void;
   onBpmCommit: (value: string) => void;
   onAccentChange: (enabled: boolean) => void;
   onToggle: () => void;
 };
 
 export function RhythmTrainingPlayer({
-  bpmInput, onBpmInputChange, onBpmCommit, accentEnabled, onAccentChange,
+  bpm, onBpmCommit, accentEnabled, onAccentChange,
   selectedPatterns, measuresPerPattern, position, isRunning, onToggle,
 }: Props) {
   return (
     <div className={styles.player}>
       <div className={styles.tempoRow}>
-        <label className={styles.tempo}>
-          <span>BPM <small>四分音符</small></span>
-          <input type="number" min="40" max="240" step="1" value={bpmInput}
-            onChange={(event) => onBpmInputChange(event.target.value)}
-            onBlur={(event) => onBpmCommit(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                onBpmCommit(event.currentTarget.value);
-                event.currentTarget.blur();
-              }
-            }} />
-        </label>
+        <TrainingDial label="テンポ（四分音符）" unit="BPM" value={bpm} min={40} max={240}
+          onChange={(value) => onBpmCommit(String(value))} />
         <button type="button" className={styles.playButton} onClick={onToggle}>
           {isRunning ? <LuSquare aria-hidden="true" /> : <LuPlay aria-hidden="true" />}
           {isRunning ? "停止" : "再生"}
         </button>
       </div>
-      <p className={styles.help}>40–240 BPM · 再生中も変更できます</p>
+      <p className={styles.help}>テンポは再生中も変更できます</p>
       <label className={styles.accent}>
         <input type="checkbox" checked={accentEnabled} onChange={(event) => onAccentChange(event.target.checked)} />
         <span>拍の頭にアクセント<small>オフですべての音が均等</small></span>

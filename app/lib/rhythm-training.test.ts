@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getRhythmTrainingBeat } from "./rhythm-training";
+import { getRhythmTrainingBeat, normalizeRhythmTrainingMeasures } from "./rhythm-training";
 
 describe("rhythm training sequence", () => {
   it("plays each subdivision for exactly two 4/4 measures and loops", () => {
@@ -41,7 +41,7 @@ describe("rhythm selection", () => {
 });
 
 describe("rhythm switching measure count", () => {
-  it.each([1, 2, 4, 8] as const)("switches selected rhythms every %i measures and loops", (measures) => {
+  it.each(Array.from({ length: 32 }, (_, index) => index + 1))("switches selected rhythms every %i measures and loops", (measures) => {
     const beatsPerPattern = measures * 4;
     const positions = Array.from({ length: beatsPerPattern * 4 }, (_, beat) =>
       getRhythmTrainingBeat(beat, [3, 4], measures),
@@ -62,7 +62,7 @@ describe("rhythm switching measure count", () => {
     }
   });
 
-  it.each([1, 2, 4, 8] as const)("wraps a single rhythm after %i measures", (measures) => {
+  it.each(Array.from({ length: 32 }, (_, index) => index + 1))("wraps a single rhythm after %i measures", (measures) => {
     const last = getRhythmTrainingBeat(measures * 4 - 1, [5], measures);
     const next = getRhythmTrainingBeat(measures * 4, [5], measures);
     expect(last.measure).toBe(measures);
@@ -70,5 +70,15 @@ describe("rhythm switching measure count", () => {
     expect(next.pattern.pulses).toBe(5);
     expect(next.measure).toBe(1);
     expect(next.beat).toBe(1);
+  });
+});
+
+describe("measure input bounds", () => {
+  it("rounds and clamps input, retaining the previous value for invalid input", () => {
+    expect(normalizeRhythmTrainingMeasures(0)).toBe(1);
+    expect(normalizeRhythmTrainingMeasures(33)).toBe(32);
+    expect(normalizeRhythmTrainingMeasures(3.6)).toBe(4);
+    expect(normalizeRhythmTrainingMeasures(NaN, 7)).toBe(7);
+    expect(normalizeRhythmTrainingMeasures(Infinity, 7)).toBe(7);
   });
 });

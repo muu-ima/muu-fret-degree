@@ -5,8 +5,13 @@ export const rhythmTrainingPatterns = [
   { label: "8分音符", pulses: 2 },
 ] as const;
 
-export const rhythmTrainingMeasureOptions = [1, 2, 4, 8] as const;
-export type RhythmTrainingMeasures = typeof rhythmTrainingMeasureOptions[number];
+export const rhythmTrainingMeasureRange = { min: 1, max: 32 } as const;
+export type RhythmTrainingMeasures = number;
+
+export function normalizeRhythmTrainingMeasures(value: number, fallback = 2): RhythmTrainingMeasures {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(rhythmTrainingMeasureRange.max, Math.max(rhythmTrainingMeasureRange.min, Math.round(value)));
+}
 
 export type RhythmTrainingPulse = typeof rhythmTrainingPatterns[number]["pulses"];
 
@@ -19,7 +24,7 @@ export function getRhythmTrainingBeat(
     selectedPulses.includes(pattern.pulses) ? [index] : [],
   );
   if (selectedIndices.length === 0) throw new Error("Select at least one training rhythm.");
-  const beatsPerPattern = measuresPerPattern * 4;
+  const beatsPerPattern = normalizeRhythmTrainingMeasures(measuresPerPattern) * 4;
   const beatInLoop = absoluteBeat % (selectedIndices.length * beatsPerPattern);
   const patternIndex = selectedIndices[Math.floor(beatInLoop / beatsPerPattern)];
   return {

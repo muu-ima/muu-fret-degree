@@ -27,8 +27,7 @@ export function RhythmTraining({ isActive = true }: { isActive?: boolean }) {
           onMeasuresChange={training.changeMeasures}
         />
         <RhythmTrainingPlayer
-          bpmInput={training.bpmInput}
-          onBpmInputChange={training.setBpmInput}
+          bpm={training.bpm}
           onBpmCommit={training.commitBpm}
           accentEnabled={training.accentEnabled}
           onAccentChange={training.changeAccent}
