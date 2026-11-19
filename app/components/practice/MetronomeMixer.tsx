@@ -7,7 +7,7 @@ export function MetronomeMixer({ mix, onChange }: Props) {
   return (
     <fieldset className={styles.mixer}>
       <legend>ノートミキシング</legend>
-      <p>各リズムを重ねて再生します。0%でその音を消せます。</p>
+      <p>4分は表、8分の裏は「&」、16分の裏は「e・a」。0%でその音を消せます。</p>
       <div className={styles.channels}>
         {metronomeMixerChannels.map((channel) => (
           <label key={channel.id} className={styles.channel}>
