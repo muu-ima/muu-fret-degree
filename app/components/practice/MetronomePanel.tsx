@@ -260,6 +260,21 @@ export function MetronomePanel({
 
       <div className="metronomeSettings">
         <MetronomeMixer mix={mix} onChange={onMixChange} />
+        <label className="metronomeVolume">
+          <span>
+            Volume
+            <output>{Math.round(volume * 100)}%</output>
+          </span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={volume}
+            onChange={(event) => onVolumeChange(Number(event.target.value))}
+          />
+        </label>
+
         <div className="metronomeSettingGroup">
           <span className="controlLabel">Count-in</span>
           <div className="countInTabs" role="group" aria-label="カウントイン">
@@ -312,20 +327,6 @@ export function MetronomePanel({
           </div>
         </div>
 
-        <label className="metronomeVolume">
-          <span>
-            Volume
-            <output>{Math.round(volume * 100)}%</output>
-          </span>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={volume}
-            onChange={(event) => onVolumeChange(Number(event.target.value))}
-          />
-        </label>
       </div>
     </section>
   );
