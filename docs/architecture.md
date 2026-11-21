@@ -392,8 +392,8 @@ AudioContextと音源出力を担当する。
 
 メトロノームのtimerと表示状態を担当する。
 
-- 開始 / 停止、現在拍、現在pulse、count-inを管理する。
-- BPM、pulse、swingから次のtickまでの時間を決める。
+- 開始 / 停止、現在拍、count-inを管理する。
+- BPMと1拍12分割の共通グリッドから次のtickまでの時間を決める。
 - 発音は注入された `playClick` へ委譲する。
 - Count-in完了時の最初の再生拍をcallbackで通知する。
 
@@ -401,27 +401,22 @@ AudioContextを直接所有しないため、将来Sessionの音声出力と同�
 
 #### ノートミキシング（第1段階）
 
-BOSS DB-90の[公式仕様](https://www.boss.info/jp/products/db-90/)にある4種類のリズムとアクセントの独立音量を参考に、通常／ミキサーモードを設ける。今回はノートミキシングのみを対象とし、メモリー、コーチ、ドラムパターン、外部入力、実機風の外装は今後の別段階とする。
+BOSS DB-90の[公式仕様](https://www.boss.info/jp/products/db-90/)にある4種類のリズムとアクセントの独立音量を参考に、メトロノームをノートミキサー方式に統一する。再生モード切り替えと旧Pulse・Swing・アクセントチェックボックスは廃止した。今回はノートミキシングのみを対象とし、メモリー、コーチ、ドラムパターン、外部入力、実機風の外装は今後の別段階とする。
 
 - `app/lib/metronome-mixer.ts`: 1拍12分割の共通グリッドで発音と音量を決める純粋関数。4分はstep 0、8分の裏はstep 6、16分の裏はstep 3・9、三連はstep 0・4・8で鳴らす。4分と裏拍のチャンネルは拍頭を重複させず、三連など重なった通常音は合算して1に制限する。小節頭のアクセントは別イベントとして加える。
 - `app/components/practice/MetronomeMixer.tsx`: 各チャンネルの音量スライダーを表示し、変更をcallbackで通知する。縦スライダーのスタイルは専用CSSに閉じる。
-- `PracticeWorkspace`: モードとチャンネル音量を所有する。モードは停止中のみ変更可能。
-- `useMetronome`: 通常モードでは従来のPulseとSwingを使用し、ミキサーでは12分割のStraightグリッドを使う。音量・音色はrefから読み、変更でtimerを再起動しない。カウントインではミックス音量によらず四分音符を鳴らし、終了callbackを従来どおり1回呼ぶ。
+- `PracticeWorkspace`: チャンネル音量を所有する。ミキサーは常時表示する。
+- `useMetronome`: 12分割のStraightグリッドを使う。音量・音色はrefから読み、変更でtimerを再起動しない。カウントインではミックス音量によらず四分音符を鳴らし、終了callbackを従来どおり1回呼ぶ。
 
 Trainingの順次切り替え再生は変更しない。ミキサーは既存の共有音声出力を使用し、音声クロックへの予約再生の移行はこの段階に含めない。
 
-#### メトロノームとTrainingの共通アクセント設定
+#### アクセントと均一なクリック
 
-通常のメトロノームとTrainingの「リズム聴き比べ」は、`app/lib/metronome-click.ts` の `getMetronomeClickKind` でクリックの種類を共通に決める。
+メトロノームでは通常音を `subdivision` で統一し、小節頭のアクセント音量を独立スライダーで調整する。アクセント0%、4分と8分の裏を同じ音量にすると均一な八分音符になる。
 
-- オンでは、小節頭を `accent`、それ以外の拍頭を `beat`、拍内の細分音を `subdivision` として鳴らす。
-- オフでは、小節頭・各拍の頭・拍内の細分音をすべて `subdivision` として鳴らし、音色・音高・音量・音の長さを統一する。
-- メトロノームで選択中のToneとVolumeは全音に同じように適用する。Trainingの音色設定自体は従来のWoodを使う。
-- UIは「拍の頭にアクセントを付ける（オフですべての音が均等）」と表記する。
-- メトロノームではアクセント設定をrefから読み、切り替え時にtimerを再起動しない。再生位置とCount-inの進行を保ったまま、次のクリックから反映する。
-- BPM・拍子・Pulse・Swing・Count-inの設定や拍位置の表示は維持する。Straightでは等間隔、Swingでは設定された長短の間隔を保つ。
+Trainingは従来のアクセントチェックボックスを維持し、`app/lib/metronome-click.ts` の `getMetronomeClickKind` を使う。オフでは全音を `subdivision`、オンでは小節頭を `accent`、他の拍頭を `beat`、細分音を `subdivision` とする。
 
-発音間隔を管理する既存のtimer方式は今回変更していない。AudioContext時刻による予約再生への移行は別の改善として扱う。
+両者とも音量・アクセント変更で再生位置をリセットしない。メトロノームの既存timer方式とTrainingのAudioContext予約方式は引き続き別々に管理する。
 
 ### `app/hooks/useBpmControl.ts`
 

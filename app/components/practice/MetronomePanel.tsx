@@ -5,35 +5,27 @@ import { LuMinus, LuPlay, LuPlus, LuSquare, LuTimerReset } from "react-icons/lu"
 import { MetronomeMixer } from "./MetronomeMixer";
 import type { MetronomeMix, MetronomeMixerChannel } from "../../lib/metronome-mixer";
 import { type MetronomeTone } from "../../lib/audio";
+import styles from "./MetronomePanel.module.css";
 
 type MetronomePanelProps = {
-  mixerEnabled: boolean;
   mix: MetronomeMix;
-  onMixerEnabledChange: (enabled: boolean) => void;
   onMixChange: (channel: MetronomeMixerChannel, volume: number) => void;
   isPanelOpen: boolean;
   bpm: number;
   bpmInput: string;
   currentBeat: number;
-  currentPulse: number;
   countInBeatsRemaining: number;
   beatsPerMeasure: number;
-  pulsesPerBeat: number;
   countInMeasures: number;
-  swingRatio: number;
   tone: MetronomeTone;
-  accentFirstBeat: boolean;
   volume: number;
   isRunning: boolean;
   isCountingIn: boolean;
   onBpmInputChange: (value: string) => void;
   onBpmCommit: (value: string) => void;
   onBeatsPerMeasureChange: (beats: number) => void;
-  onPulsesPerBeatChange: (pulses: number) => void;
   onCountInMeasuresChange: (measures: number) => void;
-  onSwingRatioChange: (ratio: number) => void;
   onToneChange: (tone: MetronomeTone) => void;
-  onAccentFirstBeatChange: (accented: boolean) => void;
   onVolumeChange: (volume: number) => void;
   onToggle: () => void;
 };
@@ -43,18 +35,6 @@ const countInOptions = [
   { value: 0, label: "Off" },
   { value: 1, label: "1 bar" },
   { value: 2, label: "2 bars" },
-];
-const swingOptions = [
-  { value: 0, label: "Straight" },
-  { value: 0.56, label: "Light" },
-  { value: 0.62, label: "Medium" },
-  { value: 0.67, label: "Heavy" },
-];
-const pulseOptions = [
-  { value: 1, label: "1/4" },
-  { value: 2, label: "1/8" },
-  { value: 3, label: "Triplet" },
-  { value: 4, label: "1/16" },
 ];
 const toneOptions: Array<{ value: MetronomeTone; label: string }> = [
   { value: "soft", label: "Soft" },
@@ -71,30 +51,23 @@ const tempoPresets = [
 ];
 
 export function MetronomePanel({
-  mixerEnabled, mix, onMixerEnabledChange, onMixChange,
+  mix, onMixChange,
   isPanelOpen,
   bpm,
   bpmInput,
   currentBeat,
-  currentPulse,
   countInBeatsRemaining,
   beatsPerMeasure,
-  pulsesPerBeat,
   countInMeasures,
-  swingRatio,
   tone,
-  accentFirstBeat,
   volume,
   isRunning,
   isCountingIn,
   onBpmInputChange,
   onBpmCommit,
   onBeatsPerMeasureChange,
-  onPulsesPerBeatChange,
   onCountInMeasuresChange,
-  onSwingRatioChange,
   onToneChange,
-  onAccentFirstBeatChange,
   onVolumeChange,
   onToggle,
 }: MetronomePanelProps) {
@@ -143,7 +116,8 @@ export function MetronomePanel({
         target?.tagName === "INPUT" ||
         target?.tagName === "SELECT" ||
         target?.tagName === "TEXTAREA" ||
-        target?.tagName === "BUTTON";
+        target?.tagName === "BUTTON" ||
+        target?.tagName === "SUMMARY";
 
       if (isFormControl || event.repeat) {
         return;
@@ -195,109 +169,97 @@ export function MetronomePanel({
         </div>
       </div>
 
-      {!mixerEnabled && <div
-        className={isCountingIn ? "pulsePosition countingIn" : "pulsePosition"}
-        aria-label={`拍内パルス ${currentPulse} / ${pulsesPerBeat}`}
-      >
-        {Array.from({ length: pulsesPerBeat }, (_, index) => (
-          <span className={isRunning && index + 1 === currentPulse ? "active" : undefined} key={`pulse-${index + 1}`} />
-        ))}
-      </div>}
-
-      <div className="metronomeTempoControls">
-        <button
-          type="button"
-          className="tempoStepButton"
-          onClick={() => adjustBpm(-1)}
-          aria-label="BPMを1下げる"
-          aria-keyshortcuts="ArrowDown"
-        >
-          <LuMinus />
-        </button>
-        <label className="metronomeBpmInput">
-          BPM
-          <input
-            min="40"
-            max="240"
-            step="1"
-            type="number"
-            value={bpmInput}
-            onBlur={(event) => onBpmCommit(event.target.value)}
-            onChange={(event) => onBpmInputChange(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                onBpmCommit(event.currentTarget.value);
-                event.currentTarget.blur();
-              }
-            }}
-          />
-        </label>
-        <button
-          type="button"
-          className="tempoStepButton"
-          onClick={() => adjustBpm(1)}
-          aria-label="BPMを1上げる"
-          aria-keyshortcuts="ArrowUp"
-        >
-          <LuPlus />
-        </button>
-      </div>
-
-      <div className="tempoPresetGroup">
-        <span className="controlLabel">Tempo Presets</span>
-        <div className="tempoPresetGrid">
-          {tempoPresets.map((preset) => (
-            <button
-              type="button"
-              className={preset.bpm === bpm ? "tempoPreset active" : "tempoPreset"}
-              aria-pressed={preset.bpm === bpm}
-              key={preset.bpm}
-              onClick={() => onBpmCommit(String(preset.bpm))}
-            >
-              <strong>{preset.bpm}</strong>
-              <span>{preset.label}</span>
-            </button>
-          ))}
+      <div className={styles.transport}>
+        <div className="metronomeTempoControls">
+          <button
+            type="button"
+            className="tempoStepButton"
+            onClick={() => adjustBpm(-1)}
+            aria-label="BPMを1下げる"
+            aria-keyshortcuts="ArrowDown"
+          >
+            <LuMinus />
+          </button>
+          <label className="metronomeBpmInput">
+            BPM
+            <input
+              min="40"
+              max="240"
+              step="1"
+              type="number"
+              value={bpmInput}
+              onBlur={(event) => onBpmCommit(event.target.value)}
+              onChange={(event) => onBpmInputChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  onBpmCommit(event.currentTarget.value);
+                  event.currentTarget.blur();
+                }
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            className="tempoStepButton"
+            onClick={() => adjustBpm(1)}
+            aria-label="BPMを1上げる"
+            aria-keyshortcuts="ArrowUp"
+          >
+            <LuPlus />
+          </button>
         </div>
-      </div>
 
-      <div className="metronomePrimaryActions">
-        <button
-          type="button"
-          className="actionButton tapTempoButton"
-          onClick={handleTapTempo}
-          aria-keyshortcuts="T"
-        >
-          <LuTimerReset aria-hidden="true" />
-          Tap Tempo
-          <span>{tapCount > 1 ? `${tapCount} taps` : "Tap repeatedly"}</span>
-        </button>
-        <button
-          type="button"
-          className={isRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
-          onClick={onToggle}
-          aria-keyshortcuts="Space"
-        >
-          {isRunning ? <LuSquare aria-hidden="true" /> : <LuPlay aria-hidden="true" />}
-          {isCountingIn
-            ? `Count-in · ${countInBeatsRemaining}`
-            : isRunning
-              ? `Stop · Beat ${currentBeat}`
-              : "Start"}
-        </button>
+        <div className="metronomePrimaryActions">
+          <button
+            type="button"
+            className="actionButton tapTempoButton"
+            onClick={handleTapTempo}
+            aria-keyshortcuts="T"
+          >
+            <LuTimerReset aria-hidden="true" />
+            Tap Tempo
+            <span>{tapCount > 1 ? `${tapCount} taps` : "Tap repeatedly"}</span>
+          </button>
+          <button
+            type="button"
+            className={isRunning ? "actionButton metronomeButton active" : "actionButton metronomeButton"}
+            onClick={onToggle}
+            aria-keyshortcuts="Space"
+          >
+            {isRunning ? <LuSquare aria-hidden="true" /> : <LuPlay aria-hidden="true" />}
+            {isCountingIn
+              ? `Count-in · ${countInBeatsRemaining}`
+              : isRunning
+                ? `Stop · Beat ${currentBeat}`
+                : "Start"}
+          </button>
+        </div>
+
+        <details className={styles.presets}>
+          <summary>
+            <span>テンポプリセット</span>
+            <small>60–160 BPM</small>
+          </summary>
+          <div className="tempoPresetGrid">
+            {tempoPresets.map((preset) => (
+              <button
+                type="button"
+                className={preset.bpm === bpm ? "tempoPreset active" : "tempoPreset"}
+                aria-pressed={preset.bpm === bpm}
+                key={preset.bpm}
+                onClick={() => onBpmCommit(String(preset.bpm))}
+              >
+                <strong>{preset.bpm}</strong>
+                <span>{preset.label}</span>
+              </button>
+            ))}
+          </div>
+        </details>
+
       </div>
 
       <div className="metronomeSettings">
-        <div className="metronomeSettingGroup">
-          <span className="controlLabel">再生モード <small>切り替えは停止中</small></span>
-          <div className="toneTabs" role="group" aria-label="メトロノーム再生モード">
-            <button type="button" className={!mixerEnabled ? "toneTab active" : "toneTab"}
-              aria-pressed={!mixerEnabled} disabled={isRunning} onClick={() => onMixerEnabledChange(false)}>通常</button>
-            <button type="button" className={mixerEnabled ? "toneTab active" : "toneTab"}
-              aria-pressed={mixerEnabled} disabled={isRunning} onClick={() => onMixerEnabledChange(true)}>ミキサー</button>
-          </div>
-        </div>
-        {mixerEnabled && <MetronomeMixer mix={mix} onChange={onMixChange} />}
+        <MetronomeMixer mix={mix} onChange={onMixChange} />
         <div className="metronomeSettingGroup">
           <span className="controlLabel">Count-in</span>
           <div className="countInTabs" role="group" aria-label="カウントイン">
@@ -334,45 +296,6 @@ export function MetronomePanel({
         </div>
 
         <div className="metronomeSettingGroup">
-          <span className="controlLabel">Pulse {mixerEnabled && <small>通常モード用</small>}</span>
-          <div className="pulseTabs" role="group" aria-label="パルス">
-            {pulseOptions.map((option) => (
-              <button
-                type="button"
-                className={option.value === pulsesPerBeat ? "pulseTab active" : "pulseTab"}
-                aria-pressed={option.value === pulsesPerBeat}
-                disabled={mixerEnabled}
-                key={option.value}
-                onClick={() => onPulsesPerBeatChange(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="metronomeSettingGroup">
-          <span className="controlLabel">
-            Swing
-            <small>{mixerEnabled ? "ミキサーはStraight固定" : "8th pulse only"}</small>
-          </span>
-          <div className="swingTabs" role="group" aria-label="スウィング">
-            {swingOptions.map((option) => (
-              <button
-                type="button"
-                className={option.value === swingRatio ? "swingTab active" : "swingTab"}
-                aria-pressed={option.value === swingRatio}
-                disabled={mixerEnabled || pulsesPerBeat !== 2}
-                key={option.value}
-                onClick={() => onSwingRatioChange(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="metronomeSettingGroup">
           <span className="controlLabel">Meter</span>
           <div className="meterTabs" role="group" aria-label="拍子">
             {meterOptions.map((beats) => (
@@ -388,15 +311,6 @@ export function MetronomePanel({
             ))}
           </div>
         </div>
-
-        {!mixerEnabled && <label className="toggle">
-          <input
-            type="checkbox"
-            checked={accentFirstBeat}
-            onChange={(event) => onAccentFirstBeatChange(event.target.checked)}
-          />
-          拍の頭にアクセントを付ける（オフですべての音が均等）
-        </label>}
 
         <label className="metronomeVolume">
           <span>

@@ -71,13 +71,9 @@ export function PracticeWorkspace() {
   const [chordInversion, setChordInversion] = useState(0);
   const [arpeggioPattern, setArpeggioPattern] = useState<ArpeggioPattern>("chord-order");
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4);
-  const [pulsesPerBeat, setPulsesPerBeat] = useState(1);
   const [countInMeasures, setCountInMeasures] = useState(0);
-  const [swingRatio, setSwingRatio] = useState(0);
   const [metronomeTone, setMetronomeTone] = useState<MetronomeTone>("soft");
-  const [accentFirstBeat, setAccentFirstBeat] = useState(true);
   const [metronomeVolume, setMetronomeVolume] = useState(0.7);
-  const [mixerEnabled, setMixerEnabled] = useState(false);
   const [metronomeMix, setMetronomeMix] = useState<MetronomeMix>(defaultMetronomeMix);
   const [bottomSheetHeight, setBottomSheetHeight] = useState(bottomSheetHeightBounds.default);
   const [desktopPanelPositions, setDesktopPanelPositions] = useState<
@@ -112,7 +108,6 @@ export function PracticeWorkspace() {
   }, [progressionPlayback.startProgression]);
   const {
     currentBeat,
-    currentPulse,
     countInBeatsRemaining,
     isCountingIn,
     isMetronomeRunning,
@@ -122,13 +117,9 @@ export function PracticeWorkspace() {
   } = useMetronome({
     bpm,
     beatsPerMeasure,
-    pulsesPerBeat,
     countInMeasures,
-    swingRatio,
     metronomeTone,
-    accentFirstBeat,
     metronomeVolume,
-    mixerEnabled,
     mix: metronomeMix,
     playClick: playMetronomeClick,
     resumeAudio,
@@ -282,13 +273,6 @@ export function PracticeWorkspace() {
 
   const toggleDesktopPanelCompact = (key: DesktopPanelKey) => {
     setCompactDesktopPanels((panels) => ({ ...panels, [key]: !panels[key] }));
-  };
-
-  const updatePulsesPerBeat = (pulses: number) => {
-    setPulsesPerBeat(pulses);
-    if (pulses !== 2) {
-      setSwingRatio(0);
-    }
   };
 
   const clampBottomSheetHeight = (height: number) =>
@@ -676,33 +660,24 @@ export function PracticeWorkspace() {
         {renderDrawerHeader("metronome", "Metronome", `${bpm} BPM · ${beatsPerMeasure}/4`)}
         <div className="shellMetronome">
           <MetronomePanel
-            mixerEnabled={mixerEnabled}
             mix={metronomeMix}
-            onMixerEnabledChange={(enabled) => { if (!isMetronomeRunning) setMixerEnabled(enabled); }}
             onMixChange={(channel, volume) => setMetronomeMix((current) => ({ ...current, [channel]: volume }))}
             isPanelOpen={isMetronomeOpen}
             bpm={bpm}
             bpmInput={bpmInput}
             currentBeat={currentBeat}
-            currentPulse={currentPulse}
             countInBeatsRemaining={countInBeatsRemaining}
             beatsPerMeasure={beatsPerMeasure}
-            pulsesPerBeat={pulsesPerBeat}
             countInMeasures={countInMeasures}
-            swingRatio={swingRatio}
             tone={metronomeTone}
-            accentFirstBeat={accentFirstBeat}
             volume={metronomeVolume}
             isRunning={isMetronomeRunning}
             isCountingIn={isCountingIn}
             onBpmInputChange={updateBpm}
             onBpmCommit={commitBpm}
             onBeatsPerMeasureChange={setBeatsPerMeasure}
-            onPulsesPerBeatChange={updatePulsesPerBeat}
             onCountInMeasuresChange={setCountInMeasures}
-            onSwingRatioChange={setSwingRatio}
             onToneChange={setMetronomeTone}
-            onAccentFirstBeatChange={setAccentFirstBeat}
             onVolumeChange={setMetronomeVolume}
             onToggle={handleToggleMetronome}
           />
