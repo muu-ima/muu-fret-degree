@@ -260,41 +260,46 @@ export function MetronomePanel({
 
       <div className="metronomeSettings">
         <MetronomeMixer mix={mix} onChange={onMixChange} />
-        <label className="metronomeVolume">
-          <span>
-            Volume
-            <output>{Math.round(volume * 100)}%</output>
-          </span>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={volume}
-            onChange={(event) => onVolumeChange(Number(event.target.value))}
-          />
-        </label>
+        <fieldset className={styles.settingsGroup}>
+          <legend>全体音量・音色</legend>
+          <div className={styles.groupControls}>
+            <label className="metronomeVolume">
+              <span>
+                Volume
+                <output>{Math.round(volume * 100)}%</output>
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={volume}
+                onChange={(event) => onVolumeChange(Number(event.target.value))}
+              />
+            </label>
 
-        <div className="metronomeSettingGroup">
-          <span className="controlLabel">Tone</span>
-          <div className="toneTabs" role="group" aria-label="メトロノーム音色">
-            {toneOptions.map((option) => (
-              <button
-                type="button"
-                className={option.value === tone ? "toneTab active" : "toneTab"}
-                aria-pressed={option.value === tone}
-                key={option.value}
-                onClick={() => onToneChange(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
+            <div className="metronomeSettingGroup">
+              <span className="controlLabel">Tone</span>
+              <div className="toneTabs" role="group" aria-label="メトロノーム音色">
+                {toneOptions.map((option) => (
+                  <button
+                    type="button"
+                    className={option.value === tone ? "toneTab active" : "toneTab"}
+                    aria-pressed={option.value === tone}
+                    key={option.value}
+                    onClick={() => onToneChange(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </fieldset>
 
-        <fieldset className={styles.timingSettings}>
+        <fieldset className={styles.settingsGroup}>
           <legend>拍子・開始設定</legend>
-          <div className={styles.timingControls}>
+          <div className={styles.groupControls}>
             <div className="metronomeSettingGroup">
               <span className="controlLabel">Count-in</span>
               <div className="countInTabs" role="group" aria-label="カウントイン">
