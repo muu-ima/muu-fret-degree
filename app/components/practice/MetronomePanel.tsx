@@ -276,6 +276,23 @@ export function MetronomePanel({
         </label>
 
         <div className="metronomeSettingGroup">
+          <span className="controlLabel">Tone</span>
+          <div className="toneTabs" role="group" aria-label="メトロノーム音色">
+            {toneOptions.map((option) => (
+              <button
+                type="button"
+                className={option.value === tone ? "toneTab active" : "toneTab"}
+                aria-pressed={option.value === tone}
+                key={option.value}
+                onClick={() => onToneChange(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="metronomeSettingGroup">
           <span className="controlLabel">Count-in</span>
           <div className="countInTabs" role="group" aria-label="カウントイン">
             {countInOptions.map((option) => (
@@ -286,23 +303,6 @@ export function MetronomePanel({
                 disabled={isRunning}
                 key={option.value}
                 onClick={() => onCountInMeasuresChange(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="metronomeSettingGroup">
-          <span className="controlLabel">Tone</span>
-          <div className="toneTabs" role="group" aria-label="メトロノーム音色">
-            {toneOptions.map((option) => (
-              <button
-                type="button"
-                className={option.value === tone ? "toneTab active" : "toneTab"}
-                aria-pressed={option.value === tone}
-                key={option.value}
-                onClick={() => onToneChange(option.value)}
               >
                 {option.label}
               </button>
