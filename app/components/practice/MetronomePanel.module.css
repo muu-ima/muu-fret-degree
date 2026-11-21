@@ -33,3 +33,21 @@
 @media (max-width: 380px) {
   .transport { padding: 10px; }
 }
+
+.timingSettings {
+  min-width: 0;
+  margin: 8px 0 0;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid var(--glass-border);
+}
+.timingSettings legend {
+  padding: 0 10px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.timingControls {
+  display: grid;
+  gap: 14px;
+}
