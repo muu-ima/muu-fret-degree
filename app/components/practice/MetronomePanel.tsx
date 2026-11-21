@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LuMinus, LuPlay, LuPlus, LuSquare, LuTimerReset } from "react-icons/lu";
+import { MetronomeSettingsTabs } from "./MetronomeSettingsTabs";
 import { MetronomeMixer } from "./MetronomeMixer";
 import type { MetronomeMix, MetronomeMixerChannel } from "../../lib/metronome-mixer";
 import { type MetronomeTone } from "../../lib/audio";
@@ -258,86 +259,88 @@ export function MetronomePanel({
 
       </div>
 
-      <div className="metronomeSettings">
-        <MetronomeMixer mix={mix} onChange={onMixChange} />
-        <fieldset className={styles.settingsGroup}>
-          <legend>全体音量・音色</legend>
-          <div className={styles.groupControls}>
-            <label className="metronomeVolume">
-              <span>
-                Volume
-                <output>{Math.round(volume * 100)}%</output>
-              </span>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={volume}
-                onChange={(event) => onVolumeChange(Number(event.target.value))}
-              />
-            </label>
+      <MetronomeSettingsTabs
+        mixer={<MetronomeMixer mix={mix} onChange={onMixChange} />}
+        sound={
+          <fieldset className={styles.settingsGroup}>
+            <legend>全体音量・音色</legend>
+            <div className={styles.groupControls}>
+              <label className="metronomeVolume">
+                <span>
+                  Volume
+                  <output>{Math.round(volume * 100)}%</output>
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={volume}
+                  onChange={(event) => onVolumeChange(Number(event.target.value))}
+                />
+              </label>
 
-            <div className="metronomeSettingGroup">
-              <span className="controlLabel">Tone</span>
-              <div className="toneTabs" role="group" aria-label="メトロノーム音色">
-                {toneOptions.map((option) => (
-                  <button
-                    type="button"
-                    className={option.value === tone ? "toneTab active" : "toneTab"}
-                    aria-pressed={option.value === tone}
-                    key={option.value}
-                    onClick={() => onToneChange(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+              <div className="metronomeSettingGroup">
+                <span className="controlLabel">Tone</span>
+                <div className="toneTabs" role="group" aria-label="メトロノーム音色">
+                  {toneOptions.map((option) => (
+                    <button
+                      type="button"
+                      className={option.value === tone ? "toneTab active" : "toneTab"}
+                      aria-pressed={option.value === tone}
+                      key={option.value}
+                      onClick={() => onToneChange(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </fieldset>
+          </fieldset>
+        }
+        timing={
+          <fieldset className={styles.settingsGroup}>
+            <legend>拍子・開始設定</legend>
+            <div className={styles.groupControls}>
+              <div className="metronomeSettingGroup">
+                <span className="controlLabel">Count-in</span>
+                <div className="countInTabs" role="group" aria-label="カウントイン">
+                  {countInOptions.map((option) => (
+                    <button
+                      type="button"
+                      className={option.value === countInMeasures ? "countInTab active" : "countInTab"}
+                      aria-pressed={option.value === countInMeasures}
+                      disabled={isRunning}
+                      key={option.value}
+                      onClick={() => onCountInMeasuresChange(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-        <fieldset className={styles.settingsGroup}>
-          <legend>拍子・開始設定</legend>
-          <div className={styles.groupControls}>
-            <div className="metronomeSettingGroup">
-              <span className="controlLabel">Count-in</span>
-              <div className="countInTabs" role="group" aria-label="カウントイン">
-                {countInOptions.map((option) => (
-                  <button
-                    type="button"
-                    className={option.value === countInMeasures ? "countInTab active" : "countInTab"}
-                    aria-pressed={option.value === countInMeasures}
-                    disabled={isRunning}
-                    key={option.value}
-                    onClick={() => onCountInMeasuresChange(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+              <div className="metronomeSettingGroup">
+                <span className="controlLabel">Meter</span>
+                <div className="meterTabs" role="group" aria-label="拍子">
+                  {meterOptions.map((beats) => (
+                    <button
+                      type="button"
+                      className={beats === beatsPerMeasure ? "meterTab active" : "meterTab"}
+                      aria-pressed={beats === beatsPerMeasure}
+                      key={beats}
+                      onClick={() => onBeatsPerMeasureChange(beats)}
+                    >
+                      {beats}/4
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-
-            <div className="metronomeSettingGroup">
-              <span className="controlLabel">Meter</span>
-              <div className="meterTabs" role="group" aria-label="拍子">
-                {meterOptions.map((beats) => (
-                  <button
-                    type="button"
-                    className={beats === beatsPerMeasure ? "meterTab active" : "meterTab"}
-                    aria-pressed={beats === beatsPerMeasure}
-                    key={beats}
-                    onClick={() => onBeatsPerMeasureChange(beats)}
-                  >
-                    {beats}/4
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </fieldset>
-
-      </div>
+          </fieldset>
+        }
+      />
     </section>
   );
 }
