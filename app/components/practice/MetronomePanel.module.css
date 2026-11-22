@@ -87,3 +87,21 @@
 }
 .tabPanel { min-width: 0; }
 .tabPanel[hidden] { display: none; }
+
+.settingsSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+.settingsSummary li { white-space: nowrap; }
+.settingsSummary li + li {
+  padding-left: 12px;
+  border-left: 1px solid var(--glass-border);
+}

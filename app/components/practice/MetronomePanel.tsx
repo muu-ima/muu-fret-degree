@@ -170,6 +170,13 @@ export function MetronomePanel({
         </div>
       </div>
 
+      <ul className={styles.settingsSummary} aria-label="現在のメトロノーム設定">
+        <li>{beatsPerMeasure}/4拍子</li>
+        <li>カウントイン {countInMeasures === 0 ? "OFF" : `${countInMeasures}小節`}</li>
+        <li>{toneOptions.find((option) => option.value === tone)?.label ?? tone}</li>
+        <li>音量{Math.round(volume * 100)}%</li>
+      </ul>
+
       <div className={styles.transport}>
         <div className="metronomeTempoControls">
           <button
