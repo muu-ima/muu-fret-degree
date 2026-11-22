@@ -9,6 +9,7 @@ import { type MetronomeTone } from "../../lib/audio";
 import styles from "./MetronomePanel.module.css";
 
 type MetronomePanelProps = {
+  error?: string;
   mix: MetronomeMix;
   onMixChange: (channel: MetronomeMixerChannel, volume: number) => void;
   isPanelOpen: boolean;
@@ -52,7 +53,7 @@ const tempoPresets = [
 ];
 
 export function MetronomePanel({
-  mix, onMixChange,
+  error, mix, onMixChange,
   isPanelOpen,
   bpm,
   bpmInput,
@@ -261,6 +262,8 @@ export function MetronomePanel({
         </details>
 
       </div>
+
+      {error && <p role="alert">{error}</p>}
 
       <MetronomeSettingsTabs
         mixer={<MetronomeMixer mix={mix} onChange={onMixChange} />}

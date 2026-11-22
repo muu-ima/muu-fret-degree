@@ -338,6 +338,10 @@ export function playMetronomeClick(
 
   oscillator.connect(gain);
   connectToOutput(gain, output);
+  oscillator.onended = () => {
+    oscillator.disconnect();
+    gain.disconnect();
+  };
   oscillator.start(startTime);
   oscillator.stop(end + 0.01);
 }

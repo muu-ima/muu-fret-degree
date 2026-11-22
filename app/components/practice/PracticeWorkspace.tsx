@@ -91,7 +91,7 @@ export function PracticeWorkspace() {
   const {
     bassSampleStatus,
     playBassNote,
-    playMetronomeClick,
+    createMetronomeAudioSession,
     playPianoNote,
     resumeAudio,
   } = useSessionAudioOutput();
@@ -108,6 +108,7 @@ export function PracticeWorkspace() {
   }, [progressionPlayback.startProgression]);
   const {
     currentBeat,
+    error: metronomeError,
     countInBeatsRemaining,
     isCountingIn,
     isMetronomeRunning,
@@ -121,10 +122,15 @@ export function PracticeWorkspace() {
     metronomeTone,
     metronomeVolume,
     mix: metronomeMix,
-    playClick: playMetronomeClick,
-    resumeAudio,
+    createAudioSession: createMetronomeAudioSession,
     onCountInComplete: handleProgressionCountInComplete,
   });
+  useEffect(() => {
+    if (!metronomeError) return;
+    progressionCountInArmedRef.current = false;
+    setIsProgressionCountingIn(false);
+  }, [metronomeError]);
+
   const bottomSheetDragRef = useRef<{ startHeight: number; startY: number } | null>(null);
   const desktopPanelDragRef = useRef<{
     key: DesktopPanelKey;
@@ -660,6 +666,7 @@ export function PracticeWorkspace() {
         {renderDrawerHeader("metronome", "Metronome", `${bpm} BPM · ${beatsPerMeasure}/4`)}
         <div className="shellMetronome">
           <MetronomePanel
+            error={metronomeError}
             mix={metronomeMix}
             onMixChange={(channel, volume) => setMetronomeMix((current) => ({ ...current, [channel]: volume }))}
             isPanelOpen={isMetronomeOpen}

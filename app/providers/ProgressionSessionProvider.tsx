@@ -39,6 +39,7 @@ function ProgressionRuntimeProvider({
       audioOutput.bassSampleStatus,
       audioOutput.playBassNote,
       audioOutput.playMetronomeClick,
+      audioOutput.createMetronomeAudioSession,
       audioOutput.playPianoNote,
       audioOutput.resumeAudio,
     ],

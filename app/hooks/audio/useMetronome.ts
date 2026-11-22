@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getMetronomeMixClicks, mixerStepsPerBeat, type MetronomeMix } from "../../lib/metronome-mixer";
-import type { MetronomeClickKind, MetronomeTone } from "../../lib/audio";
+import type { MetronomeMix } from "../../lib/metronome-mixer";
+import type { MetronomeTone } from "../../lib/audio";
+import { createMetronomePlayback, metronomePollMs, type MetronomeAudioSession, type MetronomePosition } from "../../lib/metronome-playback";
 
 type UseMetronomeOptions = {
   mix: MetronomeMix;
@@ -11,132 +12,94 @@ type UseMetronomeOptions = {
   countInMeasures: number;
   metronomeTone: MetronomeTone;
   metronomeVolume: number;
-  playClick: (kind: MetronomeClickKind, tone: MetronomeTone, volume: number) => void;
-  resumeAudio: () => void;
+  createAudioSession: () => MetronomeAudioSession;
   onCountInComplete?: () => void;
 };
 
+type Run = { audio: MetronomeAudioSession; timer?: number; playback?: ReturnType<typeof createMetronomePlayback> };
+
 export function useMetronome({
-  mix,
-  bpm,
-  beatsPerMeasure,
-  countInMeasures,
-  metronomeTone,
-  metronomeVolume,
-  playClick,
-  resumeAudio,
-  onCountInComplete,
+  mix, bpm, beatsPerMeasure, countInMeasures, metronomeTone, metronomeVolume,
+  createAudioSession, onCountInComplete,
 }: UseMetronomeOptions) {
-  const metronomeTimer = useRef<number | null>(null);
-  const metronomePulse = useRef(0);
-  const onCountInCompleteRef = useRef(onCountInComplete);
-  const soundRef = useRef({ mix, metronomeTone, metronomeVolume });
+  const runRef = useRef<Run | null>(null);
+  const settingsRef = useRef({ bpm, mix, tone: metronomeTone, volume: metronomeVolume });
+  const onCompleteRef = useRef(onCountInComplete);
   const [isMetronomeRunning, setIsMetronomeRunning] = useState(false);
-  const [runCycle, setRunCycle] = useState(0);
-  const [currentBeat, setCurrentBeat] = useState(1);
-  const [isCountingIn, setIsCountingIn] = useState(false);
-  const [countInBeatsRemaining, setCountInBeatsRemaining] = useState(0);
+  const [error, setError] = useState("");
+  const [position, setPosition] = useState<MetronomePosition>({ currentBeat: 1, isCountingIn: false, countInBeatsRemaining: 0 });
 
-  onCountInCompleteRef.current = onCountInComplete;
-
-  // Sound changes preserve the current beat and count-in.
   useEffect(() => {
-    soundRef.current = { mix, metronomeTone, metronomeVolume };
-  }, [mix, metronomeTone, metronomeVolume]);
+    settingsRef.current = { bpm, mix, tone: metronomeTone, volume: metronomeVolume };
+    onCompleteRef.current = onCountInComplete;
+  }, [bpm, mix, metronomeTone, metronomeVolume, onCountInComplete]);
 
-  const clearMetronomeTimer = useCallback(() => {
-    if (metronomeTimer.current !== null) {
-      window.clearTimeout(metronomeTimer.current);
-      metronomeTimer.current = null;
-    }
-  }, []);
-
-  const startMetronome = useCallback(() => {
-    setRunCycle((current) => current + 1);
-    setIsMetronomeRunning(true);
+  const disposeRun = useCallback(() => {
+    const run = runRef.current;
+    runRef.current = null;
+    if (!run) return;
+    window.clearTimeout(run.timer);
+    if (run.playback) run.playback.stop();
+    else run.audio.stop();
   }, []);
 
   const stopMetronome = useCallback(() => {
-    clearMetronomeTimer();
+    disposeRun();
     setIsMetronomeRunning(false);
-  }, [clearMetronomeTimer]);
+    setPosition({ currentBeat: 1, isCountingIn: false, countInBeatsRemaining: 0 });
+  }, [disposeRun]);
+
+  const startMetronome = useCallback(() => {
+    disposeRun();
+    setError("");
+    setPosition({ currentBeat: 1, isCountingIn: countInMeasures > 0, countInBeatsRemaining: countInMeasures * beatsPerMeasure });
+    let run: Run;
+    try {
+      // Resume in the user's event handler; the clock starts only once audio is ready.
+      run = { audio: createAudioSession() };
+      runRef.current = run;
+      setIsMetronomeRunning(true);
+    } catch {
+      stopMetronome();
+      setError("音声を開始できませんでした。もう一度再生してください。");
+      return;
+    }
+    void run.audio.ready.then(() => {
+      if (runRef.current !== run) return;
+      run.playback = createMetronomePlayback({
+        audio: run.audio, beatsPerMeasure, countInMeasures,
+        settings: () => settingsRef.current,
+        onPosition: setPosition,
+        onCountInComplete: () => onCompleteRef.current?.(),
+      });
+      const poll = () => {
+        if (runRef.current !== run) return;
+        try {
+          run.playback!.pump();
+          if (runRef.current === run) run.timer = window.setTimeout(poll, metronomePollMs);
+        } catch {
+          stopMetronome();
+          setError("音声を再生できませんでした。もう一度再生してください。");
+        }
+      };
+      poll();
+    }).catch(() => {
+      if (runRef.current !== run) return;
+      stopMetronome();
+      setError("音声を開始できませんでした。もう一度再生してください。");
+    });
+  }, [beatsPerMeasure, countInMeasures, createAudioSession, disposeRun, stopMetronome]);
+
+  // Structural settings restart the measure, as before; sound/BPM updates do not.
+  useEffect(() => {
+    if (runRef.current) startMetronome();
+  }, [startMetronome]);
+  useEffect(() => disposeRun, [disposeRun]);
 
   const toggleMetronome = useCallback(() => {
-    if (isMetronomeRunning) {
-      stopMetronome();
-      return;
-    }
+    if (runRef.current) stopMetronome();
+    else startMetronome();
+  }, [startMetronome, stopMetronome]);
 
-    startMetronome();
-  }, [isMetronomeRunning, startMetronome, stopMetronome]);
-
-  useEffect(() => {
-    clearMetronomeTimer();
-
-    if (!isMetronomeRunning) {
-      setIsCountingIn(false);
-      setCountInBeatsRemaining(0);
-      return;
-    }
-
-    const beatMs = (60 / bpm) * 1000;
-    const stepsPerBeat = mixerStepsPerBeat;
-    const pulseMs = beatMs / stepsPerBeat;
-    const countInBeats = countInMeasures * beatsPerMeasure;
-    const countInPulses = countInBeats * stepsPerBeat;
-    metronomePulse.current = 0;
-
-    const tick = () => {
-      const absolutePulse = metronomePulse.current;
-      const isCountInPulse = absolutePulse < countInPulses;
-      const playbackPulse = isCountInPulse ? absolutePulse : absolutePulse - countInPulses;
-      const pulseInMeasure = playbackPulse % (beatsPerMeasure * stepsPerBeat);
-      const beat = Math.floor(pulseInMeasure / stepsPerBeat);
-      const pulse = pulseInMeasure % stepsPerBeat;
-      const sound = soundRef.current;
-      resumeAudio();
-      // Count-in remains audible even when all mixer channels are muted.
-      const clicks = isCountInPulse
-        ? pulse === 0 ? [{ kind: "beat" as const, volume: 1 }] : []
-        : getMetronomeMixClicks(beat, pulse, sound.mix);
-      for (const click of clicks) {
-        if (sound.metronomeVolume > 0) playClick(click.kind, sound.metronomeTone, click.volume * sound.metronomeVolume);
-      }
-      if (countInPulses > 0 && absolutePulse === countInPulses) {
-        onCountInCompleteRef.current?.();
-      }
-      setCurrentBeat(beat + 1);
-      setIsCountingIn(isCountInPulse);
-      if (pulse === 0) {
-        const elapsedCountInBeats = Math.floor(absolutePulse / stepsPerBeat);
-        setCountInBeatsRemaining(isCountInPulse ? countInBeats - elapsedCountInBeats : 0);
-      }
-      metronomePulse.current += 1;
-
-      metronomeTimer.current = window.setTimeout(tick, pulseMs);
-    };
-
-    tick();
-
-    return clearMetronomeTimer;
-  }, [
-    beatsPerMeasure,
-    bpm,
-    clearMetronomeTimer,
-    countInMeasures,
-    isMetronomeRunning,
-    playClick,
-    resumeAudio,
-    runCycle,
-  ]);
-
-  return {
-    currentBeat,
-    countInBeatsRemaining,
-    isCountingIn,
-    isMetronomeRunning,
-    startMetronome,
-    stopMetronome,
-    toggleMetronome,
-  };
+  return { ...position, error, isMetronomeRunning, startMetronome, stopMetronome, toggleMetronome };
 }

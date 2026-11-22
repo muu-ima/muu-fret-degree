@@ -10,6 +10,8 @@ import {
   preloadBassSample,
 } from "../../lib/audio";
 
+import { createMetronomeAudioSession as createScheduledMetronomeAudio } from "../../lib/metronome-audio-session";
+
 export type BassSampleStatus = "idle" | "loading" | "ready" | "failed";
 
 export function useAudioOutput() {
@@ -60,6 +62,11 @@ export function useAudioOutput() {
     [ensureAudioContext, ensureMasterOutput],
   );
 
+  const createMetronomeAudioSession = useCallback(
+    () => createScheduledMetronomeAudio(ensureAudioContext(), ensureMasterOutput()),
+    [ensureAudioContext, ensureMasterOutput],
+  );
+
   const playPianoNote = useCallback(
     (midi: number, startOffset = 0, duration = 3.2) => {
       playPianoAudioNote(ensureAudioContext(), midi, startOffset, duration, ensureMasterOutput());
@@ -80,6 +87,7 @@ export function useAudioOutput() {
     bassSampleStatus,
     playBassNote,
     playMetronomeClick,
+    createMetronomeAudioSession,
     playPianoNote,
     resumeAudio,
   };
