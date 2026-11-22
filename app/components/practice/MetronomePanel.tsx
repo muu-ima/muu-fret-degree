@@ -235,11 +235,7 @@ export function MetronomePanel({
             aria-keyshortcuts="Space"
           >
             {isRunning ? <LuSquare aria-hidden="true" /> : <LuPlay aria-hidden="true" />}
-            {isCountingIn
-              ? `Count-in · ${countInBeatsRemaining}`
-              : isRunning
-                ? `Stop · Beat ${currentBeat}`
-                : "Start"}
+            {isRunning ? "停止" : "再生"}
           </button>
         </div>
 
