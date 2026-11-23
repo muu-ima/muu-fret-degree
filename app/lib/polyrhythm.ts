@@ -1,8 +1,15 @@
 export const polyrhythmRatios = [
-  { label: "3:2", high: 3, low: 2 },
   { label: "4:3", high: 4, low: 3 },
+  { label: "3:2", high: 3, low: 2 },
   { label: "5:4", high: 5, low: 4 },
 ] as const;
+
+export const polyrhythmSubdivisions = {
+  2: "8分音符",
+  3: "三連符",
+  4: "16分音符",
+  5: "五連符",
+} as const;
 
 export type PolyrhythmRatio = typeof polyrhythmRatios[number];
 
@@ -26,7 +33,7 @@ export function createPolyrhythmPlayback({
   play: (time: number, pulse: PolyrhythmPulse) => void;
 }) {
   const pulses = getPolyrhythmPulses(ratio);
-  const cycleDuration = () => ratio.low * 60 / getBpm();
+  const cycleDuration = () => 60 / getBpm();
   let cycle = { start: firstStart, duration: cycleDuration() };
   let previousCycle = cycle;
   let nextPulse = 0;

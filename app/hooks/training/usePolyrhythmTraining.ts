@@ -24,7 +24,7 @@ function dispose(session: Session) {
 
 export function usePolyrhythmTraining(isActive: boolean) {
   const [ratio, setRatio] = useState<PolyrhythmRatio>(polyrhythmRatios[0]);
-  const [bpm, setBpm] = useState(72);
+  const [bpm, setBpm] = useState(60);
   const [audible, setAudible] = useState<Record<Lane, boolean>>({ high: true, low: true });
   const [isRunning, setIsRunning] = useState(false);
   const [hit, setHit] = useState<PolyrhythmPulse | null>(null);

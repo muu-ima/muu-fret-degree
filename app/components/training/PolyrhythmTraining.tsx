@@ -2,14 +2,14 @@
 
 import { LuPlay, LuSquare, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { usePolyrhythmTraining } from "../../hooks/training/usePolyrhythmTraining";
-import { getPolyrhythmPulses, polyrhythmRatios } from "../../lib/polyrhythm";
+import { getPolyrhythmPulses, polyrhythmRatios, polyrhythmSubdivisions } from "../../lib/polyrhythm";
 import { TrainingDial } from "./TrainingDial";
 import shared from "./RhythmTraining.module.css";
 import styles from "./PolyrhythmTraining.module.css";
 
 const lanes = [
-  { id: "high", name: "高い音", cue: "手でたたく" },
-  { id: "low", name: "低い音", cue: "足で刻む" },
+  { id: "high", name: "高い音" },
+  { id: "low", name: "低い音" },
 ] as const;
 
 export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
@@ -21,13 +21,13 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
       <header className={shared.header}>
         <div>
           <h2 id="polyrhythm-title">ポリリズム</h2>
-          <p className={styles.description}>同じ長さのループを違う数に分けて、2つのリズムを重ねます。</p>
+          <p className={styles.description}>同じ1拍を違う数に分けて重ねます。拍の頭で2つの音がそろいます。</p>
         </div>
       </header>
       <div className={styles.body}>
         <div className={styles.controls}>
           <fieldset className={styles.ratios} disabled={player.isRunning}>
-            <legend>リズムの比率</legend>
+            <legend>リズムの組み合わせ</legend>
             <div>
               {polyrhythmRatios.map((ratio) => (
                 <button
@@ -36,12 +36,12 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
                   aria-pressed={player.ratio === ratio}
                   onClick={() => player.changeRatio(ratio)}
                 >
-                  {ratio.label}
+                  {polyrhythmSubdivisions[ratio.low]} × {polyrhythmSubdivisions[ratio.high]}
                 </button>
               ))}
             </div>
           </fieldset>
-          <TrainingDial label="低い音のテンポ" unit="BPM" value={player.bpm} min={40} max={240} onChange={player.changeBpm} />
+          <TrainingDial label="テンポ（四分音符）" unit="BPM" value={player.bpm} min={40} max={240} onChange={player.changeBpm} />
           <button
             className={shared.playButton}
             type="button"
@@ -53,15 +53,15 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
         </div>
         <div className={styles.diagram}>
           <div className={styles.labels}>
-            {lanes.map(({ id, name, cue }) => (
+            {lanes.map(({ id, name }) => (
               <div className={styles.laneLabel} data-lane={id} key={id}>
                 <div>
-                  <strong>{name} · {player.ratio[id]}打</strong>
-                  <span>{cue}</span>
+                  <strong>{polyrhythmSubdivisions[player.ratio[id]]}</strong>
+                  <span>{name}</span>
                 </div>
                 <button
                   type="button"
-                  aria-label={`${name}の再生`}
+                  aria-label={`${polyrhythmSubdivisions[player.ratio[id]]}の再生`}
                   aria-pressed={player.audible[id]}
                   className={styles.mute}
                   onClick={() => player.toggleLane(id)}
@@ -72,7 +72,7 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
             ))}
           </div>
           <div className={styles.tracks} ref={player.trackRef} aria-hidden="true">
-            <div className={styles.trackCaption}><span>2つの音がそろう</span><span>次のループ</span></div>
+            <div className={styles.trackCaption}><span>拍の頭</span><span>次の拍</span></div>
             <div className={styles.lines}>
               {lanes.map(({ id }) => (
                 <div className={styles.lane} data-lane={id} data-muted={!player.audible[id]} key={id}>
@@ -93,7 +93,7 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
             </div>
           </div>
         </div>
-        <p className={styles.description}>まず低い音だけで足を動かし、そのまま高い音を重ねて手でたたいてみましょう。</p>
+        <p className={styles.description}>まず低い音だけを聴いて打点を確認し、高い音を重ねてみましょう。</p>
         {player.error && <p className={styles.error} role="alert">{player.error}</p>}
       </div>
     </section>

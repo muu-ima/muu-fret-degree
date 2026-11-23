@@ -24,6 +24,7 @@
 }
 
 .ratios {
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
@@ -38,6 +39,7 @@
 
 .ratios > div {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
 }
 
