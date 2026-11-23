@@ -13,6 +13,7 @@ import {
 } from "react";
 import { LuGripVertical, LuMaximize2, LuMinus, LuX } from "react-icons/lu";
 import theory from "../../../data/theory.json";
+import { AudioChordImport } from "./AudioChordImport";
 import { BassFretboard, MobileBassFretboard } from "./BassFretboard";
 import { ChordDegreeStrip } from "./ChordDegreeStrip";
 import { ControlsPanel } from "./ControlsPanel";
@@ -768,6 +769,14 @@ export function PracticeWorkspace() {
         <div className="fretboardCanvasFooter">
           <ChordDegreeStrip chordNotes={chordNotes} showGuideTones={showGuideTones} />
         </div>
+        <AudioChordImport
+          onSelect={({ root, chordTypeId, inversion }) => {
+            handleStopProgression();
+            setRoot(root);
+            setChordTypeId(chordTypeId);
+            setChordInversion(inversion);
+          }}
+        />
       </section>
     </main>
   );
