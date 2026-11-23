@@ -10,7 +10,9 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@audio/beat-detect": "1.1.0",
     "@audio/mir-chordino": "1.0.0",
+    "@audio/mir-downbeat": "1.1.5",
     "@audio/mir-nnls-chroma": "1.0.0",
     "next": "^16.2.9",
     "react": "19.0.0",

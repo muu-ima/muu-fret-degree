@@ -770,6 +770,7 @@ export function PracticeWorkspace() {
           <ChordDegreeStrip chordNotes={chordNotes} showGuideTones={showGuideTones} />
         </div>
         <AudioChordImport
+          fallbackBpm={bpm}
           onSelect={({ root, chordTypeId, inversion }) => {
             handleStopProgression();
             setRoot(root);

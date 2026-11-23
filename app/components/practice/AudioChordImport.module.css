@@ -98,3 +98,125 @@ div.segment,
 .time {
   font-variant-numeric: tabular-nums;
 }
+
+.chart {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.chartHeader,
+.gridForm,
+.barHeader,
+.barChords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chartHeader,
+.barHeader {
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.chartHeader h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.timingSource {
+  margin-inline-start: 8px;
+}
+
+.timingSource,
+.gridForm label,
+.partial,
+.noChord {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.gridForm {
+  align-items: end;
+}
+
+.gridForm label {
+  display: grid;
+  gap: 4px;
+}
+
+.gridForm input,
+.applyGrid,
+.barChord {
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-bg-soft);
+  color: var(--ink);
+}
+
+.gridForm input {
+  width: 100%;
+  min-width: 5rem;
+  max-width: 9rem;
+}
+
+.applyGrid,
+.barChord,
+.timelineDetails > summary {
+  cursor: pointer;
+}
+
+.applyGrid:hover,
+.barChord:hover {
+  border-color: var(--focus);
+}
+
+.applyGrid:focus-visible,
+.barChord:focus-visible,
+.gridForm input:focus-visible,
+.timelineDetails > summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr));
+  gap: 8px;
+  max-height: 360px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.bar {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  background: var(--glass-bg-soft);
+}
+
+.barChords {
+  align-items: center;
+}
+
+.barChord {
+  min-width: 44px;
+  font-weight: 700;
+}
+
+.timelineDetails > summary {
+  width: fit-content;
+  padding: 4px;
+}
+
+.timelineDetails[open] > summary {
+  margin-bottom: 8px;
+}

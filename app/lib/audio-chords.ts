@@ -15,8 +15,13 @@ const chordTypeIds: Record<Exclude<ChordSegment["quality"], "N">, string> = {
 };
 
 export type AudioChordSelection = { root: string; chordTypeId: string; inversion: number };
+export type AudioChordAnalysis = {
+  segments: ChordSegment[];
+  duration: number;
+  timing: { bpm: number; firstBarStart: number } | null;
+};
 export type AudioChordWorkerRequest = { samples: Float32Array; sampleRate: number };
-export type AudioChordWorkerResult = { segments: ChordSegment[] } | { failed: true };
+export type AudioChordWorkerResult = AudioChordAnalysis | { failed: true };
 
 export function getAudioChordSelection(segment: ChordSegment): AudioChordSelection | undefined {
   const root = theory.roots[segment.root];
@@ -51,12 +56,12 @@ export async function analyzeAudioFile(file: File, signal: AbortSignal) {
   const samples = mono.getChannelData(0).slice();
   const worker = new Worker(new URL("./audio-chords.worker.ts", import.meta.url), { type: "module" });
 
-  return new Promise<ChordSegment[]>((resolve, reject) => {
+  return new Promise<AudioChordAnalysis>((resolve, reject) => {
     const abort = () => reject(signal.reason);
     signal.addEventListener("abort", abort, { once: true });
     worker.onmessage = ({ data }: MessageEvent<AudioChordWorkerResult>) => {
       if ("segments" in data) {
-        resolve(data.segments);
+        resolve(data);
       } else {
         reject(new Error("Chord estimation failed"));
       }
