@@ -21,7 +21,7 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
       <header className={shared.header}>
         <div>
           <h2 id="polyrhythm-title">ポリリズム</h2>
-          <p className={styles.description}>同じ1拍を違う数に分けて重ねます。拍の頭で2つの音がそろいます。</p>
+          <p className={styles.description}>それぞれのリズムを「タ・ト」と1音おきに刻むと、2拍ごとに音がそろいます。</p>
         </div>
       </header>
       <div className={styles.body}>
@@ -72,10 +72,19 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
             ))}
           </div>
           <div className={styles.tracks} ref={player.trackRef} aria-hidden="true">
-            <div className={styles.trackCaption}><span>拍の頭</span><span>次の拍</span></div>
+            <div className={styles.trackCaption}>
+              <span>1拍目</span><span>2拍目</span><span>次の頭</span>
+            </div>
             <div className={styles.lines}>
               {lanes.map(({ id }) => (
                 <div className={styles.lane} data-lane={id} data-muted={!player.audible[id]} key={id}>
+                  {Array.from({ length: player.ratio[id] }, (_, index) => (
+                    <span
+                      key={index}
+                      className={styles.rest}
+                      style={{ left: `${(index + 0.5) * 100 / player.ratio[id]}%` }}
+                    />
+                  ))}
                   {pulses.map((pulse) => pulse[id] === null ? null : (
                     <span
                       key={pulse[id]}
@@ -93,7 +102,7 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
             </div>
           </div>
         </div>
-        <p className={styles.description}>まず低い音だけを聴いて打点を確認し、高い音を重ねてみましょう。</p>
+        <p className={styles.description}>番号付きの丸が鳴る「タ」、小さい点は休む「ト」です。</p>
         {player.error && <p className={styles.error} role="alert">{player.error}</p>}
       </div>
     </section>

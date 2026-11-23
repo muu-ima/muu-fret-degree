@@ -33,7 +33,8 @@ export function createPolyrhythmPlayback({
   play: (time: number, pulse: PolyrhythmPulse) => void;
 }) {
   const pulses = getPolyrhythmPulses(ratio);
-  const cycleDuration = () => 60 / getBpm();
+  // Play every other subdivision across two quarter notes.
+  const cycleDuration = () => 2 * 60 / getBpm();
   let cycle = { start: firstStart, duration: cycleDuration() };
   let previousCycle = cycle;
   let nextPulse = 0;

@@ -129,16 +129,29 @@
 }
 
 .trackCaption {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   height: var(--caption-height);
   gap: 4px;
+}
+
+.trackCaption span:last-child {
+  justify-self: end;
 }
 
 .lines {
   position: relative;
   border-inline: 1px dashed var(--line);
+}
+
+.lines::before {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  border-left: 1px dashed var(--muted);
+  opacity: 0.65;
+  content: "";
 }
 
 .lane {
@@ -168,6 +181,7 @@
 }
 
 .pulse,
+.rest,
 .restart {
   position: absolute;
   z-index: 1;
@@ -192,8 +206,14 @@
 }
 
 .lane[data-muted="true"] .pulse,
+.lane[data-muted="true"] .rest,
 .lane[data-muted="true"] .restart {
   opacity: 0.55;
+}
+
+.rest {
+  width: 5px;
+  height: 5px;
 }
 
 .restart {
