@@ -16,6 +16,47 @@
   color: #ffb6bd;
 }
 
+.noteValues {
+  padding-top: 16px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.noteValues h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.noteValues dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+.noteValues dl > div {
+  padding: 10px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-bg-soft);
+}
+
+.noteValues dt {
+  color: var(--lane-color);
+  font-weight: 700;
+}
+
+.noteValues dt span {
+  margin-inline-end: 4px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.noteValues dd {
+  margin: 4px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -162,11 +203,13 @@
 }
 
 .lane[data-lane="high"],
+.noteValues [data-lane="high"],
 .laneLabel[data-lane="high"] {
   --lane-color: #90baff;
 }
 
 .lane[data-lane="low"],
+.noteValues [data-lane="low"],
 .laneLabel[data-lane="low"] {
   --lane-color: #7bdfc3;
 }

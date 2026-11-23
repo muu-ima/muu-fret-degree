@@ -1,7 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
-import { createPolyrhythmPlayback, getPolyrhythmPulses, getPolyrhythmRests, polyrhythmRatios } from "./polyrhythm";
+import {
+  createPolyrhythmPlayback, formatPolyrhythmNoteValue, getPolyrhythmPulses, getPolyrhythmRests, polyrhythmRatios,
+} from "./polyrhythm";
 
 describe("polyrhythm training", () => {
+  it("formats the interval between audible hits in quarter-note beats", () => {
+    const [alternating, allSixteenths, quarters, quintuplets] = polyrhythmRatios;
+
+    expect(formatPolyrhythmNoteValue(alternating.high)).toBe("1/2拍（0.5拍）");
+    expect(formatPolyrhythmNoteValue(alternating.low)).toBe("2/3拍（約0.667拍）");
+    expect(formatPolyrhythmNoteValue(allSixteenths.high)).toBe("1/4拍（0.25拍）");
+    expect(formatPolyrhythmNoteValue(quarters.low)).toBe("1拍");
+    expect(formatPolyrhythmNoteValue(quintuplets.high)).toBe("2/5拍（0.4拍）");
+  });
+
   it.each(polyrhythmRatios)("spaces both voices evenly in $label and aligns their first hit", (ratio) => {
     const pulses = getPolyrhythmPulses(ratio);
     const [highCount, lowCount] = ratio.label.split(":").map(Number);

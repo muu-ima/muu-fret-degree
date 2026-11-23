@@ -2,7 +2,7 @@
 
 import { LuPlay, LuSquare, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { usePolyrhythmTraining } from "../../hooks/training/usePolyrhythmTraining";
-import { getPolyrhythmPulses, getPolyrhythmRests, polyrhythmRatios } from "../../lib/polyrhythm";
+import { formatPolyrhythmNoteValue, getPolyrhythmPulses, getPolyrhythmRests, polyrhythmRatios } from "../../lib/polyrhythm";
 import { TrainingDial } from "./TrainingDial";
 import shared from "./RhythmTraining.module.css";
 import styles from "./PolyrhythmTraining.module.css";
@@ -103,6 +103,21 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
           </div>
         </div>
         <p className={styles.description}>番号付きの丸が鳴る「タ」、小さい点は休む「ト」です。</p>
+        <section className={styles.noteValues} aria-labelledby="polyrhythm-note-values-title">
+          <h3 id="polyrhythm-note-values-title">音価</h3>
+          <p className={styles.description}>四分音符を1拍として、鳴る「タ」から次の「タ」までの間隔を示します。</p>
+          <dl>
+            {lanes.map(({ id, name }) => {
+              const voice = player.ratio[id];
+              return (
+                <div key={id} data-lane={id}>
+                  <dt><span>{name}</span> {voice.soundedName}</dt>
+                  <dd>{formatPolyrhythmNoteValue(voice)}</dd>
+                </div>
+              );
+            })}
+          </dl>
+        </section>
         {player.error && <p className={styles.error} role="alert">{player.error}</p>}
       </div>
     </section>
