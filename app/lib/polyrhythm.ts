@@ -1,19 +1,44 @@
-export const polyrhythmRatios = [
-  { label: "4:3", high: 4, low: 3 },
-  { label: "3:2", high: 3, low: 2 },
-  { label: "5:4", high: 5, low: 4 },
-] as const;
+const cycleBeats = 2;
 
-export const polyrhythmSubdivisions = {
-  2: "8分音符",
-  3: "三連符",
-  4: "16分音符",
-  5: "五連符",
-} as const;
+type PolyrhythmVoice = {
+  name: string;
+  subdivisionsPerBeat: number;
+  playEvery: 1 | 2;
+};
+
+const subdivisions = {
+  eighths: { name: "8分音符", subdivisionsPerBeat: 2, playEvery: 2 },
+  triplets: { name: "三連符", subdivisionsPerBeat: 3, playEvery: 2 },
+  sixteenths: { name: "16分音符", subdivisionsPerBeat: 4, playEvery: 2 },
+  quintuplets: { name: "五連符", subdivisionsPerBeat: 5, playEvery: 2 },
+} as const satisfies Record<string, PolyrhythmVoice>;
+
+export const polyrhythmRatios = [
+  { label: "4:3", high: subdivisions.sixteenths, low: subdivisions.triplets },
+  {
+    label: "8:3",
+    high: { ...subdivisions.sixteenths, playEvery: 1 },
+    low: { ...subdivisions.triplets, name: "2拍3連" },
+  },
+  { label: "3:2", high: subdivisions.triplets, low: subdivisions.eighths },
+  { label: "5:4", high: subdivisions.quintuplets, low: subdivisions.sixteenths },
+] as const;
 
 export type PolyrhythmRatio = typeof polyrhythmRatios[number];
 
-export function getPolyrhythmPulses({ high, low }: PolyrhythmRatio) {
+function getVoiceHitCount(voice: PolyrhythmVoice) {
+  return cycleBeats * voice.subdivisionsPerBeat / voice.playEvery;
+}
+
+export function getPolyrhythmRests(voice: PolyrhythmVoice) {
+  if (voice.playEvery === 1) return [];
+  const hits = getVoiceHitCount(voice);
+  return Array.from({ length: hits }, (_, index) => (index + 0.5) / hits);
+}
+
+export function getPolyrhythmPulses(ratio: PolyrhythmRatio) {
+  const high = getVoiceHitCount(ratio.high);
+  const low = getVoiceHitCount(ratio.low);
   const ticks = high * low;
   return Array.from({ length: ticks }, (_, tick) => ({
     progress: tick / ticks,
@@ -33,8 +58,8 @@ export function createPolyrhythmPlayback({
   play: (time: number, pulse: PolyrhythmPulse) => void;
 }) {
   const pulses = getPolyrhythmPulses(ratio);
-  // Play every other subdivision across two quarter notes.
-  const cycleDuration = () => 2 * 60 / getBpm();
+  const fastestHitCount = getVoiceHitCount(ratio.high);
+  const cycleDuration = () => cycleBeats * 60 / getBpm();
   let cycle = { start: firstStart, duration: cycleDuration() };
   let previousCycle = cycle;
   let nextPulse = 0;
@@ -69,7 +94,7 @@ export function createPolyrhythmPlayback({
     const current = now < cycle.start ? previousCycle : cycle;
     const elapsed = now - current.start;
     const progress = Math.max(0, Math.min(1, elapsed / current.duration));
-    const flashSeconds = Math.min(0.12, current.duration / (ratio.high * 2));
+    const flashSeconds = Math.min(0.12, current.duration / (fastestHitCount * 2));
     const isPlaying = progress < 1 && elapsed >= 0;
     const hit = isPlaying ? pulses.findLast((pulse) => pulse.progress <= progress) : undefined;
     return {

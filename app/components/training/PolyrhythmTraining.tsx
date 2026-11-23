@@ -2,7 +2,7 @@
 
 import { LuPlay, LuSquare, LuVolume2, LuVolumeX } from "react-icons/lu";
 import { usePolyrhythmTraining } from "../../hooks/training/usePolyrhythmTraining";
-import { getPolyrhythmPulses, polyrhythmRatios, polyrhythmSubdivisions } from "../../lib/polyrhythm";
+import { getPolyrhythmPulses, getPolyrhythmRests, polyrhythmRatios } from "../../lib/polyrhythm";
 import { TrainingDial } from "./TrainingDial";
 import shared from "./RhythmTraining.module.css";
 import styles from "./PolyrhythmTraining.module.css";
@@ -21,7 +21,7 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
       <header className={shared.header}>
         <div>
           <h2 id="polyrhythm-title">ポリリズム</h2>
-          <p className={styles.description}>それぞれのリズムを「タ・ト」と1音おきに刻むと、2拍ごとに音がそろいます。</p>
+          <p className={styles.description}>2拍の中に違う数の打点を重ねます。次に音がそろうのは3拍目の頭です。</p>
         </div>
       </header>
       <div className={styles.body}>
@@ -36,7 +36,7 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
                   aria-pressed={player.ratio === ratio}
                   onClick={() => player.changeRatio(ratio)}
                 >
-                  {polyrhythmSubdivisions[ratio.low]} × {polyrhythmSubdivisions[ratio.high]}
+                  {ratio.low.name} × {ratio.high.name}
                 </button>
               ))}
             </div>
@@ -56,12 +56,12 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
             {lanes.map(({ id, name }) => (
               <div className={styles.laneLabel} data-lane={id} key={id}>
                 <div>
-                  <strong>{polyrhythmSubdivisions[player.ratio[id]]}</strong>
+                  <strong>{player.ratio[id].name}</strong>
                   <span>{name}</span>
                 </div>
                 <button
                   type="button"
-                  aria-label={`${polyrhythmSubdivisions[player.ratio[id]]}の再生`}
+                  aria-label={`${player.ratio[id].name}の再生`}
                   aria-pressed={player.audible[id]}
                   className={styles.mute}
                   onClick={() => player.toggleLane(id)}
@@ -78,11 +78,11 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
             <div className={styles.lines}>
               {lanes.map(({ id }) => (
                 <div className={styles.lane} data-lane={id} data-muted={!player.audible[id]} key={id}>
-                  {Array.from({ length: player.ratio[id] }, (_, index) => (
+                  {getPolyrhythmRests(player.ratio[id]).map((progress) => (
                     <span
-                      key={index}
+                      key={progress}
                       className={styles.rest}
-                      style={{ left: `${(index + 0.5) * 100 / player.ratio[id]}%` }}
+                      style={{ left: `${progress * 100}%` }}
                     />
                   ))}
                   {pulses.map((pulse) => pulse[id] === null ? null : (
