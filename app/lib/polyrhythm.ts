@@ -2,24 +2,23 @@ const cycleBeats = 2;
 
 type PolyrhythmVoice = {
   name: string;
-  soundedName: string;
   subdivisionsPerBeat: number;
   playEvery: 1 | 2;
 };
 
 const subdivisions = {
-  eighths: { name: "8分音符", soundedName: "四分音符", subdivisionsPerBeat: 2, playEvery: 2 },
-  triplets: { name: "三連符", soundedName: "2拍3連", subdivisionsPerBeat: 3, playEvery: 2 },
-  sixteenths: { name: "16分音符", soundedName: "八分音符", subdivisionsPerBeat: 4, playEvery: 2 },
-  quintuplets: { name: "五連符", soundedName: "2拍5連", subdivisionsPerBeat: 5, playEvery: 2 },
+  eighths: { name: "四分音符", subdivisionsPerBeat: 2, playEvery: 2 },
+  triplets: { name: "2拍3連", subdivisionsPerBeat: 3, playEvery: 2 },
+  sixteenths: { name: "8分音符", subdivisionsPerBeat: 4, playEvery: 2 },
+  quintuplets: { name: "2拍5連", subdivisionsPerBeat: 5, playEvery: 2 },
 } as const satisfies Record<string, PolyrhythmVoice>;
 
 export const polyrhythmRatios = [
   { label: "4:3", high: subdivisions.sixteenths, low: subdivisions.triplets },
   {
     label: "8:3",
-    high: { ...subdivisions.sixteenths, soundedName: subdivisions.sixteenths.name, playEvery: 1 },
-    low: { ...subdivisions.triplets, name: subdivisions.triplets.soundedName },
+    high: { ...subdivisions.sixteenths, name: "16分音符", playEvery: 1 },
+    low: subdivisions.triplets,
   },
   { label: "3:2", high: subdivisions.triplets, low: subdivisions.eighths },
   { label: "5:4", high: subdivisions.quintuplets, low: subdivisions.sixteenths },

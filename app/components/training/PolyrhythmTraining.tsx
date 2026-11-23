@@ -51,34 +51,33 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
             {player.isRunning ? "停止" : "再生"}
           </button>
         </div>
-        <div className={styles.diagram}>
-          <div className={styles.labels}>
-            {lanes.map(({ id, name }) => (
-              <div className={styles.laneLabel} data-lane={id} key={id}>
-                <div>
-                  <strong>{player.ratio[id].name}</strong>
-                  <span>{name}</span>
-                </div>
-                <button
-                  type="button"
-                  aria-label={`${player.ratio[id].name}の再生`}
-                  aria-pressed={player.audible[id]}
-                  className={styles.mute}
-                  onClick={() => player.toggleLane(id)}
-                >
-                  {player.audible[id] ? <LuVolume2 aria-hidden="true" /> : <LuVolumeX aria-hidden="true" />}
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className={styles.tracks} ref={player.trackRef} aria-hidden="true">
+        <div className={styles.diagram} ref={player.trackRef}>
+          <div className={styles.trackHeading} aria-hidden="true">
             <div className={styles.trackCaption}>
               <span>1拍目</span><span>2拍目</span><span>次の頭</span>
             </div>
-            <div className={styles.lines}>
-              {lanes.map(({ id }) => (
-                <div className={styles.lane} data-lane={id} data-muted={!player.audible[id]} key={id}>
-                  {getPolyrhythmRests(player.ratio[id]).map((progress) => (
+          </div>
+          {lanes.map(({ id, name }) => {
+            const voice = player.ratio[id];
+            return (
+              <div className={styles.laneRow} data-lane={id} key={id}>
+                <div className={styles.laneLabel}>
+                  <div>
+                    <strong>{voice.name}</strong>
+                    <span>{name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`${voice.name}の再生`}
+                    aria-pressed={player.audible[id]}
+                    className={styles.mute}
+                    onClick={() => player.toggleLane(id)}
+                  >
+                    {player.audible[id] ? <LuVolume2 aria-hidden="true" /> : <LuVolumeX aria-hidden="true" />}
+                  </button>
+                </div>
+                <div className={styles.lane} data-muted={!player.audible[id]} aria-hidden="true">
+                  {getPolyrhythmRests(voice).map((progress) => (
                     <span
                       key={progress}
                       className={styles.rest}
@@ -96,11 +95,11 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
                     </span>
                   ))}
                   <span className={styles.restart} />
+                  {player.isRunning && <span className={styles.playhead} />}
                 </div>
-              ))}
-              {player.isRunning && <div className={styles.playhead} />}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </div>
         <p className={styles.description}>番号付きの丸が鳴る「タ」、小さい点は休む「ト」です。</p>
         <section className={styles.noteValues} aria-labelledby="polyrhythm-note-values-title">
@@ -111,7 +110,7 @@ export function PolyrhythmTraining({ isActive }: { isActive: boolean }) {
               const voice = player.ratio[id];
               return (
                 <div key={id} data-lane={id}>
-                  <dt><span>{name}</span> {voice.soundedName}</dt>
+                  <dt><span>{name}</span> {voice.name}</dt>
                   <dd>{formatPolyrhythmNoteValue(voice)}</dd>
                 </div>
               );
