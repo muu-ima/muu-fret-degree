@@ -1,12 +1,14 @@
 "use client";
 
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { PolyrhythmTraining } from "./PolyrhythmTraining";
 import { RhythmTraining } from "./RhythmTraining";
 import { TrainingPrintButton } from "./TrainingPrintButton";
 import styles from "./TrainingTabs.module.css";
 
 const tabs = [
   { id: "rhythm", label: "リズムトレーニング" },
+  { id: "polyrhythm", label: "ポリリズム" },
   { id: "scale", label: "スケールドリル" },
 ] as const;
 type Tab = typeof tabs[number]["id"];
@@ -49,6 +51,10 @@ export function TrainingTabs({ scaleDrill }: { scaleDrill: ReactNode }) {
       <div role="tabpanel" id={`${id}-panel-rhythm`} aria-labelledby={`${id}-tab-rhythm`}
         hidden={activeTab !== "rhythm"} tabIndex={0} className={styles.panel}>
         <RhythmTraining isActive={activeTab === "rhythm"} />
+      </div>
+      <div role="tabpanel" id={`${id}-panel-polyrhythm`} aria-labelledby={`${id}-tab-polyrhythm`}
+        hidden={activeTab !== "polyrhythm"} tabIndex={0} className={styles.panel}>
+        <PolyrhythmTraining isActive={activeTab === "polyrhythm"} />
       </div>
       <div role="tabpanel" id={`${id}-panel-scale`} aria-labelledby={`${id}-tab-scale`}
         hidden={activeTab !== "scale"} tabIndex={0} className={styles.panel}>
